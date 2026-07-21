@@ -5,6 +5,8 @@ var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
 var TILE_GUIDE='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/tile-guide.jpg';
 var TILE_ALL='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/tile-all.jpg';
+var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/standard.jpg';
+var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/earlybird.jpg';
 var P={
  wall:{pid:'KmEBAGDMzKbYZNjnkZ3l52W4',price:3000,img:im('wx1WRpGD38J9QmJkNJnad4eb')},
  cs:{pid:'p9KbWMJZ7NmJvaAW1x3VEYmB',price:1600,img:im('ZOaL8DPWY6LP7mLKl92ExyG0')},
@@ -45,7 +47,8 @@ var ICO_LIST='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke
 
 var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
 +'#qw-ovl *{box-sizing:border-box}'
-+'.qw{background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}'
++'.qw{position:relative;background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}'
++'.qw .qw-x{position:absolute;top:9px;right:11px;width:30px;height:30px;border:none;background:rgba(255,255,255,.7);border-radius:50%;color:#a4b1bf;font-size:24px;line-height:28px;text-align:center;cursor:pointer;padding:0;font-family:inherit;z-index:5}.qw .qw-x:active{color:#5f6b78}'
 +'.qw .qwbar{display:flex;align-items:center;gap:6px;margin-bottom:4px}'
 +'.qw .qwdot{width:22px;height:22px;flex-shrink:0;border-radius:50%;font-size:12px;font-weight:700;display:flex!important;align-items:center;justify-content:center;background:#E6F1FB;color:#8a97a5;line-height:1;padding:0;box-sizing:border-box}'
 +'.qw .qwdot.on{background:#0C447C;color:#fff}.qw .qwdot.done{background:#B8860B;color:#fff}'
@@ -76,15 +79,16 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .btn.gho{background:none;border:1.5px solid #c9d7e6;color:#042C53}'
 +'.qw .skip{text-align:center;font-size:13px;color:#8a97a5;text-decoration:underline;margin-top:12px;cursor:pointer}'
 +'.qw .laststep{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;color:#B8860B;background:rgba(184,134,11,.1);border-radius:5px;padding:3px 9px;margin-bottom:4px}'
-+'.qw .plans{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:2px}'
-+'.qw .plan{border:1.5px solid #c9d7e6;border-radius:12px;padding:13px 12px;cursor:pointer}.qw .plan.sel{border-color:#0C447C;background:#E6F1FB}'
-+'.qw .plan .pn{font-size:15px;font-weight:800;color:#042C53}'
-+'.qw .plan .phot{display:inline-block;font-size:10px;font-weight:800;color:#fff;background:#B8860B;border-radius:4px;padding:2px 7px;margin-top:5px}.qw .plan .phot-x{background:none;padding:2px 0;color:transparent}'
-+'.qw .plan .pdisc{font-size:24px;font-weight:800;color:#B8860B;margin:7px 0 3px}.qw .plan .pd{font-size:11.5px;color:#8a97a5;line-height:1.5}'
++'.qw .qplans{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:2px}'
++'.qw .qplan{position:relative;border:2.5px solid transparent;border-radius:13px;padding:0;overflow:hidden;cursor:pointer;background:none;transition:transform .12s;box-shadow:0 2px 8px rgba(4,44,83,.1)}'
++'.qw .qplan img{width:100%;height:auto;display:block;border-radius:10px}'
++'.qw .qplan.sel{border-color:#0C447C}'
++'.qw .qplan.sel::after{content:\"✓\";position:absolute;top:6px;right:6px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}'
++'.qw .qplan:active{transform:scale(.97)}'
 +'.qw .callnote{font-size:11.5px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:11px 0 2px;line-height:1.55}'
 +'.qw.wel{text-align:center}.qw .wel-brand{font-size:11px;font-weight:800;letter-spacing:.1em;color:#0C447C;margin-bottom:12px}'
 +'.qw .wel-bar{width:34px;height:3px;background:#B8860B;border-radius:2px;margin:2px auto 15px}'
-+'.qw .wel-h{font-size:20px;font-weight:800;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap}'
++'.qw .wel-h{font-size:20px;font-weight:900;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap;-webkit-text-stroke:0.4px #16202b}'
 +'.qw .wel-p{font-size:13px;color:#7c8998;line-height:1.7;margin:0 0 6px}'
 +'.qw .wel-steps{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:4px;margin:6px 0 22px;white-space:nowrap}'
 +'.qw .ws{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;color:#042C53}'
@@ -134,10 +138,12 @@ function render(){
     var nextLbl=sumKeys(['rm','bz','hi','fan','air'])>0?'下一步：選到府方案':'不加購，下一步';
     w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div></div>';
   } else {
-    function planCard(k,tag,nm,tm,hot){var sel=plan===k;return '<div class="plan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><div class="pn">'+nm+'</div>'+(hot?'<div class="phot">推薦・更省</div>':'<div class="phot phot-x"></div>')+'<div class="pdisc">'+tag+'</div><div class="pd">'+tm+'</div></div>';}
-    w='<div class="qw"><div class="laststep">最後一步</div><h2>你可以接受多快到府？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="plans">'+planCard('std','95 折','標準方案','兩週內到府',false)+planCard('early','85 折','早鳥方案','30 天後到府',true)+'</div><div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div><div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.finish()">完成，前往結帳</button></div></div>';
+    function planCard(k,img){var sel=plan===k;return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt=""></div>';}
+    w='<div class="qw"><div class="laststep">最後一步</div><h2>你可以接受多快到府？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD)+planCard('early',PLAN_EARLY)+'</div><div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div><div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.finish()">完成，前往結帳</button></div></div>';
   }
   ovl.innerHTML=w;
+  var _card=ovl.querySelector('.qw');
+  if(_card){var _x=document.createElement('button');_x.type='button';_x.className='qw-x';_x.setAttribute('aria-label','關閉');_x.innerHTML='×';_x.onclick=function(e){e.stopPropagation();close();};_card.appendChild(_x);}
 }
 function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=0;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
