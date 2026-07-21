@@ -223,6 +223,33 @@ function injectFeat(){
     return true;
   }catch(e){return true;}
 }
+function fillConsent(){
+  try{
+    if(!window.__qsPlan)return;
+    var cfs=document.querySelectorAll('[name^="cf-"]'),el=null,row=null;
+    for(var i=0;i<cfs.length;i++){
+      var r=cfs[i].closest('.form-group');
+      var lbl=r?((r.querySelector('label')||{}).textContent||''):'';
+      if(/同意存證/.test(lbl)){el=cfs[i];row=r;break;}
+    }
+    if(!el)return;
+    if(row&&row.getAttribute('data-qsc')!=='1'){
+      row.style.cssText+=';position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;border:0!important;white-space:nowrap!important;';
+      row.setAttribute('data-qsc','1');
+    }
+    if((el.value||'').indexOf('【結帳前同意存證】')<0){
+      var planTxt=(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)':'標準方案(兩週內到府・95折)';
+      var d=new Date(),p=function(n){return (n<10?'0':'')+n;};
+      var ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+      var rec='【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策｜時間:'+ts;
+      var st=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
+      st.call(el,rec);
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  }catch(e){}
+}
+setInterval(fillConsent,700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
