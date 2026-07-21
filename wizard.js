@@ -190,12 +190,29 @@ var api={
 };
 window.__qw=api;
 /* 載入時即注入「結帳彈窗方案note」樣式（由1SHOP內文JS的結帳彈窗共用，省內文CSS字數）*/
-if(!document.getElementById('qw-ck')){var _cs=document.createElement('style');_cs.id='qw-ck';_cs.textContent='.qs-pnote{padding:7px 3px;text-align:center;font-size:14px;font-weight:900;line-height:1.3;white-space:nowrap;border-radius:0 0 10px 10px;margin-top:-1px;-webkit-text-stroke:.4px currentColor}.qs-pnote-std{background:#E6F1FB;color:#0C447C}.qs-pnote-early{background:rgba(184,134,11,.14);color:#8a6410}';document.head.appendChild(_cs);}
+if(!document.getElementById('qw-ck')){var _cs=document.createElement('style');_cs.id='qw-ck';_cs.textContent='.qs-pnote{padding:7px 3px;text-align:center;font-size:14px;font-weight:900;line-height:1.3;white-space:nowrap;border-radius:0 0 10px 10px;margin-top:-1px;-webkit-text-stroke:.4px currentColor}.qs-pnote-std{background:#E6F1FB;color:#0C447C}.qs-pnote-early{background:rgba(184,134,11,.14);color:#8a6410}.qs-plan.sel::after{content:"\\2713";position:absolute;top:6px;right:6px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}#qsf{background:#fff;border:1px solid #e7edf3;border-radius:14px;padding:16px 15px 14px;box-shadow:0 4px 16px rgba(4,44,83,.06);margin:14px 0 20px}#qsf .qsf-h{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:900;color:#042C53;margin-bottom:13px;-webkit-text-stroke:.3px #042C53}#qsf .qsf-i{color:#B8860B;font-size:17px}#qsf .qsf-li{display:flex;align-items:center;gap:9px;font-size:13.5px;line-height:1.35;margin-bottom:12px}#qsf .qsf-li:last-child{margin-bottom:0}#qsf .qsf-li b{font-weight:700;color:#1c2733;white-space:nowrap}#qsf .qsf-c{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#1a9d6b;color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}#qsf .qsf-t{white-space:nowrap;font-size:11.5px;font-weight:800;color:#0C447C;background:#E6F1FB;padding:2px 8px;border-radius:5px}';document.head.appendChild(_cs);}
 
 function cartHasProduct(){try{var c=(window._UserSession&&window._UserSession.Cart)||[];for(var i=0;i<c.length;i++){if(c[i].ProductType===0)return true;}}catch(e){}return false;}
+function injectFeat(){
+  try{
+    if(document.getElementById('qsf'))return true;
+    var hs=document.querySelectorAll('h1'),head=null;
+    for(var i=0;i<hs.length;i++){if((hs[i].textContent||'').trim()==='選擇您要清洗的項目'){head=hs[i];break;}}
+    if(!head)return false;
+    var d=document.createElement('div');d.id='qsf';
+    d.innerHTML='<div class="qsf-h"><span class="qsf-i">✦</span>服務特色</div>'
+      +'<div class="qsf-li"><span class="qsf-c">✓</span><b>清洗後 30 天功能安心保證</b><span class="qsf-t">原廠技師</span></div>'
+      +'<div class="qsf-li"><span class="qsf-c">✓</span><b>異味、過敏源一次解決</b><span class="qsf-t">深層殺菌藥水</span></div>'
+      +'<div class="qsf-li"><span class="qsf-c">✓</span><b>蒸發器深度刷洗</b><span class="qsf-t">有效移除表面積垢</span></div>'
+      +'<div class="qsf-li"><span class="qsf-c">✓</span><b>高壓水柱穿透污垢</b><span class="qsf-t">清出髒水看得見</span></div>';
+    head.parentNode.insertBefore(d,head);
+    return true;
+  }catch(e){return true;}
+}
 var tries=0;
 var boot=setInterval(function(){
   tries++;
+  injectFeat();
   if(typeof window.viewProduct==='function'&&document.querySelector('.product-row .product-wrap')){
     clearInterval(boot);
     if(!cartHasProduct()&&!window.__qwShown){window.__qwShown=true;open();}
