@@ -3,8 +3,8 @@
 try{
 var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
-var TILE_GUIDE='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/tile-guide.jpg';
-var TILE_ALL='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/tile-all.jpg';
+var TILE_GUIDE='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/guide-new.jpg';
+var TILE_ALL='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/all-new.jpg';
 var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/standard.jpg';
 var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/earlybird2.jpg';
 var P={
@@ -193,6 +193,20 @@ window.__qw=api;
 if(!document.getElementById('qw-ck')){var _cs=document.createElement('style');_cs.id='qw-ck';_cs.textContent='.qs-pnote{padding:7px 3px;text-align:center;font-size:14px;font-weight:900;line-height:1.3;white-space:nowrap;border-radius:0 0 10px 10px;margin-top:-1px;-webkit-text-stroke:.4px currentColor}.qs-pnote-std{background:#E6F1FB;color:#0C447C}.qs-pnote-early{background:rgba(184,134,11,.14);color:#8a6410}.qs-plan.sel::after{content:"\\2713";position:absolute;top:6px;right:6px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}#qsf{background:#fff;border:1px solid #e7edf3;border-radius:14px;padding:16px 15px 14px;box-shadow:0 4px 16px rgba(4,44,83,.06);margin:14px 0 20px}#qsf .qsf-h{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:900;color:#042C53;margin-bottom:13px;-webkit-text-stroke:.3px #042C53}#qsf .qsf-i{color:#B8860B;font-size:17px}#qsf .qsf-li{display:flex;align-items:center;gap:9px;font-size:13.5px;line-height:1.35;margin-bottom:12px}#qsf .qsf-li:last-child{margin-bottom:0}#qsf .qsf-li b{font-weight:700;color:#1c2733;white-space:nowrap}#qsf .qsf-c{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#1a9d6b;color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}#qsf .qsf-t{white-space:nowrap;font-size:11.5px;font-weight:800;color:#0C447C;background:#E6F1FB;padding:2px 8px;border-radius:5px}';document.head.appendChild(_cs);}
 
 function cartHasProduct(){try{var c=(window._UserSession&&window._UserSession.Cart)||[];for(var i=0;i<c.length;i++){if(c[i].ProductType===0)return true;}}catch(e){}return false;}
+function fixCards(){
+  try{
+    if(window.innerWidth>640)return; /* 只修手機；電腦版原本就正常 */
+    var ws=document.querySelectorAll('.product-row .product-wrap');
+    for(var i=0;i<ws.length;i++){var w=ws[i];
+      var h3=w.querySelector('h3');if(!h3)continue;
+      var r=h3.getBoundingClientRect();if(r.width>0&&r.height<=r.width*1.8)continue; /* 沒破版就不動 */
+      var ac=w.querySelector('.action-content');if(ac){ac.style.setProperty('display','block','important');ac.style.setProperty('grid-template-columns','none','important');}
+      var prod=w.querySelector('.product');if(prod)prod.style.setProperty('align-items','flex-start','important');
+      var acts=w.querySelector('.actions');if(acts)acts.style.setProperty('display','block','important');
+      var c3=w.querySelector('.col-3');if(c3){c3.style.setProperty('flex','0 0 92px','important');c3.style.setProperty('max-width','92px','important');c3.style.setProperty('align-self','flex-start','important');c3.style.setProperty('margin-top','4px','important');}
+    }
+  }catch(e){}
+}
 function injectFeat(){
   try{
     if(document.getElementById('qsf'))return true;
@@ -213,11 +227,13 @@ var tries=0;
 var boot=setInterval(function(){
   tries++;
   injectFeat();
+  fixCards();
   if(typeof window.viewProduct==='function'&&document.querySelector('.product-row .product-wrap')){
     clearInterval(boot);
     if(!cartHasProduct()&&!window.__qwShown){window.__qwShown=true;open();}
   }
   if(tries>40)clearInterval(boot);
 },400);
+setTimeout(fixCards,1500);setTimeout(fixCards,3500);setTimeout(fixCards,6000);
 }catch(e){}
 })();
