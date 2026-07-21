@@ -3,6 +3,8 @@
 try{
 var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
+var TILE_GUIDE='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/tile-guide.jpg';
+var TILE_ALL='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/tile-all.jpg';
 var P={
  wall:{pid:'KmEBAGDMzKbYZNjnkZ3l52W4',price:3000,img:im('wx1WRpGD38J9QmJkNJnad4eb')},
  cs:{pid:'p9KbWMJZ7NmJvaAW1x3VEYmB',price:1600,img:im('ZOaL8DPWY6LP7mLKl92ExyG0')},
@@ -44,10 +46,10 @@ var ICO_LIST='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke
 var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
 +'#qw-ovl *{box-sizing:border-box}'
 +'.qw{background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}'
-+'.qw .steps{display:flex;align-items:center;gap:6px;margin-bottom:4px}'
-+'.qw .dot{width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#E6F1FB;color:#8a97a5}'
-+'.qw .dot.on{background:#0C447C;color:#fff}.qw .dot.done{background:#B8860B;color:#fff}'
-+'.qw .ln{flex:1;height:2px;background:#c9d7e6}.qw .ln.done{background:#B8860B}'
++'.qw .qwbar{display:flex;align-items:center;gap:6px;margin-bottom:4px}'
++'.qw .qwdot{width:22px;height:22px;flex-shrink:0;border-radius:50%;font-size:12px;font-weight:700;display:flex!important;align-items:center;justify-content:center;background:#E6F1FB;color:#8a97a5;line-height:1;padding:0;box-sizing:border-box}'
++'.qw .qwdot.on{background:#0C447C;color:#fff}.qw .qwdot.done{background:#B8860B;color:#fff}'
++'.qw .qwln{flex:1;height:2px;background:#c9d7e6}.qw .qwln.done{background:#B8860B}'
 +'.qw h2{font-size:18px;margin:12px 0 3px;color:#042C53;font-weight:800}'
 +'.qw .sub{font-size:12.5px;color:#8a97a5;margin:0 0 14px}'
 +'.qw .grp-lbl{font-size:12px;font-weight:700;color:#0C447C;margin:12px 0 6px}'
@@ -89,8 +91,9 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .wsn{width:21px;height:21px;flex-shrink:0;border-radius:50%;background:none;border:1.5px solid #B8860B;color:#B8860B;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}'
 +'.qw .wsa{color:#B8860B;font-weight:800;font-size:11px;opacity:.5;margin:0 -1px}'
 +'.qw .wel-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}'
-+'.qw .wel-tile{aspect-ratio:1/1;border:none;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;line-height:1.35;text-align:center;padding:8px}'
-+'.qw .wt-pri{background:#0C447C;color:#fff}.qw .wt-gho{background:#fff;color:#0C447C;box-shadow:inset 0 0 0 1.5px #d3dde9}'
++'.qw .wel-tile{aspect-ratio:1/1;border:none;border-radius:12px;padding:0;overflow:hidden;background:none;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s;box-shadow:0 2px 10px rgba(4,44,83,.12)}'
++'.qw .wel-tile img{width:100%;height:100%;object-fit:cover;display:block}'
++'.qw .wel-tile:active{transform:scale(.97)}'
 +'#qw-air{position:fixed;inset:0;z-index:100000;background:rgba(4,20,40,.62);display:flex;align-items:center;justify-content:center;padding:18px;font-family:inherit}'
 +'#qw-air .m{background:#fff;border-radius:16px;max-width:340px;width:100%;max-height:92vh;overflow-y:auto;padding:20px 18px;text-align:center}'
 +'#qw-air h3{margin:0 0 8px;font-size:17px;color:#042C53}#qw-air p{font-size:13px;color:#1c2733;line-height:1.7;margin:0 0 12px}#qw-air p b{color:#0C447C}'
@@ -106,7 +109,7 @@ function hasBlow(){return (qty.cm||0)+(qty.cl||0)>0;}
 function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+money(P[item.k].price)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'')+'</div>';}
 function detailBlock(item){var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
 function optRow(item){var q=qty[item.k]||0;return '<div class="opt '+(q>0?'sel':'')+'" onclick="__qw.pick(&quot;'+item.k+'&quot;)"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+item.n+'</span><span class="od">'+item.d+'</span></div>'+stepper(item)+'</div>'+detailBlock(item)+'</div>';}
-function stepBar(){function d(n){return '<div class="dot '+(step>n?'done':step===n?'on':'')+'">'+(step>n?'✓':n)+'</div>';}function l(n){return '<div class="ln '+(step>n?'done':'')+'"></div>';}return '<div class="steps">'+d(1)+l(1)+d(2)+l(2)+d(3)+'</div>';}
+function stepBar(){function d(n){return '<div class="qwdot '+(step>n?'done':step===n?'on':'')+'">'+(step>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(step>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+'</div>';}
 function render(){
   var w='';
   if(step===0){
@@ -114,7 +117,7 @@ function render(){
     +'<h2 class="wel-h">幫你快速挑好清洗方案</h2>'
     +'<p class="wel-p">不知道要洗哪些？讓我一步步帶你選</p>'
     +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>室內機</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>室外機</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>到府方案</span></div>'
-    +'<div class="wel-tiles"><button class="wel-tile wt-pri" onclick="__qw.start()"><span>'+ICO_GUIDE+'</span><span>帶我一步步選</span></button><button class="wel-tile wt-gho" onclick="__qw.skip()"><span>'+ICO_LIST+'</span><span>直接看所有方案</span></button></div></div>';
+    +'<div class="wel-tiles"><button class="wel-tile" onclick="__qw.start()"><img src="'+TILE_GUIDE+'" alt="帶我一步步選"></button><button class="wel-tile" onclick="__qw.skip()"><img src="'+TILE_ALL+'" alt="查看所有方案"></button></div></div>';
   } else if(step===1){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
     var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'式機型適用</div>'+groups[g].map(optRow).join('');});
