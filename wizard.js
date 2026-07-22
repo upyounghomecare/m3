@@ -169,7 +169,7 @@ function render(){
     w='<div class="qw wel"><div class="wel-brand">三菱重工 · 冷氣清洗</div><div class="wel-bar"></div>'
     +'<h2 class="wel-h">幫你快速挑好清洗方案</h2>'
     +'<p class="wel-p">不知道要洗哪些？讓我一步步帶你選</p>'
-    +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>機型</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>方案</span></div>'
+    +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>機型</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">5</i>方案</span></div>'
     +'<div class="wel-tiles"><button class="wel-tile" onclick="__qw.start()"><img src="'+TILE_GUIDE+'" alt="帶我一步步選"></button><button class="wel-tile" onclick="__qw.skip()"><img src="'+TILE_ALL+'" alt="查看所有方案"></button></div></div>';
   } else if(step==='area'){
     var cityOpts='<option value="">請選擇縣市</option>';
