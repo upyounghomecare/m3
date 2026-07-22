@@ -83,7 +83,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .qwdot{width:22px;height:22px;flex-shrink:0;border-radius:50%;font-size:12px;font-weight:700;display:flex!important;align-items:center;justify-content:center;background:#E6F1FB;color:#8a97a5;line-height:1;padding:0;box-sizing:border-box}'
 +'.qw .qwdot.on{background:#0C447C;color:#fff}.qw .qwdot.done{background:#B8860B;color:#fff}'
 +'.qw .qwln{flex:1;height:2px;background:#c9d7e6}.qw .qwln.done{background:#B8860B}'
-+'.qw h2{font-size:18px;margin:12px 0 3px;color:#042C53;font-weight:900;-webkit-text-stroke:.5px currentColor}'
++'.qw h2{font-size:18px;margin:12px 0 3px;color:#042C53;font-weight:900!important;-webkit-text-stroke:.5px currentColor}'
 +'.qw .qh4{font-weight:900;-webkit-text-stroke:.5px currentColor}'
 +'.qw .sub{font-size:12.5px;color:#8a97a5;margin:0 0 14px}'
 +'.qw .grp-lbl{font-size:12px;font-weight:700;color:#0C447C;margin:12px 0 6px}'
