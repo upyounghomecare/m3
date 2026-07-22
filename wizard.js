@@ -96,10 +96,10 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .wel-bar{width:34px;height:3px;background:#B8860B;border-radius:2px;margin:2px auto 15px}'
 +'.qw .wel-h{font-size:20px;font-weight:900;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap;-webkit-text-stroke:0.4px #16202b}'
 +'.qw .wel-p{font-size:13px;color:#7c8998;line-height:1.7;margin:0 0 6px}'
-+'.qw .wel-steps{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:1px;margin:6px 0 22px;white-space:nowrap}'
-+'.qw .ws{display:inline-flex;align-items:center;gap:2px;font-size:9.5px;font-weight:800;color:#042C53}'
-+'.qw .wsn{width:15px;height:15px;flex-shrink:0;border-radius:50%;background:none;border:1.3px solid #B8860B;color:#B8860B;font-size:8.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}'
-+'.qw .wsa{color:#B8860B;font-weight:800;font-size:8.5px;opacity:.5;margin:0 -1px}'
++'.qw .wel-steps{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:2px;margin:6px 0 22px;white-space:nowrap}'
++'.qw .ws{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:800;color:#042C53}'
++'.qw .wsn{width:16px;height:16px;flex-shrink:0;border-radius:50%;background:none;border:1.3px solid #B8860B;color:#B8860B;font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}'
++'.qw .wsa{color:#B8860B;font-weight:800;font-size:9px;opacity:.5;margin:0 -1px}'
 +'.qw .wel-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}'
 +'.qw .wel-tile{aspect-ratio:1/1;border:none;border-radius:12px;padding:0;overflow:hidden;background:none;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s;box-shadow:0 2px 10px rgba(4,44,83,.12)}'
 +'.qw .wel-tile img{width:100%;height:100%;object-fit:cover;display:block}'
@@ -136,7 +136,7 @@ function render(){
     w='<div class="qw wel"><div class="wel-brand">三菱重工 · 冷氣清洗</div><div class="wel-bar"></div>'
     +'<h2 class="wel-h">幫你快速挑好清洗方案</h2>'
     +'<p class="wel-p">不知道要洗哪些？讓我一步步帶你選</p>'
-    +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>使用環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>室內機</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>室外機</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">5</i>到府方案</span></div>'
+    +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>室內機</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>室外機</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">5</i>到府</span></div>'
     +'<div class="wel-tiles"><button class="wel-tile" onclick="__qw.start()"><img src="'+TILE_GUIDE+'" alt="帶我一步步選"></button><button class="wel-tile" onclick="__qw.skip()"><img src="'+TILE_ALL+'" alt="查看所有方案"></button></div></div>';
   } else if(step==='env'){
     w='<div class="qw">'+stepBar()+'<h2>冷氣的使用環境為？</h2><p class="sub">先確認環境，幫你算好正確價格</p>'
@@ -170,7 +170,7 @@ function render(){
 function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=0;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
 function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
-function showAir(){if(window.__qsShowAir)window.__qsShowAir();}
+function showAir(){if(window.__qsShowAir){window.__qsShowAir();function lift(){var a=document.getElementById('qs-ovl2');if(a)a.style.setProperty('z-index','100002','important');}lift();setTimeout(lift,60);}}
 
 var api={
   start:function(){step='env';render();},
@@ -198,13 +198,15 @@ var api={
       if(i>=jobs.length){
         window.__qsPlan=plan;window.__qsEnv=env;
         if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
+        setTimeout(function(){window.__qsAdding=false;},1800);
         close();toast('已為您加入購物車，可再調整或結帳');
         return;
       }
       var job=jobs[i++];
       try{if(window.viewProduct)window.viewProduct(job.btn||null,job.pid);}catch(e){}
-      setTimeout(next,320);
+      setTimeout(next,550);
     }
+    window.__qsAdding=true;
     next();
   }
 };
@@ -279,6 +281,33 @@ function fillEnv(){
     for(var j=0;j<el.options.length;j++){if(want.test(el.options[j].text||'')){el.selectedIndex=j;el.setAttribute('data-qse','1');el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));break;}}
   }catch(e){}
 }
+/* ===== 離開精靈後也強制校正：營業場所時，購物車「商用/重油汙加價」數量 = 室內機台數 ===== */
+var INNAMES=['家用壁掛清洗保養','吊隱式小清洗保養','吊隱式大清洗保養','吊隱式全清洗保養','迷你四方吹清洗保養','四方吹清洗保養'];
+function _cartArr(){try{return (window._UserSession&&window._UserSession.Cart)||[];}catch(e){return [];}}
+function _indoorInCart(){var c=_cartArr(),n=0;c.forEach(function(x){var nm=x.ProductName||'';for(var i=0;i<INNAMES.length;i++){if(nm.indexOf(INNAMES[i])===0){n+=Number(x.Quantity)||0;break;}}});return n;}
+function _bzInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('商用/重油汙加價')===0)return Number(c[i].Quantity)||0;}return 0;}
+function _resolveBtn(nm){var bm=window.__qsBtnMap||{};for(var pid in bm){var b=bm[pid];var w=(b&&b.closest)?b.closest('.product-wrap'):null;var h=w?w.querySelector('h3'):null;var n=h?(h.textContent||'').trim():'';if(n.indexOf(nm)===0)return {pid:pid,btn:b};}return null;}
+var _bzSyncing=false;
+function reconcileBz(){
+  try{
+    if(window.__qsEnv!=='biz'||window.__qsAdding||_bzSyncing)return;
+    var indoor=_indoorInCart();if(indoor<=0)return;
+    var bz=_bzInCart();if(bz===indoor)return;
+    var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /商用\/重油汙加價/.test(x.textContent||'');})[0];
+    if(it){
+      var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];
+      if(!btn)return;
+      _bzSyncing=true;
+      try{window.selectQty(btn,indoor-bz);}catch(e){}
+      setTimeout(function(){_bzSyncing=false;},1900);
+    } else if(bz===0){
+      var r=_resolveBtn('商用/重油汙加價');if(!r)return;
+      _bzSyncing=true;var k=0;
+      (function addOne(){if(k>=indoor){setTimeout(function(){_bzSyncing=false;},700);return;}try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}k++;setTimeout(addOne,600);})();
+    }
+  }catch(e){_bzSyncing=false;}
+}
+setInterval(reconcileBz,1500);
 setInterval(function(){fillConsent();fillEnv();},700);
 var tries=0;
 var boot=setInterval(function(){
