@@ -7,6 +7,8 @@ var TILE_GUIDE='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/guide-new.jp
 var TILE_ALL='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/all-new_v4.jpg';
 var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/standard.jpg';
 var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/earlybird2.jpg';
+var IMG_HOME='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/home.jpg';
+var IMG_SHOP='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/shop.jpg';
 var P={
  wall:{pid:'KmEBAGDMzKbYZNjnkZ3l52W4',price:3000,img:im('wx1WRpGD38J9QmJkNJnad4eb')},
  cs:{pid:'p9KbWMJZ7NmJvaAW1x3VEYmB',price:1600,img:im('ZOaL8DPWY6LP7mLKl92ExyG0')},
@@ -94,14 +96,21 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .wel-bar{width:34px;height:3px;background:#B8860B;border-radius:2px;margin:2px auto 15px}'
 +'.qw .wel-h{font-size:20px;font-weight:900;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap;-webkit-text-stroke:0.4px #16202b}'
 +'.qw .wel-p{font-size:13px;color:#7c8998;line-height:1.7;margin:0 0 6px}'
-+'.qw .wel-steps{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:4px;margin:6px 0 22px;white-space:nowrap}'
-+'.qw .ws{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;color:#042C53}'
-+'.qw .wsn{width:21px;height:21px;flex-shrink:0;border-radius:50%;background:none;border:1.5px solid #B8860B;color:#B8860B;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}'
-+'.qw .wsa{color:#B8860B;font-weight:800;font-size:11px;opacity:.5;margin:0 -1px}'
++'.qw .wel-steps{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:1px;margin:6px 0 22px;white-space:nowrap}'
++'.qw .ws{display:inline-flex;align-items:center;gap:2px;font-size:9.5px;font-weight:800;color:#042C53}'
++'.qw .wsn{width:15px;height:15px;flex-shrink:0;border-radius:50%;background:none;border:1.3px solid #B8860B;color:#B8860B;font-size:8.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}'
++'.qw .wsa{color:#B8860B;font-weight:800;font-size:8.5px;opacity:.5;margin:0 -1px}'
 +'.qw .wel-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}'
 +'.qw .wel-tile{aspect-ratio:1/1;border:none;border-radius:12px;padding:0;overflow:hidden;background:none;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s;box-shadow:0 2px 10px rgba(4,44,83,.12)}'
 +'.qw .wel-tile img{width:100%;height:100%;object-fit:cover;display:block}'
 +'.qw .wel-tile:active{transform:scale(.97)}'
++'.qw .env-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:2px}'
++'.qw .env-o{position:relative;aspect-ratio:1/1;border:2.5px solid #dbe4ee;border-radius:14px;overflow:hidden;background:#fff;cursor:pointer;padding:0;font-family:inherit;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 10px rgba(4,44,83,.1);transition:transform .12s}'
++'.qw .env-o img{width:100%;height:100%;object-fit:cover;display:block}'
++'.qw .env-o:active{transform:scale(.97)}'
++'.qw .env-o.sel{border-color:#0C447C}'
++'.qw .env-o.sel::after{content:\"✓\";position:absolute;top:7px;right:8px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}'
++'.qw .envnote{font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:10px 0 2px;line-height:1.5}.qw .envnote b{color:#B8860B;font-weight:800}'
 +'#qw-air{position:fixed;inset:0;z-index:100000;background:rgba(4,20,40,.62);display:flex;align-items:center;justify-content:center;padding:18px;font-family:inherit}'
 +'#qw-air .m{background:#fff;border-radius:16px;max-width:340px;width:100%;max-height:92vh;overflow-y:auto;padding:20px 18px;text-align:center}'
 +'#qw-air h3{margin:0 0 8px;font-size:17px;color:#042C53}#qw-air p{font-size:13px;color:#1c2733;line-height:1.7;margin:0 0 12px}#qw-air p b{color:#0C447C}'
@@ -110,34 +119,43 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'#qw-air .ok{background:#0C447C;color:#fff;border:none;border-radius:999px;padding:12px 28px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;width:100%}'
 +'#qw-toast{position:fixed;left:0;right:0;bottom:24px;z-index:100001;text-align:center;pointer-events:none}#qw-toast span{background:#042C53;color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;font-family:inherit}';
 
-var qty={},opened={},step=0,plan=null,ovl=null;
+var qty={},opened={},step=0,plan=null,env=null,ovl=null;
+var INK=['wall','cs','cm','cl','m4','f4'];
 function money(n){return 'NT$ '+n.toLocaleString('en-US');}
 function sumKeys(ks){var s=0;ks.forEach(function(k){s+=qty[k]||0;});return s;}
 function hasBlow(){return (qty.cm||0)+(qty.cl||0)>0;}
 function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+money(P[item.k].price)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'')+'</div>';}
 function detailBlock(item){var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
 function optRow(item){var q=qty[item.k]||0;return '<div class="opt '+(q>0?'sel':'')+'" onclick="__qw.pick(&quot;'+item.k+'&quot;)"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+item.n+'</span><span class="od">'+item.d+'</span></div>'+stepper(item)+'</div>'+detailBlock(item)+'</div>';}
-function stepBar(){function d(n){return '<div class="qwdot '+(step>n?'done':step===n?'on':'')+'">'+(step>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(step>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+'</div>';}
+function curPos(){return step==='env'?1:(step===1?2:(step===2?3:(step===3?4:5)));}
+function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+'</div>';}
 function render(){
   var w='';
+  if(env==='biz')qty.bz=sumKeys(INK);
   if(step===0){
     w='<div class="qw wel"><div class="wel-brand">三菱重工 · 冷氣清洗</div><div class="wel-bar"></div>'
     +'<h2 class="wel-h">幫你快速挑好清洗方案</h2>'
     +'<p class="wel-p">不知道要洗哪些？讓我一步步帶你選</p>'
-    +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>室內機</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>室外機</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>到府方案</span></div>'
+    +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>使用環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>室內機</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>室外機</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">5</i>到府方案</span></div>'
     +'<div class="wel-tiles"><button class="wel-tile" onclick="__qw.start()"><img src="'+TILE_GUIDE+'" alt="帶我一步步選"></button><button class="wel-tile" onclick="__qw.skip()"><img src="'+TILE_ALL+'" alt="查看所有方案"></button></div></div>';
+  } else if(step==='env'){
+    w='<div class="qw">'+stepBar()+'<h2>冷氣的使用環境為？</h2><p class="sub">先確認環境，幫你算好正確價格</p>'
+    +'<div class="env-g"><button type="button" class="env-o '+(env==='home'?'sel':'')+'" onclick="__qw.pickEnv(&quot;home&quot;)"><img src="'+IMG_HOME+'" alt="一般家用"></button>'
+    +'<button type="button" class="env-o '+(env==='biz'?'sel':'')+'" onclick="__qw.pickEnv(&quot;biz&quot;)"><img src="'+IMG_SHOP+'" alt="營業場所"></button></div>'
+    +(env==='biz'?'<div class="envnote">🏢 營業場所：之後選室內機時，會自動加購「商用/重油汙加價」<b>每台 +$1,000</b></div>':'')
+    +'<div class="nav"><button class="btn gho" onclick="__qw.go(0)">上一步</button><button class="btn pri" '+(env?'':'disabled')+' onclick="__qw.go(1)">下一步：室內機</button></div></div>';
   } else if(step===1){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
     var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'式機型適用</div>'+groups[g].map(optRow).join('');});
     var inLbl=sumKeys(['wall','cs','cm','cl','m4','f4'])>0?'下一步：室外機':'只洗室外機，下一步';
-    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+'<div class="nav"><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===2){
     var outN=sumKeys(['o1','om']),inNow=sumKeys(['wall','cs','cm','cl','m4','f4']);
     var needMore=(inNow===0&&outN>0&&outN<3);
     var outLbl=outN>0?'下一步：加購':'不洗室外機，下一步';
     w='<div class="qw">'+stepBar()+'<h2>要清洗室外機嗎？</h2><p class="sub">室外機清洗為選配，不需要可直接按下一步</p><div class="optnote">需搭配室內機一起洗；若只洗室外機需滿 3 台</div>'+OUTLIST.map(optRow).join('')+(needMore?'<div class="warnbox">＊只洗室外機需滿 3 台（1對1＋1對多合計），目前 '+outN+' 台，<b>還差 '+(3-outN)+' 台</b>；或加入任一室內機清洗即可</div>':'')+'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">上一步</button><button class="btn pri" onclick="__qw.go(3)">'+outLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===3){
-    var body='';ADDON.forEach(function(x){if(x.needBlow&&!hasBlow())return;body+=optRow(x);if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}});
+    var body='';ADDON.forEach(function(x){if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=sumKeys(INK);body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（依室內機台數，每台 +$1,000）</div>';return;}body+=optRow(x);if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}});
     if(!hasBlow()){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
     var nextLbl=sumKeys(['rm','bz','hi','fan','air'])>0?'下一步：選到府方案':'不加購，下一步';
     w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div></div>';
@@ -155,8 +173,9 @@ function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.
 function showAir(){if(window.__qsShowAir)window.__qsShowAir();}
 
 var api={
-  start:function(){step=1;render();},
+  start:function(){step='env';render();},
   skip:function(){close();},
+  pickEnv:function(k){env=k;render();},
   pick:function(k){var was=qty[k]||0;if(!qty[k])qty[k]=1;render();if(k==='air'&&was===0){showAir();}},
   chg:function(k,d){qty[k]=Math.max(0,(qty[k]||0)+d);render();},
   pickPlan:function(k){plan=k;render();},
@@ -170,13 +189,14 @@ var api={
       return arr;
     }
     function resolve(nm){var a=realProds();var i;for(i=0;i<a.length;i++){if(a[i].name.indexOf(nm)===0)return a[i];}for(i=0;i<a.length;i++){if(a[i].name.indexOf(nm)>-1)return a[i];}return null;}
+    if(env==='biz')qty.bz=sumKeys(INK);
     var items=INDOOR.concat(OUTLIST,ADDON).filter(function(x){return qty[x.k]>0;});
     var jobs=[];items.forEach(function(x){var r=resolve(x.n);if(r){for(var i=0;i<qty[x.k];i++){jobs.push(r);}}});
     var btn=ovl.querySelector('.btn.pri');if(btn){btn.disabled=true;btn.textContent='加入中…';}
     var i=0;
     function next(){
       if(i>=jobs.length){
-        window.__qsPlan=plan;
+        window.__qsPlan=plan;window.__qsEnv=env;
         if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
         close();toast('已為您加入購物車，可再調整或結帳');
         return;
@@ -249,7 +269,17 @@ function fillConsent(){
     }
   }catch(e){}
 }
-setInterval(fillConsent,700);
+function fillEnv(){
+  try{
+    if(!window.__qsEnv)return;
+    var sels=document.querySelectorAll('select[name^="cf-"]'),el=null;
+    for(var i=0;i<sels.length;i++){var r=sels[i].closest('.form-group');var lbl=r?((r.querySelector('label')||{}).textContent||''):'';if(/服務環境/.test(lbl)){el=sels[i];break;}}
+    if(!el||el.getAttribute('data-qse')==='1')return;
+    var want=(window.__qsEnv==='biz')?/營業|重油/:/一般|住家/;
+    for(var j=0;j<el.options.length;j++){if(want.test(el.options[j].text||'')){el.selectedIndex=j;el.setAttribute('data-qse','1');el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));break;}}
+  }catch(e){}
+}
+setInterval(function(){fillConsent();fillEnv();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
