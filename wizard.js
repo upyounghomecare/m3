@@ -337,22 +337,29 @@ function _indoorInCart(){var c=_cartArr(),n=0;c.forEach(function(x){var nm=x.Pro
 function _bzInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('商用/重油汙加價')===0)return Number(c[i].Quantity)||0;}return 0;}
 function _resolveBtn(nm){var bm=window.__qsBtnMap||{};for(var pid in bm){var b=bm[pid];var w=(b&&b.closest)?b.closest('.product-wrap'):null;var h=w?w.querySelector('h3'):null;var n=h?(h.textContent||'').trim():'';if(n.indexOf(nm)===0)return {pid:pid,btn:b};}return null;}
 var _bzSyncing=false;
+function _svcEnvField(){var sels=document.querySelectorAll('select[name^="cf-"]');for(var i=0;i<sels.length;i++){var r=sels[i].closest('.form-group');var lbl=r?((r.querySelector('label')||{}).textContent||''):'';if(/服務環境/.test(lbl))return sels[i];}return null;}
 function reconcileBz(){
   try{
-    if(window.__qsEnv!=='biz'||window.__qsAdding||_bzSyncing)return;
-    var indoor=_indoorInCart();if(indoor<=0)return;
-    var bz=_bzInCart();if(bz===indoor)return;
+    if(window.__qsAdding||_bzSyncing)return;
+    var svc=_svcEnvField();
+    var guidedBiz=(window.__qsEnv==='biz');
+    if(!guidedBiz&&!svc)return; /* 銷售頁且非精靈營業：不動商用(保留客戶手動加購) */
+    var isBiz=guidedBiz||(svc&&/營業|重油/.test((svc.options[svc.selectedIndex]||{}).text||''));
+    var indoor=_indoorInCart();
+    var target=isBiz?indoor:0;
+    var bz=_bzInCart();
+    if(bz===target)return;
     var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /商用\/重油汙加價/.test(x.textContent||'');})[0];
-    if(it){
+    if(target<=0){
+      if(!it)return;
+      var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+      if(!rb)return;_bzSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_bzSyncing=false;},1900);
+    } else if(it){
       var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];
-      if(!btn)return;
-      _bzSyncing=true;
-      try{window.selectQty(btn,indoor-bz);}catch(e){}
-      setTimeout(function(){_bzSyncing=false;},1900);
-    } else if(bz===0){
-      var r=_resolveBtn('商用/重油汙加價');if(!r)return;
-      _bzSyncing=true;var k=0;
-      (function addOne(){if(k>=indoor){setTimeout(function(){_bzSyncing=false;},700);return;}try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}k++;setTimeout(addOne,600);})();
+      if(!btn)return;_bzSyncing=true;try{window.selectQty(btn,target-bz);}catch(e){}setTimeout(function(){_bzSyncing=false;},1900);
+    } else {
+      var r=_resolveBtn('商用/重油汙加價');if(!r)return;_bzSyncing=true;var k=0;
+      (function addOne(){if(k>=target){setTimeout(function(){_bzSyncing=false;},700);return;}try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}k++;setTimeout(addOne,600);})();
     }
   }catch(e){_bzSyncing=false;}
 }
