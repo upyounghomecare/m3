@@ -245,7 +245,7 @@ var api={
     var i=0;
     function next(){
       if(i>=jobs.length){
-        window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;
+        window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
         if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
         setTimeout(function(){window.__qsAdding=false;},1800);
         close();toast('已為您加入購物車，可再調整或結帳');
@@ -395,7 +395,34 @@ function checkoutArea(){
   }catch(e){}
 }
 setInterval(function(){reconcileBz();checkoutArea();},1500);
-setInterval(function(){fillConsent();fillEnv();},700);
+function fillAddr(){
+  try{
+    if(!window.__qsAreaCity||!window.__qsAreaDist)return;
+    var cs=document.querySelector('select[name="CountyAndCity"]'),as=document.querySelector('select[name="Area"]');
+    if(!cs||!as)return;
+    var st=Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype,'value').set;
+    if(cs.getAttribute('data-qsc')!=='1'){
+      if(cs.value!==window.__qsAreaCity){st.call(cs,window.__qsAreaCity);cs.dispatchEvent(new Event('change',{bubbles:true}));}
+      cs.setAttribute('data-qsc','1');return;
+    }
+    if(as.getAttribute('data-qsa')!=='1'){
+      var has=[].slice.call(as.options).some(function(o){return o.value===window.__qsAreaDist;});
+      if(has){st.call(as,window.__qsAreaDist);as.dispatchEvent(new Event('change',{bubbles:true}));as.setAttribute('data-qsa','1');}
+    }
+  }catch(e){}
+}
+function addAddrHint(){
+  try{
+    if(document.getElementById('qs-addrhint'))return;
+    var addr=document.querySelector('input[name="Address"]');
+    if(!addr||!addr.parentNode)return;
+    var h=document.createElement('div');h.id='qs-addrhint';
+    h.style.cssText='font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:6px 0;line-height:1.55;font-weight:700';
+    h.innerHTML='📍 請填寫完整地址：<b style="color:#B8860B">巷弄街道 ＋ 門牌號碼 ＋ 樓層</b>';
+    addr.parentNode.insertBefore(h,addr);
+  }catch(e){}
+}
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
