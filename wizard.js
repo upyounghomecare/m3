@@ -364,10 +364,12 @@ function reconcileRm(target){
   var cur=_qtyByName('偏遠地區加價');
   if(cur===target)return;
   var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /偏遠地區加價/.test(x.textContent||'');})[0];
-  if(it){
-    var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];
-    if(!btn)return;_rmSyncing=true;try{window.selectQty(btn,target-cur);}catch(e){}setTimeout(function(){_rmSyncing=false;},1900);
-  } else if(cur===0&&target>0){
+  if(target===0){
+    if(!it)return;
+    var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+    if(!rb)return;_rmSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_rmSyncing=false;},1900);
+  } else {
+    if(cur>=1)return;
     var r=_resolveBtn('偏遠地區加價');if(!r)return;_rmSyncing=true;try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}setTimeout(function(){_rmSyncing=false;},1400);
   }
 }
