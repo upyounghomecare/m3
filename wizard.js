@@ -375,7 +375,7 @@ function reconcileRm(target){
 }
 function _nosvcBlock(on){
   var box=document.getElementById('qs-nosvc');
-  var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){return /送出訂單|確認訂單|確認付款|前往付款|成立訂單|確認送出/.test((b.textContent||'').trim());});
+  var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){if(b.closest('#qw-ovl'))return false;return /下一步|送出訂單|確認訂單|確認付款|前往付款|成立訂單|確認送出|前往結帳/.test((b.textContent||'').trim());});
   if(on){
     btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qsnb','1');});
     if(!box){var as=document.querySelector('select[name="Area"]');if(as&&as.parentNode){box=document.createElement('div');box.id='qs-nosvc';box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';box.innerHTML='很抱歉，此地區尚未提供服務，請洽詢客服 <a href="'+LINE_CS+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">聯繫 LINE →</a>';as.parentNode.insertBefore(box,as.nextSibling);}}
