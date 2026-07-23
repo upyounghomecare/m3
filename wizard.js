@@ -434,7 +434,8 @@ function updateFab(){
   try{
     var cart=_cartArr(),hasProd=false,subtotal=0;
     for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;}}
-    var inCheckout=!!document.querySelector('select[name="CountyAndCity"]');
+    var _cc=document.querySelector('select[name="CountyAndCity"]');
+    var inCheckout=(_cc&&_cc.offsetHeight>0)||[].slice.call(document.querySelectorAll('button')).some(function(b){var t=(b.textContent||'').trim();return (t==='同意並繼續結帳'||/^請先選擇/.test(t))&&b.offsetHeight>0;});
     var wizardOpen=!!document.getElementById('qw-ovl');
     var fab=document.getElementById('qs-fab');
     if(!(hasProd&&!inCheckout&&!wizardOpen)){if(fab)fab.style.display='none';document.body.style.paddingBottom='';return;}
