@@ -261,7 +261,7 @@ var api={
 };
 window.__qw=api;
 /* 載入時即注入「結帳彈窗方案note」樣式（由1SHOP內文JS的結帳彈窗共用，省內文CSS字數）*/
-if(!document.getElementById('qw-ck')){var _cs=document.createElement('style');_cs.id='qw-ck';_cs.textContent='.qs-pnote{padding:7px 3px;text-align:center;font-size:14px;font-weight:900;line-height:1.3;white-space:nowrap;border-radius:0 0 10px 10px;margin-top:-1px;-webkit-text-stroke:.4px currentColor}.qs-pnote-std{background:#E6F1FB;color:#0C447C}.qs-pnote-early{background:rgba(184,134,11,.14);color:#8a6410}.qs-plan.sel::after{content:"\\2713";position:absolute;top:6px;right:6px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}#qsf{background:#fff;border:1px solid #e7edf3;border-radius:14px;padding:18px 18px 16px;box-shadow:0 4px 16px rgba(4,44,83,.06);margin:14px 0 20px}#qsf .qsf-h{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:900;color:#042C53;margin-bottom:16px;-webkit-text-stroke:.3px #042C53}#qsf .qsf-i{color:#B8860B;font-size:17px}#qsf .qsf-g{display:grid;grid-template-columns:1fr 1fr;gap:16px 30px}#qsf .qsf-li{display:flex;gap:12px;align-items:flex-start}#qsf .qsf-n{font-size:26px;font-weight:900;font-style:italic;color:#e3c88a;line-height:1;flex-shrink:0;width:38px}#qsf .qsf-x{min-width:0}#qsf .qsf-x b{display:block;font-weight:800;color:#12233a;font-size:14px;margin-bottom:5px;white-space:nowrap}#qsf .qsf-t{display:inline-block;white-space:nowrap;font-size:11.5px;font-weight:800;color:#0C447C;background:#E6F1FB;padding:2px 9px;border-radius:5px}@media(max-width:640px){#qsf .qsf-g{grid-template-columns:1fr;gap:14px}#qsf .qsf-n{font-size:24px;width:34px}#qsf .qsf-x b{white-space:normal}}';document.head.appendChild(_cs);}
+if(!document.getElementById('qw-ck')){var _cs=document.createElement('style');_cs.id='qw-ck';_cs.textContent='.qs-pnote{padding:7px 3px;text-align:center;font-size:14px;font-weight:900;line-height:1.3;white-space:nowrap;border-radius:0 0 10px 10px;margin-top:-1px;-webkit-text-stroke:.4px currentColor}.qs-pnote-std{background:#E6F1FB;color:#0C447C}.qs-pnote-early{background:rgba(184,134,11,.14);color:#8a6410}.qs-plan.sel::after{content:"\\2713";position:absolute;top:6px;right:6px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}#qsf{background:#fff;border:1px solid #e7edf3;border-radius:14px;padding:18px 14px 16px;box-shadow:0 4px 16px rgba(4,44,83,.06);margin:14px 0 20px}#qsf .qsf-h{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:900;color:#042C53;margin-bottom:14px;-webkit-text-stroke:.3px #042C53}#qsf .qsf-i{color:#B8860B;font-size:17px}#qsf .qsf-g{display:grid;grid-template-columns:repeat(4,1fr);gap:0}#qsf .qsf-li{text-align:center;padding:8px 10px;position:relative}#qsf .qsf-li+.qsf-li::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:1px;background:#e7edf3}#qsf .qsf-ic{color:#B8860B;display:flex;justify-content:center;margin-bottom:9px}#qsf .qsf-ic svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}#qsf .qsf-li b{display:block;font-weight:800;color:#042C53;font-size:13.5px;line-height:1.35;margin-bottom:4px}#qsf .qsf-s{font-size:11px;color:#6a7684;line-height:1.4}@media(max-width:640px){#qsf .qsf-g{grid-template-columns:1fr 1fr}#qsf .qsf-li{padding:12px 8px}#qsf .qsf-li:nth-child(3)::before{display:none}#qsf .qsf-li:nth-child(3),#qsf .qsf-li:nth-child(4){border-top:1px solid #e7edf3}}.qsh-ey{text-align:center;font-size:12px;font-weight:800;color:#B8860B;letter-spacing:2px;margin:16px 0 0;line-height:1.4}h1.qsh-u{margin-top:3px!important;padding-bottom:14px!important;position:relative;font-weight:900!important;-webkit-text-stroke:.45px currentColor}h1.qsh-u::after{content:"";position:absolute;left:50%;bottom:2px;transform:translateX(-50%);width:34px;height:3px;background:#d9b24a;border-radius:2px}';document.head.appendChild(_cs);}
 
 function cartHasProduct(){try{var c=(window._UserSession&&window._UserSession.Cart)||[];for(var i=0;i<c.length;i++){if(c[i].ProductType===0)return true;}}catch(e){}return false;}
 function fixCards(){
@@ -286,13 +286,31 @@ function injectFeat(){
     if(!head)return false;
     var d=document.createElement('div');d.id='qsf';
     d.innerHTML='<div class="qsf-h"><span class="qsf-i">✦</span>服務特色</div><div class="qsf-g">'
-      +'<div class="qsf-li"><span class="qsf-n">01</span><div class="qsf-x"><b>清洗後 30 天功能安心保證</b><span class="qsf-t">原廠技師</span></div></div>'
-      +'<div class="qsf-li"><span class="qsf-n">02</span><div class="qsf-x"><b>異味、過敏源有效改善</b><span class="qsf-t">深層殺菌藥水</span></div></div>'
-      +'<div class="qsf-li"><span class="qsf-n">03</span><div class="qsf-x"><b>蒸發器深度刷洗</b><span class="qsf-t">有效移除表面積垢</span></div></div>'
-      +'<div class="qsf-li"><span class="qsf-n">04</span><div class="qsf-x"><b>高壓水柱穿透污垢</b><span class="qsf-t">清出髒水看得見</span></div></div></div>';
+      +'<div class="qsf-li"><div class="qsf-ic"><svg viewBox="0 0 24 24"><path d="M12 3l7 2.5v5.5c0 4.5-3 7-7 8-4-1-7-3.5-7-8V5.5z"/><path d="M9 12l2 2 4-4"/></svg></div><b>30 天功能保證</b><div class="qsf-s">原廠技師</div></div>'
+      +'<div class="qsf-li"><div class="qsf-ic"><svg viewBox="0 0 24 24"><path d="M4 9h9a2.5 2.5 0 1 0-2.4-3.2"/><path d="M4 15h13a2.5 2.5 0 1 1-2.4 3.2"/><path d="M4 12h6"/></svg></div><b>異味過敏改善</b><div class="qsf-s">深層殺菌藥水</div></div>'
+      +'<div class="qsf-li"><div class="qsf-ic"><svg viewBox="0 0 24 24"><path d="M4 21c0-3 1.6-4.6 4.2-4.6"/><path d="M8.6 16.6 18 7.2a2.1 2.1 0 0 0-3-3L5.6 13.6z"/></svg></div><b>蒸發器深刷</b><div class="qsf-s">有效移除表面積垢</div></div>'
+      +'<div class="qsf-li"><div class="qsf-ic"><svg viewBox="0 0 24 24"><path d="M12 3c3.5 4 6 7 6 10a6 6 0 0 1-12 0c0-3 2.5-6 6-10z"/><path d="M10 14a2 2 0 0 0 2 2"/></svg></div><b>高壓水柱穿透</b><div class="qsf-s">清出髒水看得見</div></div></div>';
     head.parentNode.insertBefore(d,head);
     return true;
   }catch(e){return true;}
+}
+function styleHeads(){
+  try{
+    var map=[['選擇您要清洗的項目','STEP 1・選購'],['特殊加購項目','STEP 2・加購'],['目前已經選購','STEP 3・結帳']];
+    var hs=document.querySelectorAll('h1');
+    for(var m=0;m<map.length;m++){
+      for(var i=0;i<hs.length;i++){
+        var h=hs[i];
+        if((h.textContent||'').trim().indexOf(map[m][0])!==0)continue;
+        if(h.getAttribute('data-qsh')){break;}
+        h.setAttribute('data-qsh','1');
+        h.className=((h.className||'')+' qsh-u').trim();
+        var ey=document.createElement('div');ey.className='qsh-ey';ey.textContent=map[m][1];
+        h.parentNode.insertBefore(ey,h);
+        break;
+      }
+    }
+  }catch(e){}
 }
 function fillConsent(){
   try{
@@ -465,11 +483,12 @@ function updateFab(){
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
   injectFeat();
+  styleHeads();
   fixCards();
   if(typeof window.viewProduct==='function'&&document.querySelector('.product-row .product-wrap')){
     clearInterval(boot);
