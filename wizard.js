@@ -429,7 +429,28 @@ function addAddrHint(){
     addr.parentNode.insertBefore(h,addr);
   }catch(e){}
 }
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();},700);
+/* ===== 懸浮「立即結帳」按鈕(手機底部常駐)：小計＋結帳鈕 ===== */
+function updateFab(){
+  try{
+    var cart=_cartArr(),hasProd=false,subtotal=0;
+    for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;}}
+    var inCheckout=!!document.querySelector('select[name="CountyAndCity"]');
+    var wizardOpen=!!document.getElementById('qw-ovl');
+    var fab=document.getElementById('qs-fab');
+    if(!(hasProd&&!inCheckout&&!wizardOpen)){if(fab)fab.style.display='none';document.body.style.paddingBottom='';return;}
+    if(!fab){
+      fab=document.createElement('div');fab.id='qs-fab';
+      fab.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#fff;border-top:1px solid #d7e0ec;box-shadow:0 -6px 18px rgba(4,44,83,.1);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:12px;font-family:\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif';
+      fab.innerHTML='<div style=\"line-height:1.25\"><div style=\"font-size:11px;color:#8a97a5\">小計</div><div id=\"qs-fab-p\" style=\"font-size:17px;font-weight:900;color:#B8860B\"></div></div><button id=\"qs-fab-btn\" type=\"button\" style=\"flex:1;border:none;border-radius:12px;background:#042C53;color:#fff;font-size:15px;font-weight:800;padding:13px;font-family:inherit;cursor:pointer\">立即結帳</button>';
+      document.body.appendChild(fab);
+      fab.querySelector('#qs-fab-btn').onclick=function(){var co=[].slice.call(document.querySelectorAll('button')).filter(function(b){return (b.textContent||'').trim()==='立即結帳'&&!b.closest('#qs-fab');})[0];if(co)co.click();};
+    }
+    fab.style.display='flex';
+    document.body.style.paddingBottom='76px';
+    var pe=fab.querySelector('#qs-fab-p');if(pe)pe.textContent='NT$ '+subtotal.toLocaleString('en-US');
+  }catch(e){}
+}
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
