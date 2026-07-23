@@ -430,10 +430,22 @@ function addAddrHint(){
   }catch(e){}
 }
 /* ===== 懸浮「立即結帳」按鈕(手機底部常駐)：小計＋結帳鈕 ===== */
+function _cartTotalShown(){
+  try{
+    var labs=[].slice.call(document.querySelectorAll('*')).filter(function(e){return e.children.length===0&&(e.textContent||'').trim()==='小計'&&e.offsetHeight>0;});
+    for(var i=labs.length-1;i>=0;i--){var row=labs[i];
+      for(var k=0;k<5&&row;k++){var amt=[].slice.call(row.querySelectorAll('span.amount')).filter(function(a){return a.offsetHeight>0;});
+        if(amt.length){var n=parseInt((amt[amt.length-1].textContent||'').replace(/[^\d]/g,''),10);if(n>0)return n;}
+        row=row.parentElement;}
+    }
+  }catch(e){}
+  return null;
+}
 function updateFab(){
   try{
     var cart=_cartArr(),hasProd=false,subtotal=0;
     for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;}}
+    var shown=_cartTotalShown();if(shown==null||shown<=0)shown=subtotal;
     var _cc=document.querySelector('select[name="CountyAndCity"]');
     var inCheckout=(_cc&&_cc.offsetHeight>0)||[].slice.call(document.querySelectorAll('button')).some(function(b){var t=(b.textContent||'').trim();return (t==='同意並繼續結帳'||/^請先選擇/.test(t))&&b.offsetHeight>0;});
     var wizardOpen=!!document.getElementById('qw-ovl');
@@ -445,10 +457,11 @@ function updateFab(){
       fab.innerHTML='<div style=\"line-height:1.25\"><div style=\"font-size:11px;color:#8a97a5\">小計</div><div id=\"qs-fab-p\" style=\"font-size:17px;font-weight:900;color:#B8860B\"></div></div><button id=\"qs-fab-btn\" type=\"button\" style=\"flex:1;border:none;border-radius:12px;background:#042C53;color:#fff;font-size:15px;font-weight:800;padding:13px;font-family:inherit;cursor:pointer\">立即結帳</button>';
       document.body.appendChild(fab);
       fab.querySelector('#qs-fab-btn').onclick=function(){var co=[].slice.call(document.querySelectorAll('button')).filter(function(b){return (b.textContent||'').trim()==='立即結帳'&&!b.closest('#qs-fab');})[0];if(co)co.click();};
+      if(window.visualViewport){var vv=window.visualViewport;var repos=function(){var f=document.getElementById('qs-fab');if(!f)return;var lvh=document.documentElement.clientHeight;var gap=lvh-vv.height-vv.offsetTop;f.style.bottom=(gap>0?gap:0)+'px';};vv.addEventListener('resize',repos);vv.addEventListener('scroll',repos);window.addEventListener('scroll',repos,{passive:true});repos();}
     }
     fab.style.display='flex';
     document.body.style.paddingBottom='76px';
-    var pe=fab.querySelector('#qs-fab-p');if(pe)pe.textContent='NT$ '+subtotal.toLocaleString('en-US');
+    var pe=fab.querySelector('#qs-fab-p');if(pe)pe.textContent='NT$ '+shown.toLocaleString('en-US');
   }catch(e){}
 }
 setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();},700);
