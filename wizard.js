@@ -443,8 +443,8 @@ function _cartTotalShown(){
 }
 function updateFab(){
   try{
-    var cart=_cartArr(),hasProd=false,subtotal=0;
-    for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;}}
+    var cart=_cartArr(),hasProd=false,subtotal=0,cnt=0;
+    for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;cnt+=Number(cart[i].Quantity)||0;}}
     var shown=_cartTotalShown();if(shown==null||shown<=0)shown=subtotal;
     var _cc=document.querySelector('select[name="CountyAndCity"]');
     var inCheckout=(_cc&&_cc.offsetHeight>0)||[].slice.call(document.querySelectorAll('button')).some(function(b){var t=(b.textContent||'').trim();return (t==='同意並繼續結帳'||/^請先選擇/.test(t))&&b.offsetHeight>0;});
@@ -453,8 +453,8 @@ function updateFab(){
     if(!(hasProd&&!inCheckout&&!wizardOpen)){if(fab)fab.style.display='none';document.body.style.paddingBottom='';return;}
     if(!fab){
       fab=document.createElement('div');fab.id='qs-fab';
-      fab.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#fff;border-top:1px solid #d7e0ec;box-shadow:0 -6px 18px rgba(4,44,83,.1);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:12px;font-family:\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif';
-      fab.innerHTML='<div style=\"line-height:1.25\"><div style=\"font-size:11px;color:#8a97a5\">小計</div><div id=\"qs-fab-p\" style=\"font-size:17px;font-weight:900;color:#B8860B\"></div></div><button id=\"qs-fab-btn\" type=\"button\" style=\"flex:1;border:none;border-radius:12px;background:#042C53;color:#fff;font-size:15px;font-weight:800;padding:13px;font-family:inherit;cursor:pointer\">立即結帳</button>';
+      fab.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#fff;border-top:1px solid #d7e0ec;box-shadow:0 -6px 18px rgba(4,44,83,.1);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));font-family:\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif';
+      fab.innerHTML='<div style=\"width:100%;max-width:640px;margin:0 auto;display:flex;align-items:center;gap:14px\"><div style=\"flex:1;min-width:0;font-size:13.5px;color:#1c2733;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">共 <b id=\"qs-fab-n\" style=\"color:#042C53\">0</b> 件 · <span id=\"qs-fab-p\" style=\"font-weight:900;color:#B8860B\"></span></div><button id=\"qs-fab-btn\" type=\"button\" style=\"flex:0 0 auto;border:none;border-radius:999px;background:#042C53;color:#fff;font-size:15px;font-weight:800;padding:14px 50px;font-family:inherit;cursor:pointer;white-space:nowrap\">立即結帳</button></div>';
       document.body.appendChild(fab);
       fab.querySelector('#qs-fab-btn').onclick=function(){var co=[].slice.call(document.querySelectorAll('button')).filter(function(b){return (b.textContent||'').trim()==='立即結帳'&&!b.closest('#qs-fab');})[0];if(co)co.click();};
       if(window.visualViewport){var vv=window.visualViewport;var repos=function(){var f=document.getElementById('qs-fab');if(!f)return;var lvh=document.documentElement.clientHeight;var gap=lvh-vv.height-vv.offsetTop;f.style.bottom=(gap>0?gap:0)+'px';};vv.addEventListener('resize',repos);vv.addEventListener('scroll',repos);window.addEventListener('scroll',repos,{passive:true});repos();}
@@ -462,6 +462,7 @@ function updateFab(){
     fab.style.display='flex';
     document.body.style.paddingBottom='76px';
     var pe=fab.querySelector('#qs-fab-p');if(pe)pe.textContent='NT$ '+shown.toLocaleString('en-US');
+    var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
 setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();},700);
