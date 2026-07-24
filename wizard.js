@@ -326,18 +326,44 @@ function addBrandBadge(){
     li.appendChild(img);
   }catch(e){}
 }
-function preselectPlan(){
+var _PLANI={early:{img:'earlybird2.jpg',name:'早鳥方案 · 85折',sub:'安排 30 天後到府服務',nc:'#B8860B',sc:'#8a6a1f'},std:{img:'standard.jpg',name:'標準方案 · 95折',sub:'安排兩週內到府服務',nc:'#0C447C',sc:'#5a6672'}};
+var _PLANB='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/';
+function _curPlan(){return (window.__qsPlan==='early')?'early':'std';}
+function _renderPlanSum(wrap,collapsed){
+  var p=_curPlan();
+  if(collapsed){
+    var info=_PLANI[p];
+    wrap.innerHTML='<div style="font-size:11.5px;color:#8a6a1f;font-weight:700;letter-spacing:.3px;margin:0 0 6px">您選擇的方案</div>'
+      +'<div style="display:flex;align-items:center;gap:9px;background:#faf6ea;border:1px solid #ecdcae;border-radius:11px;padding:9px 10px">'
+        +'<img src="'+_PLANB+info.img+'" style="width:72px;border-radius:7px;display:block;flex:0 0 auto">'
+        +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:900;color:'+info.nc+';white-space:nowrap">'+info.name+'</div><div style="font-size:11px;color:'+info.sc+';margin-top:2px;white-space:nowrap">'+info.sub+'</div></div>'
+        +'<button type="button" class="qsps-chg" style="flex:0 0 auto;border:1px solid #d9b24a;background:#fff;color:#8a6410;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 13px;cursor:pointer;white-space:nowrap">變更</button>'
+      +'</div>'
+      +'<div style="font-size:11px;color:#9aa7b4;margin-top:5px;padding-left:2px">選錯了?點「變更」可調整方案</div>';
+    var c=wrap.querySelector('.qsps-chg');if(c)c.onclick=function(){_renderPlanSum(wrap,false);};
+  }else{
+    var card=function(k){var info=_PLANI[k];var sel=(k===p);return '<div class="qsps-pick" data-p="'+k+'" style="flex:1;border:'+(sel?'2.5px solid #B8860B':'2px solid #d3dde9')+';border-radius:11px;overflow:hidden;cursor:pointer;position:relative;box-shadow:0 2px 6px rgba(4,44,83,.08)"><img src="'+_PLANB+info.img+'" style="width:100%;display:block">'+(sel?'<div style="position:absolute;top:6px;right:6px;background:#B8860B;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 9px">已選</div>':'')+'</div>';};
+    wrap.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 7px"><span style="font-size:11.5px;color:#8a6a1f;font-weight:700;letter-spacing:.3px">選擇到府方案(越有彈性、折扣越多)</span><button type="button" class="qsps-col" style="border:none;background:none;color:#9aa7b4;font-size:12px;cursor:pointer;text-decoration:underline">收合</button></div>'
+      +'<div style="display:flex;gap:9px">'+card('std')+card('early')+'</div>'
+      +'<div style="font-size:11px;color:#9aa7b4;margin-top:6px;text-align:center">點方案圖即可切換,折扣即時更新</div>';
+    var col=wrap.querySelector('.qsps-col');if(col)col.onclick=function(){_renderPlanSum(wrap,true);};
+    var picks=wrap.querySelectorAll('.qsps-pick');
+    for(var i=0;i<picks.length;i++){picks[i].onclick=function(){var np=this.getAttribute('data-p');if(np!==_curPlan()){window.__qsPlan=np;try{if(window.__qsApplyPlanCoupon)window.__qsApplyPlanCoupon(function(){});}catch(e){}}_renderPlanSum(wrap,true);};}
+  }
+}
+function addPlanSummary(){
   try{
-    if(!window.__qsPlan)return;
     var ov=document.getElementById('qs-ovl');
     if(!ov||(ov.textContent||'').indexOf('結帳前請確認')<0)return;
-    var grid=ov.querySelector('.qs-plangrid');
-    if(!grid||grid.getAttribute('data-qspre'))return;
-    var cards=ov.querySelectorAll('.qs-plan');
-    if(!cards.length)return;
-    grid.setAttribute('data-qspre','1');
-    if([].slice.call(cards).some(function(c){return c.classList.contains('sel');}))return;
-    for(var i=0;i<cards.length;i++){if(cards[i].getAttribute('data-plan')===window.__qsPlan){cards[i].click();break;}}
+    if(!window.__qsPlan)return;
+    var modal=ov.querySelector('#qs-modal')||ov;
+    if(modal.querySelector('#qs-plansum-wrap'))return;
+    var h3=null,hs=modal.querySelectorAll('h3');
+    for(var i=0;i<hs.length;i++){if((hs[i].textContent||'').indexOf('結帳前請確認')>=0){h3=hs[i];break;}}
+    if(!h3)return;
+    var wrap=document.createElement('div');wrap.id='qs-plansum-wrap';wrap.style.cssText='margin:0 0 14px';
+    h3.parentNode.insertBefore(wrap,h3);
+    _renderPlanSum(wrap,true);
   }catch(e){}
 }
 function fillConsent(){
@@ -512,7 +538,7 @@ function updateFab(){
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();preselectPlan();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
