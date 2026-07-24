@@ -312,6 +312,20 @@ function styleHeads(){
     }
   }catch(e){}
 }
+function addBrandBadge(){
+  try{
+    var ov=document.getElementById('qs-ovl');
+    if(!ov||(ov.textContent||'').indexOf('結帳前請確認')<0)return;
+    var lis=ov.querySelectorAll('li'),li=null;
+    for(var i=0;i<lis.length;i++){if((lis[i].textContent||'').indexOf('本服務僅適用')>=0){li=lis[i];break;}}
+    if(!li||li.querySelector('.qs-mhi'))return;
+    var img=document.createElement('img');img.className='qs-mhi';
+    img.src='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/mhi-badge.jpg';
+    img.alt='認明三菱重工 MITSUBISHI HEAVY INDUSTRIES';
+    img.style.cssText='width:100%;border-radius:11px;display:block;margin:9px 0 2px;border:1px solid #e2e8f1';
+    li.appendChild(img);
+  }catch(e){}
+}
 function fillConsent(){
   try{
     if(!window.__qsPlan)return;
@@ -483,7 +497,7 @@ function updateFab(){
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
