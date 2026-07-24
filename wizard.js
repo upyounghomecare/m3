@@ -322,7 +322,7 @@ function addBrandBadge(){
     var img=document.createElement('img');img.className='qs-mhi';
     img.src='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/mhi-badge.jpg';
     img.alt='認明三菱重工 MITSUBISHI HEAVY INDUSTRIES';
-    img.style.cssText='width:100%;border-radius:11px;display:block;margin:9px 0 2px;border:1px solid #e2e8f1';
+    img.style.cssText='width:100%;max-width:200px;border-radius:11px;display:block;margin:9px auto 2px;border:1px solid #e2e8f1';
     li.appendChild(img);
   }catch(e){}
 }
