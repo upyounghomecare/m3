@@ -366,6 +366,27 @@ function addPlanSummary(){
     _renderPlanSum(wrap,true);
   }catch(e){}
 }
+function addContinueBtn(){
+  try{
+    if(!cartHasProduct())return;
+    var h1=null,hs=document.querySelectorAll('h1');
+    for(var i=0;i<hs.length;i++){if((hs[i].textContent||'').trim().indexOf('目前已經選購')===0){h1=hs[i];break;}}
+    if(!h1)return;
+    if(document.getElementById('qs-contbtn-wrap'))return;
+    var w=document.createElement('div');w.id='qs-contbtn-wrap';w.style.cssText='margin:2px 0 16px';
+    w.innerHTML='<button type="button" id="qs-contbtn" style="width:100%;border:2px dashed #d9b24a;background:#fbf7ec;color:#8a6410;font-size:15px;font-weight:800;border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:18px">＋</span> 還要加購? 繼續選購清洗項目</button><div style="font-size:11.5px;color:#9aa7b4;text-align:center;margin-top:6px">點了會捲回清洗項目列表，已選的都在購物車不會不見</div>';
+    h1.parentNode.insertBefore(w,h1.nextSibling);
+    w.querySelector('#qs-contbtn').onclick=function(){
+      var t=null,hh=document.querySelectorAll('h1');
+      for(var j=0;j<hh.length;j++){if((hh[j].textContent||'').trim().indexOf('選擇您要清洗的項目')===0){t=hh[j];break;}}
+      if(!t)return;
+      var ey=t.previousElementSibling;
+      var tgt=(ey&&(ey.className||'').indexOf('qsh-ey')>=0)?ey:t;
+      var wy=tgt.getBoundingClientRect().top+window.scrollY-70,sy=window.scrollY,dd=wy-sy,i=0,n=18;
+      (function step(){i++;var p=i/n,e=1-Math.pow(1-p,3);window.scrollTo(0,sy+dd*e);if(i<n)setTimeout(step,16);})();
+    };
+  }catch(e){}
+}
 function fillConsent(){
   try{
     if(!window.__qsPlan)return;
@@ -538,7 +559,7 @@ function updateFab(){
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
