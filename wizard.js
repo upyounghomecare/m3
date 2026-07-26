@@ -70,7 +70,7 @@ var OUTLIST=[
 ];
 var ADDON=[
  {k:'air',n:'AIRMON智慧連網控制器',d:'含全新設備費跟安裝設定費',air:true,pop:true},
- {k:'dh',n:'三菱重工除濕機',d:'內建UVC燈＋機內乾燥｜除濕18.5L/日',pop:true},
+ {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機 DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜除濕18.5L/日',pop:true},
  {k:'fan',n:'風鼓清洗',d:'僅適用吊隱大保養/全保養清洗',needBlow:true},
  {k:'tf',n:'車馬費',d:'技師車程與交通成本'},
  {k:'hi',n:'挑高施作3.5-4M加價',d:'每台加收'},
@@ -98,7 +98,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .opt img{width:46px;height:46px;border-radius:8px;border:1px solid #c9d7e6;object-fit:cover;flex-shrink:0}'
 +'.qw .oi{flex:1;min-width:0}.qw .on{font-size:14.5px;font-weight:500;display:block}.qw .od{font-size:11px;color:#8a97a5;display:block}'
 +'.qw .op{color:#B8860B;font-weight:800;font-size:14px;white-space:nowrap}'
-+'.qw .op-o{color:#c4ccd6;font-weight:600;font-size:11px;margin-left:4px}'
++'.qw .op-o{color:#c4ccd6;font-weight:600;font-size:11px;margin-right:6px}'
 +'.qw .qw-pop{display:inline-block;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;margin:4px 0 1px;line-height:1.4;white-space:nowrap;box-shadow:0 2px 7px rgba(184,134,11,.3)}'
 +'.qw .det-body{margin-top:9px;background:#E6F1FB;border-radius:8px;padding:9px 11px}'
 +'.qw .det-cap{font-size:12px;font-weight:700;color:#0C447C;margin-bottom:4px}'
@@ -166,9 +166,9 @@ function sumKeys(ks){var s=0;ks.forEach(function(k){s+=qty[k]||0;});return s;}
 function hasBlow(){return (qty.cm||0)+(qty.cl||0)>0;}
 /* 商用/重油汙加價台數：室內機每台加價；室外機「隨室內機清洗」不加價，只有「單獨清洗室外機」時才每台加價 */
 function bzQty(){if(env!=='biz')return 0;var i=sumKeys(INK),o=sumKeys(['o1','om']);return i>0?i:o;}
-function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+money(P[item.k].price)+(P[item.k].oprice?'<s class="op-o">'+money(P[item.k].oprice)+'</s>':'')+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'')+'</div>';}
+function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+(P[item.k].oprice?'<s class="op-o">'+money(P[item.k].oprice)+'</s>':'')+money(P[item.k].price)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'')+'</div>';}
 function detailBlock(item){var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
-function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';return '<div class="opt '+(q>0?'sel':'')+'" onclick="__qw.pick(&quot;'+item.k+'&quot;)"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+item.n+'</span>'+pop+'<span class="od">'+item.d+'</span></div>'+stepper(item)+'</div>'+detailBlock(item)+'</div>';}
+function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';return '<div class="opt '+(q>0?'sel':'')+'" onclick="__qw.pick(&quot;'+item.k+'&quot;)"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+(item.dn||item.n)+'</span>'+pop+'<span class="od">'+item.d+'</span></div>'+stepper(item)+'</div>'+detailBlock(item)+'</div>';}
 function curPos(){return step==='area'?1:(step==='env'?2:(step===1?3:(step===2?3:(step===3?4:5))));}
 function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+'</div>';}
 function render(){
