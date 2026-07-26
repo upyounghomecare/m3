@@ -3,6 +3,7 @@
 try{
 var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
+function imj(t){return IB+t+'/600x.jpg';}
 var TILE_GUIDE='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/guide-new.jpg';
 var TILE_ALL='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/all-new_v4.jpg';
 var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/standard.jpg';
@@ -51,8 +52,8 @@ var P={
  hi:{pid:'P02rqdam78ebxLvekNbvx6p8',price:1000,img:im('v5zx6meKY4vVbemgl0DVkLyo')},
  bz:{pid:'aovEX3VGzav0AMmq1jy9xdYm',price:1000,img:im('Xno5Qb1D3MV2j11ql67ZWPv9')},
  rm:{pid:'ndwgBoML1AZ9omyv7lD8O52Z',price:600,img:im('rAW85emGlnzxeppylyok6vBL')},
- dh:{price:21900,oprice:25900,img:im('O5gwrR4GNQbo4EnRYBpn071e')},
- tf:{price:600,img:im('ZLjRK1AGl0Aobp9KNV6DPJEw')}
+ dh:{price:21900,oprice:25900,img:imj('O5gwrR4GNQbo4EnRYBpn071e')},
+ tf:{price:600,img:imj('ZLjRK1AGl0Aobp9KNV6DPJEw')}
 };
 var INDOOR=[
  {k:'wall',n:'家用壁掛清洗保養',d:'壁掛式・約1.5-2小時/台',grp:'家用壁掛'},
@@ -95,7 +96,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .opt.sel{border-color:#0C447C;background:#E6F1FB}'
 +'.qw .opt-main{display:flex;align-items:center;gap:11px}'
 +'.qw .opt img{width:46px;height:46px;border-radius:8px;border:1px solid #c9d7e6;object-fit:cover;flex-shrink:0}'
-+'.qw .oi{flex:1;min-width:0}.qw .on{font-size:14.5px;font-weight:500;display:block}.qw .od{font-size:11px;color:#8a97a5}'
++'.qw .oi{flex:1;min-width:0}.qw .on{font-size:14.5px;font-weight:500;display:block}.qw .od{font-size:11px;color:#8a97a5;display:block}'
 +'.qw .op{color:#B8860B;font-weight:800;font-size:14px;white-space:nowrap}'
 +'.qw .op-o{color:#c4ccd6;font-weight:600;font-size:11px;margin-left:4px}'
 +'.qw .qw-pop{display:inline-block;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;margin:4px 0 1px;line-height:1.4;white-space:nowrap;box-shadow:0 2px 7px rgba(184,134,11,.3)}'
