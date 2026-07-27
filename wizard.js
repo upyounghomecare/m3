@@ -101,7 +101,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .qw-add{border:none;background:#042C53;color:#fff;font-size:12.5px;font-weight:800;border-radius:999px;padding:8px 17px;font-family:inherit;cursor:pointer;white-space:nowrap;flex:0 0 auto}.qw .qw-add:active{transform:scale(.96)}'
 +'.qw .opt.sel{border-color:#0C447C;background:#E6F1FB}'
 +'.qw .opt-main{display:flex;align-items:center;gap:11px}'
-+'.qw .opt img{width:72px;height:72px;border-radius:8px;border:1px solid #c9d7e6;object-fit:cover;flex-shrink:0}'
++'#qw-ovl .opt img{width:72px!important;height:72px!important;border-radius:8px;border:1px solid #c9d7e6;object-fit:cover;flex-shrink:0}'
 +'.qw .oi{flex:1;min-width:0}.qw .on{font-size:14.5px;font-weight:500;display:block}.qw .od{font-size:11px;color:#8a97a5;display:block}'
 +'.qw .op{color:#B8860B;font-weight:800;font-size:14px;white-space:nowrap}'
 +'.qw .op-o{color:#c4ccd6;font-weight:600;font-size:11px;margin-right:6px}'
