@@ -69,7 +69,7 @@ var OUTLIST=[
  {k:'om',n:'1對多室外機清洗',d:'需搭配室內機'}
 ];
 var ADDON=[
- {k:'air',n:'AIRMON',dn:'AIRMON 智慧聯網控制器',d:'含全新設備費跟安裝設定費',air:true,pop:true,tag:'🔧 到府安裝'},
+ {k:'air',n:'AIRMON',dn:'AIRMON 智慧遠端控制器',d:'含全新設備費跟安裝設定費',air:true,pop:true,tag:'🔧 到府安裝'},
  {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機 DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜除濕18.5L/日',pop:true,tag:'📦 另行宅配'},
  {k:'fan',n:'風鼓清洗',d:'僅適用吊隱大保養/全保養清洗',needBlow:true},
  {k:'tf',n:'車馬費',d:'技師車程與交通成本'},
@@ -103,6 +103,22 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .qw-tags{display:flex;flex-wrap:wrap;gap:6px;margin:5px 0 1px}'
 +'.qw .qw-pop{display:inline-flex;align-items:center;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;line-height:1.4;white-space:nowrap;box-shadow:0 2px 7px rgba(184,134,11,.3)}'
 +'.qw .qw-info{display:inline-flex;align-items:center;background:#E6F1FB;color:#0C447C;border:1px solid #cddff0;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;line-height:1.4;white-space:nowrap}'
++'.qw .qw-terms{display:inline-flex;align-items:center;gap:3px;margin-top:7px;font-size:11.5px;font-weight:800;color:#0C447C;text-decoration:underline;text-underline-offset:2px;cursor:pointer}'
++'#qw-terms{position:fixed;inset:0;z-index:100003;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:16px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}#qw-terms *{box-sizing:border-box}'
++'.qwt-m{background:#fff;border-radius:16px;max-width:380px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 55px rgba(0,0,0,.4)}'
++'.qwt-hd{background:linear-gradient(120deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative;flex:0 0 auto}'
++'.qwt-pill{display:inline-block;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:3px 10px;margin-bottom:7px}'
++'.qwt-hd h3{font-size:16px;font-weight:900;margin:0;padding-right:24px;line-height:1.35}'
++'.qwt-x{position:absolute;top:12px;right:13px;background:none;border:none;color:#cfe0f2;font-size:22px;line-height:1;cursor:pointer;padding:0;font-family:inherit}'
++'.qwt-bd{padding:16px 18px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1 1 auto}'
++'.qwt-ft{flex:0 0 auto;padding:12px 18px;border-top:1px solid #eef2f6}'
++'.qwt-ok{width:100%;background:#042C53;color:#fff;border:none;border-radius:999px;padding:12px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer}'
++'.qwt-intro{font-size:13px;color:#2a3b4d;background:#faf6ea;border:1px solid #f0e6cc;border-radius:9px;padding:11px 13px;margin-bottom:12px;line-height:1.7}'
++'.qwt-bd p,.qwt-inj p{font-size:13px;color:#33414f;margin:9px 0;line-height:1.75}'
++'.qwt-h{font-size:14px;font-weight:900;color:#042C53;padding-bottom:6px;border-bottom:2px solid #d9b24a;display:inline-block;margin:16px 0 9px}'
++'.qwt-ul{list-style:none;margin:7px 0;padding:0}.qwt-ul li{font-size:13px;color:#33414f;padding:2px 0 2px 17px;position:relative;line-height:1.6}.qwt-ul li::before{content:"・";position:absolute;left:0;color:#B8860B;font-weight:900}'
++'.qwt-note{font-size:12.5px;color:#b45309;background:#fef6e7;border-left:3px solid #d9b24a;border-radius:0 8px 8px 0;padding:8px 12px;margin:8px 0;line-height:1.6}'
++'.qwt-scroll{max-height:230px;overflow-y:auto;-webkit-overflow-scrolling:touch;text-align:left;border:1px solid #eef2f6;border-radius:10px;padding:2px 12px;background:#fbfdff;margin-top:6px}'
 +'.qw .det-body{margin-top:9px;background:#E6F1FB;border-radius:8px;padding:9px 11px}'
 +'.qw .det-cap{font-size:12px;font-weight:700;color:#0C447C;margin-bottom:4px}'
 +'.qw .det-body ul{margin:0;padding:0;list-style:none}.qw .det-body li{font-size:12px;color:#1c2733;line-height:1.75}'
@@ -173,7 +189,7 @@ function bzQty(){if(env!=='biz')return 0;var i=sumKeys(INK),o=sumKeys(['o1','om'
 function tfQty(){var i=sumKeys(INK),o=sumKeys(['o1','om']);return (env==='home'&&i===0&&o===1)?1:0;}
 function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+(P[item.k].oprice?'<s class="op-o">'+money(P[item.k].oprice)+'</s>':'')+money(P[item.k].price)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'<button class="qw-add" onclick="__qw.pick(&quot;'+item.k+'&quot;)">＋ 加入</button>')+'</div>';}
 function detailBlock(item){var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
-function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var tags=(pop||tag)?'<div class="qw-tags">'+pop+tag+'</div>':'';return '<div class="opt '+(q>0?'sel':'')+'"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+'</span>'+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
+function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var tags=(pop||tag)?'<div class="qw-tags">'+pop+tag+'</div>':'';var tm=_TERMS[item.k]?'<span class="qw-terms" onclick="event.stopPropagation();__qw.terms(&quot;'+item.k+'&quot;)">📋 注意事項 ›</span>':'';return '<div class="opt '+(q>0?'sel':'')+'"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+'</span>'+tm+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
 function curPos(){return step==='area'?1:(step==='env'?2:(step===1?3:(step===2?3:(step===3?4:5))));}
 function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+'</div>';}
 function render(){
@@ -231,7 +247,41 @@ function render(){
 function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=0;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
 function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
-function showAir(){if(window.__qsShowAir){window.__qsShowAir();function lift(){var a=document.getElementById('qs-ovl2');if(a)a.style.setProperty('z-index','100002','important');}lift();setTimeout(lift,60);}}
+/* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
+var _TERMS={
+ dh:{pill:'📦 另行宅配',title:'三菱重工除濕機 DH18W-T 織紋白',body:
+  '<div class="qwt-intro">本項目為冷氣清洗服務限定加購商品，須與冷氣清洗服務同筆訂購。</div>'
+  +'<p>三菱重工除濕機為實體宅配商品，將於訂單確認後由物流另行配送至指定地址，不會由清洗技師攜帶，亦不一定與冷氣清洗服務於同日送達。</p>'
+  +'<div class="qwt-h">加購內容</div><ul class="qwt-ul"><li>三菱重工除濕機</li><li>物流宅配到府</li><li>原廠保固服務</li></ul>'
+  +'<div class="qwt-h">配送及收件說明</div><p>除濕機與冷氣清洗服務為不同作業流程：</p><ul class="qwt-ul"><li>冷氣清洗服務：由約時人員聯繫安排技師到府</li><li>除濕機加購商品：由物流另行安排宅配</li></ul><p>實際出貨及到貨時間，將依訂單確認、商品庫存及物流配送狀況為準。</p><div class="qwt-note">※ 除濕機不會由清洗技師於服務當日攜帶或交付。</div><div class="qwt-note">※ 除濕機到貨日期與冷氣清洗服務日期可能不同。</div>'
+  +'<div class="qwt-h">取消、退換貨及售後說明</div><p>本商品屬網路購買之實體宅配商品，消費者自收到商品次日起享有 7 日猶豫期，猶豫期並非試用期。</p><p>如需辦理退貨，請於收到商品後 7 日內聯繫客服提出申請，請勿自行寄回。</p><p>辦理退貨時，商品及相關內容物應保持完整，包括：</p><ul class="qwt-ul"><li>除濕機主機</li><li>原廠紙箱及包裝材料</li><li>說明書及保證書</li><li>配件及贈品</li></ul><p>消費者得於確認商品外觀、規格及功能所必要的範圍內拆封檢查；如因超出必要檢查範圍之使用，造成商品刮傷、污損、缺件、包裝嚴重毀損或其他商品價值減損情形，將依商品實際狀況依法處理。</p><p>如商品收到時有外觀損傷、缺件、無法正常運作或其他異常，請保留商品、包裝及相關內容物，並儘速聯繫客服協助處理。</p><p>設備後續如發生功能異常或故障，將依原廠保固及檢測流程辦理維修或相關售後服務。</p><div class="qwt-note">※ 除濕機商品之配送、退換貨及原廠保固，與冷氣清洗服務之預約、改約、取消及服務保固分開計算。</div><div class="qwt-note">※ 冷氣清洗服務取消或改期，不代表除濕機訂單將同步取消，仍須另行聯繫客服辦理。</div>'},
+ air:{pill:'🔧 到府安裝',title:'AIRMON 智慧遠端控制器',body:
+  '<div class="qwt-intro">本項目為冷氣清洗服務限定加購商品，須與冷氣清洗服務同筆訂購。</div>'
+  +'<p>智慧遠端控制器將由技師於約定的冷氣清洗服務日攜帶至現場，並協助完成設備安裝、連線設定及功能確認，不會事先或另行宅配給客戶。</p>'
+  +'<div class="qwt-h">加購內容</div><ul class="qwt-ul"><li>智慧遠端控制器設備</li><li>技師到府安裝</li><li>基本連線設定及功能確認</li></ul>'
+  +'<div class="qwt-h">安裝及適用條件</div><p>實際能否安裝，仍須依現場空調型號、設備配置、安裝環境及網路條件確認。</p><p>如現場確認設備型號或環境不符合安裝條件，將由客服協助辦理本加購項目後續退款事宜。</p>'
+  +'<div class="qwt-h">取消、退換貨及售後說明</div><p>如需取消本加購項目，請於設備拆封及安裝前聯繫客服提出。</p><p>智慧遠端控制器經技師完成拆封、安裝、接線、配對或啟用後，即非全新未使用狀態，非因商品瑕疵之個人喜好、操作習慣或其他因素，恕不接受一般退換貨。</p><p>如設備於安裝後發生無法連線、功能異常或其他故障情形，將由客服安排檢測，並依檢測結果及原廠保固規定辦理維修或更換。</p><div class="qwt-note">※ 本商品為設備搭配到府安裝之加購項目，不另行宅配。</div><div class="qwt-note">※ 如消費者依法提出解除契約，因設備已完成安裝或使用而產生拆卸、復原、材料耗用或商品價值減損者，將依實際情況依法處理。</div>'}
+};
+function showTerms(k){
+ var t=_TERMS[k];if(!t||document.getElementById('qw-terms'))return;
+ var ov=document.createElement('div');ov.id='qw-terms';
+ ov.innerHTML='<div class="qwt-m"><div class="qwt-hd"><div class="qwt-pill">'+t.pill+'</div><h3>'+t.title+'</h3><button class="qwt-x" type="button" aria-label="關閉">×</button></div><div class="qwt-bd">'+t.body+'</div><div class="qwt-ft"><button class="qwt-ok" type="button">我知道了</button></div></div>';
+ document.body.appendChild(ov);
+ function cl(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
+ ov.querySelector('.qwt-x').onclick=cl;ov.querySelector('.qwt-ok').onclick=cl;
+ ov.onclick=function(e){if(e.target===ov)cl();};
+}
+/* AIRMON:把注意事項注入原本的機型提醒彈窗(合併成一個) */
+function _airInject(){
+ var a=document.getElementById('qs-ovl2');if(!a)return;
+ a.style.setProperty('z-index','100002','important');
+ if(a.querySelector('.qwt-inj'))return;
+ var ok=[].slice.call(a.querySelectorAll('button,a')).filter(function(b){return /我知道了/.test(b.textContent||'');})[0];
+ var box=document.createElement('div');box.className='qwt-inj';
+ box.innerHTML='<div class="qwt-h" style="margin-top:16px;border-top:1px solid #e2e8f1;padding-top:14px">加購注意事項</div><div class="qwt-scroll">'+_TERMS.air.body+'</div>';
+ if(ok&&ok.parentNode){ok.parentNode.insertBefore(box,ok);}else{a.appendChild(box);}
+}
+function showAir(){if(window.__qsShowAir){window.__qsShowAir();_airInject();setTimeout(_airInject,90);setTimeout(_airInject,240);}}
 
 var api={
   start:function(){step='area';render();},
@@ -239,7 +289,8 @@ var api={
   pickCity:function(v){areaCity=v||null;areaDist=null;areaCls=null;qty.rm=0;render();},
   pickDist:function(v){areaDist=v||null;areaCls=classify(areaCity,areaDist);qty.rm=(areaCls==='remote')?1:0;render();},
   pickEnv:function(k){env=k;if(k!=='biz')qty.bz=0;render();},
-  pick:function(k){var was=qty[k]||0;if(!qty[k])qty[k]=1;render();if(k==='air'&&was===0){showAir();}},
+  pick:function(k){var was=qty[k]||0;if(!qty[k])qty[k]=1;render();if(k==='air'&&was===0){showAir();}else if(k==='dh'&&was===0){showTerms('dh');}},
+  terms:function(k){if(k==='air'){showAir();}else{showTerms(k);}},
   chg:function(k,d){qty[k]=Math.max(0,(qty[k]||0)+d);render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
   go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){alert('請至少選擇一台室內機或室外機清洗喔！\n可回上一步（室內機／室外機）選擇台數。');return;}}step=n;render();},
@@ -343,10 +394,10 @@ function addBrandBadge(){
     li.appendChild(img);
   }catch(e){}
 }
-/* 人氣加購標示（設計#8：名稱下方紅標）— 貼在 AIRMON 智慧連網控制器、三菱重工除濕機 的商品卡 */
+/* 人氣加購＋配送標籤＋注意事項連結 — 貼在 AIRMON 智慧遠端控制器、三菱重工除濕機 的商品卡 */
 function addPopularBadge(){
   try{
-    var map=[{key:'AIRMON',info:'🔧 到府安裝'},{key:'除濕機',info:'📦 另行宅配'}];
+    var map=[{key:'AIRMON',info:'🔧 到府安裝',tk:'air'},{key:'除濕機',info:'📦 另行宅配',tk:'dh'}];
     var ws=document.querySelectorAll('.product-row .product-wrap');
     var POP='display:inline-flex;align-items:center;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:4px 12px;line-height:1;white-space:nowrap;box-shadow:0 2px 8px rgba(184,134,11,.32)';
     var INFO='display:inline-flex;align-items:center;background:#E6F1FB;color:#0C447C;border:1px solid #cddff0;font-size:11px;font-weight:800;border-radius:999px;padding:4px 12px;line-height:1;white-space:nowrap';
@@ -360,6 +411,10 @@ function addPopularBadge(){
       box.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px;align-self:flex-start';
       box.innerHTML='<span style="'+POP+'">🔥 人氣加購</span><span style="'+INFO+'">'+m.info+'</span>';
       h3.parentNode.insertBefore(box,h3.nextSibling);
+      var lk=document.createElement('span');lk.className='qs-termlink';lk.textContent='📋 注意事項 ›';
+      lk.style.cssText='display:inline-block;margin:0 0 4px;font-size:11.5px;font-weight:800;color:#0C447C;text-decoration:underline;text-underline-offset:2px;cursor:pointer;align-self:flex-start';
+      (function(tk){lk.onclick=function(){if(window.__qw)window.__qw.terms(tk);};})(m.tk);
+      box.parentNode.insertBefore(lk,box.nextSibling);
     }
   }catch(e){}
 }
