@@ -69,8 +69,8 @@ var OUTLIST=[
  {k:'om',n:'1對多室外機清洗',d:'需搭配室內機'}
 ];
 var ADDON=[
- {k:'air',n:'AIRMON智慧連網控制器',d:'含全新設備費跟安裝設定費',air:true,pop:true},
- {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機 DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜除濕18.5L/日',pop:true},
+ {k:'air',n:'AIRMON',dn:'AIRMON 智慧聯網控制器',d:'含全新設備費跟安裝設定費',air:true,pop:true,tag:'🔧 到府安裝'},
+ {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機 DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜除濕18.5L/日',pop:true,tag:'📦 另行宅配'},
  {k:'fan',n:'風鼓清洗',d:'僅適用吊隱大保養/全保養清洗',needBlow:true},
  {k:'tf',n:'車馬費',d:'技師車程與交通成本'},
  {k:'hi',n:'挑高施作3.5-4M加價',d:'每台加收'},
@@ -100,7 +100,9 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .oi{flex:1;min-width:0}.qw .on{font-size:14.5px;font-weight:500;display:block}.qw .od{font-size:11px;color:#8a97a5;display:block}'
 +'.qw .op{color:#B8860B;font-weight:800;font-size:14px;white-space:nowrap}'
 +'.qw .op-o{color:#c4ccd6;font-weight:600;font-size:11px;margin-right:6px}'
-+'.qw .qw-pop{display:inline-block;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;margin:4px 0 1px;line-height:1.4;white-space:nowrap;box-shadow:0 2px 7px rgba(184,134,11,.3)}'
++'.qw .qw-tags{display:flex;flex-wrap:wrap;gap:6px;margin:5px 0 1px}'
++'.qw .qw-pop{display:inline-flex;align-items:center;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;line-height:1.4;white-space:nowrap;box-shadow:0 2px 7px rgba(184,134,11,.3)}'
++'.qw .qw-info{display:inline-flex;align-items:center;background:#E6F1FB;color:#0C447C;border:1px solid #cddff0;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;line-height:1.4;white-space:nowrap}'
 +'.qw .det-body{margin-top:9px;background:#E6F1FB;border-radius:8px;padding:9px 11px}'
 +'.qw .det-cap{font-size:12px;font-weight:700;color:#0C447C;margin-bottom:4px}'
 +'.qw .det-body ul{margin:0;padding:0;list-style:none}.qw .det-body li{font-size:12px;color:#1c2733;line-height:1.75}'
@@ -171,7 +173,7 @@ function bzQty(){if(env!=='biz')return 0;var i=sumKeys(INK),o=sumKeys(['o1','om'
 function tfQty(){var i=sumKeys(INK),o=sumKeys(['o1','om']);return (env==='home'&&i===0&&o===1)?1:0;}
 function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+(P[item.k].oprice?'<s class="op-o">'+money(P[item.k].oprice)+'</s>':'')+money(P[item.k].price)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'<button class="qw-add" onclick="__qw.pick(&quot;'+item.k+'&quot;)">＋ 加入</button>')+'</div>';}
 function detailBlock(item){var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
-function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';return '<div class="opt '+(q>0?'sel':'')+'"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+(item.dn||item.n)+'</span>'+pop+'<span class="od">'+item.d+'</span>'+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
+function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var tags=(pop||tag)?'<div class="qw-tags">'+pop+tag+'</div>':'';return '<div class="opt '+(q>0?'sel':'')+'"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+'</span>'+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
 function curPos(){return step==='area'?1:(step==='env'?2:(step===1?3:(step===2?3:(step===3?4:5))));}
 function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+'</div>';}
 function render(){
@@ -344,17 +346,20 @@ function addBrandBadge(){
 /* 人氣加購標示（設計#8：名稱下方紅標）— 貼在 AIRMON 智慧連網控制器、三菱重工除濕機 的商品卡 */
 function addPopularBadge(){
   try{
-    var keys=['AIRMON','除濕機'];
+    var map=[{key:'AIRMON',info:'🔧 到府安裝'},{key:'除濕機',info:'📦 另行宅配'}];
     var ws=document.querySelectorAll('.product-row .product-wrap');
+    var POP='display:inline-flex;align-items:center;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:4px 12px;line-height:1;white-space:nowrap;box-shadow:0 2px 8px rgba(184,134,11,.32)';
+    var INFO='display:inline-flex;align-items:center;background:#E6F1FB;color:#0C447C;border:1px solid #cddff0;font-size:11px;font-weight:800;border-radius:999px;padding:4px 12px;line-height:1;white-space:nowrap';
     for(var i=0;i<ws.length;i++){
       var w=ws[i],h3=w.querySelector('h3');if(!h3)continue;
-      var nm=(h3.textContent||'').trim(),hit=false;
-      for(var j=0;j<keys.length;j++){if(nm.indexOf(keys[j])>=0){hit=true;break;}}
-      if(!hit)continue;
-      if(w.querySelector('.qs-pop'))continue;
-      var tag=document.createElement('span');tag.className='qs-pop';tag.textContent='🔥 人氣加購';
-      tag.style.cssText='display:inline-flex;align-items:center;align-self:flex-start;width:auto;max-width:max-content;flex:0 0 auto;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:4px 13px;margin-top:6px;line-height:1;white-space:nowrap;box-shadow:0 2px 8px rgba(184,134,11,.32)';
-      h3.parentNode.insertBefore(tag,h3.nextSibling);
+      var nm=(h3.textContent||'').trim(),m=null;
+      for(var j=0;j<map.length;j++){if(nm.indexOf(map[j].key)>=0){m=map[j];break;}}
+      if(!m)continue;
+      if(w.querySelector('.qs-tags'))continue;
+      var box=document.createElement('div');box.className='qs-tags';
+      box.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px;align-self:flex-start';
+      box.innerHTML='<span style="'+POP+'">🔥 人氣加購</span><span style="'+INFO+'">'+m.info+'</span>';
+      h3.parentNode.insertBefore(box,h3.nextSibling);
     }
   }catch(e){}
 }
