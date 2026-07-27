@@ -113,7 +113,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qwt-m{background:#fff;border-radius:16px;max-width:380px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 55px rgba(0,0,0,.4)}'
 +'.qwt-hd{background:linear-gradient(120deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative;flex:0 0 auto}'
 +'.qwt-pill{display:inline-block;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:3px 10px;margin-bottom:7px}'
-+'.qwt-hd h3{font-size:16px;font-weight:900;margin:0;padding-right:24px;line-height:1.35}'
++'.qwt-hd h3{font-size:16px;font-weight:900;margin:0;padding-right:24px;line-height:1.35;color:#fff!important}'
 +'.qwt-x{position:absolute;top:12px;right:13px;background:none;border:none;color:#cfe0f2;font-size:22px;line-height:1;cursor:pointer;padding:0;font-family:inherit}'
 +'.qwt-bd{padding:16px 18px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1 1 auto}'
 +'.qwt-ft{flex:0 0 auto;padding:12px 18px;border-top:1px solid #eef2f6}'
