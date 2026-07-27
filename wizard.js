@@ -6,6 +6,7 @@ function im(t){return IB+t+'/600x.png';}
 function imj(t){return IB+t+'/600x.jpg';}
 var TILE_GUIDE='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/guide-new.jpg';
 var TILE_ALL='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/all-new_v4.jpg';
+var IMG_QUICK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/quickbuy.jpg';
 var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/standard.jpg';
 var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/earlybird2.jpg';
 var IMG_HOME='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/home.jpg';
@@ -166,6 +167,10 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .wsn{width:16px;height:16px;flex-shrink:0;border-radius:50%;background:none;border:1.3px solid #B8860B;color:#B8860B;font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}'
 +'.qw .wsa{color:#B8860B;font-weight:800;font-size:9px;opacity:.5;margin:0 -1px}'
 +'.qw .wel-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}'
++'.qw .wel-start{display:block;width:100%;border:none;border-radius:14px;overflow:hidden;padding:0;background:none;cursor:pointer;box-shadow:0 5px 16px rgba(4,44,83,.18);-webkit-tap-highlight-color:transparent;transition:transform .12s}'
++'.qw .wel-start img{width:100%;display:block;aspect-ratio:3/1;object-fit:cover}'
++'.qw .wel-start:active{transform:scale(.98)}'
++'.qw .wel-skip{display:inline-block;text-align:center;font-size:13px;color:#8a97a5;text-decoration:underline;text-underline-offset:2px;margin-top:16px;cursor:pointer}'
 +'.qw .wel-tile{aspect-ratio:1/1;border:none;border-radius:12px;padding:0;overflow:hidden;background:none;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s;box-shadow:0 2px 10px rgba(4,44,83,.12)}'
 +'.qw .wel-tile img{width:100%;height:100%;object-fit:cover;display:block}'
 +'.qw .wel-tile:active{transform:scale(.97)}'
@@ -211,7 +216,7 @@ function render(){
     +'<h2 class="wel-h">幫你快速挑好清洗方案</h2>'
     +'<p class="wel-p">不知道要洗哪些？讓我一步步帶你選</p>'
     +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>機型</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">5</i>方案</span></div>'
-    +'<div class="wel-tiles"><button class="wel-tile" onclick="__qw.start()"><img src="'+TILE_GUIDE+'" alt="帶我一步步選"></button><button class="wel-tile" onclick="__qw.skip()"><img src="'+TILE_ALL+'" alt="查看所有方案"></button></div></div>';
+    +'<button class="wel-start" onclick="__qw.start()"><img src="'+IMG_QUICK+'" alt="開始快速選購"></button><div class="wel-skip" onclick="__qw.skip()">我已經知道要買什麼，自己看就好 →</div></div>';
   } else if(step==='area'){
     var cityOpts='<option value="">請選擇縣市</option>';
     for(var ci in TW){if(TW.hasOwnProperty(ci)){cityOpts+='<option value="'+ci+'"'+(areaCity===ci?' selected':'')+'>'+ci+'</option>';}}
@@ -224,13 +229,13 @@ function render(){
      +'<div class="flbl">鄉鎮市區</div><select class="qsel" onchange="__qw.pickDist(this.value)">'+distOpts+'</select>'
      +resImg
      +(areaCls==='nosvc'?'<a class="cslink" href="'+LINE_CS+'" target="_blank" rel="noopener">聯繫客服 →</a>':'')
-     +'<div class="nav"><button class="btn gho" onclick="__qw.go(0)">上一步</button><button class="btn pri" '+(canNext?'':'disabled')+' onclick="__qw.go(&quot;env&quot;)">下一步</button></div></div>';
+     +'<div class="nav"><button class="btn gho" onclick="__qw.go(0)">上一步</button><button class="btn pri" '+(canNext?'':'disabled')+' onclick="__qw.go(&quot;env&quot;)">下一步</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='env'){
     w='<div class="qw">'+stepBar()+'<h2>冷氣的使用環境為？</h2><p class="sub">先確認環境，幫你算好正確價格</p>'
     +'<div class="env-g"><button type="button" class="env-o '+(env==='home'?'sel':'')+'" onclick="__qw.pickEnv(&quot;home&quot;)"><img src="'+IMG_HOME+'" alt="一般家用"></button>'
     +'<button type="button" class="env-o '+(env==='biz'?'sel':'')+'" onclick="__qw.pickEnv(&quot;biz&quot;)"><img src="'+IMG_SHOP+'" alt="營業場所"></button></div>'
     +'<div class="envnote">選「營業場所」後，之後選室內機會自動幫你算好加價 <b>$1,000</b></div>'
-    +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri" '+(env?'':'disabled')+' onclick="__qw.go(1)">下一步：室內機</button></div></div>';
+    +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri" '+(env?'':'disabled')+' onclick="__qw.go(1)">下一步：室內機</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===1){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
     var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'式機型適用</div>'+groups[g].map(optRow).join('');});
@@ -246,7 +251,7 @@ function render(){
     var body='';ADDON.forEach(function(x){if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機每台 +$1,000；室外機隨室內機清洗不加價，僅單洗室外機時每台 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}});
     if(!hasBlow()){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
     var nextLbl=sumKeys(ADDON.map(function(a){return a.k;}))>0?'下一步：選到府方案':'不加購，下一步';
-    w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else {
     function planCard(k,img,note,ncls){var sel=plan===k;return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt=""><div class="qpn '+ncls+'">'+note+'</div></div>';}
     w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div><div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div><div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.finish()">完成，前往結帳</button></div></div>';
