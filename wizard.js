@@ -69,7 +69,7 @@ var OUTLIST=[
  {k:'om',n:'1對多室外機清洗',d:'需搭配室內機'}
 ];
 var ADDON=[
- {k:'air',n:'AIRMON',dn:'AIRMON 智慧遠端控制器 MHICAD-WF100',d:'含全新設備費跟安裝設定費',air:true,pop:true,tag:'🔧 到府安裝'},
+ {k:'air',n:'AIRMON',dn:'AIRMON 智慧遠端控制器 MHICAD-WF100',d:'含全新設備費跟安裝設定費',air:true,pop:true,tag:'🔧 到府安裝',nmsm:true},
  {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機 DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜除濕18.5L/日',pop:true,tag:'📦 另行宅配',gift:'🎁 加贈清洗75折券'},
  {k:'fan',n:'風鼓清洗',d:'僅適用吊隱大保養/全保養清洗',needBlow:true},
  {k:'tf',n:'車馬費',d:'技師車程與交通成本'},
@@ -83,6 +83,10 @@ var ICO_LIST='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke
 var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
 +'#qw-ovl *{box-sizing:border-box}'
 +'.qw{position:relative;background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}'
++'@media(min-width:760px){.qw{max-width:520px}}'
++'.qw .on.qw-on-sm{font-size:12.5px;white-space:nowrap;letter-spacing:-.2px}'
++'.qw .qw-thumb{cursor:zoom-in}'
++'#qw-zoom{position:fixed;inset:0;z-index:100005;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}#qw-zoom img{max-width:100%;max-height:90vh;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.5)}'
 +'.qw .qw-x{position:absolute;top:9px;right:11px;width:30px;height:30px;border:none;background:rgba(255,255,255,.7);border-radius:50%;color:#a4b1bf;font-size:24px;line-height:28px;text-align:center;cursor:pointer;padding:0;font-family:inherit;z-index:5}.qw .qw-x:active{color:#5f6b78}'
 +'.qw .qwbar{display:flex;align-items:center;gap:6px;margin-bottom:4px;padding-right:32px}'
 +'.qw .qwdot{width:22px;height:22px;flex-shrink:0;border-radius:50%;font-size:12px;font-weight:700;display:flex!important;align-items:center;justify-content:center;background:#E6F1FB;color:#8a97a5;line-height:1;padding:0;box-sizing:border-box}'
@@ -196,7 +200,7 @@ function bzQty(){if(env!=='biz')return 0;var i=sumKeys(INK),o=sumKeys(['o1','om'
 function tfQty(){var i=sumKeys(INK),o=sumKeys(['o1','om']);return (env==='home'&&i===0&&o===1)?1:0;}
 function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+(P[item.k].oprice?'<s class="op-o">'+money(P[item.k].oprice)+'</s>':'')+money(P[item.k].price)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'<button class="qw-add" onclick="__qw.pick(&quot;'+item.k+'&quot;)">＋ 加入</button>')+'</div>';}
 function detailBlock(item){var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
-function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var gift=item.gift?'<span class="qw-gift">'+item.gift+'</span>':'';var tags=(pop||tag||gift)?'<div class="qw-tags">'+pop+tag+gift+'</div>':'';var tm=_TERMS[item.k]?'<span class="qw-terms" onclick="event.stopPropagation();__qw.terms(&quot;'+item.k+'&quot;)">📋 注意事項 ›</span>':'';return '<div class="opt '+(q>0?'sel':'')+'"><div class="opt-main"><img src="'+P[item.k].img+'"><div class="oi"><span class="on">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+'</span>'+tm+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
+function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var gift=item.gift?'<span class="qw-gift">'+item.gift+'</span>':'';var tags=(pop||tag||gift)?'<div class="qw-tags">'+pop+tag+gift+'</div>':'';var tm=_TERMS[item.k]?'<span class="qw-terms" onclick="event.stopPropagation();__qw.terms(&quot;'+item.k+'&quot;)">📋 注意事項 ›</span>':'';return '<div class="opt '+(q>0?'sel':'')+'"><div class="opt-main"><img class="qw-thumb" src="'+P[item.k].img+'" onclick="event.stopPropagation();__qw.zoom(&quot;'+P[item.k].img+'&quot;)"><div class="oi"><span class="on'+(item.nmsm?' qw-on-sm':'')+'">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+'</span>'+tm+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
 function curPos(){return step==='area'?1:(step==='env'?2:(step===1?3:(step===2?3:(step===3?4:5))));}
 function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+'</div>';}
 function render(){
@@ -295,6 +299,7 @@ var api={
   pickEnv:function(k){env=k;if(k!=='biz')qty.bz=0;render();},
   pick:function(k){if(k==='dh'||k==='air'){showTerms(k,'gate');return;}var was=qty[k]||0;if(!qty[k])qty[k]=1;render();},
   terms:function(k){showTerms(k,'read');},
+  zoom:function(src){if(document.getElementById('qw-zoom'))return;var z=document.createElement('div');z.id='qw-zoom';z.innerHTML='<img src="'+src+'" alt="">';z.onclick=function(){if(z.parentNode)z.parentNode.removeChild(z);};document.body.appendChild(z);},
   chg:function(k,d){qty[k]=Math.max(0,(qty[k]||0)+d);render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
   go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){alert('請至少選擇一台室內機或室外機清洗喔！\n可回上一步（室內機／室外機）選擇台數。');return;}}step=n;render();},
@@ -596,7 +601,30 @@ function checkoutArea(){
     _nosvcBlock(cls==='nosvc');
   }catch(e){}
 }
-setInterval(function(){reconcileBz();checkoutArea();},1500);
+function _tfInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('車馬費')===0)return Number(c[i].Quantity)||0;}return 0;}
+var _tfSyncing=false;
+/* 結帳把關:家用+只洗1台室外機(無室內機)→ 自動補車馬費$600;不符則移除(補自己下單漏洞) */
+function reconcileTf(){
+  try{
+    if(window.__qsAdding||_tfSyncing)return;
+    var svc=_svcEnvField();var guidedEnv=window.__qsEnv;
+    if(!guidedEnv&&!svc)return;
+    var isBiz=(guidedEnv==='biz')||(svc&&/營業|重油/.test((svc.options[svc.selectedIndex]||{}).text||''));
+    var indoor=_indoorInCart(),outdoor=_outdoorInCart();
+    var target=(!isBiz&&indoor===0&&outdoor===1)?1:0;
+    var cur=_tfInCart();
+    if(cur===target)return;
+    var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /車馬費/.test(x.textContent||'');})[0];
+    if(target<=0){
+      if(!it)return;
+      var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+      if(!rb)return;_tfSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_tfSyncing=false;},1900);
+    } else if(!it){
+      var r=_resolveBtn('車馬費');if(!r)return;_tfSyncing=true;try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}setTimeout(function(){_tfSyncing=false;},1400);
+    }
+  }catch(e){_tfSyncing=false;}
+}
+setInterval(function(){reconcileBz();reconcileTf();checkoutArea();},1500);
 function fillAddr(){
   try{
     if(!window.__qsAreaCity||!window.__qsAreaDist)return;
