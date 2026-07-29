@@ -452,7 +452,7 @@ function addPopularBadge(){
   }catch(e){}
 }
 /* 車馬費純自動:隱藏商品頁的車馬費加購卡,客戶不能手動加(由精靈依規則自動加入購物車) */
-function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');if(h&&(h.textContent||'').indexOf('車馬費')>=0){ws[i].style.display='none';}}}catch(e){}}
+function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0){ws[i].style.display='none';}}}catch(e){}}
 var _PLANI={early:{img:'earlybird2.jpg',name:'早鳥方案 · 85折',sub:'安排 30 天後到府服務',nc:'#B8860B',sc:'#8a6a1f'},std:{img:'standard.jpg',name:'標準方案 · 95折',sub:'安排兩週內到府服務',nc:'#0C447C',sc:'#5a6672'}};
 var _PLANB='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/';
 function _curPlan(){return (window.__qsPlan==='early')?'early':'std';}
