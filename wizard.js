@@ -647,7 +647,22 @@ function reconcileTf(){
     }
   }catch(e){_tfSyncing=false;}
 }
-setInterval(function(){reconcileBz();reconcileTf();checkoutArea();},1500);
+function _fanInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('風鼓清洗')===0)return Number(c[i].Quantity)||0;}return 0;}
+function _blowInCart(){var c=_cartArr(),n=0;c.forEach(function(x){var nm=x.ProductName||'';if(nm.indexOf('吊隱式大清洗保養')===0||nm.indexOf('吊隱式全清洗保養')===0)n+=Number(x.Quantity)||0;});return n;}
+var _fanSyncing=false;
+/* 把關:購物車有「風鼓清洗」但沒有「吊隱式大/全清洗」→ 自動移除(風鼓僅適用吊隱大/全) */
+function reconcileFan(){
+  try{
+    if(window.__qsAdding||_fanSyncing)return;
+    if(_fanInCart()<=0)return;
+    if(_blowInCart()>0)return;
+    var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /風鼓清洗/.test(x.textContent||'');})[0];
+    if(!it)return;
+    var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+    if(!rb)return;_fanSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_fanSyncing=false;},1900);
+  }catch(e){_fanSyncing=false;}
+}
+setInterval(function(){reconcileBz();reconcileTf();reconcileFan();checkoutArea();},1500);
 function fillAddr(){
   try{
     if(!window.__qsAreaCity||!window.__qsAreaDist)return;
