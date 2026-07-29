@@ -160,7 +160,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .callnote{font-size:11.5px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:11px 0 2px;line-height:1.55}'
 +'.qw.wel{text-align:center}.qw .wel-brand{font-size:11px;font-weight:800;letter-spacing:.1em;color:#0C447C;margin-bottom:12px}'
 +'.qw .wel-bar{width:34px;height:3px;background:#B8860B;border-radius:2px;margin:2px auto 15px}'
-+'.qw .wel-h{font-size:20px;font-weight:900;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap;-webkit-text-stroke:0.4px #16202b}'
++'.qw .wel-h{font-size:24px;font-weight:900;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap;-webkit-text-stroke:0.4px #16202b}'
 +'.qw .wel-p{font-size:13px;color:#7c8998;line-height:1.7;margin:0 0 6px}'
 +'.qw .wel-steps{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:2px;margin:6px 0 22px;white-space:nowrap}'
 +'.qw .ws{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:800;color:#042C53}'
@@ -249,7 +249,7 @@ function render(){
     var outNote=(env==='biz')?'<div class="optnote">🏢 營業場所可<b>單獨清洗室外機</b>，每台加收 <b>$1,000</b> 商用加價</div>':(inNow>0?'<div class="optnote">室外機清洗為選配，可搭配室內機一起清洗。</div>':'<div class="optnote">只洗室外機：<b>1 台</b>加 <b>$600 車馬費</b>（單筆）、<b>2 台以上免</b></div>');
     w='<div class="qw">'+stepBar()+'<h2>要清洗室外機嗎？</h2><p class="sub">室外機清洗為選配，不需要可直接按下一步</p>'+outNote+OUTLIST.map(optRow).join('')+(tfHint?'<div class="warnbox" style="color:#8a6410;background:rgba(184,134,11,.08)">🚗 目前只洗 1 台室外機，將自動加收 <b>車馬費 $600</b>（技師車程成本，單筆）</div>':'')+'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">上一步</button><button class="btn pri" onclick="__qw.go(3)">'+outLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===3){
-    var body='';ADDON.forEach(function(x){if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機每台 +$1,000；室外機隨室內機清洗不加價，僅單洗室外機時每台 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}});
+    var body='';ADDON.forEach(function(x){if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機每台 +$1,000；室外機隨室內機清洗不加價，僅單洗室外機時每台 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5–4M 高處的機器台數（最多 '+(sumKeys(INK)+sumKeys(['o1','om']))+' 台）</div>';}});
     if(!hasBlow()){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
     var nextLbl=sumKeys(ADDON.map(function(a){return a.k;}))>0?'下一步：選到府方案':'不加購，下一步';
     w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
@@ -303,10 +303,10 @@ var api={
   pickCity:function(v){areaCity=v||null;areaDist=null;areaCls=null;qty.rm=0;render();},
   pickDist:function(v){areaDist=v||null;areaCls=classify(areaCity,areaDist);qty.rm=(areaCls==='remote')?1:0;render();},
   pickEnv:function(k){env=k;if(k!=='biz')qty.bz=0;render();},
-  pick:function(k){if(k==='dh'||k==='air'){showTerms(k,'gate');return;}var was=qty[k]||0;if(!qty[k])qty[k]=1;render();},
+  pick:function(k){if(k==='dh'||k==='air'){showTerms(k,'gate');return;}if(k==='hi'&&(sumKeys(INK)+sumKeys(['o1','om']))<1)return;var was=qty[k]||0;if(!qty[k])qty[k]=1;render();},
   terms:function(k){showTerms(k,'read');},
   zoom:function(src){if(document.getElementById('qw-zoom'))return;var z=document.createElement('div');z.id='qw-zoom';z.innerHTML='<img src="'+src+'" alt="">';z.onclick=function(){if(z.parentNode)z.parentNode.removeChild(z);};document.body.appendChild(z);},
-  chg:function(k,d){qty[k]=Math.max(0,(qty[k]||0)+d);render();},
+  chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK)+sumKeys(['o1','om']);if(v>mx)v=mx;}qty[k]=v;render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
   go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){alert('請至少選擇一台室內機或室外機清洗喔！\n可回上一步（室內機／室外機）選擇台數。');return;}}step=n;render();},
   finish:function(){
@@ -453,6 +453,28 @@ function addPopularBadge(){
 }
 /* 車馬費純自動:隱藏商品頁的車馬費加購卡,客戶不能手動加(由精靈依規則自動加入購物車) */
 function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0){ws[i].style.display='none';}}}catch(e){}}
+/* 自己下單時,系統自動加入的費用(車馬費/商用/偏遠)在購物車項目下補一行白話說明,避免客戶覺得莫名多收 */
+var _FEENOTE=[
+ {m:'車馬費',t:'🚗 只洗 1 台室外機的車馬費；2 台以上免收車馬費'},
+ {m:'商用/重油汙加價',t:'🏢 營業場所/重油汙加價，每台 +$1,000'},
+ {m:'偏遠地區加價',t:'📍 您的服務地址屬偏遠地區，每張訂單收一次 +$600'}
+];
+function autoFeeNotes(){try{
+ var items=[].slice.call(document.querySelectorAll('.cart-item'));
+ items.forEach(function(it){
+  if(/cart-empty/.test(it.className)||(it.closest&&it.closest('#qw-ovl')))return;
+  var content=it.querySelector('.item-content')||it;
+  if(content.querySelector('.qs-feenote'))return;
+  var nmEl=it.querySelector('.item-name');var nm=nmEl?(nmEl.textContent||''):(it.textContent||'');
+  for(var i=0;i<_FEENOTE.length;i++){var f=_FEENOTE[i];
+   if(nm.indexOf(f.m)>=0){
+    var d=document.createElement('div');d.className='qs-feenote';d.textContent=f.t;
+    d.style.cssText='clear:both;font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:7px;padding:6px 10px;margin:8px 0 2px;line-height:1.5;font-weight:600';
+    content.appendChild(d);break;
+   }
+  }
+ });
+}catch(e){}}
 var _PLANI={early:{img:'earlybird2.jpg',name:'早鳥方案 · 85折',sub:'安排 30 天後到府服務',nc:'#B8860B',sc:'#8a6a1f'},std:{img:'standard.jpg',name:'標準方案 · 95折',sub:'安排兩週內到府服務',nc:'#0C447C',sc:'#5a6672'}};
 var _PLANB='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/';
 function _curPlan(){return (window.__qsPlan==='early')?'early':'std';}
@@ -662,7 +684,25 @@ function reconcileFan(){
     if(!rb)return;_fanSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_fanSyncing=false;},1900);
   }catch(e){_fanSyncing=false;}
 }
-setInterval(function(){reconcileBz();reconcileTf();reconcileFan();checkoutArea();},1500);
+function _hiInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('挑高施作')===0)return Number(c[i].Quantity)||0;}return 0;}
+var _hiSyncing=false;
+/* 把關:挑高加價台數不可超過總機器(室內+室外)台數,超過自動壓回;機器歸零則移除 */
+function reconcileHi(){try{
+  if(window.__qsAdding||_hiSyncing)return;
+  var hi=_hiInCart();if(hi<=0)return;
+  var max=_indoorInCart()+_outdoorInCart();
+  if(hi<=max)return;
+  var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /挑高施作/.test(x.textContent||'');})[0];
+  if(!it)return;
+  if(max<=0){
+    var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+    if(!rb)return;_hiSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_hiSyncing=false;},1900);
+  } else {
+    var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];
+    if(!btn)return;_hiSyncing=true;try{if(window.selectQty)window.selectQty(btn,max-hi);}catch(e){}setTimeout(function(){_hiSyncing=false;},1900);
+  }
+}catch(e){_hiSyncing=false;}}
+setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();checkoutArea();},1500);
 function fillAddr(){
   try{
     if(!window.__qsAreaCity||!window.__qsAreaDist)return;
@@ -727,7 +767,7 @@ function updateFab(){
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
