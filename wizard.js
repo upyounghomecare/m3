@@ -354,7 +354,7 @@ if(!window.__qsGateHook){window.__qsGateHook=true;
    var k=(nm.indexOf('AIRMON')>=0)?'air':((nm.indexOf('除濕機')>=0)?'dh':null);
    if(!k||window['__qsRead_'+k])return;
    var btn=el.closest('button,a');if(!btn)return;
-   if((btn.textContent||'').replace(/\s/g,'').indexOf('加入')<0)return;
+   var _bt=(btn.textContent||'').replace(/\s/g,'');if(_bt.indexOf('加入')<0&&_bt.indexOf('加購')<0)return;
    e.preventDefault();e.stopImmediatePropagation();
    showTerms(k,'gate',function(){window.__qsGatePass=true;try{btn.click();}catch(_){}setTimeout(function(){window.__qsGatePass=false;},150);});
   }catch(err){}
