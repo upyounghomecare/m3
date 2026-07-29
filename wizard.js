@@ -66,8 +66,8 @@ var INDOOR=[
 ];
 var LK={wall:'家用壁掛',cs:'吊隱式小',cm:'吊隱式大',cl:'吊隱式全',m4:'迷你四方吹',f4:'四方吹'};
 var OUTLIST=[
- {k:'o1',n:'1對1室外機清洗',d:'需搭配室內機'},
- {k:'om',n:'1對多室外機清洗',d:'需搭配室內機'}
+ {k:'o1',n:'1對1室外機清洗',d:'一對一分離式'},
+ {k:'om',n:'1對多室外機清洗',d:'一對多(多聯機)'}
 ];
 var ADDON=[
  {k:'air',n:'AIRMON',dn:'AIRMON 智慧遠端控制器 MHICAD-WF100',d:'含全新設備費跟安裝設定費',air:true,pop:true,tag:'🔧 到府安裝',nmsm:true},
@@ -246,7 +246,7 @@ function render(){
     var outN=sumKeys(['o1','om']),inNow=sumKeys(['wall','cs','cm','cl','m4','f4']);
     var tfHint=(env==='home'&&inNow===0&&outN===1);
     var outLbl=outN>0?'下一步：加購':'不洗室外機，下一步';
-    var outNote=(env==='biz')?'<div class="optnote">🏢 營業場所可<b>單獨清洗室外機</b>，每台加收 <b>$1,000</b> 商用加價</div>':'<div class="optnote">室外機清洗為選配。<b>只洗 1 台</b>室外機會加 <b>$600 車馬費</b>(單筆);<b>2 台以上免</b></div>';
+    var outNote=(env==='biz')?'<div class="optnote">🏢 營業場所可<b>單獨清洗室外機</b>，每台加收 <b>$1,000</b> 商用加價</div>':(inNow>0?'<div class="optnote">室外機清洗為選配，可搭配室內機一起清洗。</div>':'<div class="optnote">只洗室外機：<b>1 台</b>加 <b>$600 車馬費</b>（單筆）、<b>2 台以上免</b></div>');
     w='<div class="qw">'+stepBar()+'<h2>要清洗室外機嗎？</h2><p class="sub">室外機清洗為選配，不需要可直接按下一步</p>'+outNote+OUTLIST.map(optRow).join('')+(tfHint?'<div class="warnbox" style="color:#8a6410;background:rgba(184,134,11,.08)">🚗 目前只洗 1 台室外機，將自動加收 <b>車馬費 $600</b>（技師車程成本，單筆）</div>':'')+'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">上一步</button><button class="btn pri" onclick="__qw.go(3)">'+outLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===3){
     var body='';ADDON.forEach(function(x){if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機每台 +$1,000；室外機隨室內機清洗不加價，僅單洗室外機時每台 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}});
