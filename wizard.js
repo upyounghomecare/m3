@@ -455,7 +455,7 @@ function addPopularBadge(){
 function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0){ws[i].style.display='none';}}}catch(e){}}
 /* 自己下單時,系統自動加入的費用(車馬費/商用/偏遠)在購物車項目下補一行白話說明,避免客戶覺得莫名多收 */
 var _FEENOTE=[
- {m:'車馬費',t:'🚗 只洗 1 台室外機的車馬費；2 台以上免收車馬費'},
+ {m:'車馬費',t:'🚗 只洗 1 台室外機需加收車馬費；清洗 2 台室外機以上免加收車馬費'},
  {m:'商用/重油汙加價',t:'🏢 營業場所/重油汙加價，每台 +$1,000'},
  {m:'偏遠地區加價',t:'📍 您的服務地址屬偏遠地區，每張訂單收一次 +$600'}
 ];
