@@ -282,7 +282,7 @@ var _TERMS={
   +'<div class="qwt-h">取消、退換貨及售後說明</div><p>如需取消本加購項目，請於設備拆封及安裝前聯繫客服提出。</p><p>智慧遠端控制器經技師完成拆封、安裝、接線、配對或啟用後，即非全新未使用狀態，非因商品瑕疵之個人喜好、操作習慣或其他因素，恕不接受一般退換貨。</p><p>如設備於安裝後發生無法連線、功能異常或其他故障情形，將由客服安排檢測，並依檢測結果及原廠保固規定辦理維修或更換。</p><div class="qwt-note">※ 本商品為設備搭配到府安裝之加購項目，不另行宅配。</div><div class="qwt-note">※ 如消費者依法提出解除契約，因設備已完成安裝或使用而產生拆卸、復原、材料耗用或商品價值減損者，將依實際情況依法處理。</div>'}
 };
 function _readStamp(){try{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}catch(e){return '';}}
-function showTerms(k,mode){
+function showTerms(k,mode,onConfirm){
  var t=_TERMS[k];if(!t||document.getElementById('qw-terms'))return;
  var gate=(mode==='gate');
  var ft=gate?'<div class="qwt-ft"><label class="qwt-chk"><input type="checkbox" class="qwt-cb"> 我已閱讀並瞭解上述加購注意事項</label><button class="qwt-ok" type="button" disabled>確認加購</button><div class="qwt-hint">勾選後才能加購；系統會記錄您已閱讀</div></div>':'<div class="qwt-ft"><button class="qwt-ok" type="button">我知道了</button></div>';
@@ -293,7 +293,7 @@ function showTerms(k,mode){
  ov.querySelector('.qwt-x').onclick=cl;
  ov.onclick=function(e){if(e.target===ov)cl();};
  var ok=ov.querySelector('.qwt-ok');
- if(gate){var cb=ov.querySelector('.qwt-cb');cb.onchange=function(){ok.disabled=!cb.checked;};ok.onclick=function(){if(!cb.checked)return;qty[k]=1;window['__qsRead_'+k]=_readStamp();cl();render();};}
+ if(gate){var cb=ov.querySelector('.qwt-cb');cb.onchange=function(){ok.disabled=!cb.checked;};ok.onclick=function(){if(!cb.checked)return;window['__qsRead_'+k]=_readStamp();cl();if(onConfirm){onConfirm();}else{qty[k]=1;render();}};}
  else{ok.onclick=cl;}
 }
 
@@ -343,6 +343,23 @@ var api={
   }
 };
 window.__qw=api;
+/* 頁面(自己下單)加購把關:按除濕機/AIRMON 的原生「+加入」時,先跳注意事項gate,勾選確認才真的加(與精靈一致、並記錄已閱讀) */
+if(!window.__qsGateHook){window.__qsGateHook=true;
+ document.addEventListener('click',function(e){
+  try{
+   if(window.__qsGatePass)return;
+   var el=e.target;if(!el||!el.closest)return;
+   var card=el.closest('.product-wrap');if(!card||el.closest('#qw-ovl'))return;
+   var h=card.querySelector('h3');var nm=h?(h.textContent||''):'';
+   var k=(nm.indexOf('AIRMON')>=0)?'air':((nm.indexOf('除濕機')>=0)?'dh':null);
+   if(!k||window['__qsRead_'+k])return;
+   var btn=el.closest('button,a');if(!btn)return;
+   if((btn.textContent||'').replace(/\s/g,'').indexOf('加入')<0)return;
+   e.preventDefault();e.stopImmediatePropagation();
+   showTerms(k,'gate',function(){window.__qsGatePass=true;try{btn.click();}catch(_){}setTimeout(function(){window.__qsGatePass=false;},150);});
+  }catch(err){}
+ },true);
+}
 /* 載入時即注入「結帳彈窗方案note」樣式（由1SHOP內文JS的結帳彈窗共用，省內文CSS字數）*/
 if(!document.getElementById('qw-ck')){var _cs=document.createElement('style');_cs.id='qw-ck';_cs.textContent='.qs-pnote{padding:7px 3px;text-align:center;font-size:14px;font-weight:900;line-height:1.3;white-space:nowrap;border-radius:0 0 10px 10px;margin-top:-1px;-webkit-text-stroke:.4px currentColor}.qs-pnote-std{background:#E6F1FB;color:#0C447C}.qs-pnote-early{background:rgba(184,134,11,.14);color:#8a6410}.qs-plan.sel::after{content:"\\2713";position:absolute;top:6px;right:6px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}#qsf{background:#fff;border:1px solid #e7edf3;border-radius:14px;padding:18px 14px 16px;box-shadow:0 4px 16px rgba(4,44,83,.06);margin:14px 0 20px}#qsf .qsf-h{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:900;color:#042C53;margin-bottom:14px;-webkit-text-stroke:.3px #042C53}#qsf .qsf-i{color:#B8860B;font-size:17px}#qsf .qsf-g{display:grid;grid-template-columns:repeat(4,1fr);gap:0}#qsf .qsf-li{text-align:center;padding:8px 10px;position:relative}#qsf .qsf-li+.qsf-li::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:1px;background:#e7edf3}#qsf .qsf-ic{color:#B8860B;display:flex;justify-content:center;margin-bottom:9px}#qsf .qsf-ic svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}#qsf .qsf-li b{display:block;font-weight:800;color:#042C53;font-size:13.5px;line-height:1.35;margin-bottom:4px}#qsf .qsf-s{font-size:11px;color:#6a7684;line-height:1.4}@media(max-width:640px){#qsf .qsf-g{grid-template-columns:1fr 1fr}#qsf .qsf-li{padding:12px 8px}#qsf .qsf-li:nth-child(3)::before{display:none}#qsf .qsf-li:nth-child(3),#qsf .qsf-li:nth-child(4){border-top:1px solid #e7edf3}}.qsh-ey{text-align:center;font-size:12px;font-weight:800;color:#B8860B;letter-spacing:2px;margin:16px 0 0;line-height:1.4}h1.qsh-u{margin-top:3px!important;padding-bottom:14px!important;position:relative;font-weight:900!important;-webkit-text-stroke:.45px currentColor}h1.qsh-u::after{content:"";position:absolute;left:50%;bottom:2px;transform:translateX(-50%);width:34px;height:3px;background:#d9b24a;border-radius:2px}.btn-cart{display:none!important}.qs-plan-h{margin:0 0 2px!important}.qs-plan-sub{margin:0 0 8px!important}.qs-planbox{margin-bottom:8px!important}#qs-modal p{margin:2px 0 9px!important;line-height:1.6!important}#qs-modal h3{margin:0 0 6px!important}#qs-modal ul{margin:0 0 4px!important;padding-left:20px!important}#qs-modal li{margin-bottom:6px!important;line-height:1.5!important}.qs-plan-call{margin-top:8px!important}#qs-agree-l{white-space:nowrap!important;font-size:12.5px!important}';document.head.appendChild(_cs);}
 
