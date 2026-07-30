@@ -181,6 +181,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .env-o.sel{border-color:#0C447C}'
 +'.qw .env-o.sel::after{content:\"✓\";position:absolute;top:7px;right:8px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}'
 +'.qw .envnote{font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:10px 0 2px;line-height:1.5}.qw .envnote b{color:#B8860B;font-weight:800}'
++'.qs-corr-line .item-tool{display:none!important}.qs-corr-line [class*="qty"],.qs-corr-line [class*="quantity"],.qs-corr-line [class*="counter"],.qs-corr-line [class*="number"]{display:none!important}.qs-corr-line .item-name{color:#0C447C!important;font-size:12.5px}'
 +'.qw .flbl{font-size:12px;font-weight:700;color:#0C447C;margin:2px 0 5px}'
 +'.qw .qsel{width:100%;border:1.5px solid #c9d7e6;border-radius:12px;padding:11px 34px 11px 12px;font-size:14px;color:#12233a;background:#fff;font-family:inherit;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%230C447C%27 stroke-width=%273%27><path d=%27M6 9l6 6 6-6%27/></svg>\");background-repeat:no-repeat;background-position:right 12px center;margin-bottom:10px}'
 +'.qw .area-res{width:100%;border-radius:12px;display:block;margin:4px 0 2px}'
@@ -452,7 +453,9 @@ function addPopularBadge(){
   }catch(e){}
 }
 /* 車馬費純自動:隱藏商品頁的車馬費加購卡,客戶不能手動加(由精靈依規則自動加入購物車) */
-function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0){ws[i].style.display='none';}}}catch(e){}}
+function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0||nm.indexOf('方案折扣校正')>=0){ws[i].style.display='none';}}}catch(e){}}
+/* 購物車裡的「方案折扣校正」改成白話說明、隱藏數量/單價/刪除鈕(系統自動管理,客戶不需操作) */
+function styleCorrLine(){try{var items=[].slice.call(document.querySelectorAll('.cart-item'));items.forEach(function(it){var nmEl=it.querySelector('.item-name');if(!nmEl)return;if((nmEl.textContent||'').indexOf('方案折扣校正')>=0){it.classList.add('qs-corr-line');if(nmEl.getAttribute('data-qsc')!=='1'){nmEl.textContent='加購品優惠價・不參與方案折扣';nmEl.setAttribute('data-qsc','1');}}});}catch(e){}}
 /* 自己下單時,系統自動加入的費用(車馬費/商用/偏遠)在購物車項目下補一行白話說明,避免客戶覺得莫名多收 */
 var _FEENOTE=[
  {m:'車馬費',t:'🚗 只洗 1 台室外機需加收車馬費；清洗 2 台室外機以上免加收車馬費'},
@@ -702,7 +705,35 @@ function reconcileHi(){try{
     if(!btn)return;_hiSyncing=true;try{if(window.selectQty)window.selectQty(btn,max-hi);}catch(e){}setTimeout(function(){_hiSyncing=false;},1900);
   }
 }catch(e){_hiSyncing=false;}}
-setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();checkoutArea();},1500);
+/* ===== 加購品保護:車馬費/AIRMON/除濕機 不受任何優惠券折扣(自我校正) =====
+   原理:券照打整車→在校正=0時反推真實折扣率並快取→用它算「只折服務、保護品原價」的目標小計
+   →設定隱形「方案折扣校正」商品數量把保護品被多折的錢補回→目標取偏客戶地板值,保證絕不多收 */
+var _adjSyncing=false,_adjC=null;
+function _readXiaoji(){try{var box=document.querySelector('.cart-total');if(box){var m=(box.textContent||'').match(/小計[\s\S]*?NT\$\s*([\d,]+)/);if(m)return parseInt(m[1].replace(/,/g,''),10);}}catch(e){}return null;}
+function _corrInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('方案折扣校正')>=0)return Number(c[i].Quantity)||0;}return 0;}
+function _setCorr(n){var cur=_corrInCart();if(cur===n)return;var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /方案折扣校正/.test(x.textContent||'');})[0];
+ if(n<=0){if(!it)return;var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];if(!rb)return;_adjSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_adjSyncing=false;},1700);}
+ else if(it){var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];if(!btn)return;_adjSyncing=true;try{if(window.selectQty)window.selectQty(btn,n-cur);}catch(e){}setTimeout(function(){_adjSyncing=false;},1700);}
+ else{var r=_resolveBtn('方案折扣校正');if(!r)return;_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}setTimeout(function(){_adjSyncing=false;},1600);}}
+function reconcileAdjust(){try{
+ if(window.__qsAdding||_adjSyncing)return;
+ var cart=_cartArr();if(!cart.length){_adjC=null;return;}
+ var P=0,X=0,sub=0;
+ for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
+  if(nm.indexOf('方案折扣校正')>=0){X+=Number(cart[i].Quantity)||0;}
+  else if(nm.indexOf('車馬費')>=0||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
+ var xiao=_readXiaoji();if(xiao==null)return;
+ if(X===0){_adjC=sub>0?(sub-xiao)/sub:0;}
+ var C=_adjC||0;
+ if(C<=0.0001||P<=0){if(X>0)_setCorr(0);return;}
+ var Cnow=sub>0?(sub-xiao)/sub:0;if(X>0&&Math.abs(Cnow-C)>0.02){_setCorr(0);return;}
+ var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
+ if(xiao>target){_setCorr(Math.max(0,X-1));return;}
+ if(xiao===target)return;
+ var dX=Math.round((target-xiao)/(1-C));if(dX===0)dX=(target-xiao)>0?1:-1;
+ var nX=Math.max(0,X+dX);if(nX!==X)_setCorr(nX);
+}catch(e){}}
+setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileAdjust();checkoutArea();},1500);
 function fillAddr(){
   try{
     if(!window.__qsAreaCity||!window.__qsAreaDist)return;
@@ -767,7 +798,7 @@ function updateFab(){
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
