@@ -764,10 +764,12 @@ var _adjSyncing=false,_adjC=null;
 function _readXiaoji(){try{var box=document.querySelector('.cart-total');if(box){var m=(box.textContent||'').match(/小計[\s\S]*?NT\$\s*([\d,]+)/);if(m)return parseInt(m[1].replace(/,/g,''),10);}}catch(e){}return null;}
 function _corrInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('方案折扣校正')>=0)return Number(c[i].Quantity)||0;}return 0;}
 function _setCorr(n){var cur=_corrInCart();if(cur===n)return;var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return x.classList.contains('qs-corr-line')||/方案折扣校正/.test(x.textContent||'');})[0];
- if(!it){if(n<=0)return;var r=_resolveBtn('方案折扣校正');if(!r)return;_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}setTimeout(function(){_adjSyncing=false;},1600);return;}
+ if(!it){if(n<=0)return;var r=_resolveBtn('方案折扣校正');if(!r)return;_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}
+   if(n>1){setTimeout(function(){try{var it2=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return x.classList.contains('qs-corr-line')||/方案折扣校正/.test(x.textContent||'');})[0];var iq2=it2?it2.getAttribute('data-item'):null;if(iq2!=null&&window.cartChangeItem)window.cartChangeItem(iq2,n);}catch(e){}},1200);}/* 加入後立刻一次撐到正確數量，不等下一輪 */
+   setTimeout(function(){_adjSyncing=false;},1900);return;}
  var iq=it.getAttribute('data-item');
- if(n<=0){var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];_adjSyncing=true;try{if(rb)rb.click();else if(window.cartChangeItem)window.cartChangeItem(iq,0);}catch(e){}setTimeout(function(){_adjSyncing=false;},1700);return;}
- _adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(iq,n);}catch(e){}setTimeout(function(){_adjSyncing=false;},1700);}
+ if(n<=0){var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];_adjSyncing=true;try{if(rb)rb.click();else if(window.cartChangeItem)window.cartChangeItem(iq,0);}catch(e){}setTimeout(function(){_adjSyncing=false;},900);return;}
+ _adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(iq,n);}catch(e){}setTimeout(function(){_adjSyncing=false;},900);}
 function reconcileAdjust(){try{
  if(window.__qsAdding||_adjSyncing)return;
  var cart=_cartArr();if(!cart.length){_adjC=null;return;}
@@ -786,39 +788,8 @@ function reconcileAdjust(){try{
  var dX=Math.round((target-xiao)/(1-C));if(dX===0)dX=(target-xiao)>0?1:-1;
  var nX=Math.max(0,X+dX);if(nX!==X)_setCorr(nX);
 }catch(e){}}
-/* 付款前強制校驗:送出結帳前確保加購品保護金額正確。設計原則=寧可放行、絕不誤擋、絕不卡死(4秒逾時強制放行、全程fail-open) */
-var __qsGuardBusy=false,__qsGuardBypassOnce=false;
-function _guardSafe(){try{
-  var cart=_cartArr();if(!cart.length)return true;
-  var P=0,X=0,sub=0;
-  for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
-    if(nm.indexOf('方案折扣校正')>=0){X+=Number(cart[i].Quantity)||0;}
-    else if(nm.indexOf('車馬費')>=0||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
-  if(P<=0)return true;                       /* 沒有需保護的加購品 → 放行 */
-  var C=_adjC||0;if(C<=0.0001)return true;   /* 沒有優惠券折扣 → 放行 */
-  var xiao=_readXiaoji();if(xiao==null)return true;/* 讀不到小計 → 放行(fail-open) */
-  var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
-  return xiao>=target-3;                      /* 小計已達保護目標(容3元誤差) → 放行 */
-}catch(e){return true;}}
-function _guardToast(show){var el=document.getElementById('qs-guard-toast');
-  if(show){if(!el){el=document.createElement('div');el.id='qs-guard-toast';el.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100050;background:#333;color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.3);line-height:1.5';el.textContent='⏳ 正在確認優惠金額，請稍候…';document.body.appendChild(el);}}
-  else{if(el&&el.parentNode)el.parentNode.removeChild(el);}}
-document.addEventListener('click',function(ev){try{
-  if(__qsGuardBypassOnce){__qsGuardBypassOnce=false;return;}          /* 補好後的自動重送 → 直接放行 */
-  if(__qsGuardBusy){ev.preventDefault();ev.stopImmediatePropagation();return;}/* 補價中 → 忽略連點 */
-  var tgt=ev.target;var b=(tgt&&tgt.closest)?tgt.closest('button,a'):null;if(!b)return;
-  if(b.closest('#qw-ovl'))return;                                    /* 精靈內部按鈕不管 */
-  var t=(b.textContent||'').trim();
-  if(!/送出訂單|確認訂單|確認付款|前往付款|成立訂單|確認送出|前往結帳/.test(t))return;
-  if(_guardSafe())return;                                            /* 金額正確 → 完全放行(一般客戶走這條) */
-  ev.preventDefault();ev.stopImmediatePropagation();                 /* 校正被刪/不足 → 先攔這一下 */
-  __qsGuardBusy=true;_guardToast(true);
-  var tries=0;var iv=setInterval(function(){try{
-    tries++;reconcileAdjust();
-    if(_guardSafe()||tries>=8){clearInterval(iv);_guardToast(false);__qsGuardBusy=false;__qsGuardBypassOnce=true;try{b.click();}catch(e){}}
-  }catch(e){clearInterval(iv);_guardToast(false);__qsGuardBusy=false;__qsGuardBypassOnce=true;try{b.click();}catch(e2){}}},500);
-}catch(e){}},true);
 setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileAdjust();checkoutArea();},1500);
+setInterval(function(){reconcileAdjust();},600);/* 加購品保護快線:每0.6秒巡一次，校正被刪/不足時最快補回，壓縮破防空窗 */
 function fillAddr(){
   try{
     if(!window.__qsAreaCity||!window.__qsAreaDist)return;
