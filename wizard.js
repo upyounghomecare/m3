@@ -653,8 +653,9 @@ function reconcileBz(){
       var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
       if(!rb)return;_bzSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_bzSyncing=false;},1900);
     } else if(it){
-      var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];
-      if(!btn)return;_bzSyncing=true;try{window.selectQty(btn,target-bz);}catch(e){}setTimeout(function(){_bzSyncing=false;},1900);
+      var iq=it.getAttribute('data-item');_bzSyncing=true;
+      try{if(window.cartChangeItem&&iq!=null){window.cartChangeItem(iq,target);}else{var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];if(btn&&window.selectQty)window.selectQty(btn,target-bz);}}catch(e){}
+      setTimeout(function(){_bzSyncing=false;},2000);
     } else {
       var r=_resolveBtn('商用/重油汙加價');if(!r)return;_bzSyncing=true;var k=0;
       (function addOne(){if(k>=target){setTimeout(function(){_bzSyncing=false;},700);return;}try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}k++;setTimeout(addOne,600);})();
@@ -751,8 +752,9 @@ function reconcileHi(){try{
     var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
     if(!rb)return;_hiSyncing=true;try{rb.click();}catch(e){}setTimeout(function(){_hiSyncing=false;},1900);
   } else {
-    var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];
-    if(!btn)return;_hiSyncing=true;try{if(window.selectQty)window.selectQty(btn,max-hi);}catch(e){}setTimeout(function(){_hiSyncing=false;},1900);
+    var iq=it.getAttribute('data-item');_hiSyncing=true;
+    try{if(window.cartChangeItem&&iq!=null){window.cartChangeItem(iq,max);}else{var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];if(btn&&window.selectQty)window.selectQty(btn,max-hi);}}catch(e){}
+    setTimeout(function(){_hiSyncing=false;},2000);
   }
 }catch(e){_hiSyncing=false;}}
 /* ===== 加購品保護:車馬費/AIRMON/除濕機 不受任何優惠券折扣(自我校正) =====
