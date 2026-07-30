@@ -283,6 +283,58 @@ var _TERMS={
   +'<div class="qwt-h">取消、退換貨及售後說明</div><p>如需取消本加購項目，請於設備拆封及安裝前聯繫客服提出。</p><p>智慧遠端控制器經技師完成拆封、安裝、接線、配對或啟用後，即非全新未使用狀態，非因商品瑕疵之個人喜好、操作習慣或其他因素，恕不接受一般退換貨。</p><p>如設備於安裝後發生無法連線、功能異常或其他故障情形，將由客服安排檢測，並依檢測結果及原廠保固規定辦理維修或更換。</p><div class="qwt-note">※ 本商品為設備搭配到府安裝之加購項目，不另行宅配。</div><div class="qwt-note">※ 如消費者依法提出解除契約，因設備已完成安裝或使用而產生拆卸、復原、材料耗用或商品價值減損者，將依實際情況依法處理。</div>'}
 };
 function _readStamp(){try{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}catch(e){return '';}}
+/* ===== 除濕機期望配送日選擇：D+2工作天起、擋週日/國定假日、旺季4-9月週六可配送、不可回溯 ===== */
+var _DHHOLA=["20260101","20260215","20260216","20260217","20260218","20260219","20260220","20260227","20260228","20260403","20260404","20260405","20260406","20260501","20260619","20260925","20260928","20261009","20261010","20261025","20261026","20261225","20270101","20270204","20270205","20270206","20270207","20270208","20270209","20270210","20270228","20270301","20270404","20270405","20270406","20270430","20270501","20270609","20270915","20270928","20271010","20271011","20271025","20271224","20271225","20271231"];
+var _DHHOL={};_DHHOLA.forEach(function(d){_DHHOL[d]=1;});
+function _dhKey(dt){var m=dt.getMonth()+1,d=dt.getDate();return dt.getFullYear()+((m<10?'0':'')+m)+((d<10?'0':'')+d);}
+function _dhBlocked(dt){if(_DHHOL[_dhKey(dt)])return true;var w=dt.getDay();if(w===0)return true;if(w===6){var m=dt.getMonth()+1;return !(m>=4&&m<=9);}return false;}
+function _dhMin(){var d=new Date();d.setHours(12,0,0,0);var n=0;while(n<2){d.setDate(d.getDate()+1);if(!_dhBlocked(d))n++;}return d;}
+function _dhFmt(dt){var m=dt.getMonth()+1,d=dt.getDate();return dt.getFullYear()+'/'+(m<10?'0':'')+m+'/'+(d<10?'0':'')+d;}
+function showDeliveryPicker(onDone){
+ if(document.getElementById('qw-dhcal'))return;
+ var MIN=_dhMin();var minMonth=new Date(MIN.getFullYear(),MIN.getMonth(),1);var view=new Date(minMonth);var selDate=null,selSlot=null;
+ var ov=document.createElement('div');ov.id='qw-dhcal';
+ ov.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
+ ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.35)">'
+ +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px"><div style="font-size:11px;font-weight:800;opacity:.85">📦 三菱重工除濕機 · 另行宅配</div><div style="font-size:16.5px;font-weight:900;margin-top:3px">選擇期望配送日期與時段</div></div>'
+ +'<div style="padding:15px 18px 18px">'
+ +'<div style="font-size:12px;font-weight:800;color:#042C53;margin-bottom:8px">1. 期望配送日期<span style="color:#7c8998;font-weight:600">（週日/國定假日不可選）</span></div>'
+ +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><button data-nav="-1" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">‹</button><b id="qwdh-ml" style="font-size:14px"></b><button data-nav="1" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">›</button></div>'
+ +'<div id="qwdh-wd" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px"></div>'
+ +'<div id="qwdh-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>'
+ +'<div style="font-size:12px;font-weight:800;color:#042C53;margin:16px 0 8px">2. 時段</div>'
+ +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-slot="上午" class="qwdh-slot" style="border:1.5px solid #d3ddea;border-radius:12px;padding:12px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer">上午<span style="display:block;font-size:11px;font-weight:600;color:#7c8998;margin-top:2px">約 09:00–12:00</span></button><button data-slot="下午" class="qwdh-slot" style="border:1.5px solid #d3ddea;border-radius:12px;padding:12px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer">下午<span style="display:block;font-size:11px;font-weight:600;color:#7c8998;margin-top:2px">約 13:00–18:00</span></button></div>'
+ +'<div style="font-size:11.5px;color:#8a6410;background:rgba(184,134,11,.09);border:1px solid rgba(184,134,11,.25);border-radius:10px;padding:10px 12px;line-height:1.65;margin-top:15px">⚠️ 此為<b>期望配送時間</b>，實際仍需依物流量能為準，司機將於配送前<b>去電聯繫</b>確認。</div>'
+ +'<div id="qwdh-sum" style="font-size:12.5px;color:#042C53;font-weight:800;text-align:center;margin-top:13px;min-height:17px"></div>'
+ +'<button id="qwdh-ok" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed">確認加購除濕機</button>'
+ +'<button id="qwdh-cancel" style="width:100%;border:none;background:none;color:#7c8998;font-size:12.5px;margin-top:10px;cursor:pointer;text-decoration:underline">取消，不加購除濕機</button>'
+ +'</div></div>';
+ document.body.appendChild(ov);
+ var wd=['日','一','二','三','四','五','六'];
+ ov.querySelector('#qwdh-wd').innerHTML=wd.map(function(n,i){return '<div style="text-align:center;font-size:11px;font-weight:800;color:'+((i===0||i===6)?'#c0392b':'#7c8998')+';padding:2px 0">'+n+'</div>';}).join('');
+ function render(){
+  ov.querySelector('#qwdh-ml').textContent=view.getFullYear()+' 年 '+(view.getMonth()+1)+' 月';
+  var pad=new Date(view.getFullYear(),view.getMonth(),1).getDay();var dim=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+  var h='';for(var i=0;i<pad;i++)h+='<div></div>';
+  for(var d=1;d<=dim;d++){var dt=new Date(view.getFullYear(),view.getMonth(),d);var dis=(dt<MIN)||_dhBlocked(dt);var sel=selDate&&_dhKey(selDate)===_dhKey(dt);var hol=_DHHOL[_dhKey(dt)];
+   var st='aspect-ratio:1/1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;';
+   if(sel)st+='background:#042C53;color:#fff;';else if(dis)st+='background:#f0f3f7;color:#7c8998;opacity:.45;cursor:not-allowed;';else st+='background:#fff;border:1.5px solid #d3ddea;color:#16202b;cursor:pointer;';
+   h+='<div '+(dis?'':'data-d="'+d+'"')+' style="'+st+'">'+d+(hol?'<span style="font-size:8px;font-weight:800;color:'+(sel?'#f5c4be':'#c0392b')+';line-height:1;margin-top:1px">假</span>':'')+'</div>';}
+  ov.querySelector('#qwdh-days').innerHTML=h;
+  var pv=ov.querySelector('[data-nav="-1"]');pv.disabled=(view<=minMonth);pv.style.opacity=(view<=minMonth)?'.35':'1';
+ }
+ function sum(){var el=ov.querySelector('#qwdh-sum');var ok=ov.querySelector('#qwdh-ok');
+  if(selDate&&selSlot){el.textContent='已選：'+_dhFmt(selDate)+'（'+selSlot+'）';ok.disabled=false;ok.style.background='#042C53';ok.style.cursor='pointer';}
+  else{el.textContent=selDate?'請再選時段':'請選擇日期與時段';ok.disabled=true;ok.style.background='#b7c2cf';ok.style.cursor='not-allowed';}}
+ ov.addEventListener('click',function(e){
+  var nav=e.target.closest('[data-nav]');if(nav){var dir=+nav.getAttribute('data-nav');var nv=new Date(view.getFullYear(),view.getMonth()+dir,1);if(nv>=minMonth){view=nv;render();}return;}
+  var day=e.target.closest('[data-d]');if(day){selDate=new Date(view.getFullYear(),view.getMonth(),+day.getAttribute('data-d'));render();sum();return;}
+  var slot=e.target.closest('.qwdh-slot');if(slot){selSlot=slot.getAttribute('data-slot');[].slice.call(ov.querySelectorAll('.qwdh-slot')).forEach(function(x){x.style.borderColor='#d3ddea';x.style.background='#fff';x.style.color='#16202b';});slot.style.borderColor='#042C53';slot.style.background='#E6F1FB';slot.style.color='#042C53';sum();return;}
+ });
+ ov.querySelector('#qwdh-cancel').onclick=function(){if(ov.parentNode)ov.parentNode.removeChild(ov);};
+ ov.querySelector('#qwdh-ok').onclick=function(){if(!selDate||!selSlot)return;window.__qsDhDelivery=_dhFmt(selDate)+'（'+selSlot+'）';if(ov.parentNode)ov.parentNode.removeChild(ov);if(onDone)onDone();};
+ render();sum();
+}
 function showTerms(k,mode,onConfirm){
  var t=_TERMS[k];if(!t||document.getElementById('qw-terms'))return;
  var gate=(mode==='gate');
@@ -294,7 +346,7 @@ function showTerms(k,mode,onConfirm){
  ov.querySelector('.qwt-x').onclick=cl;
  ov.onclick=function(e){if(e.target===ov)cl();};
  var ok=ov.querySelector('.qwt-ok');
- if(gate){var cb=ov.querySelector('.qwt-cb');cb.onchange=function(){ok.disabled=!cb.checked;};ok.onclick=function(){if(!cb.checked)return;window['__qsRead_'+k]=_readStamp();cl();if(onConfirm){onConfirm();}else{qty[k]=1;render();}};}
+ if(gate){var cb=ov.querySelector('.qwt-cb');cb.onchange=function(){ok.disabled=!cb.checked;};ok.onclick=function(){if(!cb.checked)return;window['__qsRead_'+k]=_readStamp();cl();var doAdd=function(){if(onConfirm){onConfirm();}else{qty[k]=1;render();}};if(k==='dh'){showDeliveryPicker(doAdd);}else{doAdd();}};}
  else{ok.onclick=cl;}
 }
 
@@ -353,7 +405,7 @@ if(!window.__qsGateHook){window.__qsGateHook=true;
    var card=el.closest('.product-wrap');if(!card||el.closest('#qw-ovl'))return;
    var h=card.querySelector('h3');var nm=h?(h.textContent||''):'';
    var k=(nm.indexOf('AIRMON')>=0)?'air':((nm.indexOf('除濕機')>=0)?'dh':null);
-   if(!k||window['__qsRead_'+k])return;
+   if(!k)return;var _done=(k==='dh')?window.__qsDhDelivery:window['__qsRead_'+k];if(_done)return;
    var btn=el.closest('button,a');if(!btn)return;
    var _bt=(btn.textContent||'').replace(/\s/g,'');if(_bt.indexOf('加入')<0&&_bt.indexOf('加購')<0)return;
    e.preventDefault();e.stopImmediatePropagation();
@@ -557,7 +609,7 @@ function fillConsent(){
       var planTxt=(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)':'標準方案(兩週內到府・95折)';
       var d=new Date(),p=function(n){return (n<10?'0':'')+n;};
       var ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
-      var rec='【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+'｜時間:'+ts;
+      var rec='【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+((window.__qsDhDelivery&&_cartArr().some(function(x){return (x.ProductName||'').indexOf('除濕機')>=0;}))?'｜除濕機期望配送:'+window.__qsDhDelivery:'')+'｜時間:'+ts;
       var st=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
       st.call(el,rec);
       el.dispatchEvent(new Event('input',{bubbles:true}));
