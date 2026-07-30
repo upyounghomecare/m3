@@ -786,6 +786,38 @@ function reconcileAdjust(){try{
  var dX=Math.round((target-xiao)/(1-C));if(dX===0)dX=(target-xiao)>0?1:-1;
  var nX=Math.max(0,X+dX);if(nX!==X)_setCorr(nX);
 }catch(e){}}
+/* 付款前強制校驗:送出結帳前確保加購品保護金額正確。設計原則=寧可放行、絕不誤擋、絕不卡死(4秒逾時強制放行、全程fail-open) */
+var __qsGuardBusy=false,__qsGuardBypassOnce=false;
+function _guardSafe(){try{
+  var cart=_cartArr();if(!cart.length)return true;
+  var P=0,X=0,sub=0;
+  for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
+    if(nm.indexOf('方案折扣校正')>=0){X+=Number(cart[i].Quantity)||0;}
+    else if(nm.indexOf('車馬費')>=0||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
+  if(P<=0)return true;                       /* 沒有需保護的加購品 → 放行 */
+  var C=_adjC||0;if(C<=0.0001)return true;   /* 沒有優惠券折扣 → 放行 */
+  var xiao=_readXiaoji();if(xiao==null)return true;/* 讀不到小計 → 放行(fail-open) */
+  var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
+  return xiao>=target-3;                      /* 小計已達保護目標(容3元誤差) → 放行 */
+}catch(e){return true;}}
+function _guardToast(show){var el=document.getElementById('qs-guard-toast');
+  if(show){if(!el){el=document.createElement('div');el.id='qs-guard-toast';el.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100050;background:#333;color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.3);line-height:1.5';el.textContent='⏳ 正在確認優惠金額，請稍候…';document.body.appendChild(el);}}
+  else{if(el&&el.parentNode)el.parentNode.removeChild(el);}}
+document.addEventListener('click',function(ev){try{
+  if(__qsGuardBypassOnce){__qsGuardBypassOnce=false;return;}          /* 補好後的自動重送 → 直接放行 */
+  if(__qsGuardBusy){ev.preventDefault();ev.stopImmediatePropagation();return;}/* 補價中 → 忽略連點 */
+  var tgt=ev.target;var b=(tgt&&tgt.closest)?tgt.closest('button,a'):null;if(!b)return;
+  if(b.closest('#qw-ovl'))return;                                    /* 精靈內部按鈕不管 */
+  var t=(b.textContent||'').trim();
+  if(!/送出訂單|確認訂單|確認付款|前往付款|成立訂單|確認送出|前往結帳/.test(t))return;
+  if(_guardSafe())return;                                            /* 金額正確 → 完全放行(一般客戶走這條) */
+  ev.preventDefault();ev.stopImmediatePropagation();                 /* 校正被刪/不足 → 先攔這一下 */
+  __qsGuardBusy=true;_guardToast(true);
+  var tries=0;var iv=setInterval(function(){try{
+    tries++;reconcileAdjust();
+    if(_guardSafe()||tries>=8){clearInterval(iv);_guardToast(false);__qsGuardBusy=false;__qsGuardBypassOnce=true;try{b.click();}catch(e){}}
+  }catch(e){clearInterval(iv);_guardToast(false);__qsGuardBusy=false;__qsGuardBypassOnce=true;try{b.click();}catch(e2){}}},500);
+}catch(e){}},true);
 setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileAdjust();checkoutArea();},1500);
 function fillAddr(){
   try{
