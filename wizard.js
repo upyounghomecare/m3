@@ -603,11 +603,13 @@ function fillConsent(){
       row.style.cssText+=';position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;border:0!important;white-space:nowrap!important;';
       row.setAttribute('data-qsc','1');
     }
-    if((el.value||'').indexOf('【結帳前同意存證】')<0){
-      var planTxt=(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)':'標準方案(兩週內到府・95折)';
-      var d=new Date(),p=function(n){return (n<10?'0':'')+n;};
-      var ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
-      var rec='【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+((window.__qsDhDelivery&&_cartArr().some(function(x){return (x.ProductName||'').indexOf('除濕機')>=0;}))?'｜除濕機期望配送:'+window.__qsDhDelivery:'')+'｜時間:'+ts;
+    /* 存證:改為「內容有變才更新」(原本只寫一次會漏記後加的配送日/換方案/已閱讀)；保留第一次的時間戳、收斂後即不再寫，不抖動 */
+    var planTxt=(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)':'標準方案(兩週內到府・95折)';
+    var _cur=el.value||'';
+    var _mt=_cur.match(/｜時間:([^｜]+)$/);var ts;
+    if(_mt){ts=_mt[1];}else{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
+    var rec='【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+((window.__qsDhDelivery&&_cartArr().some(function(x){return (x.ProductName||'').indexOf('除濕機')>=0;}))?'｜除濕機期望配送:'+window.__qsDhDelivery:'')+'｜時間:'+ts;
+    if(_cur!==rec){
       var st=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
       st.call(el,rec);
       el.dispatchEvent(new Event('input',{bubbles:true}));
