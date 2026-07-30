@@ -790,8 +790,27 @@ function reconcileAdjust(){try{
  var dX=Math.round((target-xiao)/(1-C));if(dX===0)dX=(target-xiao)>0?1:-1;
  var nX=Math.max(0,X+dX);if(nX!==X)_setCorr(nX);
 }catch(e){}}
+/* 校正看門狗:偵測「該有校正、卻卡在不足且連續~6秒毫無進展」→ 強制解鎖 _adjSyncing，讓自動補回重試(補多品項並發時校正卡0導致保護失效的漏洞)。只在明顯錯誤時動作、只補不減、正常建構1.5-3秒完成不會誤觸 */
+var _adjWatchLastX=null,_adjWatchStuck=0;
+function reconcileAdjustWatch(){try{
+  var cart=_cartArr();if(!cart.length){_adjWatchLastX=null;_adjWatchStuck=0;return;}
+  var P=0,X=0,sub=0;
+  for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
+    if(nm.indexOf('方案折扣校正')>=0){X+=Number(cart[i].Quantity)||0;}
+    else if(nm.indexOf('車馬費')>=0||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
+  if(P<=0){_adjWatchStuck=0;_adjWatchLastX=X;return;}
+  var xiao=_readXiaoji();if(xiao==null)return;
+  var C=(X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0);
+  if(C<=0.0001){_adjWatchStuck=0;_adjWatchLastX=X;return;}
+  var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
+  if(xiao>=target-3){_adjWatchStuck=0;_adjWatchLastX=X;return;}/* 已正確 */
+  if(_adjWatchLastX!==null&&X===_adjWatchLastX){_adjWatchStuck++;}else{_adjWatchStuck=0;}
+  _adjWatchLastX=X;
+  if(_adjWatchStuck>=3){_adjSyncing=false;_adjWatchStuck=0;}/* 連續~6秒卡住且不足→強制解鎖,下一輪reconcileAdjust會重補 */
+}catch(e){}}
 setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileAdjust();checkoutArea();},1500);
 setInterval(function(){reconcileAdjust();},600);/* 加購品保護快線:每0.6秒巡一次，校正被刪/不足時最快補回，壓縮破防空窗 */
+setInterval(reconcileAdjustWatch,2000);/* 校正看門狗:每2秒巡一次 */
 function fillAddr(){
   try{
     if(!window.__qsAreaCity||!window.__qsAreaDist)return;
