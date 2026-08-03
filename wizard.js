@@ -772,12 +772,14 @@ function _corrInCart(){var c=_cartArr(),s=0;for(var i=0;i<c.length;i++){if((c[i]
 /* _setCorr(M):設定校正「總金額」=M,拆成4面額($1000×q1000+$100×q100+$10×q10+$1×q1)。每次呼叫只做一個動作(加入/改量),靠多輪(600ms快線)收斂,避免並發非同步亂序 */
 function _setCorr(M){M=Math.max(0,Math.round(M));try{window.__corrDbg={M:M,t:Date.now(),sync:_adjSyncing};}catch(e){}var want={1000:Math.floor(M/1000),100:Math.floor((M%1000)/100),10:Math.floor((M%100)/10),1:M%10};var have=_corrCart();var map=_corrMap();
  /* 1)移除 want=0 但購物車還有的面額:必須用 removeCartItem(cartChangeItem設0無效);idx會位移故做完就return等下一輪 */
- for(var a=0;a<_CORR_DENOMS.length;a++){var da=_CORR_DENOMS[a];if(want[da]<=0&&have[da]){var el=document.querySelector('.cart-item[data-item="'+have[da].idx+'"]');var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb){_adjSyncing=true;try{window.removeCartItem(rb);}catch(e){}setTimeout(function(){_adjSyncing=false;},900);return;}}}
+ for(var a=0;a<_CORR_DENOMS.length;a++){var da=_CORR_DENOMS[a];if(want[da]<=0&&have[da]){var el=document.querySelector('.cart-item[data-item="'+have[da].idx+'"]');var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb){_adjSyncing=true;try{window.removeCartItem(rb);}catch(e){}setTimeout(function(){_adjSyncing=false;},1800);return;}}}
  /* 2)加入 want>0 但購物車缺的面額:一次全加(新item加到陣列末尾,不影響既有idx) */
  var miss=[];for(var b2=0;b2<_CORR_DENOMS.length;b2++){var db=_CORR_DENOMS[b2];if(want[db]>0&&!have[db]&&map[db])miss.push(db);}
- if(miss.length){var d0=miss[0];_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(map[d0].btn,map[d0].pid);}catch(e){}setTimeout(function(){_adjSyncing=false;},1000);return;}
+ if(miss.length){var d0=miss[0];var q0=want[d0];_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(map[d0].btn,map[d0].pid);}catch(e){}
+  if(q0>1){setTimeout(function(){try{var hv=_corrCart();if(hv[d0]&&hv[d0].qty!==q0&&window.cartChangeItem)window.cartChangeItem(hv[d0].idx,q0);}catch(e){}},1500);}/* 加入後立刻撐到正確數量,不等下一輪 */
+  setTimeout(function(){_adjSyncing=false;},2800);return;}
  /* 3)所有需要的面額都在了,一次把數量調到位(cartChangeItem,idx穩定) */
- for(var c2=0;c2<_CORR_DENOMS.length;c2++){var dc=_CORR_DENOMS[c2];var h=have[dc];if(h&&want[dc]>0&&h.qty!==want[dc]){_adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(h.idx,want[dc]);}catch(e){}setTimeout(function(){_adjSyncing=false;},800);return;}}}
+ for(var c2=0;c2<_CORR_DENOMS.length;c2++){var dc=_CORR_DENOMS[c2];var h=have[dc];if(h&&want[dc]>0&&h.qty!==want[dc]){_adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(h.idx,want[dc]);}catch(e){}setTimeout(function(){_adjSyncing=false;},1800);return;}}}
 function reconcileAdjust(){try{
  try{window.__recDbg={called:(window.__recDbg&&window.__recDbg.called||0)+1,adding:!!window.__qsAdding,sync:_adjSyncing};}catch(e){}
  if(window.__qsAdding||_adjSyncing)return;
