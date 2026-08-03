@@ -770,7 +770,7 @@ function _corrMap(){var bm=window.__qsBtnMap||{},map={};for(var pid in bm){if(!b
 function _corrCart(){var res={},c=_cartArr();for(var i=0;i<c.length;i++){var x=c[i];if((x.ProductName||'').indexOf('加購品已享優惠價')<0)continue;var q=Number(x.Quantity)||0;var d=Number(x.PriceBase)||(q>0?Math.round((Number(x.LineTotal)||0)/q):0);if(_CORR_DENOMS.indexOf(d)>=0)res[d]={idx:i,qty:q};}return res;}
 function _corrInCart(){var c=_cartArr(),s=0;for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)s+=Number(c[i].LineTotal)||0;}return s;}
 /* _setCorr(M):設定校正「總金額」=M,拆成4面額($1000×q1000+$100×q100+$10×q10+$1×q1)。每次呼叫只做一個動作(加入/改量),靠多輪(600ms快線)收斂,避免並發非同步亂序 */
-function _setCorr(M){M=Math.max(0,Math.round(M));var want={1000:Math.floor(M/1000),100:Math.floor((M%1000)/100),10:Math.floor((M%100)/10),1:M%10};var have=_corrCart();var map=_corrMap();
+function _setCorr(M){M=Math.max(0,Math.round(M));try{window.__corrDbg={M:M,t:Date.now(),sync:_adjSyncing};}catch(e){}var want={1000:Math.floor(M/1000),100:Math.floor((M%1000)/100),10:Math.floor((M%100)/10),1:M%10};var have=_corrCart();var map=_corrMap();
  /* 1)移除 want=0 但購物車還有的面額:必須用 removeCartItem(cartChangeItem設0無效);idx會位移故做完就return等下一輪 */
  for(var a=0;a<_CORR_DENOMS.length;a++){var da=_CORR_DENOMS[a];if(want[da]<=0&&have[da]){var el=document.querySelector('.cart-item[data-item="'+have[da].idx+'"]');var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb){_adjSyncing=true;try{window.removeCartItem(rb);}catch(e){}setTimeout(function(){_adjSyncing=false;},900);return;}}}
  /* 2)加入 want>0 但購物車缺的面額:一次全加(新item加到陣列末尾,不影響既有idx) */
@@ -779,6 +779,7 @@ function _setCorr(M){M=Math.max(0,Math.round(M));var want={1000:Math.floor(M/100
  /* 3)所有需要的面額都在了,一次把數量調到位(cartChangeItem,idx穩定) */
  for(var c2=0;c2<_CORR_DENOMS.length;c2++){var dc=_CORR_DENOMS[c2];var h=have[dc];if(h&&want[dc]>0&&h.qty!==want[dc]){_adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(h.idx,want[dc]);}catch(e){}setTimeout(function(){_adjSyncing=false;},800);return;}}}
 function reconcileAdjust(){try{
+ try{window.__recDbg={called:(window.__recDbg&&window.__recDbg.called||0)+1,adding:!!window.__qsAdding,sync:_adjSyncing};}catch(e){}
  if(window.__qsAdding||_adjSyncing)return;
  var cart=_cartArr();if(!cart.length){_adjC=null;return;}
  var P=0,X=0,sub=0;
