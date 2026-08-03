@@ -775,7 +775,7 @@ function _setCorr(M){M=Math.max(0,Math.round(M));try{window.__corrDbg={M:M,t:Dat
  for(var a=0;a<_CORR_DENOMS.length;a++){var da=_CORR_DENOMS[a];if(want[da]<=0&&have[da]){var el=document.querySelector('.cart-item[data-item="'+have[da].idx+'"]');var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb){_adjSyncing=true;try{window.removeCartItem(rb);}catch(e){}setTimeout(function(){_adjSyncing=false;},900);return;}}}
  /* 2)加入 want>0 但購物車缺的面額:一次全加(新item加到陣列末尾,不影響既有idx) */
  var miss=[];for(var b2=0;b2<_CORR_DENOMS.length;b2++){var db=_CORR_DENOMS[b2];if(want[db]>0&&!have[db]&&map[db])miss.push(db);}
- if(miss.length){_adjSyncing=true;miss.forEach(function(d){try{if(window.viewProduct)window.viewProduct(map[d].btn,map[d].pid);}catch(e){}});setTimeout(function(){_adjSyncing=false;},1600);return;}
+ if(miss.length){var d0=miss[0];_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(map[d0].btn,map[d0].pid);}catch(e){}setTimeout(function(){_adjSyncing=false;},1000);return;}
  /* 3)所有需要的面額都在了,一次把數量調到位(cartChangeItem,idx穩定) */
  for(var c2=0;c2<_CORR_DENOMS.length;c2++){var dc=_CORR_DENOMS[c2];var h=have[dc];if(h&&want[dc]>0&&h.qty!==want[dc]){_adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(h.idx,want[dc]);}catch(e){}setTimeout(function(){_adjSyncing=false;},800);return;}}}
 function reconcileAdjust(){try{
