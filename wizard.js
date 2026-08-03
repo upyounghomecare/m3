@@ -290,13 +290,13 @@ function _dhMin(){var d=new Date();d.setHours(12,0,0,0);var n=0;while(n<2){d.set
 function _dhFmt(dt){var m=dt.getMonth()+1,d=dt.getDate();return dt.getFullYear()+'/'+(m<10?'0':'')+m+'/'+(d<10?'0':'')+d;}
 function showDeliveryPicker(onDone){
  if(document.getElementById('qw-dhcal'))return;
- var MIN=_dhMin();var minMonth=new Date(MIN.getFullYear(),MIN.getMonth(),1);var view=new Date(minMonth);var selDate=null,selSlot=null;
+ var MIN=_dhMin();var MAX=new Date();MAX.setHours(23,59,59,999);MAX.setDate(MAX.getDate()+9);/* 只開放 D+2(工作天)~D+9 */var minMonth=new Date(MIN.getFullYear(),MIN.getMonth(),1);var maxMonth=new Date(MAX.getFullYear(),MAX.getMonth(),1);var view=new Date(minMonth);var selDate=null,selSlot=null;
  var ov=document.createElement('div');ov.id='qw-dhcal';
  ov.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.35)">'
  +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px"><div style="font-size:11px;font-weight:800;opacity:.85">📦 三菱重工除濕機 · 另行宅配</div><div style="font-size:16.5px;font-weight:900;margin-top:3px">選擇期望配送日期與時段</div></div>'
  +'<div style="padding:15px 18px 18px">'
- +'<div style="font-size:12px;font-weight:800;color:#042C53;margin-bottom:8px">1. 期望配送日期<span style="color:#7c8998;font-weight:600">（週日/國定假日不可選）</span></div>'
+ +'<div style="font-size:12px;font-weight:800;color:#042C53;margin-bottom:8px">1. 期望配送日期<span style="color:#7c8998;font-weight:600">（僅可選 '+_dhFmt(MIN).slice(5)+'～'+_dhFmt(MAX).slice(5)+'，週日/國定假日不可選）</span></div>'
  +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><button data-nav="-1" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">‹</button><b id="qwdh-ml" style="font-size:14px"></b><button data-nav="1" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">›</button></div>'
  +'<div id="qwdh-wd" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px"></div>'
  +'<div id="qwdh-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>'
@@ -314,18 +314,18 @@ function showDeliveryPicker(onDone){
   ov.querySelector('#qwdh-ml').textContent=view.getFullYear()+' 年 '+(view.getMonth()+1)+' 月';
   var pad=new Date(view.getFullYear(),view.getMonth(),1).getDay();var dim=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
   var h='';for(var i=0;i<pad;i++)h+='<div></div>';
-  for(var d=1;d<=dim;d++){var dt=new Date(view.getFullYear(),view.getMonth(),d);var dis=(dt<MIN)||_dhBlocked(dt);var sel=selDate&&_dhKey(selDate)===_dhKey(dt);var hol=_DHHOL[_dhKey(dt)];
+  for(var d=1;d<=dim;d++){var dt=new Date(view.getFullYear(),view.getMonth(),d);var dis=(dt<MIN)||(dt>MAX)||_dhBlocked(dt);var sel=selDate&&_dhKey(selDate)===_dhKey(dt);var hol=_DHHOL[_dhKey(dt)];
    var st='aspect-ratio:1/1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;';
    if(sel)st+='background:#042C53;color:#fff;';else if(dis)st+='background:#f0f3f7;color:#7c8998;opacity:.45;cursor:not-allowed;';else st+='background:#fff;border:1.5px solid #d3ddea;color:#16202b;cursor:pointer;';
    h+='<div '+(dis?'':'data-d="'+d+'"')+' style="'+st+'">'+d+(hol?'<span style="font-size:8px;font-weight:800;color:'+(sel?'#f5c4be':'#c0392b')+';line-height:1;margin-top:1px">假</span>':'')+'</div>';}
   ov.querySelector('#qwdh-days').innerHTML=h;
-  var pv=ov.querySelector('[data-nav="-1"]');pv.disabled=(view<=minMonth);pv.style.opacity=(view<=minMonth)?'.35':'1';
+  var pv=ov.querySelector('[data-nav="-1"]');pv.disabled=(view<=minMonth);pv.style.opacity=(view<=minMonth)?'.35':'1';var nx=ov.querySelector('[data-nav="1"]');if(nx){nx.disabled=(view>=maxMonth);nx.style.opacity=(view>=maxMonth)?'.35':'1';}
  }
  function sum(){var el=ov.querySelector('#qwdh-sum');var ok=ov.querySelector('#qwdh-ok');
   if(selDate&&selSlot){el.textContent='已選：'+_dhFmt(selDate)+'（'+selSlot+'）';ok.disabled=false;ok.style.background='#042C53';ok.style.cursor='pointer';}
   else{el.textContent=selDate?'請再選時段':'請選擇日期與時段';ok.disabled=true;ok.style.background='#b7c2cf';ok.style.cursor='not-allowed';}}
  ov.addEventListener('click',function(e){
-  var nav=e.target.closest('[data-nav]');if(nav){var dir=+nav.getAttribute('data-nav');var nv=new Date(view.getFullYear(),view.getMonth()+dir,1);if(nv>=minMonth){view=nv;render();}return;}
+  var nav=e.target.closest('[data-nav]');if(nav){var dir=+nav.getAttribute('data-nav');var nv=new Date(view.getFullYear(),view.getMonth()+dir,1);if(nv>=minMonth&&nv<=maxMonth){view=nv;render();}return;}
   var day=e.target.closest('[data-d]');if(day){selDate=new Date(view.getFullYear(),view.getMonth(),+day.getAttribute('data-d'));render();sum();return;}
   var slot=e.target.closest('.qwdh-slot');if(slot){selSlot=slot.getAttribute('data-slot');[].slice.call(ov.querySelectorAll('.qwdh-slot')).forEach(function(x){x.style.borderColor='#d3ddea';x.style.background='#fff';x.style.color='#16202b';});slot.style.borderColor='#042C53';slot.style.background='#E6F1FB';slot.style.color='#042C53';sum();return;}
  });
@@ -506,7 +506,7 @@ function addPopularBadge(){
 function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0||nm.indexOf('加購品已享優惠價')>=0){ws[i].style.display='none';}}}catch(e){}}
 /* 購物車裡的「方案折扣校正」改成白話說明、隱藏數量/單價/刪除鈕(系統自動管理,客戶不需操作) */
 /* 校正計算期間把會跳動的金額蓋成「計算中…」,算完一次顯示正確值(客戶不會看到金額亂跳);9秒安全上限,萬一卡住也會自動顯示真實金額 */
-function _corrBusy(){var t=window.__qsCorrBusy||0;return t>0&&(Date.now()-t)<9000;}
+function _corrBusy(){var t=window.__qsCorrBusy||0;return t>0&&(Date.now()-t)<12000;}
 function _maskPrice(price,busy){try{if(!price)return;var sp=price.querySelector('.qs-calc');
  if(busy){if(!sp){[].slice.call(price.children).forEach(function(c){c.style.display='none';});sp=document.createElement('span');sp.className='qs-calc';sp.textContent='計算中…';sp.style.cssText='color:#8a93a0;font-size:13px;font-weight:600;white-space:nowrap';price.appendChild(sp);}}
  else if(sp){if(sp.parentElement)sp.parentElement.removeChild(sp);[].slice.call(price.children).forEach(function(c){c.style.display='';});}}catch(e){}}
@@ -790,9 +790,9 @@ function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
  for(k=0;k<_CORR_DENOMS.length;k++){d=_CORR_DENOMS[k];if(want[d]>0&&!have[d]&&map[d]){ops.push({t:'add',d:d});if(want[d]>1)ops.push({t:'qty',d:d,n:want[d]});}}
  for(k=0;k<_CORR_DENOMS.length;k++){d=_CORR_DENOMS[k];if(want[d]>0&&have[d]&&have[d].qty!==want[d])ops.push({t:'qty',d:d,n:want[d]});}
  if(!ops.length)return;
- _adjSyncing=true;window.__qsCorrBusy=Date.now();var i2=0;
+ _adjSyncing=true;if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();var i2=0;
  (function step(){
-   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;window.__qsCorrBusy=0;},1200);return;}
+   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;},1200);return;}
    var op=ops[i2++];
    try{
      if(op.t==='add'){if(map[op.d]&&window.viewProduct)window.viewProduct(map[op.d].btn,map[op.d].pid);}
@@ -807,7 +807,7 @@ function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
 }
 function reconcileAdjust(){try{
  if(window.__qsAdding||_adjSyncing)return;
- var cart=_cartArr();if(!cart.length){_adjC=null;return;}
+ var cart=_cartArr();if(!cart.length){_adjC=null;window.__qsCorrBusy=0;return;}
  var P=0,X=0,sub=0;
  for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
   if(nm.indexOf('加購品已享優惠價')>=0){X+=Number(cart[i].LineTotal)||0;}
@@ -815,9 +815,9 @@ function reconcileAdjust(){try{
  var xiao=_readXiaoji();if(xiao==null)return;
  if(X===0||_adjC==null){_adjC=sub>0?(sub-xiao)/sub:0;}
  var C=_adjC||0;
- if(C<=0.0001||P<=0){if(X>0)_setCorr(0);return;}
- var Cnow=sub>0?(sub-xiao)/sub:0;if(X>0&&Math.abs(Cnow-C)>0.02){_setCorr(0);return;}
- var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
+ if(C<=0.0001||P<=0){if(X>0){if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();_setCorr(0);}else{window.__qsCorrBusy=0;}return;}
+ var Cnow=sub>0?(sub-xiao)/sub:0;if(X>0&&Math.abs(Cnow-C)>0.02){if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();_setCorr(0);return;}
+ var S=sub-P-X;var target=S-Math.ceil(C*S)+P;if(xiao===target){window.__qsCorrBusy=0;}else if(!window.__qsCorrBusy){window.__qsCorrBusy=Date.now();}
  if(xiao>target){var dXo=Math.round((target-xiao)/(1-C));_setCorr(Math.max(0,X+dXo));return;}
  if(xiao===target)return;
  var dX=Math.round((target-xiao)/(1-C));if(dX===0)dX=(target-xiao)>0?1:-1;
