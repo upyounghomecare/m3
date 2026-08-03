@@ -503,9 +503,9 @@ function addPopularBadge(){
   }catch(e){}
 }
 /* 車馬費純自動:隱藏商品頁的車馬費加購卡,客戶不能手動加(由精靈依規則自動加入購物車) */
-function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0||nm.indexOf('方案折扣校正')>=0){ws[i].style.display='none';}}}catch(e){}}
+function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0||nm.indexOf('加購品已享優惠價')>=0){ws[i].style.display='none';}}}catch(e){}}
 /* 購物車裡的「方案折扣校正」改成白話說明、隱藏數量/單價/刪除鈕(系統自動管理,客戶不需操作) */
-function styleCorrLine(){try{var items=[].slice.call(document.querySelectorAll('.cart-item'));items.forEach(function(it){var h=it.querySelector('.detail h4')||it.querySelector('h4')||it.querySelector('.item-name');if(!h)return;if(it.classList.contains('qs-corr-line')||(h.textContent||'').indexOf('方案折扣校正')>=0){it.classList.add('qs-corr-line');h.textContent='加購品優惠價・不參與方案折扣';h.style.cssText='color:#0C447C;font-weight:700;font-size:13px';var hide='position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important';var q=it.querySelector('.quantity');if(q)q.style.cssText=hide;var tool=it.querySelector('.item-tool');if(tool)tool.style.cssText=hide;var qty=Number(it.getAttribute('data-qty'))||0;var meta=it.querySelector('.meta');if(meta)meta.innerHTML='<span style="color:#0C447C;font-weight:700">＋ NT$ '+qty.toLocaleString()+'</span>';}});}catch(e){}}
+function styleCorrLine(){try{var items=[].slice.call(document.querySelectorAll('.cart-item'));var corr=items.filter(function(it){return it.classList.contains('qs-corr-line')||(it.textContent||'').indexOf('加購品已享優惠價')>=0;});if(!corr.length)return;var total=0;var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)total+=Number(c[i].LineTotal)||0;}var hide='position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important';corr.forEach(function(it,idx){it.classList.add('qs-corr-line');if(idx===0){it.style.display='';var h=it.querySelector('.detail h4')||it.querySelector('h4')||it.querySelector('.item-name');if(h){h.textContent='加購品已享優惠價・不參與方案折扣';h.style.cssText='color:#0C447C;font-weight:700;font-size:13px';}var q=it.querySelector('.quantity');if(q)q.style.cssText=hide;var tool=it.querySelector('.item-tool');if(tool)tool.style.cssText=hide;var meta=it.querySelector('.meta');if(meta)meta.innerHTML='<span style="color:#0C447C;font-weight:700">＋ NT$ '+total.toLocaleString()+'</span>';}else{it.style.display='none';}});}catch(e){}}
 /* 自己下單時,系統自動加入的費用(車馬費/商用/偏遠)在購物車項目下補一行白話說明,避免客戶覺得莫名多收 */
 var _FEENOTE=[
  {m:'車馬費',t:'🚗 只洗 1 台室外機需加收車馬費；清洗 2 台室外機以上免加收車馬費'},
@@ -764,20 +764,19 @@ function reconcileHi(){try{
    →設定隱形「方案折扣校正」商品數量把保護品被多折的錢補回→目標取偏客戶地板值,保證絕不多收 */
 var _adjSyncing=false,_adjC=null;
 function _readXiaoji(){try{var box=document.querySelector('.cart-total');if(box){var m=(box.textContent||'').match(/小計[\s\S]*?NT\$\s*([\d,]+)/);if(m)return parseInt(m[1].replace(/,/g,''),10);}}catch(e){}return null;}
-function _corrInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('方案折扣校正')>=0)return Number(c[i].Quantity)||0;}return 0;}
-function _setCorr(n){var cur=_corrInCart();if(cur===n)return;var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return x.classList.contains('qs-corr-line')||/方案折扣校正/.test(x.textContent||'');})[0];
- if(!it){if(n<=0)return;var r=_resolveBtn('方案折扣校正');if(!r)return;_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}
-   if(n>1){setTimeout(function(){try{var it2=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return x.classList.contains('qs-corr-line')||/方案折扣校正/.test(x.textContent||'');})[0];var iq2=it2?it2.getAttribute('data-item'):null;if(iq2!=null&&window.cartChangeItem)window.cartChangeItem(iq2,n);}catch(e){}},1200);}/* 加入後立刻一次撐到正確數量，不等下一輪 */
-   setTimeout(function(){_adjSyncing=false;},1900);return;}
- var iq=it.getAttribute('data-item');
- if(n<=0){var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];_adjSyncing=true;try{if(rb)rb.click();else if(window.cartChangeItem)window.cartChangeItem(iq,0);}catch(e){}setTimeout(function(){_adjSyncing=false;},900);return;}
- _adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(iq,n);}catch(e){}setTimeout(function(){_adjSyncing=false;},900);}
+/* 多面額校正:4個面額產品($1000/$100/$10/$1)同名「加購品已享優惠價」,靠購物車item的PriceBase區分面額、購物車陣列索引當cartChangeItem的itemQue */
+var _CORR_DENOMS=[1000,100,10,1];
+function _corrMap(){var bm=window.__qsBtnMap||{},map={};for(var pid in bm){if(!bm.hasOwnProperty(pid))continue;var b=bm[pid];var w=(b&&b.closest)?b.closest('.product-wrap'):null;if(!w)continue;var h=w.querySelector('h3');var n=h?(h.textContent||'').trim():'';if(n.indexOf('加購品已享優惠價')!==0)continue;var m=(w.textContent||'').match(/NT\$\s*([\d,]+)/);if(!m)continue;var p=parseInt(m[1].replace(/,/g,''),10);if(_CORR_DENOMS.indexOf(p)>=0)map[p]={pid:pid,btn:b};}return map;}
+function _corrCart(){var res={},c=_cartArr();for(var i=0;i<c.length;i++){var x=c[i];if((x.ProductName||'').indexOf('加購品已享優惠價')<0)continue;var q=Number(x.Quantity)||0;var d=Number(x.PriceBase)||(q>0?Math.round((Number(x.LineTotal)||0)/q):0);if(_CORR_DENOMS.indexOf(d)>=0)res[d]={idx:i,qty:q};}return res;}
+function _corrInCart(){var c=_cartArr(),s=0;for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)s+=Number(c[i].LineTotal)||0;}return s;}
+/* _setCorr(M):設定校正「總金額」=M,拆成4面額($1000×q1000+$100×q100+$10×q10+$1×q1)。每次呼叫只做一個動作(加入/改量),靠多輪(600ms快線)收斂,避免並發非同步亂序 */
+function _setCorr(M){M=Math.max(0,Math.round(M));var want={1000:Math.floor(M/1000),100:Math.floor((M%1000)/100),10:Math.floor((M%100)/10),1:M%10};var have=_corrCart();var map=_corrMap();for(var j=0;j<_CORR_DENOMS.length;j++){var d=_CORR_DENOMS[j];var w=want[d];var h=have[d];if(h){if(h.qty!==w){_adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(h.idx,Math.max(0,w));}catch(e){}setTimeout(function(){_adjSyncing=false;},900);return;}}else if(w>0){var info=map[d];if(info){_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(info.btn,info.pid);}catch(e){}setTimeout(function(){_adjSyncing=false;},1400);return;}}}}
 function reconcileAdjust(){try{
  if(window.__qsAdding||_adjSyncing)return;
  var cart=_cartArr();if(!cart.length){_adjC=null;return;}
  var P=0,X=0,sub=0;
  for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
-  if(nm.indexOf('方案折扣校正')>=0){X+=Number(cart[i].Quantity)||0;}
+  if(nm.indexOf('加購品已享優惠價')>=0){X+=Number(cart[i].LineTotal)||0;}
   else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
  var xiao=_readXiaoji();if(xiao==null)return;
  if(X===0){_adjC=sub>0?(sub-xiao)/sub:0;}
@@ -796,7 +795,7 @@ function reconcileAdjustWatch(){try{
   var cart=_cartArr();if(!cart.length){_adjWatchLastX=null;_adjWatchStuck=0;return;}
   var P=0,X=0,sub=0;
   for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
-    if(nm.indexOf('方案折扣校正')>=0){X+=Number(cart[i].Quantity)||0;}
+    if(nm.indexOf('加購品已享優惠價')>=0){X+=Number(cart[i].LineTotal)||0;}
     else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
   if(P<=0){_adjWatchStuck=0;_adjWatchLastX=X;return;}
   var xiao=_readXiaoji();if(xiao==null)return;
@@ -853,7 +852,7 @@ function _cartTotalShown(){
 function updateFab(){
   try{
     var cart=_cartArr(),hasProd=false,subtotal=0,cnt=0;
-    for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;if((cart[i].ProductName||'').indexOf('方案折扣校正')<0)cnt+=Number(cart[i].Quantity)||0;}}
+    for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;if((cart[i].ProductName||'').indexOf('加購品已享優惠價')<0)cnt+=Number(cart[i].Quantity)||0;}}
     var shown=_cartTotalShown();if(shown==null||shown<=0)shown=subtotal;
     var _cc=document.querySelector('select[name="CountyAndCity"]');
     var inCheckout=(_cc&&_cc.offsetHeight>0)||[].slice.call(document.querySelectorAll('button')).some(function(b){var t=(b.textContent||'').trim();return (t==='同意並繼續結帳'||/^請先選擇/.test(t))&&b.offsetHeight>0;});
