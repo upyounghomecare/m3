@@ -763,7 +763,7 @@ function reconcileHi(){try{
    原理:券照打整車→在校正=0時反推真實折扣率並快取→用它算「只折服務、保護品原價」的目標小計
    →設定隱形「方案折扣校正」商品數量把保護品被多折的錢補回→目標取偏客戶地板值,保證絕不多收 */
 var _adjSyncing=false,_adjC=null;
-function _readXiaoji(){try{var box=document.querySelector('.cart-total');if(box){var m=(box.textContent||'').match(/小計[\s\S]*?NT\$\s*([\d,]+)/);if(m)return parseInt(m[1].replace(/,/g,''),10);}}catch(e){}return null;}
+function _readXiaoji(){try{if(typeof window._cartTotal==='number'&&window._cartTotal>0)return window._cartTotal;var box=document.querySelector('.cart-total');if(box){var m=(box.textContent||'').match(/小計[\s\S]*?NT\$\s*([\d,]+)/);if(m)return parseInt(m[1].replace(/,/g,''),10);}}catch(e){}return null;}
 /* 多面額校正:4個面額產品($1000/$100/$10/$1)同名「加購品已享優惠價」,靠購物車item的PriceBase區分面額、購物車陣列索引當cartChangeItem的itemQue */
 var _CORR_DENOMS=[1000,100,10,1];
 function _corrMap(){var bm=window.__qsBtnMap||{},map={};for(var pid in bm){if(!bm.hasOwnProperty(pid))continue;var b=bm[pid];var w=(b&&b.closest)?b.closest('.product-wrap'):null;if(!w)continue;var h=w.querySelector('h3');var n=h?(h.textContent||'').trim():'';if(n.indexOf('加購品已享優惠價')!==0)continue;var m=(w.textContent||'').match(/NT\$\s*([\d,]+)/);if(!m)continue;var p=parseInt(m[1].replace(/,/g,''),10);if(_CORR_DENOMS.indexOf(p)>=0)map[p]={pid:pid,btn:b};}return map;}
