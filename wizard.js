@@ -770,16 +770,29 @@ function _corrMap(){var bm=window.__qsBtnMap||{},map={};for(var pid in bm){if(!b
 function _corrCart(){var res={},c=_cartArr();for(var i=0;i<c.length;i++){var x=c[i];if((x.ProductName||'').indexOf('加購品已享優惠價')<0)continue;var q=Number(x.Quantity)||0;var d=Number(x.PriceBase)||(q>0?Math.round((Number(x.LineTotal)||0)/q):0);if(_CORR_DENOMS.indexOf(d)>=0)res[d]={idx:i,qty:q};}return res;}
 function _corrInCart(){var c=_cartArr(),s=0;for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)s+=Number(c[i].LineTotal)||0;}return s;}
 /* _setCorr(M):設定校正「總金額」=M,拆成4面額($1000×q1000+$100×q100+$10×q10+$1×q1)。每次呼叫只做一個動作(加入/改量),靠多輪(600ms快線)收斂,避免並發非同步亂序 */
-function _setCorr(M){M=Math.max(0,Math.round(M));var want={1000:Math.floor(M/1000),100:Math.floor((M%1000)/100),10:Math.floor((M%100)/10),1:M%10};var have=_corrCart();var map=_corrMap();
- /* 1)移除 want=0 但購物車還有的面額:必須用 removeCartItem(cartChangeItem設0無效);idx會位移故做完就return等下一輪 */
- for(var a=0;a<_CORR_DENOMS.length;a++){var da=_CORR_DENOMS[a];if(want[da]<=0&&have[da]){var el=document.querySelector('.cart-item[data-item="'+have[da].idx+'"]');var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb){_adjSyncing=true;try{window.removeCartItem(rb);}catch(e){}setTimeout(function(){_adjSyncing=false;},1800);return;}}}
- /* 2)加入 want>0 但購物車缺的面額:一次全加(新item加到陣列末尾,不影響既有idx) */
- var miss=[];for(var b2=0;b2<_CORR_DENOMS.length;b2++){var db=_CORR_DENOMS[b2];if(want[db]>0&&!have[db]&&map[db])miss.push(db);}
- if(miss.length){var d0=miss[0];var q0=want[d0];_adjSyncing=true;try{if(window.viewProduct)window.viewProduct(map[d0].btn,map[d0].pid);}catch(e){}
-  if(q0>1){setTimeout(function(){try{var hv=_corrCart();if(hv[d0]&&hv[d0].qty!==q0&&window.cartChangeItem)window.cartChangeItem(hv[d0].idx,q0);}catch(e){}},1500);}/* 加入後立刻撐到正確數量,不等下一輪 */
-  setTimeout(function(){_adjSyncing=false;},2800);return;}
- /* 3)所有需要的面額都在了,一次把數量調到位(cartChangeItem,idx穩定) */
- for(var c2=0;c2<_CORR_DENOMS.length;c2++){var dc=_CORR_DENOMS[c2];var h=have[dc];if(h&&want[dc]>0&&h.qty!==want[dc]){_adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(h.idx,want[dc]);}catch(e){}setTimeout(function(){_adjSyncing=false;},1800);return;}}}
+function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
+ var want={1000:Math.floor(M/1000),100:Math.floor((M%1000)/100),10:Math.floor((M%100)/10),1:M%10};
+ var have=_corrCart(),map=_corrMap(),ops=[],k,d;
+ /* 排程:移除多餘面額 → 加入缺的面額(加完若需>1再設量) → 既有面額調量。整串一次做完(間隔650ms循序,避免1SHOP併發丟棄),把畫面跳動壓在3-4秒 */
+ for(k=0;k<_CORR_DENOMS.length;k++){d=_CORR_DENOMS[k];if(want[d]<=0&&have[d])ops.push({t:'rm',d:d});}
+ for(k=0;k<_CORR_DENOMS.length;k++){d=_CORR_DENOMS[k];if(want[d]>0&&!have[d]&&map[d]){ops.push({t:'add',d:d});if(want[d]>1)ops.push({t:'qty',d:d,n:want[d]});}}
+ for(k=0;k<_CORR_DENOMS.length;k++){d=_CORR_DENOMS[k];if(want[d]>0&&have[d]&&have[d].qty!==want[d])ops.push({t:'qty',d:d,n:want[d]});}
+ if(!ops.length)return;
+ _adjSyncing=true;var i2=0;
+ (function step(){
+   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;},1200);return;}
+   var op=ops[i2++];
+   try{
+     if(op.t==='add'){if(map[op.d]&&window.viewProduct)window.viewProduct(map[op.d].btn,map[op.d].pid);}
+     else{var hv=_corrCart(),h=hv[op.d];
+       if(h){
+         if(op.t==='rm'){var el=document.querySelector('.cart-item[data-item="'+h.idx+'"]');var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb)window.removeCartItem(rb);}
+         else if(h.qty!==op.n&&window.cartChangeItem){window.cartChangeItem(h.idx,op.n);}
+       }}
+   }catch(e){}
+   setTimeout(step,650);
+ })();
+}
 function reconcileAdjust(){try{
  if(window.__qsAdding||_adjSyncing)return;
  var cart=_cartArr();if(!cart.length){_adjC=null;return;}
