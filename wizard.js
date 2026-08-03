@@ -883,19 +883,27 @@ function updateFab(){
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
-/* 在1SHOP內建浮動鈕群(.chat)加一顆「↓ 前往選購」:長頁(詳情圖多)客戶要滑很久才到選購區,原生只有回到最上方 */
+/* 在1SHOP內建浮動鈕群(.chat)加一顆「↓ 前往選購」:長頁(詳情圖多)客戶要滑很久才到選購區,原生只有回到最上方。
+   不沿用goTopBtn的class(那是「捲下去才顯示」,與本鈕相反),自帶顯示邏輯:選購區還在畫面下方才顯示 */
 function addGoBottomBtn(){try{
-  if(document.getElementById('qs-godown'))return;
   var list=document.querySelector('.chat ul.action-list');if(!list)return;
-  var top=list.querySelector('li.goTopBtn');if(!top)return;
-  var li=document.createElement('li');li.id='qs-godown';li.className=top.className;
-  li.innerHTML='<button type="button" class="btn btn-top" title="前往選購"><i class="far fa-arrow-down"></i></button>';
-  li.querySelector('button').onclick=function(){
-    var t=document.querySelector('.product-row')||document.querySelector('.product-wrap');
-    var y=t?(t.getBoundingClientRect().top+window.pageYOffset-60):document.body.scrollHeight;
-    try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}
-  };
-  list.insertBefore(li,top);
+  var ref=list.querySelector('li.goTopBtn');if(!ref)return;
+  var li=document.getElementById('qs-godown');
+  if(!li){
+    li=document.createElement('li');li.id='qs-godown';
+    var cs=getComputedStyle(ref);
+    li.style.cssText='display:block;list-style:none;margin:'+cs.margin+';padding:'+cs.padding;
+    li.innerHTML='<button type="button" class="btn btn-top" title="前往選購"><i class="far fa-arrow-down"></i></button>';
+    li.querySelector('button').onclick=function(){
+      var t=document.querySelector('.product-row')||document.querySelector('.product-wrap');
+      var y=t?(t.getBoundingClientRect().top+window.pageYOffset-60):document.body.scrollHeight;
+      try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}
+    };
+    list.insertBefore(li,ref);
+  }
+  var t2=document.querySelector('.product-row')||document.querySelector('.product-wrap');
+  var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
+  li.style.display=show?'block':'none';
 }catch(e){}}
 setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();addGoBottomBtn();},700);
 var tries=0;
