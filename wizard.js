@@ -510,13 +510,24 @@ function _corrBusy(){var t=window.__qsCorrBusy||0;return t>0&&(Date.now()-t)<120
 function _maskPrice(price,busy){try{if(!price)return;var sp=price.querySelector('.qs-calc');
  if(busy){if(!sp){[].slice.call(price.children).forEach(function(c){c.style.display='none';});sp=document.createElement('span');sp.className='qs-calc';sp.textContent='計算中…';sp.style.cssText='color:#8a93a0;font-size:13px;font-weight:600;white-space:nowrap';price.appendChild(sp);}}
  else if(sp){if(sp.parentElement)sp.parentElement.removeChild(sp);[].slice.call(price.children).forEach(function(c){c.style.display='';});}}catch(e){}}
-function maskCalc(){try{var busy=_corrBusy();
- _maskPrice(document.querySelector('.cart-total .row.total .price'),busy);
- [].slice.call(document.querySelectorAll('.cart-item')).forEach(function(it){
-   if(it.classList.contains('qs-corr-line'))return;
-   var p=it.querySelector('.price');if(!p)return;
-   _maskPrice(p, busy && /-\s*NT\$/.test(it.textContent||''));
- });}catch(e){}}
+function maskCalc(){try{
+ var busy=_corrBusy();var sec=document.getElementById('cart-section');if(!sec)return;
+ var ov=document.getElementById('qs-calcov');
+ if(busy){
+   if(!ov){
+     if(!document.getElementById('qs-spin-css')){var st=document.createElement('style');st.id='qs-spin-css';st.textContent='@keyframes qsspin{to{transform:rotate(360deg)}}';document.head.appendChild(st);}
+     var h=sec.offsetHeight;if(h>80)sec.style.minHeight=h+'px';
+     if(getComputedStyle(sec).position==='static')sec.style.position='relative';
+     ov=document.createElement('div');ov.id='qs-calcov';
+     ov.style.cssText='position:absolute;inset:0;z-index:60;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;border-radius:inherit';
+     ov.innerHTML='<div style="text-align:center;font-family:\'PingFang TC\',\'Microsoft JhengHei\',system-ui,sans-serif"><div style="width:26px;height:26px;margin:0 auto 10px;border:3px solid #dce4ee;border-top-color:#042C53;border-radius:50%;animation:qsspin .8s linear infinite"></div><div style="font-size:14.5px;font-weight:800;color:#042C53">金額計算中…</div><div style="font-size:12px;color:#8a93a0;margin-top:5px">正在為加購品保留原價</div></div>';
+     sec.appendChild(ov);
+   }
+ }else if(ov){
+   if(ov.parentElement)ov.parentElement.removeChild(ov);
+   sec.style.minHeight='';
+ }
+}catch(e){}}
 function styleCorrLine(){try{var items=[].slice.call(document.querySelectorAll('.cart-item'));var corr=items.filter(function(it){return it.classList.contains('qs-corr-line')||(it.textContent||'').indexOf('加購品已享優惠價')>=0;});if(!corr.length)return;if(_corrBusy()){corr.forEach(function(it){it.classList.add('qs-corr-line');it.style.display='none';});return;}var total=0;var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)total+=Number(c[i].LineTotal)||0;}var hide='position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important';corr.forEach(function(it,idx){it.classList.add('qs-corr-line');if(idx===0){it.style.display='';var h=it.querySelector('.detail h4')||it.querySelector('h4')||it.querySelector('.item-name');if(h){h.textContent='加購品已享優惠價・不參與方案折扣';h.style.cssText='color:#0C447C;font-weight:700;font-size:13px';}var q=it.querySelector('.quantity');if(q)q.style.cssText=hide;var tool=it.querySelector('.item-tool');if(tool)tool.style.cssText=hide;var meta=it.querySelector('.meta');if(meta)meta.innerHTML='<span style="color:#0C447C;font-weight:700">＋ NT$ '+total.toLocaleString()+'</span>';var amt=it.querySelector('.price .amount');if(amt&&amt.textContent!==total.toLocaleString())amt.textContent=total.toLocaleString();}else{it.style.display='none';}});}catch(e){}}
 /* 自己下單時,系統自動加入的費用(車馬費/商用/偏遠)在購物車項目下補一行白話說明,避免客戶覺得莫名多收 */
 var _FEENOTE=[
