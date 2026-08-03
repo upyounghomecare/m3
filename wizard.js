@@ -505,7 +505,19 @@ function addPopularBadge(){
 /* 車馬費純自動:隱藏商品頁的車馬費加購卡,客戶不能手動加(由精靈依規則自動加入購物車) */
 function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0||nm.indexOf('加購品已享優惠價')>=0){ws[i].style.display='none';}}}catch(e){}}
 /* 購物車裡的「方案折扣校正」改成白話說明、隱藏數量/單價/刪除鈕(系統自動管理,客戶不需操作) */
-function styleCorrLine(){try{var items=[].slice.call(document.querySelectorAll('.cart-item'));var corr=items.filter(function(it){return it.classList.contains('qs-corr-line')||(it.textContent||'').indexOf('加購品已享優惠價')>=0;});if(!corr.length)return;var total=0;var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)total+=Number(c[i].LineTotal)||0;}var hide='position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important';corr.forEach(function(it,idx){it.classList.add('qs-corr-line');if(idx===0){it.style.display='';var h=it.querySelector('.detail h4')||it.querySelector('h4')||it.querySelector('.item-name');if(h){h.textContent='加購品已享優惠價・不參與方案折扣';h.style.cssText='color:#0C447C;font-weight:700;font-size:13px';}var q=it.querySelector('.quantity');if(q)q.style.cssText=hide;var tool=it.querySelector('.item-tool');if(tool)tool.style.cssText=hide;var meta=it.querySelector('.meta');if(meta)meta.innerHTML='<span style="color:#0C447C;font-weight:700">＋ NT$ '+total.toLocaleString()+'</span>';var amt=it.querySelector('.price .amount');if(amt&&amt.textContent!==total.toLocaleString())amt.textContent=total.toLocaleString();}else{it.style.display='none';}});}catch(e){}}
+/* 校正計算期間把會跳動的金額蓋成「計算中…」,算完一次顯示正確值(客戶不會看到金額亂跳);9秒安全上限,萬一卡住也會自動顯示真實金額 */
+function _corrBusy(){var t=window.__qsCorrBusy||0;return t>0&&(Date.now()-t)<9000;}
+function _maskPrice(price,busy){try{if(!price)return;var sp=price.querySelector('.qs-calc');
+ if(busy){if(!sp){[].slice.call(price.children).forEach(function(c){c.style.display='none';});sp=document.createElement('span');sp.className='qs-calc';sp.textContent='計算中…';sp.style.cssText='color:#8a93a0;font-size:13px;font-weight:600;white-space:nowrap';price.appendChild(sp);}}
+ else if(sp){if(sp.parentElement)sp.parentElement.removeChild(sp);[].slice.call(price.children).forEach(function(c){c.style.display='';});}}catch(e){}}
+function maskCalc(){try{var busy=_corrBusy();
+ _maskPrice(document.querySelector('.cart-total .row.total .price'),busy);
+ [].slice.call(document.querySelectorAll('.cart-item')).forEach(function(it){
+   if(it.classList.contains('qs-corr-line'))return;
+   var p=it.querySelector('.price');if(!p)return;
+   _maskPrice(p, busy && /-\s*NT\$/.test(it.textContent||''));
+ });}catch(e){}}
+function styleCorrLine(){try{var items=[].slice.call(document.querySelectorAll('.cart-item'));var corr=items.filter(function(it){return it.classList.contains('qs-corr-line')||(it.textContent||'').indexOf('加購品已享優惠價')>=0;});if(!corr.length)return;if(_corrBusy()){corr.forEach(function(it){it.classList.add('qs-corr-line');it.style.display='none';});return;}var total=0;var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)total+=Number(c[i].LineTotal)||0;}var hide='position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important';corr.forEach(function(it,idx){it.classList.add('qs-corr-line');if(idx===0){it.style.display='';var h=it.querySelector('.detail h4')||it.querySelector('h4')||it.querySelector('.item-name');if(h){h.textContent='加購品已享優惠價・不參與方案折扣';h.style.cssText='color:#0C447C;font-weight:700;font-size:13px';}var q=it.querySelector('.quantity');if(q)q.style.cssText=hide;var tool=it.querySelector('.item-tool');if(tool)tool.style.cssText=hide;var meta=it.querySelector('.meta');if(meta)meta.innerHTML='<span style="color:#0C447C;font-weight:700">＋ NT$ '+total.toLocaleString()+'</span>';var amt=it.querySelector('.price .amount');if(amt&&amt.textContent!==total.toLocaleString())amt.textContent=total.toLocaleString();}else{it.style.display='none';}});}catch(e){}}
 /* 自己下單時,系統自動加入的費用(車馬費/商用/偏遠)在購物車項目下補一行白話說明,避免客戶覺得莫名多收 */
 var _FEENOTE=[
  {m:'車馬費',t:'🚗 只洗 1 台室外機需加收車馬費；清洗 2 台室外機以上免加收車馬費'},
@@ -778,9 +790,9 @@ function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
  for(k=0;k<_CORR_DENOMS.length;k++){d=_CORR_DENOMS[k];if(want[d]>0&&!have[d]&&map[d]){ops.push({t:'add',d:d});if(want[d]>1)ops.push({t:'qty',d:d,n:want[d]});}}
  for(k=0;k<_CORR_DENOMS.length;k++){d=_CORR_DENOMS[k];if(want[d]>0&&have[d]&&have[d].qty!==want[d])ops.push({t:'qty',d:d,n:want[d]});}
  if(!ops.length)return;
- _adjSyncing=true;var i2=0;
+ _adjSyncing=true;window.__qsCorrBusy=Date.now();var i2=0;
  (function step(){
-   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;},1200);return;}
+   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;window.__qsCorrBusy=0;},1200);return;}
    var op=ops[i2++];
    try{
      if(op.t==='add'){if(map[op.d]&&window.viewProduct)window.viewProduct(map[op.d].btn,map[op.d].pid);}
@@ -892,7 +904,7 @@ function updateFab(){
     }
     fab.style.display='flex';
     document.body.style.paddingBottom='76px';
-    var pe=fab.querySelector('#qs-fab-p');if(pe)pe.textContent='NT$ '+shown.toLocaleString('en-US');
+    var pe=fab.querySelector('#qs-fab-p');if(pe)pe.textContent=_corrBusy()?'計算中…':('NT$ '+shown.toLocaleString('en-US'));
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
@@ -918,7 +930,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();addGoBottomBtn();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
