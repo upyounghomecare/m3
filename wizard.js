@@ -777,8 +777,7 @@ function _setCorr(M){M=Math.max(0,Math.round(M));var want={1000:Math.floor(M/100
  var miss=[];for(var b2=0;b2<_CORR_DENOMS.length;b2++){var db=_CORR_DENOMS[b2];if(want[db]>0&&!have[db]&&map[db])miss.push(db);}
  if(miss.length){_adjSyncing=true;miss.forEach(function(d){try{if(window.viewProduct)window.viewProduct(map[d].btn,map[d].pid);}catch(e){}});setTimeout(function(){_adjSyncing=false;},1600);return;}
  /* 3)所有需要的面額都在了,一次把數量調到位(cartChangeItem,idx穩定) */
- var acted=false;for(var c2=0;c2<_CORR_DENOMS.length;c2++){var dc=_CORR_DENOMS[c2];var h=have[dc];if(h&&want[dc]>0&&h.qty!==want[dc]){try{if(window.cartChangeItem)window.cartChangeItem(h.idx,want[dc]);acted=true;}catch(e){}}}
- if(acted){_adjSyncing=true;setTimeout(function(){_adjSyncing=false;},1000);}}
+ for(var c2=0;c2<_CORR_DENOMS.length;c2++){var dc=_CORR_DENOMS[c2];var h=have[dc];if(h&&want[dc]>0&&h.qty!==want[dc]){_adjSyncing=true;try{if(window.cartChangeItem)window.cartChangeItem(h.idx,want[dc]);}catch(e){}setTimeout(function(){_adjSyncing=false;},800);return;}}}
 function reconcileAdjust(){try{
  if(window.__qsAdding||_adjSyncing)return;
  var cart=_cartArr();if(!cart.length){_adjC=null;return;}
