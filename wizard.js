@@ -778,7 +778,7 @@ function reconcileAdjust(){try{
  var P=0,X=0,sub=0;
  for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
   if(nm.indexOf('方案折扣校正')>=0){X+=Number(cart[i].Quantity)||0;}
-  else if(nm.indexOf('車馬費')>=0||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
+  else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
  var xiao=_readXiaoji();if(xiao==null)return;
  if(X===0){_adjC=sub>0?(sub-xiao)/sub:0;}
  var C=_adjC||0;
@@ -797,7 +797,7 @@ function reconcileAdjustWatch(){try{
   var P=0,X=0,sub=0;
   for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
     if(nm.indexOf('方案折扣校正')>=0){X+=Number(cart[i].Quantity)||0;}
-    else if(nm.indexOf('車馬費')>=0||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
+    else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
   if(P<=0){_adjWatchStuck=0;_adjWatchLastX=X;return;}
   var xiao=_readXiaoji();if(xiao==null)return;
   var C=(X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0);
@@ -853,7 +853,7 @@ function _cartTotalShown(){
 function updateFab(){
   try{
     var cart=_cartArr(),hasProd=false,subtotal=0,cnt=0;
-    for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;cnt+=Number(cart[i].Quantity)||0;}}
+    for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;if((cart[i].ProductName||'').indexOf('方案折扣校正')<0)cnt+=Number(cart[i].Quantity)||0;}}
     var shown=_cartTotalShown();if(shown==null||shown<=0)shown=subtotal;
     var _cc=document.querySelector('select[name="CountyAndCity"]');
     var inCheckout=(_cc&&_cc.offsetHeight>0)||[].slice.call(document.querySelectorAll('button')).some(function(b){var t=(b.textContent||'').trim();return (t==='同意並繼續結帳'||/^請先選擇/.test(t))&&b.offsetHeight>0;});
