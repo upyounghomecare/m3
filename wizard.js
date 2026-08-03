@@ -883,7 +883,21 @@ function updateFab(){
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
   }catch(e){}
 }
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();},700);
+/* 在1SHOP內建浮動鈕群(.chat)加一顆「↓ 前往選購」:長頁(詳情圖多)客戶要滑很久才到選購區,原生只有回到最上方 */
+function addGoBottomBtn(){try{
+  if(document.getElementById('qs-godown'))return;
+  var list=document.querySelector('.chat ul.action-list');if(!list)return;
+  var top=list.querySelector('li.goTopBtn');if(!top)return;
+  var li=document.createElement('li');li.id='qs-godown';li.className=top.className;
+  li.innerHTML='<button type="button" class="btn btn-top" title="前往選購"><i class="far fa-arrow-down"></i></button>';
+  li.querySelector('button').onclick=function(){
+    var t=document.querySelector('.product-row')||document.querySelector('.product-wrap');
+    var y=t?(t.getBoundingClientRect().top+window.pageYOffset-60):document.body.scrollHeight;
+    try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}
+  };
+  list.insertBefore(li,top);
+}catch(e){}}
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();addGoBottomBtn();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
