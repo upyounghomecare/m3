@@ -82,7 +82,7 @@ var ICO_LIST='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke
 var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
 +'#qw-ovl *{box-sizing:border-box}'
 +'.qw{position:relative;background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}'
-+'@media (min-width:760px){#qw-ovl .qw{max-width:660px!important}}'+'@media (min-width:1200px){#qw-ovl .qw{max-width:780px!important}}'+'#qs-ovl,#qs-ovl2{align-items:flex-start!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}#qs-ovl>*,#qs-ovl2>*{margin:auto!important}'/* 修:內文JS彈窗原本垂直置中又沒開捲動,內容比螢幕高時頂端會被切掉且捲不到(需縮放才看得到) */
++'@media (min-width:760px){#qw-ovl .qw{max-width:660px!important}}'+'.qw .qpnote{margin-top:11px;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.75}'+'.qw .qpn-info{background:#eaf2fb;border:1px solid #b9d3ee;color:#0C447C}'+'.qw .qpn-warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}'+'.qw .qdl{margin-top:12px;background:#fff;border:1.5px solid #dbe3ec;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(4,44,83,.06);cursor:pointer}'+'.qw .qdl:active{transform:scale(.99)}'+'.qw .qdl-ic{width:34px;height:34px;flex:0 0 auto;border-radius:9px;background:rgba(184,134,11,.09);display:flex;align-items:center;justify-content:center;font-size:17px}'+'.qw .qdl-tx{flex:1;min-width:0}.qw .qdl-t1{font-size:14px;font-weight:900;color:#042C53}.qw .qdl-t2{font-size:11.5px;color:#5f6b78;margin-top:2px}'+'.qw .qdl-ar{color:#B8860B;font-size:18px;font-weight:900}'+'@media (min-width:1200px){#qw-ovl .qw{max-width:780px!important}}'+'#qs-ovl,#qs-ovl2{align-items:flex-start!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}#qs-ovl>*,#qs-ovl2>*{margin:auto!important}'/* 修:內文JS彈窗原本垂直置中又沒開捲動,內容比螢幕高時頂端會被切掉且捲不到(需縮放才看得到) */
 +'.qw .on.qw-on-sm{font-size:12.5px;white-space:nowrap;letter-spacing:-.2px}'
 +'.qw .qw-thumb{cursor:zoom-in}'
 +'#qw-zoom{position:fixed;inset:0;z-index:100005;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}#qw-zoom img{max-width:100%;max-height:90vh;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.5)}'
@@ -254,13 +254,14 @@ function render(){
     w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else {
     function planCard(k,img,note,ncls){var sel=plan===k;return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt=""><div class="qpn '+ncls+'">'+note+'</div></div>';}
-    w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div><div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div><div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.finish()">完成，前往結帳</button></div></div>';
+    w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ <b>標準方案將安排兩週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ <b>早鳥方案需等候 30 天後</b>才安排到府清洗。<br>若希望盡快清洗，請改選「標準方案」（兩週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
   ovl.innerHTML=w;
   var _card=ovl.querySelector('.qw');
   if(_card){var _x=document.createElement('button');_x.type='button';_x.className='qw-x';_x.setAttribute('aria-label','關閉');_x.innerHTML='×';_x.onclick=function(e){e.stopPropagation();close();};_card.appendChild(_x);}
 }
-function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=0;render();}
+var _qwResume=null;
+function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
 function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
 /* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
@@ -360,6 +361,53 @@ var api={
   chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK)+sumKeys(['o1','om']);if(v>mx)v=mx;}qty[k]=v;render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
   go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){alert('請至少選擇一台室內機或室外機清洗喔！\n可回上一步（室內機／室外機）選擇台數。');return;}}step=n;render();},
+  /* 方案確認彈窗:按「完成，前往結帳」時先跳一次確認(兩種方案各自內容),確認後才真的加入購物車 */
+  confirmPlan:function(){
+    if(!plan)return;
+    if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
+    var D={std:{t:'確認您的標準方案',lead:'您選擇的是「標準方案 95 折」',
+        li:['到府服務將安排在<b>下單日起兩週內</b>','實際到府日期，由約時人員<b>去電與您確認</b>','時間可以彈性的話，改選「早鳥方案」可享 <b>85 折</b>（需等候 30 天）'],
+        alt:'改選早鳥方案',ok:'我了解，確認標準方案',other:'early'},
+      early:{t:'確認您的早鳥方案',lead:'您選擇的是「早鳥方案 85 折」',
+        li:['到府服務將安排在<b>下單日起 30 天後</b>','實際到府日期，由約時人員<b>去電與您確認</b>','如需盡快服務，請改選「標準方案」（兩週內到府）'],
+        alt:'改選標準方案',ok:'我了解，確認早鳥方案',other:'std'}}[plan];
+    if(!D)return;
+    var old=document.getElementById('qw-pc');if(old&&old.parentNode)old.parentNode.removeChild(old);
+    var ov=document.createElement('div');ov.id='qw-pc';
+    ov.style.cssText='position:fixed;inset:0;z-index:100002;background:rgba(4,20,40,.6);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
+    ov.innerHTML='<div style="background:#fff;border-radius:17px;max-width:420px;width:100%;margin:auto;box-shadow:0 14px 44px rgba(0,0,0,.35);overflow:hidden">'
+      +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:16px 20px;text-align:center;font-size:17px;font-weight:900">'+D.t+'</div>'
+      +'<div style="padding:18px 20px"><div style="font-size:15px;font-weight:900;text-align:center;color:#B8860B;margin-bottom:13px">'+D.lead+'</div>'
+      +'<ul style="list-style:none;margin:0;padding:0">'+D.li.map(function(x){return '<li style="font-size:13.5px;line-height:1.7;color:#17212c;padding-left:17px;position:relative;margin-bottom:9px"><span style="position:absolute;left:0;color:#B8860B;font-weight:900">・</span>'+x+'</li>';}).join('')+'</ul></div>'
+      +'<div style="padding:0 20px 20px;display:flex;gap:10px">'
+      +'<button type="button" id="qw-pc-alt" style="flex:1;border:1.5px solid #dbe3ec;background:transparent;color:#5f6b78;border-radius:12px;padding:13px;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer">'+D.alt+'</button>'
+      +'<button type="button" id="qw-pc-ok" style="flex:1;border:none;background:#042C53;color:#fff;border-radius:12px;padding:13px;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer">'+D.ok+'</button>'
+      +'</div></div>';
+    document.body.appendChild(ov);
+    function kill(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
+    ov.querySelector('#qw-pc-alt').onclick=function(){kill();api.pickPlan(D.other);};
+    ov.querySelector('#qw-pc-ok').onclick=function(){kill();api.finish();};
+    ov.addEventListener('click',function(e){if(e.target===ov)kill();});
+  },
+  /* 先看完整圖文介紹:關精靈→捲到詳情圖區→浮出「回到引導精靈」(選擇都保留,回來時停在原本那一步) */
+  seeDetail:function(){
+    _qwResume=step;
+    close();
+    var b=document.getElementById('qw-back');
+    if(!b){
+      b=document.createElement('button');b.type='button';b.id='qw-back';
+      b.textContent='↩ 回到引導精靈';
+      b.style.cssText='position:fixed;right:16px;bottom:20px;z-index:99990;background:#042C53;color:#fff;border:none;border-radius:99px;padding:14px 22px;font-size:14.5px;font-weight:900;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 26px rgba(4,44,83,.4)';
+      b.onclick=function(){if(b.parentNode)b.parentNode.removeChild(b);open();};
+      document.body.appendChild(b);
+    }
+    setTimeout(function(){
+      var t=null,ws=document.querySelectorAll('div');
+      for(var i=0;i<ws.length;i++){var im=ws[i].querySelectorAll('img');if(im.length>=8&&/img\.1shop\.tw/.test(im[0].src||'')){t=ws[i];break;}}
+      if(!t)t=document.querySelector('.product-row');
+      if(t){try{window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-60,behavior:'smooth'});}catch(e){window.scrollTo(0,t.getBoundingClientRect().top+window.pageYOffset-60);}}
+    },180);
+  },
   finish:function(){
     if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
     /* 動態對應：不靠寫死商品ID，改用「名稱開頭比對」找出當前頁面的真實按鈕與ID
@@ -655,7 +703,34 @@ function addContinueBtn(){
     if(!h1)return;
     if(document.getElementById('qs-contbtn-wrap'))return;
     var w=document.createElement('div');w.id='qs-contbtn-wrap';w.style.cssText='margin:2px 0 16px';
-    w.innerHTML='<button type="button" id="qs-contbtn" style="width:100%;border:2px dashed #d9b24a;background:#fbf7ec;color:#8a6410;font-size:15px;font-weight:800;border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:18px">＋</span> 還要加購? 繼續選購清洗項目</button><div style="font-size:11.5px;color:#9aa7b4;text-align:center;margin-top:6px">點了會捲回清洗項目列表，已選的都在購物車不會不見</div>';
+    w.innerHTML='<button type="button" id="qs-contbtn" style="width:100%;border:2px dashed #d9b24a;background:#fbf7ec;color:#8a6410;font-size:15px;font-weight:800;border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:18px">＋</span> 還要加購? 繼續選購清洗項目</button><div style="font-size:11.5px;color:#9aa7b4;text-align:center;margin-top:6px">點了會捲回清洗項目列表，已選的都在購物車不會不見</div><div style="text-align:center;margin-top:10px"><a id="qs-rewiz" style="font-size:13px;color:#0C447C;text-decoration:underline;text-underline-offset:3px;font-weight:700;cursor:pointer">🪄 想重新挑一次？用引導精靈重選</a><div style="font-size:11px;color:#9aa7b4;margin-top:4px">點了會先確認，並清空目前購物車重新開始</div></div>';
+    /* 「重新用引導精靈」:先確認,再逐一清空購物車(凍結校正避免邊清邊補),清完重置精靈狀態並重開 */
+    setTimeout(function(){
+      var a=document.getElementById('qs-rewiz');
+      if(!a||a.getAttribute('data-b'))return;
+      a.setAttribute('data-b','1');
+      a.onclick=function(){
+        if(!confirm('這會清空目前購物車，重新用引導精靈挑選。\n確定要重新開始嗎？'))return;
+        a.textContent='清空中…';
+        window.__qsAdding=true;
+        var n=0;
+        (function clr(){
+          var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){
+            return [].slice.call(x.querySelectorAll('button,a,i,span')).some(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;});
+          })[0];
+          if(!it||n>20){
+            qty={};plan=null;env=null;areaCity=null;areaDist=null;areaCls=null;opened={};
+            window.__qsPlan=null;window.__qsDhDelivery='';window.__qsRead_dh='';window.__qsRead_air='';
+            window.__qsCorrBusy=0;
+            setTimeout(function(){window.__qsAdding=false;_qwResume=0;open();},900);
+            return;
+          }
+          var rb=[].slice.call(it.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+          try{window.removeCartItem(rb);n++;}catch(e){}
+          setTimeout(clr,600);
+        })();
+      };
+    },50);
     h1.parentNode.insertBefore(w,h1.nextSibling);
     w.querySelector('#qs-contbtn').onclick=function(){
       var t=null,hh=document.querySelectorAll('h1');
