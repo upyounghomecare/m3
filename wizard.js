@@ -178,7 +178,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .env-o:active{transform:scale(.97)}'
 +'.qw .env-o.sel{border-color:#0C447C}'
 +'.qw .env-o.sel::after{content:\"✓\";position:absolute;top:7px;right:8px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}'
-+'.qw .envnote{font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:10px 0 2px;line-height:1.5}.qw .envnote b{color:#B8860B;font-weight:800}'
++'.qw .envnote{font-size:13.5px;font-weight:800;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:10px 13px;margin:10px 0 2px;line-height:1.6}.qw .envnote b{color:#B8860B;font-weight:900}'
 +'.qs-corr-line .item-tool{display:none!important}.qs-corr-line [class*="qty"],.qs-corr-line [class*="quantity"],.qs-corr-line [class*="counter"],.qs-corr-line [class*="number"]{display:none!important}.qs-corr-line .item-name{color:#0C447C!important;font-size:12.5px}'
 +'.qw .flbl{font-size:12px;font-weight:700;color:#0C447C;margin:2px 0 5px}'
 +'.qw .qsel{width:100%;border:1.5px solid #c9d7e6;border-radius:12px;padding:11px 34px 11px 12px;font-size:14px;color:#12233a;background:#fff;font-family:inherit;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%230C447C%27 stroke-width=%273%27><path d=%27M6 9l6 6 6-6%27/></svg>\");background-repeat:no-repeat;background-position:right 12px center;margin-bottom:10px}'
