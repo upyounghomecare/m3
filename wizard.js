@@ -517,6 +517,16 @@ function _dhResetWatch(){try{
   if(has){_dhGone=0;return;}
   if(window.__qsDhDelivery||window.__qsRead_dh){_dhGone++;if(_dhGone>=4){window.__qsDhDelivery='';window.__qsRead_dh='';_dhGone=0;}}
 }catch(e){}}
+/* 修:內文JS記住「已同意」(__qsAgreed)後,再按立即結帳會跳過方案選擇畫面,客戶想改早鳥/標準只能重新整理。
+   作法:只要不在結帳畫面、也沒開著同意彈窗,就清掉旗標→下次按結帳會重新跳出方案選擇 */
+function resetAgreeGate(){try{
+  if(!window.__qsAgreed)return;
+  var cc=document.querySelector('select[name="CountyAndCity"]');
+  if(cc&&cc.offsetHeight>0)return;/* 正在結帳表單中,不動 */
+  var o=document.getElementById('qs-ovl');
+  if(o&&getComputedStyle(o).display!=='none')return;/* 同意彈窗開著,不動 */
+  window.__qsAgreed=false;
+}catch(e){}}
 function maskCalc(){try{
  var busy=_corrBusy();var sec=document.getElementById('cart-section');if(!sec)return;
  var ov=document.getElementById('qs-calcov');
@@ -947,7 +957,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();_dhResetWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();_dhResetWatch();resetAgreeGate();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
