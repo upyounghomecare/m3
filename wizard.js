@@ -539,6 +539,33 @@ function resetAgreeGate(){try{
   if(o&&getComputedStyle(o).display!=='none')return;/* 同意彈窗開著,不動 */
   window.__qsAgreed=false;
 }catch(e){}}
+/* 在結帳同意彈窗加一顆「只更新方案，回購物車」:原本只有「同意並繼續結帳」會直接帶客戶進三步驟結帳,
+   想單純換方案看金額的客戶沒有出路。此鈕只套用方案優惠券並關閉彈窗,不進結帳流程 */
+function addPlanOnlyBtn(){try{
+  var ovl=document.getElementById('qs-ovl');
+  if(!ovl||getComputedStyle(ovl).display==='none')return;
+  var box=document.getElementById('qs-planbox');if(!box)return;
+  var go=document.getElementById('qs-go');if(!go||!go.parentNode)return;
+  var b=document.getElementById('qs-planonly');
+  if(!b){
+    b=document.createElement('button');b.type='button';b.id='qs-planonly';
+    b.textContent='只更新方案，回購物車看金額';
+    b.style.cssText='width:100%;margin-top:9px;border:1.5px solid #d3ddea;background:#fff;color:#0C447C;border-radius:12px;padding:12px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer';
+    b.onclick=function(){
+      var sel=box.querySelector('.qs-plan.sel');
+      if(!sel){try{if(window.notificationMsg)notificationMsg('請先選擇到府方案','danger',3);}catch(e){}return;}
+      window.__qsPlan=sel.getAttribute('data-plan');
+      b.disabled=true;b.textContent='更新中…';
+      var done=false;
+      function fin(){if(done)return;done=true;try{ovl.style.display='none';}catch(e){}b.disabled=false;b.textContent='只更新方案，回購物車看金額';}
+      try{if(window.__qsApplyPlanCoupon){window.__qsApplyPlanCoupon(fin);setTimeout(fin,4500);}else fin();}catch(e){fin();}
+    };
+    go.parentNode.insertBefore(b,go.nextSibling);
+  }
+  var has=!!box.querySelector('.qs-plan.sel');
+  b.style.opacity=has?'1':'.5';
+  b.style.cursor=has?'pointer':'not-allowed';
+}catch(e){}}
 function maskCalc(){try{
  var busy=_corrBusy();var sec=document.getElementById('cart-section');if(!sec)return;
  var ov=document.getElementById('qs-calcov');
@@ -969,7 +996,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();_dhResetWatch();resetAgreeGate();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
