@@ -155,7 +155,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .qplan.sel{border-color:#0C447C}'
 +'.qw .qplan.sel::after{content:\"✓\";position:absolute;top:6px;right:6px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}'
 +'.qw .qplan:active{transform:scale(.97)}'
-+'.qw .callnote{font-size:11.5px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:11px 0 2px;line-height:1.55}'
++'.qw .callnote{font-size:13.5px;font-weight:800;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:10px 13px;margin:11px 0 2px;line-height:1.6}'
 +'.qw.wel{text-align:center}.qw .wel-brand{font-size:11px;font-weight:800;letter-spacing:.1em;color:#0C447C;margin-bottom:12px}'
 +'.qw .wel-bar{width:34px;height:3px;background:#B8860B;border-radius:2px;margin:2px auto 15px}'
 +'.qw .wel-h{font-size:24px;font-weight:900;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap;-webkit-text-stroke:0.4px #16202b}'
@@ -397,7 +397,8 @@ var api={
     if(!b){
       b=document.createElement('button');b.type='button';b.id='qw-back';
       b.textContent='↩ 回到引導精靈';
-      b.style.cssText='position:fixed;right:16px;bottom:20px;z-index:99990;background:#042C53;color:#fff;border:none;border-radius:99px;padding:14px 22px;font-size:14.5px;font-weight:900;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 26px rgba(4,44,83,.4)';
+      b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:99990;background:linear-gradient(135deg,#C9962A,#B8860B);color:#fff;border:none;border-radius:99px;padding:15px 30px;font-size:15.5px;font-weight:900;letter-spacing:.02em;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 30px rgba(184,134,11,.5);white-space:nowrap;animation:qwbk .34s cubic-bezier(.2,1.4,.4,1)';
+      if(!document.getElementById('qw-bk-css')){var bs=document.createElement('style');bs.id='qw-bk-css';bs.textContent='@keyframes qwbk{0%{transform:translateX(-50%) translateY(18px);opacity:0}60%{transform:translateX(-50%) translateY(-3px);opacity:1}100%{transform:translateX(-50%) translateY(0);opacity:1}}';document.head.appendChild(bs);}
       b.onclick=function(){if(b.parentNode)b.parentNode.removeChild(b);open();};
       document.body.appendChild(b);
     }
