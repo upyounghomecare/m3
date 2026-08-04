@@ -402,6 +402,18 @@ if(!window.__qsGateHook){window.__qsGateHook=true;
    var el=e.target;if(!el||!el.closest)return;
    var card=el.closest('.product-wrap');if(!card||el.closest('#qw-ovl'))return;
    var h=card.querySelector('h3');var nm=h?(h.textContent||''):'';
+   /* 事前把關:1SHOP規定加購品必須購物車先有主商品(清洗服務)才加得進,否則會在跳完注意事項/配送日後才失敗。
+      這裡在按下的當下就先擋、給友善提示,不讓客戶白填 */
+   var _isAddon=/AIRMON|除濕機|風鼓清洗|挑高施作|商用\/重油汙|偏遠地區|車馬費/.test(nm);
+   if(_isAddon&&(_indoorInCart()+_outdoorInCart())<=0){
+     var _b=el.closest('button,a');if(!_b)return;
+     var _t=(_b.textContent||'').replace(/\s/g,'');
+     if(_t.indexOf('加入')<0&&_t.indexOf('加購')<0&&_t.indexOf('選購')<0)return;
+     e.preventDefault();e.stopImmediatePropagation();
+     var _m='請先在上方「清洗項目」選擇要清洗的冷氣機型，才能加購此項目';
+     try{if(window.notificationMsg)notificationMsg(_m,'danger',4);else alert(_m);}catch(_e){alert(_m);}
+     return;
+   }
    var k=(nm.indexOf('AIRMON')>=0)?'air':((nm.indexOf('除濕機')>=0)?'dh':null);
    if(!k)return;var _done=(k==='dh')?window.__qsDhDelivery:window['__qsRead_'+k];if(_done)return;
    var btn=el.closest('button,a');if(!btn)return;
