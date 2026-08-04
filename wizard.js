@@ -510,6 +510,13 @@ function _corrBusy(){var t=window.__qsCorrBusy||0;return t>0&&(Date.now()-t)<120
 function _maskPrice(price,busy){try{if(!price)return;var sp=price.querySelector('.qs-calc');
  if(busy){if(!sp){[].slice.call(price.children).forEach(function(c){c.style.display='none';});sp=document.createElement('span');sp.className='qs-calc';sp.textContent='計算中…';sp.style.cssText='color:#8a93a0;font-size:13px;font-weight:600;white-space:nowrap';price.appendChild(sp);}}
  else if(sp){if(sp.parentElement)sp.parentElement.removeChild(sp);[].slice.call(price.children).forEach(function(c){c.style.display='';});}}catch(e){}}
+var _dhGone=0;
+function _dhResetWatch(){try{
+  if(window.__qsAdding){_dhGone=0;return;}
+  var has=_cartArr().some(function(x){return (x.ProductName||'').indexOf('三菱重工除濕機')>=0;});
+  if(has){_dhGone=0;return;}
+  if(window.__qsDhDelivery||window.__qsRead_dh){_dhGone++;if(_dhGone>=4){window.__qsDhDelivery='';window.__qsRead_dh='';_dhGone=0;}}
+}catch(e){}}
 function maskCalc(){try{
  var busy=_corrBusy();var sec=document.getElementById('cart-section');if(!sec)return;
  var ov=document.getElementById('qs-calcov');
@@ -793,7 +800,7 @@ function _corrMap(){var bm=window.__qsBtnMap||{},map={};for(var pid in bm){if(!b
 function _corrCart(){var res={},c=_cartArr();for(var i=0;i<c.length;i++){var x=c[i];if((x.ProductName||'').indexOf('加購品已享優惠價')<0)continue;var q=Number(x.Quantity)||0;var d=Number(x.PriceBase)||(q>0?Math.round((Number(x.LineTotal)||0)/q):0);if(_CORR_DENOMS.indexOf(d)>=0)res[d]={idx:i,qty:q};}return res;}
 function _corrInCart(){var c=_cartArr(),s=0;for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)s+=Number(c[i].LineTotal)||0;}return s;}
 /* _setCorr(M):設定校正「總金額」=M,拆成4面額($1000×q1000+$100×q100+$10×q10+$1×q1)。每次呼叫只做一個動作(加入/改量),靠多輪(600ms快線)收斂,避免並發非同步亂序 */
-function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
+function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));M=Math.floor(M/10)*10;/* 以$10為單位,少一個面額步驟、加快收斂;無條件捨去保證絕不多收 */
  var want={1000:Math.floor(M/1000),100:Math.floor((M%1000)/100),10:Math.floor((M%100)/10),1:M%10};
  var have=_corrCart(),map=_corrMap(),ops=[],k,d;
  /* 排程:移除多餘面額 → 加入缺的面額(加完若需>1再設量) → 既有面額調量。整串一次做完(間隔650ms循序,避免1SHOP併發丟棄),把畫面跳動壓在3-4秒 */
@@ -803,7 +810,7 @@ function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
  if(!ops.length)return;
  _adjSyncing=true;if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();var i2=0;
  (function step(){
-   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;},1200);return;}
+   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;},900);return;}
    var op=ops[i2++];
    try{
      if(op.t==='add'){if(map[op.d]&&window.viewProduct)window.viewProduct(map[op.d].btn,map[op.d].pid);}
@@ -813,7 +820,7 @@ function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
          else if(h.qty!==op.n&&window.cartChangeItem){window.cartChangeItem(h.idx,op.n);}
        }}
    }catch(e){}
-   setTimeout(step,650);
+   setTimeout(step,500);
  })();
 }
 function reconcileAdjust(){try{
@@ -828,11 +835,10 @@ function reconcileAdjust(){try{
  var C=_adjC||0;
  if(C<=0.0001||P<=0){if(X>0){if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();_setCorr(0);}else{window.__qsCorrBusy=0;}return;}
  var Cnow=sub>0?(sub-xiao)/sub:0;if(X>0&&Math.abs(Cnow-C)>0.02){if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();_setCorr(0);return;}
- var S=sub-P-X;var target=S-Math.ceil(C*S)+P;if(xiao===target){window.__qsCorrBusy=0;}else if(!window.__qsCorrBusy){window.__qsCorrBusy=Date.now();}
- if(xiao>target){var dXo=Math.round((target-xiao)/(1-C));_setCorr(Math.max(0,X+dXo));return;}
- if(xiao===target)return;
- var dX=Math.round((target-xiao)/(1-C));if(dX===0)dX=(target-xiao)>0?1:-1;
- var nX=Math.max(0,X+dX);if(nX!==X)_setCorr(nX);
+ var S=sub-P-X;var target=S-Math.ceil(C*S)+P;var gap=target-xiao;
+ if(gap>=0&&gap<=10){window.__qsCorrBusy=0;return;}/* 已達標(容許≤$10且偏客戶) */
+ if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();
+ var dX=Math.round(gap/(1-C));var nX=Math.max(0,X+dX);_setCorr(nX);
 }catch(e){}}
 /* 校正看門狗:偵測「該有校正、卻卡在不足且連續~6秒毫無進展」→ 強制解鎖 _adjSyncing，讓自動補回重試(補多品項並發時校正卡0導致保護失效的漏洞)。只在明顯錯誤時動作、只補不減、正常建構1.5-3秒完成不會誤觸 */
 var _adjWatchLastX=null,_adjWatchStuck=0;
@@ -847,7 +853,7 @@ function reconcileAdjustWatch(){try{
   var C=(X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0);
   if(C<=0.0001){_adjWatchStuck=0;_adjWatchLastX=X;return;}
   var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
-  if(xiao>=target-3){_adjWatchStuck=0;_adjWatchLastX=X;return;}/* 已正確 */
+  if(xiao>=target-12){_adjWatchStuck=0;_adjWatchLastX=X;return;}/* 已正確 */
   if(_adjWatchLastX!==null&&X===_adjWatchLastX){_adjWatchStuck++;}else{_adjWatchStuck=0;}
   _adjWatchLastX=X;
   if(_adjWatchStuck>=3){_adjSyncing=false;_adjWatchStuck=0;}/* 連續~6秒卡住且不足→強制解鎖,下一輪reconcileAdjust會重補 */
@@ -941,7 +947,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();_dhResetWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
