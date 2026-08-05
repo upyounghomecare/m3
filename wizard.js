@@ -393,15 +393,7 @@ var api={
   seeDetail:function(){
     _qwResume=step;
     close();
-    var b=document.getElementById('qw-back');
-    if(!b){
-      b=document.createElement('button');b.type='button';b.id='qw-back';
-      b.textContent='↩ 回到引導精靈';
-      b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:99990;background:linear-gradient(135deg,#C9962A,#B8860B);color:#fff;border:none;border-radius:99px;padding:15px 30px;font-size:15.5px;font-weight:900;letter-spacing:.02em;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 30px rgba(184,134,11,.5);white-space:nowrap;animation:qwbk .34s cubic-bezier(.2,1.4,.4,1)';
-      if(!document.getElementById('qw-bk-css')){var bs=document.createElement('style');bs.id='qw-bk-css';bs.textContent='@keyframes qwbk{0%{transform:translateX(-50%) translateY(18px);opacity:0}60%{transform:translateX(-50%) translateY(-3px);opacity:1}100%{transform:translateX(-50%) translateY(0);opacity:1}}';document.head.appendChild(bs);}
-      b.onclick=function(){if(b.parentNode)b.parentNode.removeChild(b);open();};
-      document.body.appendChild(b);
-    }
+    _showBackBtn();
     setTimeout(function(){
       var t=null,ws=document.querySelectorAll('div');
       for(var i=0;i<ws.length;i++){var im=ws[i].querySelectorAll('img');if(im.length>=8&&/img\.1shop\.tw/.test(im[0].src||'')){t=ws[i];break;}}
@@ -614,6 +606,30 @@ function addPlanOnlyBtn(){try{
   var has=!!box.querySelector('.qs-plan.sel');
   b.style.opacity=has?'1':'.5';
   b.style.cursor=has?'pointer':'not-allowed';
+}catch(e){}}
+/* 「↩ 回到引導精靈」浮動鈕:①按📖看詳情時顯示 ②精靈被關掉且購物車是空的(客戶沒有其他入口可回精靈)時也顯示
+   購物車有商品時不顯示(底部已有「共N件·立即結帳」浮動條,且購物車上方有🪄重選連結),結帳中也不顯示 */
+function _showBackBtn(){try{
+  var b=document.getElementById('qw-back');
+  if(b)return b;
+  if(!document.getElementById('qw-bk-css')){var bs=document.createElement('style');bs.id='qw-bk-css';bs.textContent='@keyframes qwbk{0%{transform:translateX(-50%) translateY(18px);opacity:0}60%{transform:translateX(-50%) translateY(-3px);opacity:1}100%{transform:translateX(-50%) translateY(0);opacity:1}}';document.head.appendChild(bs);}
+  b=document.createElement('button');b.type='button';b.id='qw-back';
+  b.textContent='↩ 回到引導精靈';
+  b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:99990;background:linear-gradient(135deg,#C9962A,#B8860B);color:#fff;border:none;border-radius:99px;padding:15px 30px;font-size:15.5px;font-weight:900;letter-spacing:.02em;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 30px rgba(184,134,11,.5);white-space:nowrap;animation:qwbk .34s cubic-bezier(.2,1.4,.4,1)';
+  b.onclick=function(){_hideBackBtn();open();};
+  document.body.appendChild(b);
+  return b;
+}catch(e){return null;}}
+function _hideBackBtn(){try{var b=document.getElementById('qw-back');if(b&&b.parentNode)b.parentNode.removeChild(b);}catch(e){}}
+function backBtnWatch(){try{
+  if(document.getElementById('qw-ovl')){_hideBackBtn();return;}   /* 精靈開著 */
+  if(!window.__qwShown)return;                                     /* 客戶還沒用過精靈 */
+  var cc=document.querySelector('select[name="CountyAndCity"]');
+  if(cc&&cc.offsetHeight>0){_hideBackBtn();return;}                /* 結帳中 */
+  var c=_cartArr(),has=false;
+  for(var i=0;i<c.length;i++){if(c[i].ProductType===0&&(c[i].ProductName||'').length>0){has=true;break;}}
+  if(has){_hideBackBtn();return;}                                  /* 有商品→用購物車的🪄連結 */
+  _showBackBtn();
 }catch(e){}}
 function maskCalc(){try{
  var busy=_corrBusy();var sec=document.getElementById('cart-section');if(!sec)return;
@@ -1072,7 +1088,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
