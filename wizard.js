@@ -4,14 +4,14 @@ try{
 var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
 function imj(t){return IB+t+'/600x.jpg';}
-var IMG_QUICK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/quickbuy.jpg';
-var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/standard.jpg';
-var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/earlybird2.jpg';
-var IMG_HOME='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/home.jpg';
-var IMG_SHOP='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/shop.jpg';
-var IMG_AREA_OK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/green.jpg';
-var IMG_AREA_RM='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/gold.jpg';
-var IMG_AREA_NO='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/red.jpg';
+var IMG_QUICK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/quickbuy.jpg';
+var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/standard.jpg';
+var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/earlybird2.jpg';
+var IMG_HOME='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/home.jpg';
+var IMG_SHOP='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/shop.jpg';
+var IMG_AREA_OK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/green.jpg';
+var IMG_AREA_RM='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/gold.jpg';
+var IMG_AREA_NO='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/red.jpg';
 var LINE_CS='https://line.me/R/ti/p/@063kttbk';
 var TW={
 '基隆市':['仁愛區','信義區','中正區','中山區','安樂區','暖暖區','七堵區'],
@@ -254,7 +254,7 @@ function render(){
     w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else {
     function planCard(k,img,note,ncls){var sel=plan===k;return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt=""><div class="qpn '+ncls+'">'+note+'</div></div>';}
-    w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ <b>標準方案將安排兩週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ <b>早鳥方案需等候 30 天後</b>才安排到府清洗。<br>若希望盡快清洗，請改選「標準方案」（兩週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
+    w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
   ovl.innerHTML=w;
   var _card=ovl.querySelector('.qw');
@@ -366,10 +366,10 @@ var api={
     if(!plan)return;
     if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
     var D={std:{t:'確認您的標準方案',lead:'您選擇的是「標準方案 95 折」',
-        li:['到府服務將安排在<b>下單日起兩週內</b>','實際到府日期，由約時人員<b>去電與您確認</b>','時間可以彈性的話，改選「早鳥方案」可享 <b>85 折</b>（需等候 30 天）'],
+        li:['到府服務將安排在<b>專人去電聯繫起 2 週內</b>','實際到府日期，由約時人員<b>去電與您確認</b>','時間可以彈性的話，改選「早鳥方案」可享 <b>85 折</b>（需等候 30 天）'],
         alt:'改選早鳥方案',ok:'我了解，確認標準方案',other:'early'},
       early:{t:'確認您的早鳥方案',lead:'您選擇的是「早鳥方案 85 折」',
-        li:['到府服務將安排在<b>下單日起 30 天後</b>','實際到府日期，由約時人員<b>去電與您確認</b>','如需盡快服務，請改選「標準方案」（兩週內到府）'],
+        li:['到府服務將安排在<b>專人去電聯繫約時起 30 天後</b>','實際到府日期，由約時人員<b>去電與您確認</b>','如需盡快服務，請改選「標準方案」（兩週內到府）'],
         alt:'改選標準方案',ok:'我了解，確認早鳥方案',other:'std'}}[plan];
     if(!D)return;
     var old=document.getElementById('qw-pc');if(old&&old.parentNode)old.parentNode.removeChild(old);
@@ -532,7 +532,7 @@ function addBrandBadge(){
     for(var i=0;i<lis.length;i++){if((lis[i].textContent||'').indexOf('本服務僅適用')>=0){li=lis[i];break;}}
     if(!li||li.querySelector('.qs-mhi'))return;
     var img=document.createElement('img');img.className='qs-mhi';
-    img.src='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/mhi-badge.jpg';
+    img.src='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/mhi-badge.jpg';
     img.alt='認明三菱重工 MITSUBISHI HEAVY INDUSTRIES';
     img.style.cssText='width:100%;max-width:200px;border-radius:11px;display:block;margin:9px auto 2px;border:1px solid #e2e8f1';
     li.appendChild(img);
@@ -657,7 +657,7 @@ function autoFeeNotes(){try{
  });
 }catch(e){}}
 var _PLANI={early:{img:'earlybird2.jpg',name:'早鳥方案 · 85折',sub:'安排 30 天後到府服務',nc:'#B8860B',sc:'#8a6a1f'},std:{img:'standard.jpg',name:'標準方案 · 95折',sub:'安排兩週內到府服務',nc:'#0C447C',sc:'#5a6672'}};
-var _PLANB='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@main/';
+var _PLANB='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@848e4541ea7afc7426e3a557308b57ca19ce81f3/';
 function _curPlan(){return (window.__qsPlan==='early')?'early':'std';}
 function _renderPlanSum(wrap,collapsed){
   var p=_curPlan();
