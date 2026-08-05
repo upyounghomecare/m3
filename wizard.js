@@ -192,7 +192,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'#qw-air .ok{background:#0C447C;color:#fff;border:none;border-radius:999px;padding:12px 28px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;width:100%}'
 +'#qw-toast{position:fixed;left:0;right:0;bottom:24px;z-index:100001;text-align:center;pointer-events:none}#qw-toast span{background:#042C53;color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;font-family:inherit}';
 
-var qty={},opened={},step=0,plan=null,env=null,ovl=null;
+var qty={},opened={},step=0,plan=null,env=null,ovl=null,_finishing=false;
 var areaCity=null,areaDist=null,areaCls=null;
 var INK=['wall','cs','cm','cl','m4','f4'];
 function money(n){return 'NT$ '+n.toLocaleString('en-US');}
@@ -402,9 +402,12 @@ var api={
     },180);
   },
   finish:function(){
-    if(window.__qsAdding)return;/* 防重入:雙擊/重複觸發會把商品加入兩次→客戶被收兩倍錢 */
+    /* 防重入用獨立旗標 _finishing;__qsAdding 會凍結所有保護機制(校正/車馬費/挑高/孤兒把關),
+       只能在真正開始加購時才設,且任何中途返回或例外都必須解除,否則保護會永久停擺 */
+    if(_finishing||window.__qsAdding)return;
     if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
-    window.__qsAdding=true;
+    _finishing=true;
+    try{
     /* 動態對應：不靠寫死商品ID，改用「名稱開頭比對」找出當前頁面的真實按鈕與ID
        （1SHOP複製頁面後商品ID會全變，寫死ID會失效；此法在任何頁面都可用）*/
     function realProds(){
@@ -417,14 +420,14 @@ var api={
     if(areaCls==='remote')qty.rm=1;
     var items=INDOOR.concat(OUTLIST,ADDON).filter(function(x){return qty[x.k]>0;});
     var jobs=[];items.forEach(function(x){var r=resolve(x.n);if(r){for(var i=0;i<qty[x.k];i++){jobs.push(r);}}});
-    if(jobs.length===0){alert('抱歉，加入購物車時發生問題，請再試一次；若持續失敗，可關閉精靈自行選購。');return;}
-    var btn=ovl.querySelector('.btn.pri');if(btn){btn.disabled=true;btn.textContent='加入中…';}
+    if(jobs.length===0){alert('抱歉，加入購物車時發生問題，請再試一次；若持續失敗，可關閉精靈自行選購。');_finishing=false;return;}
+    var btn=ovl?ovl.querySelector('.btn.pri'):null;if(btn){btn.disabled=true;btn.textContent='加入中…';}
     var i=0;
     function next(){
       if(i>=jobs.length){
         window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
         if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
-        setTimeout(function(){window.__qsAdding=false;},1800);
+        setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
         close();toast('已為您加入購物車，可再調整或結帳');
         /* 加完自動帶到「目前已經選購」購物車區,讓客戶馬上看到結果(不然精靈關掉後不知道發生什麼事) */
         setTimeout(function(){try{
@@ -442,6 +445,7 @@ var api={
     }
     window.__qsAdding=true;
     next();
+    }catch(e){_finishing=false;window.__qsAdding=false;}
   }
 };
 window.__qw=api;
