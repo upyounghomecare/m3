@@ -908,6 +908,35 @@ function _fanInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].Prod
 function _blowInCart(){var c=_cartArr(),n=0;c.forEach(function(x){var nm=x.ProductName||'';if(nm.indexOf('吊隱式大清洗保養')===0||nm.indexOf('吊隱式全清洗保養')===0)n+=Number(x.Quantity)||0;});return n;}
 var _fanSyncing=false;
 /* 把關:購物車有「風鼓清洗」但沒有「吊隱式大/全清洗」→ 自動移除(風鼓僅適用吊隱大/全) */
+/* 孤兒加購品把關:1SHOP規定加購品必須有主商品(清洗服務)才能加入,但客戶把清洗服務刪掉後,加購品會留在購物車
+   → 等於用加購價單買除濕機/AIRMON(少收價差)。此處偵測到「有加購品但沒有任何清洗服務」時自動移除並提示。
+   校正產品不算加購品(它是系統自己管的),移除主商品時校正會由 reconcileAdjust 自行歸零 */
+var _orphanSyncing=false;
+var _ADDON_NAMES=['三菱重工除濕機','AIRMON','風鼓清洗','挑高施作','商用/重油汙','偏遠地區加價','車馬費'];
+function reconcileOrphanAddon(){try{
+  if(window.__qsAdding||_orphanSyncing)return;
+  var c=_cartArr();if(!c.length)return;
+  var svc=_indoorInCart()+_outdoorInCart();
+  if(svc>0)return;                       /* 有清洗服務 → 正常 */
+  var target=null;
+  for(var i=0;i<c.length;i++){
+    var nm=c[i].ProductName||'';
+    if(nm.indexOf('加購品已享優惠價')>=0)continue;   /* 校正產品不動 */
+    for(var j=0;j<_ADDON_NAMES.length;j++){
+      if(nm.indexOf(_ADDON_NAMES[j])>=0){target=nm;break;}
+    }
+    if(target)break;
+  }
+  if(!target)return;
+  var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return (x.textContent||'').indexOf(target)>=0;})[0];
+  if(!it)return;
+  var rb=[].slice.call(it.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+  if(!rb)return;
+  _orphanSyncing=true;
+  try{window.removeCartItem(rb);}catch(e){}
+  try{toast('加購品需搭配冷氣清洗服務，已為您移除「'+target+'」');}catch(e){}
+  setTimeout(function(){_orphanSyncing=false;},1200);
+}catch(e){_orphanSyncing=false;}}
 function reconcileFan(){
   try{
     if(window.__qsAdding||_fanSyncing)return;
@@ -1007,7 +1036,7 @@ function reconcileAdjustWatch(){try{
   _adjWatchLastX=X;
   if(_adjWatchStuck>=3){_adjSyncing=false;_adjWatchStuck=0;}/* 連續~6秒卡住且不足→強制解鎖,下一輪reconcileAdjust會重補 */
 }catch(e){}}
-setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileAdjust();checkoutArea();},1500);
+setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileOrphanAddon();reconcileAdjust();checkoutArea();},1500);
 setInterval(function(){reconcileAdjust();},600);/* 加購品保護快線:每0.6秒巡一次，校正被刪/不足時最快補回，壓縮破防空窗 */
 setInterval(reconcileAdjustWatch,2000);/* 校正看門狗:每2秒巡一次 */
 function fillAddr(){
