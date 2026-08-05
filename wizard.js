@@ -82,7 +82,7 @@ var ICO_LIST='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke
 var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
 +'#qw-ovl *{box-sizing:border-box}'
 +'.qw{position:relative;background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}'
-+'@media (min-width:760px){#qw-ovl .qw{max-width:530px!important;padding:10px 8px 8px!important}}'+'#qw-ovl .qw .wel-start{max-width:89%!important;margin-left:auto!important;margin-right:auto!important;display:block!important}'+'.qw .qpnote{margin-top:11px;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.75}'+'.qw .qpn-info{background:#eaf2fb;border:1px solid #b9d3ee;color:#0C447C}'+'.qw .qpn-warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}'+'.qw .qdl{margin-top:12px;background:#fff;border:1.5px solid #dbe3ec;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(4,44,83,.06);cursor:pointer}'+'.qw .qdl:active{transform:scale(.99)}'+'.qw .qdl-ic{width:34px;height:34px;flex:0 0 auto;border-radius:9px;background:rgba(184,134,11,.09);display:flex;align-items:center;justify-content:center;font-size:17px}'+'.qw .qdl-tx{flex:1;min-width:0}.qw .qdl-t1{font-size:14px;font-weight:900;color:#042C53}.qw .qdl-t2{font-size:11.5px;color:#5f6b78;margin-top:2px}'+'.qw .qdl-ar{color:#B8860B;font-size:18px;font-weight:900}'+'#qw-ovl .qw .callnote,#qw-ovl .qw .envnote,#qw-ovl .qw .optnote,#qw-ovl .qw .warnbox{font-size:13.5px!important;font-weight:800!important;line-height:1.6!important;padding:10px 13px!important}'+'#qw-ovl .qw .callnote b,#qw-ovl .qw .envnote b,#qw-ovl .qw .optnote b,#qw-ovl .qw .warnbox b{font-weight:900!important}'/* 說明類文字統一放大加粗:內文CSS內有舊的.qw重複樣式會壓過wizard.js,故用#qw-ovl前綴+!important強制生效 */+'#qs-ovl,#qs-ovl2{align-items:flex-start!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}#qs-ovl>*,#qs-ovl2>*{margin:auto!important}'/* 修:內文JS彈窗原本垂直置中又沒開捲動,內容比螢幕高時頂端會被切掉且捲不到(需縮放才看得到) */
++'@media (min-width:760px){#qw-ovl .qw{max-width:640px!important;padding:12px 14px 14px!important}}'+'@media (min-width:1100px){#qw-ovl .qw{max-width:720px!important}}'+'@media (min-width:760px){#qw-terms .qwt-m{max-width:520px!important}}'+'#qw-ovl .qw .wel-start{max-width:89%!important;margin-left:auto!important;margin-right:auto!important;display:block!important}'+'.qw .qpnote{margin-top:11px;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.75}'+'.qw .qpn-info{background:#eaf2fb;border:1px solid #b9d3ee;color:#0C447C}'+'.qw .qpn-warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}'+'.qw .qdl{margin-top:12px;background:#fff;border:1.5px solid #dbe3ec;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(4,44,83,.06);cursor:pointer}'+'.qw .qdl:active{transform:scale(.99)}'+'.qw .qdl-ic{width:34px;height:34px;flex:0 0 auto;border-radius:9px;background:rgba(184,134,11,.09);display:flex;align-items:center;justify-content:center;font-size:17px}'+'.qw .qdl-tx{flex:1;min-width:0}.qw .qdl-t1{font-size:14px;font-weight:900;color:#042C53}.qw .qdl-t2{font-size:11.5px;color:#5f6b78;margin-top:2px}'+'.qw .qdl-ar{color:#B8860B;font-size:18px;font-weight:900}'+'#qw-ovl .qw .callnote,#qw-ovl .qw .envnote,#qw-ovl .qw .optnote,#qw-ovl .qw .warnbox{font-size:13.5px!important;font-weight:800!important;line-height:1.6!important;padding:10px 13px!important}'+'#qw-ovl .qw .callnote b,#qw-ovl .qw .envnote b,#qw-ovl .qw .optnote b,#qw-ovl .qw .warnbox b{font-weight:900!important}'/* 說明類文字統一放大加粗:內文CSS內有舊的.qw重複樣式會壓過wizard.js,故用#qw-ovl前綴+!important強制生效 */+'#qs-ovl,#qs-ovl2{align-items:flex-start!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}#qs-ovl>*,#qs-ovl2>*{margin:auto!important}'/* 修:內文JS彈窗原本垂直置中又沒開捲動,內容比螢幕高時頂端會被切掉且捲不到(需縮放才看得到) */
 +'.qw .on.qw-on-sm{font-size:12.5px;white-space:nowrap;letter-spacing:-.2px}'
 +'.qw .qw-thumb{cursor:zoom-in}'
 +'#qw-zoom{position:fixed;inset:0;z-index:100005;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}#qw-zoom img{max-width:100%;max-height:90vh;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.5)}'
@@ -375,13 +375,13 @@ var api={
     var old=document.getElementById('qw-pc');if(old&&old.parentNode)old.parentNode.removeChild(old);
     var ov=document.createElement('div');ov.id='qw-pc';
     ov.style.cssText='position:fixed;inset:0;z-index:100002;background:rgba(4,20,40,.6);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
-    ov.innerHTML='<div style="background:#fff;border-radius:17px;max-width:420px;width:100%;margin:auto;box-shadow:0 14px 44px rgba(0,0,0,.35);overflow:hidden">'
+    ov.innerHTML='<div style="background:#fff;border-radius:17px;max-width:500px;width:100%;margin:auto;box-shadow:0 14px 44px rgba(0,0,0,.35);overflow:hidden">'
       +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:16px 20px;text-align:center;font-size:17px;font-weight:900">'+D.t+'</div>'
       +'<div style="padding:18px 20px"><div style="font-size:15px;font-weight:900;text-align:center;color:#B8860B;margin-bottom:13px">'+D.lead+'</div>'
       +'<ul style="list-style:none;margin:0;padding:0">'+D.li.map(function(x){return '<li style="font-size:13.5px;line-height:1.7;color:#17212c;padding-left:17px;position:relative;margin-bottom:9px"><span style="position:absolute;left:0;color:#B8860B;font-weight:900">・</span>'+x+'</li>';}).join('')+'</ul></div>'
       +'<div style="padding:0 20px 20px;display:flex;gap:10px">'
-      +'<button type="button" id="qw-pc-alt" style="flex:1;border:1.5px solid #dbe3ec;background:transparent;color:#5f6b78;border-radius:12px;padding:13px;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer">'+D.alt+'</button>'
-      +'<button type="button" id="qw-pc-ok" style="flex:1;border:none;background:#042C53;color:#fff;border-radius:12px;padding:13px;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer">'+D.ok+'</button>'
+      +'<button type="button" id="qw-pc-alt" style="flex:1;border:1.5px solid #dbe3ec;background:transparent;color:#5f6b78;border-radius:12px;padding:13px 10px;font-size:13.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap">'+D.alt+'</button>'
+      +'<button type="button" id="qw-pc-ok" style="flex:1;border:none;background:#042C53;color:#fff;border-radius:12px;padding:13px 10px;font-size:13.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap">'+D.ok+'</button>'
       +'</div></div>';
     document.body.appendChild(ov);
     function kill(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
@@ -424,6 +424,14 @@ var api={
         if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
         setTimeout(function(){window.__qsAdding=false;},1800);
         close();toast('已為您加入購物車，可再調整或結帳');
+        /* 加完自動帶到「目前已經選購」購物車區,讓客戶馬上看到結果(不然精靈關掉後不知道發生什麼事) */
+        setTimeout(function(){try{
+          var t=null,hs=document.querySelectorAll('h1');
+          for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0){t=hs[k];break;}}
+          if(!t)t=document.getElementById('cart-section');
+          if(t){var y=t.getBoundingClientRect().top+window.pageYOffset-70;
+            try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}}
+        }catch(e){}},420);
         return;
       }
       var job=jobs[i++];
