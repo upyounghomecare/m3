@@ -256,6 +256,7 @@ function render(){
     function planCard(k,img,note,ncls){var sel=plan===k;return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt=""><div class="qpn '+ncls+'">'+note+'</div></div>';}
     w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
+  if(!ovl)return;/* 精靈已關閉就別動,避免崩潰 */
   ovl.innerHTML=w;
   var _card=ovl.querySelector('.qw');
   if(_card){var _x=document.createElement('button');_x.type='button';_x.className='qw-x';_x.setAttribute('aria-label','關閉');_x.innerHTML='×';_x.onclick=function(e){e.stopPropagation();close();};_card.appendChild(_x);}
@@ -645,8 +646,30 @@ function backBtnWatch(){try{
   if(has){_hideBackBtn();return;}                                  /* 有商品→用購物車的🪄連結 */
   _showBackBtn();
 }catch(e){}}
+/* 金額計算中鎖住「立即結帳」:移除保護品的瞬間,校正還沒歸零(最壞會多收數千元),
+   若此時客戶按下結帳就會被多收。鎖定僅在計算中(_corrBusy,含12秒硬上限),算完立即解除;
+   全程 try/catch,任何意外都不會卡住按鈕(fail-open) */
+function _lockCheckout(busy){try{
+  var btns=[].slice.call(document.querySelectorAll('button,a')).filter(function(b){
+    return (b.textContent||'').replace(/\s/g,'').indexOf('立即結帳')>=0;
+  });
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    if(busy){
+      if(b.getAttribute('data-qslock')==null){
+        b.setAttribute('data-qslock','1');
+        b.style.pointerEvents='none';b.style.opacity='.5';b.style.cursor='not-allowed';
+        b.setAttribute('title','金額計算中，請稍候…');
+      }
+    }else if(b.getAttribute('data-qslock')!=null){
+      b.removeAttribute('data-qslock');
+      b.style.pointerEvents='';b.style.opacity='';b.style.cursor='';
+      b.removeAttribute('title');
+    }
+  }
+}catch(e){}}
 function maskCalc(){try{
- var busy=_corrBusy();var sec=document.getElementById('cart-section');if(!sec)return;
+ var busy=_corrBusy();_lockCheckout(busy);var sec=document.getElementById('cart-section');if(!sec)return;
  var ov=document.getElementById('qs-calcov');
  if(busy){
    if(!ov){
