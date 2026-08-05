@@ -1031,10 +1031,10 @@ function reconcileAdjustWatch(){try{
   var C=(X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0);
   if(C<=0.0001){_adjWatchStuck=0;_adjWatchLastX=X;return;}
   var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
-  if(xiao>=target-3){_adjWatchStuck=0;_adjWatchLastX=X;return;}/* 已正確 */
+  if(xiao>=target-3&&xiao<=target+3){_adjWatchStuck=0;_adjWatchLastX=X;return;}/* 已正確。雙向容差:小計太低=少收、太高=多收,兩個方向都要救(原本只檢查太低,校正卡在過高時看門狗會誤判為正常→客戶被多收) */
   if(_adjWatchLastX!==null&&X===_adjWatchLastX){_adjWatchStuck++;}else{_adjWatchStuck=0;}
   _adjWatchLastX=X;
-  if(_adjWatchStuck>=3){_adjSyncing=false;_adjWatchStuck=0;}/* 連續~6秒卡住且不足→強制解鎖,下一輪reconcileAdjust會重補 */
+  if(_adjWatchStuck>=3){_adjSyncing=false;_adjWatchStuck=0;}/* 連續~6秒卡住(不論太低或太高)→強制解鎖,下一輪reconcileAdjust會重算 */
 }catch(e){}}
 setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileOrphanAddon();reconcileAdjust();checkoutArea();},1500);
 setInterval(function(){reconcileAdjust();},600);/* 加購品保護快線:每0.6秒巡一次，校正被刪/不足時最快補回，壓縮破防空窗 */
