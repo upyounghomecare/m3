@@ -363,7 +363,7 @@ var api={
   go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){alert('請至少選擇一台室內機或室外機清洗喔！\n可回上一步（室內機／室外機）選擇台數。');return;}}step=n;render();},
   /* 方案確認彈窗:按「完成，前往結帳」時先跳一次確認(兩種方案各自內容),確認後才真的加入購物車 */
   confirmPlan:function(){
-    if(!plan)return;
+    if(!plan||window.__qsAdding)return;/* 加購進行中不再跳確認窗 */
     if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
     var D={std:{t:'確認您的標準方案',lead:'您選擇的是「標準方案 95 折」',
         li:['到府服務將安排在<b>專人去電聯繫起 2 週內</b>','實際到府日期，由約時人員<b>去電與您確認</b>','時間可以彈性的話，改選「早鳥方案」可享 <b>85 折</b>（需等候 30 天）'],
@@ -386,7 +386,7 @@ var api={
     document.body.appendChild(ov);
     function kill(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
     ov.querySelector('#qw-pc-alt').onclick=function(){kill();api.pickPlan(D.other);};
-    ov.querySelector('#qw-pc-ok').onclick=function(){kill();api.finish();};
+    ov.querySelector('#qw-pc-ok').onclick=function(e){var b=this;if(b.disabled)return;b.disabled=true;b.textContent='處理中…';kill();api.finish();};
     ov.addEventListener('click',function(e){if(e.target===ov)kill();});
   },
   /* 先看完整圖文介紹:關精靈→捲到詳情圖區→浮出「回到引導精靈」(選擇都保留,回來時停在原本那一步) */
@@ -402,7 +402,9 @@ var api={
     },180);
   },
   finish:function(){
+    if(window.__qsAdding)return;/* 防重入:雙擊/重複觸發會把商品加入兩次→客戶被收兩倍錢 */
     if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
+    window.__qsAdding=true;
     /* 動態對應：不靠寫死商品ID，改用「名稱開頭比對」找出當前頁面的真實按鈕與ID
        （1SHOP複製頁面後商品ID會全變，寫死ID會失效；此法在任何頁面都可用）*/
     function realProds(){
