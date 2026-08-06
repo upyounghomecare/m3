@@ -662,11 +662,23 @@ function _lockCheckout(busy){try{
         b.setAttribute('data-qslock','1');
         b.style.pointerEvents='none';b.style.opacity='.5';b.style.cursor='not-allowed';
         b.setAttribute('title','金額計算中，請稍候…');
+        /* pointer-events只擋指標裝置,不擋鍵盤:桌機客戶按Tab聚焦後按Enter,瀏覽器仍會送出原生click。
+           故一併移出Tab順序並停用。先把原本狀態記在data-*,解鎖時只還原「我們改過的」,
+           避免把本來就該停用/本來就有tabindex的按鈕誤開或改壞。 */
+        b.setAttribute('data-qstab',b.hasAttribute('tabindex')?b.getAttribute('tabindex'):'__none__');
+        b.setAttribute('tabindex','-1');
+        b.setAttribute('aria-disabled','true');
+        if(b.tagName==='BUTTON'&&!b.disabled){b.disabled=true;b.setAttribute('data-qsdis','1');}
+        try{if(document.activeElement===b&&b.blur)b.blur();}catch(e2){}
       }
     }else if(b.getAttribute('data-qslock')!=null){
       b.removeAttribute('data-qslock');
       b.style.pointerEvents='';b.style.opacity='';b.style.cursor='';
       b.removeAttribute('title');
+      var pt=b.getAttribute('data-qstab');
+      if(pt==null||pt==='__none__')b.removeAttribute('tabindex');else b.setAttribute('tabindex',pt);
+      b.removeAttribute('data-qstab');b.removeAttribute('aria-disabled');
+      if(b.getAttribute('data-qsdis')!=null){b.disabled=false;b.removeAttribute('data-qsdis');}
     }
   }
 }catch(e){}}
