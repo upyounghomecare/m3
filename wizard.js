@@ -261,7 +261,7 @@ function render(){
     w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else {
     function planCard(k,img,note,ncls){var sel=plan===k;return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt=""><div class="qpn '+ncls+'">'+note+'</div></div>';}
-    w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
+    w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
   if(!ovl)return;/* 精靈已關閉就別動,避免崩潰 */
   ovl.innerHTML=w;
@@ -397,7 +397,7 @@ var api={
     ov.querySelector('#qw-pc-ok').onclick=function(e){var b=this;if(b.disabled)return;b.disabled=true;b.textContent='處理中…';kill();api.finish();};
     ov.addEventListener('click',function(e){if(e.target===ov)kill();});
   },
-  /* 先看完整圖文介紹:關精靈→捲到詳情圖區→浮出「回到引導精靈」(選擇都保留,回來時停在原本那一步) */
+  /* 先看服務說明/規範完整圖文介紹:關精靈→捲到詳情圖區→浮出「回到引導精靈」(選擇都保留,回來時停在原本那一步) */
   seeDetail:function(){
     _qwResume=step;
     close();
@@ -709,7 +709,9 @@ function styleCorrLine(){try{var items=[].slice.call(document.querySelectorAll('
 /* 自己下單時,系統自動加入的費用(車馬費/商用/偏遠)在購物車項目下補一行白話說明,避免客戶覺得莫名多收 */
 var _FEENOTE=[
  {m:'車馬費',t:'🚗 只洗 1 台室外機需加收車馬費；清洗 2 台室外機以上免加收車馬費'},
- {m:'商用/重油汙加價',t:'🏢 營業場所/重油汙加價，每台 +$1,000'},
+ /* 商用加價的計價基準會變:有室內機→按室內機台數;完全沒室內機(只洗室外機)→按室外機台數。
+    所以文案寫成函式,依購物車現況產生,客戶看到的永遠是自己那筆的正確說明 */
+ {m:'商用/重油汙加價',t:function(){return '🏢 營業場所/重油汙加價，每台'+(_indoorInCart()>0?'室內機':'室外機')+' +$1,000';}},
  {m:'偏遠地區加價',t:'📍 您的服務地址屬偏遠地區，每張訂單收一次 +$600'}
 ];
 function autoFeeNotes(){try{
@@ -717,11 +719,14 @@ function autoFeeNotes(){try{
  items.forEach(function(it){
   if(/cart-empty/.test(it.className)||(it.closest&&it.closest('#qw-ovl')))return;
   var content=it.querySelector('.item-content')||it;
-  if(content.querySelector('.qs-feenote'))return;
   var nmEl=it.querySelector('.item-name');var nm=nmEl?(nmEl.textContent||''):(it.textContent||'');
+  var old=content.querySelector('.qs-feenote');
   for(var i=0;i<_FEENOTE.length;i++){var f=_FEENOTE[i];
    if(nm.indexOf(f.m)>=0){
-    var d=document.createElement('div');d.className='qs-feenote';d.textContent=f.t;
+    var txt=(typeof f.t==='function')?f.t():f.t;
+    /* 動態文案(如商用加價)會隨購物車變動,已存在時要更新而不是直接跳過 */
+    if(old){if(old.textContent!==txt)old.textContent=txt;break;}
+    var d=document.createElement('div');d.className='qs-feenote';d.textContent=txt;
     d.style.cssText='clear:both;font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:7px;padding:6px 10px;margin:8px 0 2px;line-height:1.5;font-weight:600';
     content.appendChild(d);break;
    }
@@ -784,22 +789,38 @@ function addContinueBtn(){
       a.setAttribute('data-b','1');
       a.onclick=function(){
         if(!confirm('這會清空目前購物車，重新用引導精靈挑選。\n確定要重新開始嗎？'))return;
+        var _origTxt=a.textContent;
         a.textContent='清空中…';
         window.__qsAdding=true;
-        var n=0;
+        var n=0,_t0=Date.now(),_fin=false;
+        function _done(){
+          if(_fin)return;_fin=true;
+          qty={};plan=null;env=null;areaCity=null;areaDist=null;areaCls=null;opened={};
+          window.__qsPlan=null;window.__qsDhDelivery='';window.__qsRead_dh='';window.__qsRead_air='';
+          window.__qsCorrBusy=0;
+          try{a.textContent=_origTxt;}catch(e){}
+          setTimeout(function(){window.__qsAdding=false;_qwResume=0;try{open();}catch(e){}},900);
+        }
         (function clr(){
-          var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){
-            return [].slice.call(x.querySelectorAll('button,a,i,span')).some(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;});
-          })[0];
-          if(!it||n>20){
-            qty={};plan=null;env=null;areaCity=null;areaDist=null;areaCls=null;opened={};
-            window.__qsPlan=null;window.__qsDhDelivery='';window.__qsRead_dh='';window.__qsRead_air='';
-            window.__qsCorrBusy=0;
-            setTimeout(function(){window.__qsAdding=false;_qwResume=0;open();},900);
-            return;
-          }
-          var rb=[].slice.call(it.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
-          try{window.removeCartItem(rb);n++;}catch(e){}
+          var stop=false;
+          try{
+            /* 折扣/優惠列的 ProductType 是 99(無商品ID),removeCartItem 對它完全無效。
+               不跳過的話迴圈會一直卡在同一列空轉,畫面停在「清空中…」,
+               而且 __qsAdding 會把所有金額保護凍結整整十幾秒。 */
+            var cart=(window._UserSession&&window._UserSession.Cart)||[];
+            var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){
+              var ci=cart[Number(x.getAttribute('data-item'))];
+              if(ci&&Number(ci.ProductType)===99)return false;
+              return [].slice.call(x.querySelectorAll('button,a,i,span')).some(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;});
+            })[0];
+            n++;/* 先計數再動作:失敗或例外也要算,否則計數停住就變成無限迴圈(保護永遠解不開) */
+            if(!it||n>25||(Date.now()-_t0)>20000){stop=true;}
+            else{
+              var rb=[].slice.call(it.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+              if(rb)window.removeCartItem(rb);
+            }
+          }catch(e){stop=true;}/* 出例外一律收尾,不能讓 __qsAdding 卡在 true */
+          if(stop){_done();return;}
           setTimeout(clr,600);
         })();
       };
