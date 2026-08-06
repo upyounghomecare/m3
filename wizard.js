@@ -1136,6 +1136,21 @@ function updateFab(){
 }
 /* 在1SHOP內建浮動鈕群(.chat)加一顆「↓ 前往選購」:長頁(詳情圖多)客戶要滑很久才到選購區,原生只有回到最上方。
    不沿用goTopBtn的class(那是「捲下去才顯示」,與本鈕相反),自帶顯示邏輯:選購區還在畫面下方才顯示 */
+/* 右下角按鈕組(1SHOP原生.chat容器,內含「↑回到上方」與我們插入的「↓前往選購」)固定在bottom:20px,
+   完全不知道底部有浮動結帳條 → 浮動條一出現就把最下面那顆(↑回到上方)壓掉56px。
+   這裡依浮動條實際高度動態把整組往上抬,浮動條消失時自動復原。
+   註:#qs-fab是position:fixed,fixed元素的offsetParent恆為null,不可用它判斷可見性,只能看display/高度 */
+function liftCornerBtns(){try{
+  var chat=document.querySelector('.chat');if(!chat)return;
+  var fab=document.getElementById('qs-fab');
+  var h=0;
+  if(fab){var cs=getComputedStyle(fab);if(cs.display!=='none'&&cs.visibility!=='hidden')h=Math.round(fab.getBoundingClientRect().height);}
+  var want=h>0?(h+12)+'px':'';
+  if(chat.getAttribute('data-qslift')===want)return;
+  chat.setAttribute('data-qslift',want);
+  if(want)chat.style.setProperty('bottom',want,'important');
+  else chat.style.removeProperty('bottom');
+}catch(e){}}
 function addGoBottomBtn(){try{
   var list=document.querySelector('.chat ul.action-list');if(!list)return;
   var ref=list.querySelector('li.goTopBtn');if(!ref)return;
@@ -1156,7 +1171,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
