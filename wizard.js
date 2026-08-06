@@ -792,11 +792,23 @@ function addContinueBtn(){
         var _origTxt=a.textContent;
         a.textContent='清空中…';
         window.__qsAdding=true;
+        /* 清空期間 __qsAdding 會凍結所有金額保護,若此時購物車還剩「保護品已被刪、校正還在」的
+           中間狀態,小計會虛高。所以要同時舉起計算中旗標把結帳鈕鎖住(每輪刷新,避免12秒上限中途到期) */
+        window.__qsCorrBusy=Date.now();
         var n=0,_t0=Date.now(),_fin=false;
         function _done(){
           if(_fin)return;_fin=true;
           qty={};plan=null;env=null;areaCity=null;areaDist=null;areaCls=null;opened={};
           window.__qsPlan=null;window.__qsDhDelivery='';window.__qsRead_dh='';window.__qsRead_air='';
+          /* 這幾個全域若不一起清掉會變成幽靈設定:
+             __qsEnv 殘留 'biz' → 客戶改用「自己選」時系統仍自動加收商用加價 $1,000/台,並壓掉車馬費判斷
+             __qsAreaCity/Dist  → 結帳表單被自動填入上一次的舊地址,連帶算錯偏遠加價
+             __qsAgreed/GatePass→ 同意條款的閘門被跳過 */
+          window.__qsEnv=null;window.__qsAreaCity=null;window.__qsAreaDist=null;window.__qsAreaCls=null;
+          window.__qsAgreed=false;window.__qsGatePass=false;
+          try{['CountyAndCity','Area'].forEach(function(nm){var e=document.querySelector('select[name="'+nm+'"]');
+            if(e){e.removeAttribute('data-qsc');e.removeAttribute('data-qsa');}});
+            var sv=_svcEnvField();if(sv)sv.removeAttribute('data-qse');}catch(e){}
           window.__qsCorrBusy=0;
           try{a.textContent=_origTxt;}catch(e){}
           setTimeout(function(){window.__qsAdding=false;_qwResume=0;try{open();}catch(e){}},900);
@@ -814,6 +826,7 @@ function addContinueBtn(){
               return [].slice.call(x.querySelectorAll('button,a,i,span')).some(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;});
             })[0];
             n++;/* 先計數再動作:失敗或例外也要算,否則計數停住就變成無限迴圈(保護永遠解不開) */
+            window.__qsCorrBusy=Date.now();/* 每輪刷新,讓結帳鈕整段清空期間都鎖著 */
             if(!it||n>25||(Date.now()-_t0)>20000){stop=true;}
             else{
               var rb=[].slice.call(it.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
