@@ -38,21 +38,21 @@ var REMOTE=['台中市外埔區','台中市大安區','台中市大甲區','台�
 var NOSVC=['南投縣中寮鄉','南投縣仁愛鄉','南投縣信義鄉','南投縣國姓鄉','南投縣埔里鎮','南投縣水里鄉','南投縣竹山鎮','南投縣集集鎮','南投縣魚池鄉','南投縣鹿谷鄉','台中市和平區','台南市六甲區','台南市北門區','台南市南化區','台南市大內區','台南市學甲區','台南市將軍區','台南市山上區','台南市左鎮區','台南市後壁區','台南市新營區','台南市東山區','台南市柳營區','台南市楠西區','台南市白河區','台南市龍崎區','嘉義縣中埔鄉','嘉義縣大埔鄉','嘉義縣布袋鎮','嘉義縣東石鄉','嘉義縣梅山鄉','嘉義縣番路鄉','嘉義縣竹崎鄉','嘉義縣義竹鄉','嘉義縣阿里山','宜蘭縣南澳鄉','宜蘭縣大同鄉','屏東縣三地門鄉','屏東縣佳冬鄉','屏東縣來義鄉','屏東縣內埔鄉','屏東縣南州鄉','屏東縣恆春鎮','屏東縣新園鄉','屏東縣新埤鄉','屏東縣春日鄉','屏東縣東港鎮','屏東縣枋寮鄉','屏東縣枋山鄉','屏東縣林邊鄉','屏東縣泰武鄉','屏東縣滿州鄉','屏東縣牡丹鄉','屏東縣獅子鄉','屏東縣瑪家鄉','屏東縣萬巒鄉','屏東縣車城鄉','屏東縣霧台鄉','彰化縣二水鄉','彰化縣大城鄉','彰化縣溪州鄉','彰化縣竹塘鄉','新北市三芝區','新北市坪林區','新北市平溪區','新北市深坑區','新北市烏來區','新北市瑞芳區','新北市石碇區','新北市萬里區','新北市貢寮區','新北市金山區','新北市雙溪區','新竹縣五峰鄉','新竹縣尖石鄉','新竹縣峨嵋鄉','新竹縣橫山鄉','桃園市大溪區','桃園市復興區','苗栗縣南庄鄉','苗栗縣泰安鄉','雲林縣北港鎮','雲林縣口湖鄉','雲林縣古坑鄉','雲林縣四湖鄉','雲林縣水林鄉','高雄市內門區','高雄市六龜區','高雄市杉林區','高雄市桃源區','高雄市田寮區','高雄市甲仙區','高雄市美濃區','高雄市茂林區','高雄市那瑪夏區'];
 function classify(c,d){if(!c||!d)return null;var k=c+d;if(NOSVC.indexOf(k)>=0)return 'nosvc';if(REMOTE.indexOf(k)>=0)return 'remote';return 'normal';}
 var P={
- wall:{pid:'KmEBAGDMzKbYZNjnkZ3l52W4',price:3000,img:im('wx1WRpGD38J9QmJkNJnad4eb')},
- cs:{pid:'p9KbWMJZ7NmJvaAW1x3VEYmB',price:1600,img:im('ZOaL8DPWY6LP7mLKl92ExyG0')},
- cm:{pid:'wMXgOaDokp3AWaDB7Y9JAp45',price:3000,img:im('o4a0bwXWNWbyLrb7lGgE1yzv')},
- cl:{pid:'N6qx3aVnzXN2rVdW7jZWBXY2',price:5000,img:im('o4a0bwXWNWbyLrb7lGgE1yzv')},
- m4:{pid:'oBpXwKO97o9aZ8Wnz3dgQyV0',price:4000,img:im('Wqybvx25N9yJLmyvNREOMVPo')},
- f4:{pid:'WwNEQDBMkmGKVN8Z1O5a3Jb4',price:5000,img:im('Wqybvx25N9yJLmyvNREOMVPo')},
- o1:{pid:'JZ8LKanp10Zlx48xkXVbQw04',price:1000,img:im('0nMRz1wGlRwA7jaGNV9Kjv6E')},
- om:{pid:'eobJKaG21M0Qr8ZRzA4BqnwO',price:1500,img:im('BoQZq74kYmWexpj7l5PMywAK')},
- fan:{pid:'4WjbAXQV12Zg4J0Y1gqNOdal',price:500,img:im('wAjo1QaDle4mRjzg390xLGMJ')},
- air:{pid:'28je90BY1yYVlQm91Mqp6lDN',price:1600,img:im('BW4907rb3bP61B6VNQGK6kwy')},
- hi:{pid:'P02rqdam78ebxLvekNbvx6p8',price:1000,img:im('v5zx6meKY4vVbemgl0DVkLyo')},
- bz:{pid:'aovEX3VGzav0AMmq1jy9xdYm',price:1000,img:im('Xno5Qb1D3MV2j11ql67ZWPv9')},
- rm:{pid:'ndwgBoML1AZ9omyv7lD8O52Z',price:600,img:im('rAW85emGlnzxeppylyok6vBL')},
+ wall:{pid:'KmEBAGDMzKbYZNjnkZ3l52W4',price:3000,img:imj('BW4907rb3bP68bk9NQGK6kwy')},
+ cs:{pid:'p9KbWMJZ7NmJvaAW1x3VEYmB',price:1600,img:imj('DPq15dgL3Pqjg67ylrBbJ2am')},
+ cm:{pid:'wMXgOaDokp3AWaDB7Y9JAp45',price:3000,img:imj('EM7nvrbJlqVge7APNBpxVwjP')},
+ cl:{pid:'N6qx3aVnzXN2rVdW7jZWBXY2',price:5000,img:imj('xQdpkWj03ae1WbGG39by6aRo')},
+ m4:{pid:'oBpXwKO97o9aZ8Wnz3dgQyV0',price:4000,img:imj('AZajx5K9lEmoJ6EwlPJR4Wd2')},
+ f4:{pid:'WwNEQDBMkmGKVN8Z1O5a3Jb4',price:5000,img:imj('Wqybvx25N9yJO5zgNREOMVPo')},
+ o1:{pid:'JZ8LKanp10Zlx48xkXVbQw04',price:1000,img:imj('0nMRz1wGlRwAygdyNV9Kjv6E')},
+ om:{pid:'eobJKaG21M0Qr8ZRzA4BqnwO',price:1500,img:imj('1LPZao453vJ7yQjo3QAR86mM')},
+ fan:{pid:'4WjbAXQV12Zg4J0Y1gqNOdal',price:500,img:imj('A7dLy5pv31v9D0krlXg0QzKr')},
+ air:{pid:'28je90BY1yYVlQm91Mqp6lDN',price:1600,img:imj('BW4907rb3bP61B6VNQGK6kwy')},
+ hi:{pid:'P02rqdam78ebxLvekNbvx6p8',price:1000,img:imj('eKP9MRgBYr85EzARlOvLWZrn')},
+ bz:{pid:'aovEX3VGzav0AMmq1jy9xdYm',price:1000,img:imj('w560gEeAlo0aovA2NOqrx1ab')},
+ rm:{pid:'ndwgBoML1AZ9omyv7lD8O52Z',price:600,img:imj('41brG7JDYpJLm4AXlxW5ywvg')},
  dh:{price:21900,oprice:25900,img:imj('O5gwrR4GNQbo4EnRYBpn071e')},
- tf:{price:600,img:imj('ZLjRK1AGl0Aobp9KNV6DPJEw')}
+ tf:{price:600,img:imj('wAjo1QaDle4m1WkZ390xLGMJ')}
 };
 var INDOOR=[
  {k:'wall',n:'家用壁掛清洗保養',d:'壁掛式・約1.5-2小時/台',grp:'家用壁掛'},
