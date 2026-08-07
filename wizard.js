@@ -4,14 +4,14 @@ try{
 var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
 function imj(t){return IB+t+'/600x.jpg';}
-var IMG_QUICK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/quickbuy.jpg';
-var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/standard.jpg';
-var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/earlybird2.jpg';
-var IMG_HOME='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/home.jpg';
-var IMG_SHOP='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/shop.jpg';
-var IMG_AREA_OK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/green.jpg';
-var IMG_AREA_RM='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/gold.jpg';
-var IMG_AREA_NO='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/red.jpg';
+var IMG_QUICK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/quickbuy.jpg';
+var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/standard.jpg';
+var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/earlybird2.jpg';
+var IMG_HOME='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/home.jpg';
+var IMG_SHOP='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/shop.jpg';
+var IMG_AREA_OK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/green.jpg';
+var IMG_AREA_RM='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/gold.jpg';
+var IMG_AREA_NO='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/red.jpg';
 var LINE_CS='https://line.me/R/ti/p/@063kttbk';
 var TW={
 '基隆市':['仁愛區','信義區','中正區','中山區','安樂區','暖暖區','七堵區'],
@@ -549,7 +549,7 @@ function addBrandBadge(){
     for(var i=0;i<lis.length;i++){if((lis[i].textContent||'').indexOf('本服務僅適用')>=0){li=lis[i];break;}}
     if(!li||li.querySelector('.qs-mhi'))return;
     var img=document.createElement('img');img.className='qs-mhi';
-    img.src='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/mhi-badge.jpg';
+    img.src='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@c92f0bcb23f9201518b759ee611fff1ed221c779/mhi-badge.png';
     img.alt='認明三菱重工 MITSUBISHI HEAVY INDUSTRIES';
     img.style.cssText='width:100%;max-width:200px;border-radius:11px;display:block;margin:9px auto 2px;border:1px solid #e2e8f1';
     li.appendChild(img);
