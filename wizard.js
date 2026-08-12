@@ -585,6 +585,11 @@ function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .pr
 /* 購物車裡的「方案折扣校正」改成白話說明、隱藏數量/單價/刪除鈕(系統自動管理,客戶不需操作) */
 /* 校正計算期間把會跳動的金額蓋成「計算中…」,算完一次顯示正確值(客戶不會看到金額亂跳);9秒安全上限,萬一卡住也會自動顯示真實金額 */
 function _corrBusy(){var t=window.__qsCorrBusy||0;return t>0&&(Date.now()-t)<12000;}
+/* 換優惠券期間的結帳鎖,用「自己的」旗標。
+   不能共用 __qsCorrBusy —— 除濕機/AIRMON 下架後 reconcileAdjust 的 P 恆為 0,
+   它每 600ms 就會執行一次 window.__qsCorrBusy=0,實測把鎖清成只剩 10 毫秒(等於沒鎖)。
+   純時間判斷、8 秒硬到期,所以不可能卡住讓客戶結不了帳。 */
+function _cpBusy(){var t=window.__qsCpBusy||0;return t>0&&(Date.now()-t)<8000;}
 function _maskPrice(price,busy){try{if(!price)return;var sp=price.querySelector('.qs-calc');
  if(busy){if(!sp){[].slice.call(price.children).forEach(function(c){c.style.display='none';});sp=document.createElement('span');sp.className='qs-calc';sp.textContent='計算中…';sp.style.cssText='color:#8a93a0;font-size:13px;font-weight:600;white-space:nowrap';price.appendChild(sp);}}
  else if(sp){if(sp.parentElement)sp.parentElement.removeChild(sp);[].slice.call(price.children).forEach(function(c){c.style.display='';});}}catch(e){}}
@@ -691,7 +696,7 @@ function _lockCheckout(busy){try{
   }
 }catch(e){}}
 function maskCalc(){try{
- var busy=_corrBusy();_lockCheckout(busy);var sec=document.getElementById('cart-section');if(!sec)return;
+ var busy=_corrBusy()||_cpBusy();_lockCheckout(busy);var sec=document.getElementById('cart-section');if(!sec)return;
  var ov=document.getElementById('qs-calcov');
  if(busy){
    if(!ov){
@@ -1326,13 +1331,14 @@ function couponRestoreWatch(){try{
   _cpTry++;_cpAt=now;_cpFixing=1;
   /* 換券是「先移除舊券、再套新券」,中間購物車會有一小段完全沒有優惠券。
      客戶若剛好在這時按下「立即結帳」,就會用沒折扣的原價成立訂單。
-     借用既有的結帳鎖把整段換券期間鎖住(maskCalc 排在本函式之前,只設旗標會慢一輪,所以直接鎖)。 */
-  window.__qsCorrBusy=now;
+     用自己的 __qsCpBusy 鎖住(不能用 __qsCorrBusy,會被 reconcileAdjust 每 600ms 清掉);
+     maskCalc 排在本函式之前,只設旗標會慢一輪,所以這裡直接鎖一次。 */
+  window.__qsCpBusy=now;
   try{_lockCheckout(true);}catch(e){}
   el.value=best.c;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
   btn.click();
   if(window.notificationMsg)window.notificationMsg('已為您套回原本的 '+Math.round((1-best.r)*100)+' 折優惠','success',4);
-  setTimeout(function(){window.__qsCorrBusy=0;},2600);
+  setTimeout(function(){window.__qsCpBusy=0;},2600);
 }catch(e){}}
 function liftCornerBtns(){try{
   var chat=document.querySelector('.chat');if(!chat)return;
