@@ -1194,6 +1194,35 @@ function updateFab(){
    完全不知道底部有浮動結帳條 → 浮動條一出現就把最下面那顆(↑回到上方)壓掉56px。
    這裡依浮動條實際高度動態把整組往上抬,浮動條消失時自動復原。
    註:#qs-fab是position:fixed,fixed元素的offsetParent恆為null,不可用它判斷可見性,只能看display/高度 */
+/* LINE 綁定禮專屬碼(UPB 開頭,一律 92 折 = 0.08)的比價保護。
+   內文JS 有一張寫死的折扣比價表 VAL,只認得那 4 組公開碼;綁定碼有幾百組不可能全登記進去
+   (內文JS 已達 14,865/15,000 字元)。未登記的碼會被當「未知」直接套用 ——
+   於是選了早鳥(85折)的客戶輸入綁定碼,會被默默換成比較差的 92 折,多付 7% 而且服務時間照樣等 30 天。
+   這裡在內文JS 的處理外面再包一層:只要是 UPB 開頭,先比對目前方案,方案比較優惠就擋下並提示。 */
+var _BIND_OFF=0.08;
+var _PLAN_OFF={early:0.15,std:0.05};
+function bindCouponGuard(){try{
+  if(window.__qsBindWrapped)return;
+  var orig=window.submitCouponNumber;
+  if(typeof orig!=='function')return;
+  window.__qsBindWrapped=true;
+  window.submitCouponNumber=function(a){
+    try{
+      var inp=null;
+      try{if(window.jQuery)inp=window.jQuery(a).closest('.input-group').find('[name="CouponNumber"]')[0];}catch(e2){}
+      if(!inp)inp=document.querySelector('[name="CouponNumber"]');
+      var code=((inp&&inp.value)||'').trim().toUpperCase();
+      if(/^UPB/.test(code)){
+        var cur=_PLAN_OFF[window.__qsPlan]||0;
+        if(cur>_BIND_OFF){
+          if(window.notificationMsg)window.notificationMsg('您選的早鳥方案 85 折更優惠，已為您保留原折扣','success',4);
+          return;/* 不往下呼叫,保住原本的方案券 */
+        }
+      }
+    }catch(e){}
+    return orig.apply(this,arguments);
+  };
+}catch(e){}}
 function liftCornerBtns(){try{
   var chat=document.querySelector('.chat');if(!chat)return;
   var fab=document.getElementById('qs-fab');
@@ -1225,7 +1254,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
