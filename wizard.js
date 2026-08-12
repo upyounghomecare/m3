@@ -1236,7 +1236,11 @@ function _cartHasGoods(){try{
    存 localStorage 而不是變數:客戶重新整理或關掉再開,記憶才不會歸零
    (實測第二輪抓到的洞 —— 重整後打錯字,85折 被清掉救不回來,多付 $300)。 */
 var _CP_KEY='qs_cp_best';
-function _cpSave(code,rate){try{localStorage.setItem(_CP_KEY,JSON.stringify({c:code,r:rate,t:(new Date()).getTime()}));}catch(e){}}
+function _cpSave(code,rate){try{
+  var old=_cpLoad();
+  if(old&&old.r>rate+0.001)return;/* 不要用比較差的碼蓋掉比較好的記憶 */
+  localStorage.setItem(_CP_KEY,JSON.stringify({c:code,r:rate,t:(new Date()).getTime()}));
+}catch(e){}}
 function _cpLoad(){try{
   var o=JSON.parse(localStorage.getItem(_CP_KEY)||'null');
   if(!o||!o.c||typeof o.r!=='number')return null;
@@ -1255,27 +1259,6 @@ function bindCouponGuard(){try{
   var orig=window.submitCouponNumber;
   if(typeof orig!=='function')return;
   window.__qsBindWrapped=true;
-
-  /* 監看套用結果:成功就把碼記下來,補回失敗就把記憶清掉(碼多半已經用掉了) */
-  var nmOrig=window.notificationMsg;
-  if(typeof nmOrig==='function'){
-    window.notificationMsg=function(msg){
-      try{
-        var s=(typeof msg==='string')?msg:'';
-        if(s.indexOf('使用成功')>=0&&_cpPending){
-          var v=_codeOff(_cpPending);
-          if(v!==null&&v>0)_cpSave(_cpPending,v);
-          _cpTry=0;_cpPending=null;_cpFixing=0;
-        }else if(s.indexOf('套用失敗')>=0){
-          _cpPending=null;
-          /* 這裡「不要」清掉記憶:原本那則失敗訊息會比補回動作晚一步才送到,
-             一旦在這裡清,補回成功的下一秒記憶就沒了(實測踩過)。
-             補不回來的判斷交給看門狗用「試了兩次仍然沒好」來決定。 */
-        }
-      }catch(e){}
-      return nmOrig.apply(this,arguments);
-    };
-  }
 
   window.submitCouponNumber=function(a){
     try{
@@ -1309,6 +1292,16 @@ function bindCouponGuard(){try{
    一次補三種情況:①打錯字被清掉 ②重新整理後記憶歸零 ③客戶回頭改方案,方案券蓋掉自己的專屬券。 */
 function couponRestoreWatch(){try{
   if(!window.__qsBindWrapped)return;
+  /* 記住客戶自己輸入成功的碼。
+     這裡直接看「購物車的折扣率是不是等於剛送出那組碼的折扣」,不靠 1SHOP 的提示文字 ——
+     舊版是包 notificationMsg 來聽「使用成功」,但 bindCouponGuard 先把旗標設起來才去包,
+     若當下 notificationMsg 還沒被建好就會永遠跳過不包:擋下的保護正常、記憶卻從頭到尾沒存過。
+     這是時序競賽,測試頁測不出來、正式頁時好時壞(2026-08-12 實測)。 */
+  if(_cpPending){
+    var pv=_codeOff(_cpPending);
+    if(pv===null||pv<=0)_cpPending=null;
+    else if(Math.abs(_cartOff()-pv)<=0.001){_cpSave(_cpPending,pv);_cpPending=null;_cpTry=0;_cpFixing=0;}
+  }
   /* 用 _corrBusy() 而不是直接看 __qsCorrBusy:它有 12 秒自動到期,
      萬一底下的解鎖 setTimeout 沒跑到(分頁在背景會被凍結),看門狗才不會被自己鎖死。 */
   if(window.__qsAdding||_corrBusy())return;/* 加購/清空進行中不要插手 */
