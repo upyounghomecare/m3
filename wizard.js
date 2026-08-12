@@ -1194,31 +1194,97 @@ function updateFab(){
    完全不知道底部有浮動結帳條 → 浮動條一出現就把最下面那顆(↑回到上方)壓掉56px。
    這裡依浮動條實際高度動態把整組往上抬,浮動條消失時自動復原。
    註:#qs-fab是position:fixed,fixed元素的offsetParent恆為null,不可用它判斷可見性,只能看display/高度 */
-/* LINE 綁定禮專屬碼(UPB 開頭,一律 92 折 = 0.08)的比價保護。
-   內文JS 有一張寫死的折扣比價表 VAL,只認得那 4 組公開碼;綁定碼有幾百組不可能全登記進去
-   (內文JS 已達 14,865/15,000 字元)。未登記的碼會被當「未知」直接套用 ——
-   於是選了早鳥(85折)的客戶輸入綁定碼,會被默默換成比較差的 92 折,多付 7% 而且服務時間照樣等 30 天。
-   這裡在內文JS 的處理外面再包一層:只要是 UPB 開頭,先比對目前方案,方案比較優惠就擋下並提示。 */
-var _BIND_OFF=0.08;
+/* ===== 優惠碼防呆層 =====
+   內文JS 有一張寫死的折扣比價表 VAL,只認得 4 組公開碼;專屬碼有幾百組不可能全登記進去
+   (內文JS 已達 14,865/15,000 字元)。未登記的碼會被當「未知」直接套用。
+   2026-08-12 實測抓到三個會讓客戶多付錢的洞,這一層就是補這三個:
+   A. 降級:車上已有較好的券(回購85折/VIP88折)時輸入較差的碼(綁定92折),會靜默換掉
+      → 實測 $2,550 變 $2,760,還顯示「使用成功」。舊版只跟「方案」比,沒跟「車上實際生效的券」比。
+   B. 打錯字賠錢:內文JS 是「先移除舊券 → 再套新券」,套失敗不會還原
+      → 客戶 85 折輸入一個錯的碼,掉回方案的 95 折,多付 $300,提示只說「套用失敗」。
+   C. 大小寫:1SHOP 的優惠碼區分大小寫,小寫輸入必失敗,然後就觸發 B。 */
 var _PLAN_OFF={early:0.15,std:0.05};
+/* 已知折扣值:自家專屬碼看前綴(不必逐組登記),公開碼查表 */
+var _PUB_OFF={UP95:0.05,KQ7X9ZP2:0.15,UP88VIP:0.12,UPYOUNG999:0.10};
+function _codeOff(code){
+  if(/^UPB92/.test(code))return 0.08;/* LINE綁定禮 92折 */
+  if(/^UPR85/.test(code))return 0.15;/* 老客戶回購禮 85折 */
+  var v=_PUB_OFF[code];return v===undefined?null:v;/* null = 不認得,不擋 */
+}
+/* 購物車現在實際生效的折扣率(折扣列 ProductType=99、金額在 CouponPrice) */
+function _cartOff(){try{
+  var cart=(window._UserSession&&window._UserSession.Cart)||[];
+  var sub=0,disc=0;
+  for(var i=0;i<cart.length;i++){
+    var it=cart[i];
+    if(Number(it.ProductType)===99)disc+=Math.abs(Number(it.CouponPrice)||0);
+    else sub+=Number(it.LineTotal)||0;
+  }
+  return sub>0?(disc/sub):0;
+}catch(e){return 0}}
+function _cartHasGoods(){try{
+  var cart=(window._UserSession&&window._UserSession.Cart)||[];
+  for(var i=0;i<cart.length;i++)if(Number(cart[i].ProductType)!==99)return true;
+  return false;
+}catch(e){return false}}
+var _cpPending=null;/* 這次送出的碼 */
+var _cpGood=null;   /* 最後一個「比方案更優惠」且成功套用的碼,失敗時用來還原 */
+var _cpRestore=0;   /* 還原次數上限,防無限迴圈 */
 function bindCouponGuard(){try{
   if(window.__qsBindWrapped)return;
   var orig=window.submitCouponNumber;
   if(typeof orig!=='function')return;
   window.__qsBindWrapped=true;
+
+  /* --- 修 B:監看套用結果。成功就記住,失敗就把剛剛被移除的好券補回來 --- */
+  var nmOrig=window.notificationMsg;
+  if(typeof nmOrig==='function'){
+    window.notificationMsg=function(msg){
+      try{
+        var s=(typeof msg==='string')?msg:'';
+        if(s.indexOf('使用成功')>=0&&_cpPending){
+          var v=_codeOff(_cpPending);
+          /* 只記「比方案好」的碼;方案券本身(如 UP95)不必記,它會自動補回 */
+          if(v!==null&&v>(_PLAN_OFF[window.__qsPlan]||0))_cpGood=_cpPending;
+          _cpRestore=0;_cpPending=null;
+        }else if(s.indexOf('套用失敗')>=0){
+          var lost=_cpGood;_cpPending=null;
+          if(lost&&_cpRestore<1&&_cartHasGoods()){
+            _cpRestore++;
+            setTimeout(function(){try{
+              var el=document.querySelector('[name="CouponNumber"]');
+              if(!el)return;
+              el.value=lost;el.dispatchEvent(new Event('input',{bubbles:true}));
+              var btn=document.querySelector('[onclick*="submitCouponNumber"]');
+              if(btn)btn.click();
+              if(window.notificationMsg)window.notificationMsg('查無此優惠碼，已為您保留原本的折扣','success',4);
+            }catch(e2){}},600);
+          }
+        }
+      }catch(e){}
+      return nmOrig.apply(this,arguments);
+    };
+  }
+
   window.submitCouponNumber=function(a){
     try{
       var inp=null;
       try{if(window.jQuery)inp=window.jQuery(a).closest('.input-group').find('[name="CouponNumber"]')[0];}catch(e2){}
       if(!inp)inp=document.querySelector('[name="CouponNumber"]');
-      var code=((inp&&inp.value)||'').trim().toUpperCase();
-      if(/^UPB/.test(code)){
-        var cur=_PLAN_OFF[window.__qsPlan]||0;
-        if(cur>_BIND_OFF){
-          if(window.notificationMsg)window.notificationMsg('您選的早鳥方案 85 折更優惠，已為您保留原折扣','success',4);
-          return;/* 不往下呼叫,保住原本的方案券 */
+      var raw=(inp&&inp.value)||'';
+      var code=raw.trim().toUpperCase();
+      /* --- 修 C:自動去空白+轉大寫,寫回輸入框讓後面的流程也吃到 --- */
+      if(inp&&raw!==code){inp.value=code;try{inp.dispatchEvent(new Event('input',{bubbles:true}));}catch(e3){}}
+      /* --- 修 A:跟「方案」和「車上實際生效的券」兩者取高的比 --- */
+      var incoming=_codeOff(code);
+      if(incoming!==null){
+        var cur=Math.max(_cartOff(),_PLAN_OFF[window.__qsPlan]||0);
+        if(cur-incoming>0.001){
+          if(window.notificationMsg)window.notificationMsg('您目前的 '+Math.round((1-cur)*100)+' 折更優惠，已為您保留原折扣','success',4);
+          return;/* 不往下呼叫,連移除都不會發生 */
         }
       }
+      _cpPending=code;
     }catch(e){}
     return orig.apply(this,arguments);
   };
