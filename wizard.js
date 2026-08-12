@@ -1222,6 +1222,11 @@ function _cartOff(){try{
   }
   return sub>0?(disc/sub):0;
 }catch(e){return 0}}
+function _cartSub(){try{
+  var cart=(window._UserSession&&window._UserSession.Cart)||[];
+  var s=0;for(var i=0;i<cart.length;i++)if(Number(cart[i].ProductType)!==99)s+=Number(cart[i].LineTotal)||0;
+  return s;
+}catch(e){return -1}}
 function _cartHasGoods(){try{
   var cart=(window._UserSession&&window._UserSession.Cart)||[];
   for(var i=0;i<cart.length;i++)if(Number(cart[i].ProductType)!==99)return true;
@@ -1242,6 +1247,8 @@ function _cpClear(){try{localStorage.removeItem(_CP_KEY);}catch(e){}}
 var _cpPending=null;/* 這次送出的碼 */
 var _cpTry=0;       /* 自動補回的嘗試次數上限,防無限迴圈 */
 var _cpAt=0;        /* 上次補回的時間,要留時間讓它落地,不然 700ms 迴圈會空燒次數 */
+var _cpSeen=0;      /* 第一次發現折扣變差的時間,要先靜候讓 1SHOP 把手上的操作做完 */
+var _cpSub=-1;      /* 上次看到的商品小計,購物車一變動就重置嘗試次數 */
 var _cpFixing=0;    /* 正在補回中 */
 function bindCouponGuard(){try{
   if(window.__qsBindWrapped)return;
@@ -1305,12 +1312,22 @@ function couponRestoreWatch(){try{
   /* 用 _corrBusy() 而不是直接看 __qsCorrBusy:它有 12 秒自動到期,
      萬一底下的解鎖 setTimeout 沒跑到(分頁在背景會被凍結),看門狗才不會被自己鎖死。 */
   if(window.__qsAdding||_corrBusy())return;/* 加購/清空進行中不要插手 */
-  if(!_cartHasGoods()){_cpTry=0;return;}
+  if(!_cartHasGoods()){_cpTry=0;_cpSeen=0;return;}
   var best=_cpLoad();if(!best)return;
-  if(_cartOff()>=best.r-0.001){_cpTry=0;_cpFixing=0;return;}/* 已經一樣好或更好 */
+  var sub=_cartSub();
+  if(sub!==_cpSub){_cpSub=sub;_cpTry=0;_cpSeen=0;}/* 購物車一有變動就給新的機會 */
+  if(_cartOff()>=best.r-0.001){_cpTry=0;_cpSeen=0;_cpFixing=0;return;}/* 已經一樣好或更好 */
   var now=(new Date()).getTime();
-  if(now-_cpAt<2500)return;/* 留時間給上一次落地 */
-  if(_cpTry>=2){_cpClear();_cpFixing=0;return;}/* 試兩次都補不回來 → 碼多半已用掉,清掉別再吵 */
+  /* 1SHOP 的購物車一次只吃一個操作,併發送出會被靜默丟棄。
+     折扣剛變差的那一瞬間,客戶那次的「移除舊券→套新券」多半還在飛,
+     這時搶著送出一定失敗 —— 先靜候 1.8 秒讓它落地。(2026-08-12 正式頁實測踩過) */
+  if(!_cpSeen){_cpSeen=now;return;}
+  if(now-_cpSeen<1800)return;
+  if(now-_cpAt<3000)return;/* 留時間給上一次落地 */
+  /* 試滿次數就停手,但**不清掉記憶** —— 失敗多半只是撞到別的操作,
+     把客戶的碼忘掉會讓折扣永遠回不來,代價比多試幾次大得多。
+     購物車再有變動時上面會把次數歸零,自然會再試。 */
+  if(_cpTry>=3){_cpFixing=0;return;}
   var el=document.querySelector('[name="CouponNumber"]');if(!el)return;
   var btn=document.querySelector('[onclick*="submitCouponNumber"]');if(!btn)return;
   _cpTry++;_cpAt=now;_cpFixing=1;
