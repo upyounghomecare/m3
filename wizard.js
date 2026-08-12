@@ -1227,16 +1227,28 @@ function _cartHasGoods(){try{
   for(var i=0;i<cart.length;i++)if(Number(cart[i].ProductType)!==99)return true;
   return false;
 }catch(e){return false}}
+/* 記住客戶自己輸入過、成功套用的最佳優惠碼。
+   存 localStorage 而不是變數:客戶重新整理或關掉再開,記憶才不會歸零
+   (實測第二輪抓到的洞 —— 重整後打錯字,85折 被清掉救不回來,多付 $300)。 */
+var _CP_KEY='qs_cp_best';
+function _cpSave(code,rate){try{localStorage.setItem(_CP_KEY,JSON.stringify({c:code,r:rate,t:(new Date()).getTime()}));}catch(e){}}
+function _cpLoad(){try{
+  var o=JSON.parse(localStorage.getItem(_CP_KEY)||'null');
+  if(!o||!o.c||typeof o.r!=='number')return null;
+  if((new Date()).getTime()-(o.t||0)>7*864e5){_cpClear();return null;}/* 放太久就不管了 */
+  return o;
+}catch(e){return null}}
+function _cpClear(){try{localStorage.removeItem(_CP_KEY);}catch(e){}}
 var _cpPending=null;/* 這次送出的碼 */
-var _cpGood=null;   /* 最後一個「比方案更優惠」且成功套用的碼,失敗時用來還原 */
-var _cpRestore=0;   /* 還原次數上限,防無限迴圈 */
+var _cpTry=0;       /* 自動補回的嘗試次數上限,防無限迴圈 */
+var _cpFixing=0;    /* 正在補回中 */
 function bindCouponGuard(){try{
   if(window.__qsBindWrapped)return;
   var orig=window.submitCouponNumber;
   if(typeof orig!=='function')return;
   window.__qsBindWrapped=true;
 
-  /* --- 修 B:監看套用結果。成功就記住,失敗就把剛剛被移除的好券補回來 --- */
+  /* 監看套用結果:成功就把碼記下來,補回失敗就把記憶清掉(碼多半已經用掉了) */
   var nmOrig=window.notificationMsg;
   if(typeof nmOrig==='function'){
     window.notificationMsg=function(msg){
@@ -1244,22 +1256,11 @@ function bindCouponGuard(){try{
         var s=(typeof msg==='string')?msg:'';
         if(s.indexOf('使用成功')>=0&&_cpPending){
           var v=_codeOff(_cpPending);
-          /* 只記「比方案好」的碼;方案券本身(如 UP95)不必記,它會自動補回 */
-          if(v!==null&&v>(_PLAN_OFF[window.__qsPlan]||0))_cpGood=_cpPending;
-          _cpRestore=0;_cpPending=null;
+          if(v!==null&&v>0)_cpSave(_cpPending,v);
+          _cpTry=0;_cpPending=null;_cpFixing=0;
         }else if(s.indexOf('套用失敗')>=0){
-          var lost=_cpGood;_cpPending=null;
-          if(lost&&_cpRestore<1&&_cartHasGoods()){
-            _cpRestore++;
-            setTimeout(function(){try{
-              var el=document.querySelector('[name="CouponNumber"]');
-              if(!el)return;
-              el.value=lost;el.dispatchEvent(new Event('input',{bubbles:true}));
-              var btn=document.querySelector('[onclick*="submitCouponNumber"]');
-              if(btn)btn.click();
-              if(window.notificationMsg)window.notificationMsg('查無此優惠碼，已為您保留原本的折扣','success',4);
-            }catch(e2){}},600);
-          }
+          _cpPending=null;
+          if(_cpFixing){_cpFixing=0;_cpClear();}/* 記住的碼補不回來(多半已用過),別再試 */
         }
       }catch(e){}
       return nmOrig.apply(this,arguments);
@@ -1273,21 +1274,41 @@ function bindCouponGuard(){try{
       if(!inp)inp=document.querySelector('[name="CouponNumber"]');
       var raw=(inp&&inp.value)||'';
       var code=raw.trim().toUpperCase();
-      /* --- 修 C:自動去空白+轉大寫,寫回輸入框讓後面的流程也吃到 --- */
+      /* 自動去空白+轉大寫(1SHOP 的優惠碼區分大小寫,小寫輸入必失敗) */
       if(inp&&raw!==code){inp.value=code;try{inp.dispatchEvent(new Event('input',{bubbles:true}));}catch(e3){}}
-      /* --- 修 A:跟「方案」和「車上實際生效的券」兩者取高的比 --- */
       var incoming=_codeOff(code);
-      if(incoming!==null){
-        var cur=Math.max(_cartOff(),_PLAN_OFF[window.__qsPlan]||0);
+      if(incoming!==null&&!_cpFixing){
+        var cartR=_cartOff(),planR=_PLAN_OFF[window.__qsPlan]||0,cur=Math.max(cartR,planR);
+        /* 比現有的差 → 擋下,連移除都不會發生 */
         if(cur-incoming>0.001){
           if(window.notificationMsg)window.notificationMsg('您目前的 '+Math.round((1-cur)*100)+' 折更優惠，已為您保留原折扣','success',4);
-          return;/* 不往下呼叫,連移除都不會發生 */
+          return;
+        }
+        /* 跟現有的一樣 → 也擋下,免得白白燒掉一組只能用一次的專屬碼 */
+        if(cartR>0&&Math.abs(cartR-incoming)<=0.001){
+          if(window.notificationMsg)window.notificationMsg('您目前已經是 '+Math.round((1-cartR)*100)+' 折，這組優惠碼請留著下次使用','success',4);
+          return;
         }
       }
       _cpPending=code;
     }catch(e){}
     return orig.apply(this,arguments);
   };
+}catch(e){}}
+/* 看門狗:只要購物車現在的折扣比「客戶已經成功用過的最佳碼」還差,就自動補回去。
+   一次補三種情況:①打錯字被清掉 ②重新整理後記憶歸零 ③客戶回頭改方案,方案券蓋掉自己的專屬券。 */
+function couponRestoreWatch(){try{
+  if(!window.__qsBindWrapped)return;
+  if(window.__qsAdding||window.__qsCorrBusy)return;/* 加購/清空進行中不要插手 */
+  if(!_cartHasGoods()){_cpTry=0;return;}
+  var best=_cpLoad();if(!best)return;
+  if(_cartOff()>=best.r-0.001){_cpTry=0;return;}
+  if(_cpTry>=2)return;
+  _cpTry++;_cpFixing=1;
+  var el=document.querySelector('[name="CouponNumber"]');if(!el)return;
+  el.value=best.c;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
+  var btn=document.querySelector('[onclick*="submitCouponNumber"]');
+  if(btn){btn.click();if(window.notificationMsg)window.notificationMsg('已為您套回原本的 '+Math.round((1-best.r)*100)+' 折優惠','success',4);}
 }catch(e){}}
 function liftCornerBtns(){try{
   var chat=document.querySelector('.chat');if(!chat)return;
@@ -1320,7 +1341,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
