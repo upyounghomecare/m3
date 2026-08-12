@@ -1241,6 +1241,7 @@ function _cpLoad(){try{
 function _cpClear(){try{localStorage.removeItem(_CP_KEY);}catch(e){}}
 var _cpPending=null;/* 這次送出的碼 */
 var _cpTry=0;       /* 自動補回的嘗試次數上限,防無限迴圈 */
+var _cpAt=0;        /* 上次補回的時間,要留時間讓它落地,不然 700ms 迴圈會空燒次數 */
 var _cpFixing=0;    /* 正在補回中 */
 function bindCouponGuard(){try{
   if(window.__qsBindWrapped)return;
@@ -1260,7 +1261,9 @@ function bindCouponGuard(){try{
           _cpTry=0;_cpPending=null;_cpFixing=0;
         }else if(s.indexOf('套用失敗')>=0){
           _cpPending=null;
-          if(_cpFixing){_cpFixing=0;_cpClear();}/* 記住的碼補不回來(多半已用過),別再試 */
+          /* 這裡「不要」清掉記憶:原本那則失敗訊息會比補回動作晚一步才送到,
+             一旦在這裡清,補回成功的下一秒記憶就沒了(實測踩過)。
+             補不回來的判斷交給看門狗用「試了兩次仍然沒好」來決定。 */
         }
       }catch(e){}
       return nmOrig.apply(this,arguments);
@@ -1302,9 +1305,11 @@ function couponRestoreWatch(){try{
   if(window.__qsAdding||window.__qsCorrBusy)return;/* 加購/清空進行中不要插手 */
   if(!_cartHasGoods()){_cpTry=0;return;}
   var best=_cpLoad();if(!best)return;
-  if(_cartOff()>=best.r-0.001){_cpTry=0;return;}
-  if(_cpTry>=2)return;
-  _cpTry++;_cpFixing=1;
+  if(_cartOff()>=best.r-0.001){_cpTry=0;_cpFixing=0;return;}/* 已經一樣好或更好 */
+  var now=(new Date()).getTime();
+  if(now-_cpAt<2500)return;/* 留時間給上一次落地 */
+  if(_cpTry>=2){_cpClear();_cpFixing=0;return;}/* 試兩次都補不回來 → 碼多半已用掉,清掉別再吵 */
+  _cpTry++;_cpAt=now;_cpFixing=1;
   var el=document.querySelector('[name="CouponNumber"]');if(!el)return;
   el.value=best.c;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
   var btn=document.querySelector('[onclick*="submitCouponNumber"]');
