@@ -1302,18 +1302,27 @@ function bindCouponGuard(){try{
    一次補三種情況:①打錯字被清掉 ②重新整理後記憶歸零 ③客戶回頭改方案,方案券蓋掉自己的專屬券。 */
 function couponRestoreWatch(){try{
   if(!window.__qsBindWrapped)return;
-  if(window.__qsAdding||window.__qsCorrBusy)return;/* 加購/清空進行中不要插手 */
+  /* 用 _corrBusy() 而不是直接看 __qsCorrBusy:它有 12 秒自動到期,
+     萬一底下的解鎖 setTimeout 沒跑到(分頁在背景會被凍結),看門狗才不會被自己鎖死。 */
+  if(window.__qsAdding||_corrBusy())return;/* 加購/清空進行中不要插手 */
   if(!_cartHasGoods()){_cpTry=0;return;}
   var best=_cpLoad();if(!best)return;
   if(_cartOff()>=best.r-0.001){_cpTry=0;_cpFixing=0;return;}/* 已經一樣好或更好 */
   var now=(new Date()).getTime();
   if(now-_cpAt<2500)return;/* 留時間給上一次落地 */
   if(_cpTry>=2){_cpClear();_cpFixing=0;return;}/* 試兩次都補不回來 → 碼多半已用掉,清掉別再吵 */
-  _cpTry++;_cpAt=now;_cpFixing=1;
   var el=document.querySelector('[name="CouponNumber"]');if(!el)return;
+  var btn=document.querySelector('[onclick*="submitCouponNumber"]');if(!btn)return;
+  _cpTry++;_cpAt=now;_cpFixing=1;
+  /* 換券是「先移除舊券、再套新券」,中間購物車會有一小段完全沒有優惠券。
+     客戶若剛好在這時按下「立即結帳」,就會用沒折扣的原價成立訂單。
+     借用既有的結帳鎖把整段換券期間鎖住(maskCalc 排在本函式之前,只設旗標會慢一輪,所以直接鎖)。 */
+  window.__qsCorrBusy=now;
+  try{_lockCheckout(true);}catch(e){}
   el.value=best.c;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
-  var btn=document.querySelector('[onclick*="submitCouponNumber"]');
-  if(btn){btn.click();if(window.notificationMsg)window.notificationMsg('已為您套回原本的 '+Math.round((1-best.r)*100)+' 折優惠','success',4);}
+  btn.click();
+  if(window.notificationMsg)window.notificationMsg('已為您套回原本的 '+Math.round((1-best.r)*100)+' 折優惠','success',4);
+  setTimeout(function(){window.__qsCorrBusy=0;},2600);
 }catch(e){}}
 function liftCornerBtns(){try{
   var chat=document.querySelector('.chat');if(!chat)return;
