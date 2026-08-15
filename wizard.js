@@ -154,7 +154,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .qpn{padding:7px 3px;text-align:center;font-size:14px;font-weight:900;line-height:1.3;white-space:nowrap;border-top:1px solid rgba(0,0,0,.05);-webkit-text-stroke:.4px currentColor}'
 +'.qw .qpn-std{background:#E6F1FB;color:#0C447C}'
 +'.qw .qpn-early{background:rgba(184,134,11,.14);color:#8a6410}'
-+'.qw .qplan.sel{border-color:#0C447C}'
++'.qw .qplan.sel{border-color:#0C447C}'+'.qw .qwbar-sum{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#042C53;color:#fff;border-radius:11px;padding:10px 13px;margin:10px 0 2px}'+'.qw .qwb-l{font-size:12px;font-weight:700;opacity:.92;line-height:1.45}'+'.qw .qwb-ex{display:block;font-size:10.5px;font-weight:600;opacity:.72;margin-top:1px}'+'.qw .qwb-r{font-size:18px;font-weight:900;white-space:nowrap;letter-spacing:.3px}'+'.qw .qp-money{background:#0C447C;color:#fff;padding:6px 4px;text-align:center;line-height:1.25}'+'.qw .qp-money s{display:block;font-size:10.5px;font-weight:600;color:#9fc2e6}'+'.qw .qp-money b{font-size:15px;font-weight:900}'+'.qw .qp-save{background:#fff6e0;color:#8a6410;font-size:10.5px;font-weight:800;text-align:center;padding:4px 3px;line-height:1.3}'
 +'.qw .qplan.sel::after{content:\"✓\";position:absolute;top:6px;right:6px;width:22px;height:22px;background:#0C447C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}'
 +'.qw .qplan:active{transform:scale(.97)}'
 +''
@@ -213,6 +213,36 @@ function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span c
 var OUT_DETAIL='<b>清洗項目：</b><br>1. 機外殼除塵清潔<br>2. 冷凝器（散熱鰭片）深層清洗<br>3. 高壓水柱沖洗散熱片<br>4. 清除散熱口灰塵與雜物';
 function detailBlock(item){if(item.k==='o1'||item.k==='om'){return (qty[item.k]>0)?'<div class="det-body">'+OUT_DETAIL+'</div>':'';}var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
 function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var gift=item.gift?'<span class="qw-gift">'+item.gift+'</span>':'';var tags=(pop||tag||gift)?'<div class="qw-tags">'+pop+tag+gift+'</div>':'';var tm=_TERMS[item.k]?'<span class="qw-terms" onclick="event.stopPropagation();__qw.terms(&quot;'+item.k+'&quot;)">📋 注意事項 ›</span>':'';return '<div class="opt '+(q>0?'sel':'')+'"><div class="opt-main"><img class="qw-thumb" src="'+P[item.k].img+'" onclick="event.stopPropagation();__qw.zoom(&quot;'+P[item.k].img+'&quot;)"><div class="oi"><span class="on'+(item.nmsm?' qw-on-sm':'')+'">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+'</span>'+tm+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
+/* ===== 精靈全程小計 =====
+   客戶要走過室內機／室外機／加購三個畫面,以前中途完全看不到累計金額,
+   要按下「完成」跳到購物車才第一次看到總價。客單價 $2,850~$9,975 不是隨手買的金額,
+   而且精靈會「自動加」車馬費/商用/偏遠 —— 客戶沒主動選卻要付,過程中看得到才不會有疑慮。
+   算法與 finish() 建購物車時完全一致:品項 + 商用×台數 + 車馬費 + 偏遠。 */
+function _qwCount(){var n=0;INK.concat(['o1','om']).forEach(function(k){n+=qty[k]||0;});return n;}
+var _AUTOK={bz:1,tf:1,rm:1};/* 這三項由程式自動決定,不能從 qty 讀 */
+function _qwSub(){try{
+  var s=0;
+  for(var k in qty){if(!qty.hasOwnProperty(k))continue;
+    if(_AUTOK[k])continue;/* finish() 會把 bz/tf/rm 寫進 qty,若一併累加會重複計算
+                             (客戶走完精靈再重開時 qty 還留著那些值) */
+    var q=qty[k]||0;if(q<=0)continue;
+    if(P[k]&&typeof P[k].price==='number')s+=P[k].price*q;}
+  var bz=bzQty();if(bz>0&&P.bz)s+=P.bz.price*bz;
+  var tf=tfQty();if(tf>0&&P.tf)s+=P.tf.price*tf;
+  if(areaCls==='remote'&&P.rm)s+=P.rm.price;
+  return s;
+}catch(e){return 0}}
+/* 底部小計條:只在有選東西時出現,沒選就不佔版面也不會嚇到人 */
+function _qwBar(){
+  var n=_qwCount(),s=_qwSub();
+  if(n<=0&&s<=0)return '';
+  var extra=[];
+  if(bzQty()>0)extra.push('商用加價×'+bzQty());
+  if(tfQty()>0)extra.push('車馬費');
+  if(areaCls==='remote')extra.push('偏遠加價');
+  var ex=extra.length?'<span class="qwb-ex">含 '+extra.join('、')+'</span>':'';
+  return '<div class="qwbar-sum"><div class="qwb-l">已選 '+n+' 台'+ex+'</div><div class="qwb-r">'+money(s)+'</div></div>';
+}
 function curPos(){return step==='area'?1:(step==='env'?2:(step===1?3:(step===2?3:(step===3?4:5))));}
 function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+'</div>';}
 function render(){
@@ -247,13 +277,13 @@ function render(){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
     var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'式機型適用</div>'+groups[g].map(optRow).join('');});
     var inLbl=sumKeys(['wall','cs','cm','cl','m4','f4'])>0?'下一步：室外機':'只洗室外機，下一步';
-    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===2){
     var outN=sumKeys(['o1','om']),inNow=sumKeys(['wall','cs','cm','cl','m4','f4']);
     var tfHint=(env==='home'&&inNow===0&&outN===1);
     var outLbl=outN>0?'下一步：加購':'不洗室外機，下一步';
     var outNote=(env==='biz')?'<div class="optnote">🏢 營業場所可<b>單獨清洗室外機</b>，每台加收 <b>$1,000</b> 商用加價</div>':(inNow>0?'<div class="optnote">室外機清洗為選配，可搭配室內機一起清洗。</div>':'<div class="optnote">只洗室外機：<b>1 台</b>加 <b>$600 車馬費</b>（單筆）、<b>2 台以上免</b></div>');
-    w='<div class="qw">'+stepBar()+'<h2>要清洗室外機嗎？</h2><p class="sub">室外機清洗為選配，不需要可直接按下一步</p>'+outNote+OUTLIST.map(optRow).join('')+(tfHint?'<div class="warnbox" style="color:#8a6410;background:rgba(184,134,11,.08)">🚗 目前只洗 1 台室外機，將自動加收 <b>車馬費 $600</b>（技師車程成本，單筆）</div>':'')+'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">上一步</button><button class="btn pri" onclick="__qw.go(3)">'+outLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗室外機嗎？</h2><p class="sub">室外機清洗為選配，不需要可直接按下一步</p>'+outNote+OUTLIST.map(optRow).join('')+(tfHint?'<div class="warnbox" style="color:#8a6410;background:rgba(184,134,11,.08)">🚗 目前只洗 1 台室外機，將自動加收 <b>車馬費 $600</b>（技師車程成本，單筆）</div>':'')+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">上一步</button><button class="btn pri" onclick="__qw.go(3)">'+outLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===3){
     /* 只顯示銷售頁上真的買得到的加購品:後台把商品從銷售頁移除,精靈就自動不再提供(加回來也會自動出現),
        不必改程式。__qsBtnMap 還沒建好時不過濾,避免開場瞬間全部消失。 */
@@ -261,9 +291,21 @@ function render(){
     var body='';ADDON.forEach(function(x){if(_bmReady&&!_resolveBtn(x.n))return;if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機每台 +$1,000；室外機隨室內機清洗不加價，僅單洗室外機時每台 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5–4M 高處的機器台數（最多 '+(sumKeys(INK)+sumKeys(['o1','om']))+' 台）</div>';}});
     if(!hasBlow()){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
     var nextLbl=sumKeys(ADDON.map(function(a){return a.k;}))>0?'下一步：選到府方案':'不加購，下一步';
-    w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else {
-    function planCard(k,img,note,ncls){var sel=plan===k;return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt=""><div class="qpn '+ncls+'">'+note+'</div></div>';}
+    /* 方案卡顯示實際金額:客戶原本只看到「95折/85折」,不知道各是多少錢、也不知道差多少。
+       實測 20 筆訂單只有 4 筆選早鳥,把省下的金額直接寫出來比抽象折數有感。
+       此時品項已全選完,_qwSub() 算得出來;客戶按上一步改數量再回來會重算。 */
+    var _sub=_qwSub();
+    var _off={std:0.05,early:0.15};
+    function planPrice(k){
+      if(_sub<=0)return '';
+      var pay=_sub-Math.round(_sub*_off[k]);
+      var save=(k==='early')?(Math.round(_sub*_off.early)-Math.round(_sub*_off.std)):0;
+      return '<div class="qp-money"><s>'+money(_sub)+'</s><b>'+money(pay)+'</b></div>'
+        +(save>0?'<div class="qp-save">比標準方案再省 '+money(save)+'</div>':'');
+    }
+    function planCard(k,img,note,ncls){var sel=plan===k;return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt="">'+planPrice(k)+'<div class="qpn '+ncls+'">'+note+'</div></div>';}
     w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
   if(!ovl)return;/* 精靈已關閉就別動,避免崩潰 */
