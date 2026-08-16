@@ -1022,7 +1022,7 @@ function reconcileRm(target){
 }
 function _nosvcBlock(on){
   var box=document.getElementById('qs-nosvc');
-  var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){if(b.closest('#qw-ovl'))return false;return /下一步|送出訂單|確認訂單|確認付款|前往付款|成立訂單|確認送出|前往結帳/.test((b.textContent||'').trim());});
+  var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){if(b.closest('#qw-ovl'))return false;return /下一步|送出|確認訂單|確認付款|前往付款|成立訂單|前往結帳|立即結帳/.test((b.textContent||'').trim());});
   if(on){
     btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qsnb','1');});
     if(!box){var as=document.querySelector('select[name="Area"]');if(as&&as.parentNode){box=document.createElement('div');box.id='qs-nosvc';box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';box.innerHTML='很抱歉，此地區尚未提供服務，請洽詢客服 <a href="'+LINE_CS+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">聯繫 LINE →</a>';as.parentNode.insertBefore(box,as.nextSibling);}}
@@ -1062,7 +1062,7 @@ function _hiBlock(on){try{
  var box=document.getElementById('qs-hiblk');
  var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){
   if(b.closest('#qw-ovl'))return false;
-  return /\u4e0b\u4e00\u6b65|\u9001\u51fa\u8a02\u55ae|\u78ba\u8a8d\u8a02\u55ae|\u78ba\u8a8d\u4ed8\u6b3e|\u524d\u5f80\u4ed8\u6b3e|\u6210\u7acb\u8a02\u55ae|\u78ba\u8a8d\u9001\u51fa|\u524d\u5f80\u7d50\u5e33/.test((b.textContent||'').trim());});
+  return /\u4e0b\u4e00\u6b65|\u9001\u51fa|\u78ba\u8a8d\u8a02\u55ae|\u78ba\u8a8d\u4ed8\u6b3e|\u524d\u5f80\u4ed8\u6b3e|\u6210\u7acb\u8a02\u55ae|\u524d\u5f80\u7d50\u5e33|\u7acb\u5373\u7d50\u5e33/.test((b.textContent||'').trim());});
  if(on){
   btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qshm','1');});
   if(!box){var s=_hiField();if(s&&s.parentNode){box=document.createElement('div');box.id='qs-hiblk';
