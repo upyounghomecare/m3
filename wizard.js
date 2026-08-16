@@ -1024,10 +1024,26 @@ function _nosvcBlock(on){
   var box=document.getElementById('qs-nosvc');
   var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){if(b.closest('#qw-ovl'))return false;return /下一步|送出|確認訂單|確認付款|前往付款|成立訂單|前往結帳|立即結帳/.test((b.textContent||'').trim());});
   if(on){
-    btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qsnb','1');});
+    btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qsnb','1');
+     if(!b.hasAttribute('data-qsnbst'))b.setAttribute('data-qsnbst',b.getAttribute('style')||'');
+     b.style.setProperty('background','#c0392b','important');
+     b.style.setProperty('background-color','#c0392b','important');
+     b.style.setProperty('background-image','none','important');
+     b.style.setProperty('color','#fff','important');
+     b.style.setProperty('opacity','1','important');
+     b.style.setProperty('cursor','not-allowed','important');});
+    _hiBindTap();setTimeout(_hiTapOverlay,0);
     if(!box){var as=document.querySelector('select[name="Area"]');if(as&&as.parentNode){box=document.createElement('div');box.id='qs-nosvc';box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';box.innerHTML='很抱歉，此地區尚未提供服務，請洽詢客服 <a href="'+LINE_CS+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">聯繫 LINE →</a>';as.parentNode.insertBefore(box,as.nextSibling);}}
   } else {
-    [].slice.call(document.querySelectorAll('[data-qsnb]')).forEach(function(b){b.removeAttribute('data-qsnb');if(!b.hasAttribute('data-qshm'))b.disabled=false;});
+    [].slice.call(document.querySelectorAll('[data-qsnb]')).forEach(function(b){
+     b.removeAttribute('data-qsnb');
+     if(!b.hasAttribute('data-qshm')){b.disabled=false;
+      var st=b.getAttribute('data-qsnbst');
+      if(st!==null){if(st)b.setAttribute('style',st);else b.removeAttribute('style');}}
+     b.removeAttribute('data-qsnbst');});
+    if(!document.querySelector('[data-qsnb],[data-qshm]')){
+     var o1=document.getElementById('qs-hitap');if(o1)o1.style.display='none';
+     var t1=document.getElementById('qs-hitip');if(t1)t1.style.display='none';}
     if(box&&box.parentNode)box.parentNode.removeChild(box);
   }
 }
@@ -1068,11 +1084,13 @@ function _hiTip(){try{
    +'background:#042C53;color:#fff;font-size:13.5px;font-weight:700;line-height:1.6;padding:12px 18px;'
    +'border-radius:12px;max-width:88%;box-shadow:0 6px 24px rgba(0,0,0,.3);text-align:center;font-family:inherit';
   document.body.appendChild(t);}
- t.textContent='\u0034 \u7c73\u4ee5\u4e0a\u76ee\u524d\u7121\u6cd5\u65bd\u4f5c\uff0c\u8acb\u6539\u9078\u5176\u4ed6\u9ad8\u5ea6\u6216\u6d3d\u8a62\u5ba2\u670d';
+ /* 兩道鎖都可能成立,地區優先(那是完全不能服務) */
+ var isArea=!!document.querySelector('[data-qsnb]');
+ t.textContent=isArea?'\u6b64\u5730\u5340\u5c1a\u672a\u63d0\u4f9b\u670d\u52d9\uff0c\u8acb\u6d3d\u8a62\u5ba2\u670d\u5354\u52a9':'\u0034 \u7c73\u4ee5\u4e0a\u76ee\u524d\u7121\u6cd5\u65bd\u4f5c\uff0c\u8acb\u6539\u9078\u5176\u4ed6\u9ad8\u5ea6\u6216\u6d3d\u8a62\u5ba2\u670d';
  t.style.display='block';
  clearTimeout(window.__qsHiTipT);
  window.__qsHiTipT=setTimeout(function(){t.style.display='none';},2800);
- var box=document.getElementById('qs-hiblk');
+ var box=document.getElementById(isArea?'qs-nosvc':'qs-hiblk');
  if(box){
   try{box.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){try{box.scrollIntoView();}catch(e2){}}
   var k=0,iv=setInterval(function(){k++;
@@ -1083,7 +1101,7 @@ function _hiTip(){try{
 /* disabled 的按鈕完全不產生點擊事件(連冒泡都沒有)→ 在它上面疊一層透明感應區接點擊。
    按鈕本身維持 disabled,訂單絕對送不出去 */
 function _hiTapOverlay(){try{
- var b=null,bs=document.querySelectorAll('[data-qshm]');
+ var b=null,bs=document.querySelectorAll('[data-qsnb],[data-qshm]');
  for(var i=0;i<bs.length;i++){var rr=bs[i].getBoundingClientRect();
   if(rr.width>0&&rr.height>0&&rr.bottom>0&&rr.top<window.innerHeight){b=bs[i];break;}}
  var ov=document.getElementById('qs-hitap');
@@ -1098,8 +1116,8 @@ function _hiTapOverlay(){try{
  ov.style.left=Math.round(r.left)+'px';ov.style.top=Math.round(r.top)+'px';
  ov.style.width=Math.round(r.width)+'px';ov.style.height=Math.round(r.height)+'px';
  if(!ov.getAttribute('data-qsbnd')){ov.setAttribute('data-qsbnd','1');
-  window.addEventListener('scroll',function(){if(_hiBlocked)_hiTapOverlay();},true);
-  window.addEventListener('resize',function(){if(_hiBlocked)_hiTapOverlay();});}
+  window.addEventListener('scroll',function(){if(document.querySelector('[data-qsnb],[data-qshm]'))_hiTapOverlay();},true);
+  window.addEventListener('resize',function(){if(document.querySelector('[data-qsnb],[data-qshm]'))_hiTapOverlay();});}
 }catch(e){}}
 function _hiBindTap(){if(_hiTapBound)return;_hiTapBound=true;
  document.addEventListener('click',function(e){try{
