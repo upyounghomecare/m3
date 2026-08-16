@@ -1072,7 +1072,9 @@ function _hiWant(){
  if(!t||/\u8acb\u9078\u64c7/.test(t))return null;/* 還沒選 → 不動作 */
  if(/4\u7c73\u4ee5\u4e0a/.test(t))return 'X';
  var m=t.match(/(\d+)\s*\u53f0/);
- return m?parseInt(m[1],10):0;
+ if(m)return parseInt(m[1],10);
+ if(/3\.5\u7c73\u4ee5\u4e0b/.test(t))return 0;/* 明確表示不需要挑高 */
+ return null;/* \u9632\u5446:\u770b\u4e0d\u61c2\u53f0\u6578(\u4f8b\u5982\u65e7\u7248\u7684\u300c3.5-4\u7c73(\u8acb\u52a0\u8cfc\u6311\u9ad8\u8cbb)\u300d)\u4e00\u5f8b\u4e0d\u52d5\u4f5c,\u7d55\u4e0d\u8aa4\u522a */
 }
 var _hiBlocked=false,_hiTapBound=false;
 /* 被停用的按鈕手機收不到點擊 → 由 document 層攔截,判斷點在按鈕範圍內就給提示。
