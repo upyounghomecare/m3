@@ -1058,20 +1058,62 @@ function _hiWant(){
  var m=t.match(/(\d+)\s*\u53f0/);
  return m?parseInt(m[1],10):0;
 }
+var _hiBlocked=false,_hiTapBound=false;
+/* 被停用的按鈕手機收不到點擊 → 由 document 層攔截,判斷點在按鈕範圍內就給提示。
+   按鈕本身維持 disabled,訂單絕對送不出去 */
+function _hiTip(){try{
+ var t=document.getElementById('qs-hitip');
+ if(!t){t=document.createElement('div');t.id='qs-hitip';
+  t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:100002;'
+   +'background:#042C53;color:#fff;font-size:13.5px;font-weight:700;line-height:1.6;padding:12px 18px;'
+   +'border-radius:12px;max-width:88%;box-shadow:0 6px 24px rgba(0,0,0,.3);text-align:center;font-family:inherit';
+  document.body.appendChild(t);}
+ t.textContent='\u0034 \u7c73\u4ee5\u4e0a\u76ee\u524d\u7121\u6cd5\u65bd\u4f5c\uff0c\u8acb\u6539\u9078\u5176\u4ed6\u9ad8\u5ea6\u6216\u6d3d\u8a62\u5ba2\u670d';
+ t.style.display='block';
+ clearTimeout(window.__qsHiTipT);
+ window.__qsHiTipT=setTimeout(function(){t.style.display='none';},2800);
+ var box=document.getElementById('qs-hiblk');
+ if(box){
+  try{box.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){try{box.scrollIntoView();}catch(e2){}}
+  var k=0,iv=setInterval(function(){k++;
+   box.style.boxShadow=(k%2)?'0 0 0 3px rgba(192,57,43,.55)':'none';
+   if(k>=6){clearInterval(iv);box.style.boxShadow='none';}},200);
+ }
+}catch(e){}}
+function _hiBindTap(){if(_hiTapBound)return;_hiTapBound=true;
+ document.addEventListener('click',function(e){try{
+  if(!_hiBlocked)return;
+  var bs=document.querySelectorAll('[data-qshm]');
+  for(var i=0;i<bs.length;i++){var r=bs[i].getBoundingClientRect();
+   if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){_hiTip();return;}}
+ }catch(err){}},true);
+}
 function _hiBlock(on){try{
  var box=document.getElementById('qs-hiblk');
  var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){
   if(b.closest('#qw-ovl'))return false;
   return /\u4e0b\u4e00\u6b65|\u9001\u51fa|\u78ba\u8a8d\u8a02\u55ae|\u78ba\u8a8d\u4ed8\u6b3e|\u524d\u5f80\u4ed8\u6b3e|\u6210\u7acb\u8a02\u55ae|\u524d\u5f80\u7d50\u5e33|\u7acb\u5373\u7d50\u5e33/.test((b.textContent||'').trim());});
  if(on){
-  btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qshm','1');});
+  _hiBlocked=true;_hiBindTap();
+ btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qshm','1');
+  if(!b.hasAttribute('data-qshmst'))b.setAttribute('data-qshmst',b.getAttribute('style')||'');
+  b.style.setProperty('background','#c0392b','important');
+  b.style.setProperty('background-color','#c0392b','important');
+  b.style.setProperty('background-image','none','important');
+  b.style.setProperty('color','#fff','important');
+  b.style.setProperty('opacity','1','important');
+  b.style.setProperty('cursor','not-allowed','important');});
   if(!box){var s=_hiField();if(s&&s.parentNode){box=document.createElement('div');box.id='qs-hiblk';
    box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';
    box.innerHTML='\u5f88\u62b1\u6b49\uff0c4 \u7c73\u4ee5\u4e0a\u76ee\u524d\u7121\u6cd5\u65bd\u4f5c\uff0c\u8acb\u6d3d\u8a62\u5ba2\u670d <a href="'+LINE_CS+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">\u806f\u7e6b LINE \u2192</a>';
    s.parentNode.insertBefore(box,s.nextSibling);}}
  } else {
+  _hiBlocked=false;
   [].slice.call(document.querySelectorAll('[data-qshm]')).forEach(function(b){
-   b.removeAttribute('data-qshm');if(!b.hasAttribute('data-qsnb'))b.disabled=false;});
+   b.removeAttribute('data-qshm');if(!b.hasAttribute('data-qsnb'))b.disabled=false;
+   var st=b.getAttribute('data-qshmst');
+   if(st!==null){if(st)b.setAttribute('style',st);else b.removeAttribute('style');b.removeAttribute('data-qshmst');}});
+  var tp=document.getElementById('qs-hitip');if(tp)tp.style.display='none';
   if(box&&box.parentNode)box.parentNode.removeChild(box);
  }
 }catch(e){}}
