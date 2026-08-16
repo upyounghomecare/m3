@@ -1037,11 +1037,11 @@ function _nosvcBlock(on){
   } else {
     [].slice.call(document.querySelectorAll('[data-qsnb]')).forEach(function(b){
      b.removeAttribute('data-qsnb');
-     if(!b.hasAttribute('data-qshm')){b.disabled=false;
+     if(!_qsOtherLock(b,'data-qsnb')){b.disabled=false;
       var st=b.getAttribute('data-qsnbst');
       if(st!==null){if(st)b.setAttribute('style',st);else b.removeAttribute('style');}}
      b.removeAttribute('data-qsnbst');});
-    if(!document.querySelector('[data-qsnb],[data-qshm]')){
+    if(!document.querySelector('[data-qsnb],[data-qsam],[data-qshm]')){
      var o1=document.getElementById('qs-hitap');if(o1)o1.style.display='none';
      var t1=document.getElementById('qs-hitip');if(t1)t1.style.display='none';}
     if(box&&box.parentNode)box.parentNode.removeChild(box);
@@ -1050,6 +1050,62 @@ function _nosvcBlock(on){
 /* ===== 結帳把關:安裝高度 =====
    高度欄位預設就停在第一個選項,分不出「客戶說沒有」與「客戶根本沒碰」→
    程式在最前面補一個空的「請選擇」,沒選一律不動購物車(比照 reconcileBz 對服務環境的處理) */
+/* ===== 結帳把關:機齡 =====
+   標題寫「15年以上恕不服務」但選項沒有那一項→客戶只能亂選,技師出車才發現做不了。
+   做法與高度那道完全平行:程式補「請選擇」,選了15年以上就擋結帳 */
+function _ageField(){try{
+ var ss=document.querySelectorAll('select[name^="cf-"]');
+ for(var i=0;i<ss.length;i++){var r=ss[i].closest('.form-group');
+  var l=r?((r.querySelector('label')||{}).textContent||''):'';
+  if(/\u6a5f\u9f61/.test(l))return ss[i];}
+}catch(e){}return null;}
+var _ageChosen=null;
+function _agePlaceholder(){try{
+ var s=_ageField();if(!s||!s.options.length)return;
+ if(s.options[0].value==='')return;
+ var o=document.createElement('option');o.value='';o.textContent='\u8acb\u9078\u64c7';o.setAttribute('data-qsph','1');
+ s.insertBefore(o,s.options[0]);
+ if(_ageChosen)s.value=_ageChosen;else s.selectedIndex=0;
+ if(!s.getAttribute('data-qsab')){s.setAttribute('data-qsab','1');
+  s.addEventListener('change',function(){_ageChosen=s.value;});}
+}catch(e){}}
+function _ageWant(){
+ var s=_ageField();if(!s)return null;
+ var t=(s.options[s.selectedIndex]||{}).text||'';
+ if(!t||/\u8acb\u9078\u64c7/.test(t))return null;/* 還沒選 → 不動作 */
+ if(/15\u5e74\u4ee5\u4e0a/.test(t))return 'X';/* 注意:「10-15年」不含「15年以上」 */
+ return 0;
+}
+function _ageBlock(on){try{
+ var box=document.getElementById('qs-ageblk');
+ var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){
+  if(b.closest('#qw-ovl'))return false;
+  return /\u4e0b\u4e00\u6b65|\u9001\u51fa|\u78ba\u8a8d\u8a02\u55ae|\u78ba\u8a8d\u4ed8\u6b3e|\u524d\u5f80\u4ed8\u6b3e|\u6210\u7acb\u8a02\u55ae|\u524d\u5f80\u7d50\u5e33|\u7acb\u5373\u7d50\u5e33/.test((b.textContent||'').trim());});
+ if(on){
+  _hiBindTap();setTimeout(_hiTapOverlay,0);
+  btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qsam','1');
+   if(!b.hasAttribute('data-qsamst'))b.setAttribute('data-qsamst',b.getAttribute('style')||'');
+   b.style.setProperty('background','#c0392b','important');
+   b.style.setProperty('background-color','#c0392b','important');
+   b.style.setProperty('background-image','none','important');
+   b.style.setProperty('color','#fff','important');
+   b.style.setProperty('opacity','1','important');
+   b.style.setProperty('cursor','not-allowed','important');});
+  if(!box){var s=_ageField();if(s&&s.parentNode){box=document.createElement('div');box.id='qs-ageblk';
+   box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';
+   box.innerHTML='\u5f88\u62b1\u6b49\uff0c\u6a5f\u9f61 15 \u5e74\u4ee5\u4e0a\u56e0\u96f6\u4ef6\u8001\u5316\u98a8\u96aa\u9ad8\uff0c\u76ee\u524d\u7121\u6cd5\u63d0\u4f9b\u6e05\u6d17\u670d\u52d9 <a href="'+LINE_CS+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">\u806f\u7e6b LINE \u2192</a>';
+   s.parentNode.insertBefore(box,s.nextSibling);}}
+ } else {
+  [].slice.call(document.querySelectorAll('[data-qsam]')).forEach(function(b){
+   b.removeAttribute('data-qsam');
+   if(!_qsOtherLock(b,'data-qsam')){b.disabled=false;
+    var st=b.getAttribute('data-qsamst');
+    if(st!==null){if(st)b.setAttribute('style',st);else b.removeAttribute('style');}}
+   b.removeAttribute('data-qsamst');});
+  if(box&&box.parentNode)box.parentNode.removeChild(box);
+ }
+}catch(e){}}
+function reconcileAgeForm(){try{_ageBlock(_ageWant()==='X');}catch(e){}}
 function _hiField(){try{
  var ss=document.querySelectorAll('select[name^="cf-"]');
  for(var i=0;i<ss.length;i++){var r=ss[i].closest('.form-group');
@@ -1076,6 +1132,10 @@ function _hiWant(){
  if(/3\.5\u7c73\u4ee5\u4e0b/.test(t))return 0;/* 明確表示不需要挑高 */
  return null;/* \u9632\u5446:\u770b\u4e0d\u61c2\u53f0\u6578(\u4f8b\u5982\u65e7\u7248\u7684\u300c3.5-4\u7c73(\u8acb\u52a0\u8cfc\u6311\u9ad8\u8cbb)\u300d)\u4e00\u5f8b\u4e0d\u52d5\u4f5c,\u7d55\u4e0d\u8aa4\u522a */
 }
+/* 三道鎖:地區 data-qsnb / 機齡 data-qsam / 高度 data-qshm。
+   任一道解開時,都要確認別道還在不在,否則會誤放 */
+function _qsOtherLock(b,mine){var f=['data-qsnb','data-qsam','data-qshm'];
+ for(var i=0;i<f.length;i++){if(f[i]!==mine&&b.hasAttribute(f[i]))return true;}return false;}
 var _hiBlocked=false,_hiTapBound=false;
 /* 被停用的按鈕手機收不到點擊 → 由 document 層攔截,判斷點在按鈕範圍內就給提示。
    按鈕本身維持 disabled,訂單絕對送不出去 */
@@ -1088,11 +1148,14 @@ function _hiTip(){try{
   document.body.appendChild(t);}
  /* 兩道鎖都可能成立,地區優先(那是完全不能服務) */
  var isArea=!!document.querySelector('[data-qsnb]');
- t.textContent=isArea?'\u6b64\u5730\u5340\u5c1a\u672a\u63d0\u4f9b\u670d\u52d9\uff0c\u8acb\u6d3d\u8a62\u5ba2\u670d\u5354\u52a9':'\u0034 \u7c73\u4ee5\u4e0a\u76ee\u524d\u7121\u6cd5\u65bd\u4f5c\uff0c\u8acb\u6539\u9078\u5176\u4ed6\u9ad8\u5ea6\u6216\u6d3d\u8a62\u5ba2\u670d';
+ var isAge=!isArea&&!!document.querySelector('[data-qsam]');
+ t.textContent=isArea?'\u6b64\u5730\u5340\u5c1a\u672a\u63d0\u4f9b\u670d\u52d9\uff0c\u8acb\u6d3d\u8a62\u5ba2\u670d\u5354\u52a9'
+  :isAge?'\u6a5f\u9f61 15 \u5e74\u4ee5\u4e0a\u56e0\u96f6\u4ef6\u8001\u5316\u98a8\u96aa\u9ad8\uff0c\u76ee\u524d\u7121\u6cd5\u63d0\u4f9b\u6e05\u6d17\u670d\u52d9'
+  :'\u0034 \u7c73\u4ee5\u4e0a\u76ee\u524d\u7121\u6cd5\u65bd\u4f5c\uff0c\u8acb\u6539\u9078\u5176\u4ed6\u9ad8\u5ea6\u6216\u6d3d\u8a62\u5ba2\u670d';
  t.style.display='block';
  clearTimeout(window.__qsHiTipT);
  window.__qsHiTipT=setTimeout(function(){t.style.display='none';},2800);
- var box=document.getElementById(isArea?'qs-nosvc':'qs-hiblk');
+ var box=document.getElementById(isArea?'qs-nosvc':isAge?'qs-ageblk':'qs-hiblk');
  if(box){
   try{box.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){try{box.scrollIntoView();}catch(e2){}}
   var k=0,iv=setInterval(function(){k++;
@@ -1103,7 +1166,7 @@ function _hiTip(){try{
 /* disabled 的按鈕完全不產生點擊事件(連冒泡都沒有)→ 在它上面疊一層透明感應區接點擊。
    按鈕本身維持 disabled,訂單絕對送不出去 */
 function _hiTapOverlay(){try{
- var b=null,bs=document.querySelectorAll('[data-qsnb],[data-qshm]');
+ var b=null,bs=document.querySelectorAll('[data-qsnb],[data-qsam],[data-qshm]');
  for(var i=0;i<bs.length;i++){var rr=bs[i].getBoundingClientRect();
   if(rr.width>0&&rr.height>0&&rr.bottom>0&&rr.top<window.innerHeight){b=bs[i];break;}}
  var ov=document.getElementById('qs-hitap');
@@ -1118,8 +1181,8 @@ function _hiTapOverlay(){try{
  ov.style.left=Math.round(r.left)+'px';ov.style.top=Math.round(r.top)+'px';
  ov.style.width=Math.round(r.width)+'px';ov.style.height=Math.round(r.height)+'px';
  if(!ov.getAttribute('data-qsbnd')){ov.setAttribute('data-qsbnd','1');
-  window.addEventListener('scroll',function(){if(document.querySelector('[data-qsnb],[data-qshm]'))_hiTapOverlay();},true);
-  window.addEventListener('resize',function(){if(document.querySelector('[data-qsnb],[data-qshm]'))_hiTapOverlay();});}
+  window.addEventListener('scroll',function(){if(document.querySelector('[data-qsnb],[data-qsam],[data-qshm]'))_hiTapOverlay();},true);
+  window.addEventListener('resize',function(){if(document.querySelector('[data-qsnb],[data-qsam],[data-qshm]'))_hiTapOverlay();});}
 }catch(e){}}
 function _hiBindTap(){if(_hiTapBound)return;_hiTapBound=true;
  document.addEventListener('click',function(e){try{
@@ -1151,7 +1214,7 @@ function _hiBlock(on){try{
  } else {
   _hiBlocked=false;
   [].slice.call(document.querySelectorAll('[data-qshm]')).forEach(function(b){
-   b.removeAttribute('data-qshm');if(!b.hasAttribute('data-qsnb'))b.disabled=false;
+   b.removeAttribute('data-qshm');if(!_qsOtherLock(b,'data-qshm'))b.disabled=false;
    var st=b.getAttribute('data-qshmst');
    if(st!==null){if(st)b.setAttribute('style',st);else b.removeAttribute('style');b.removeAttribute('data-qshmst');}});
   var tp=document.getElementById('qs-hitip');if(tp)tp.style.display='none';
@@ -1355,7 +1418,7 @@ function reconcileAdjustWatch(){try{
   _adjWatchLastX=X;
   if(_adjWatchStuck>=3){_adjSyncing=false;_adjWatchStuck=0;}/* 連續~6秒卡住(不論太低或太高)→強制解鎖,下一輪reconcileAdjust會重算 */
 }catch(e){}}
-setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileOrphanAddon();reconcileAdjust();checkoutArea();reconcileHiForm();},1500);
+setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileOrphanAddon();reconcileAdjust();checkoutArea();reconcileAgeForm();reconcileHiForm();},1500);
 setInterval(function(){reconcileAdjust();},600);/* 加購品保護快線:每0.6秒巡一次，校正被刪/不足時最快補回，壓縮破防空窗 */
 setInterval(reconcileAdjustWatch,2000);/* 校正看門狗:每2秒巡一次 */
 function fillAddr(){
@@ -1600,7 +1663,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_hiPlaceholder();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
