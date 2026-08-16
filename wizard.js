@@ -1027,10 +1027,85 @@ function _nosvcBlock(on){
     btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qsnb','1');});
     if(!box){var as=document.querySelector('select[name="Area"]');if(as&&as.parentNode){box=document.createElement('div');box.id='qs-nosvc';box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';box.innerHTML='很抱歉，此地區尚未提供服務，請洽詢客服 <a href="'+LINE_CS+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">聯繫 LINE →</a>';as.parentNode.insertBefore(box,as.nextSibling);}}
   } else {
-    [].slice.call(document.querySelectorAll('[data-qsnb]')).forEach(function(b){b.disabled=false;b.removeAttribute('data-qsnb');});
+    [].slice.call(document.querySelectorAll('[data-qsnb]')).forEach(function(b){b.removeAttribute('data-qsnb');if(!b.hasAttribute('data-qshm'))b.disabled=false;});
     if(box&&box.parentNode)box.parentNode.removeChild(box);
   }
 }
+/* ===== 結帳把關:安裝高度 =====
+   高度欄位預設就停在第一個選項,分不出「客戶說沒有」與「客戶根本沒碰」→
+   程式在最前面補一個空的「請選擇」,沒選一律不動購物車(比照 reconcileBz 對服務環境的處理) */
+function _hiField(){try{
+ var ss=document.querySelectorAll('select[name^="cf-"]');
+ for(var i=0;i<ss.length;i++){var r=ss[i].closest('.form-group');
+  var l=r?((r.querySelector('label')||{}).textContent||''):'';
+  if(/\u5b89\u88dd\u9ad8\u5ea6/.test(l))return ss[i];}
+}catch(e){}return null;}
+var _hiChosen=null;
+function _hiPlaceholder(){try{
+ var s=_hiField();if(!s||!s.options.length)return;
+ if(s.options[0].value==='')return;/* 已經有空選項(自己加的或1SHOP本來就有) */
+ var o=document.createElement('option');o.value='';o.textContent='\u8acb\u9078\u64c7';o.setAttribute('data-qsph','1');
+ s.insertBefore(o,s.options[0]);
+ if(_hiChosen)s.value=_hiChosen;else s.selectedIndex=0;/* 表單被重繪時把客戶選過的值接回去 */
+ if(!s.getAttribute('data-qshb')){s.setAttribute('data-qshb','1');
+  s.addEventListener('change',function(){_hiChosen=s.value;});}
+}catch(e){}}
+function _hiWant(){
+ var s=_hiField();if(!s)return null;
+ var t=(s.options[s.selectedIndex]||{}).text||'';
+ if(!t||/\u8acb\u9078\u64c7/.test(t))return null;/* 還沒選 → 不動作 */
+ if(/4\u7c73\u4ee5\u4e0a/.test(t))return 'X';
+ var m=t.match(/(\d+)\s*\u53f0/);
+ return m?parseInt(m[1],10):0;
+}
+function _hiBlock(on){try{
+ var box=document.getElementById('qs-hiblk');
+ var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){
+  if(b.closest('#qw-ovl'))return false;
+  return /\u4e0b\u4e00\u6b65|\u9001\u51fa\u8a02\u55ae|\u78ba\u8a8d\u8a02\u55ae|\u78ba\u8a8d\u4ed8\u6b3e|\u524d\u5f80\u4ed8\u6b3e|\u6210\u7acb\u8a02\u55ae|\u78ba\u8a8d\u9001\u51fa|\u524d\u5f80\u7d50\u5e33/.test((b.textContent||'').trim());});
+ if(on){
+  btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qshm','1');});
+  if(!box){var s=_hiField();if(s&&s.parentNode){box=document.createElement('div');box.id='qs-hiblk';
+   box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';
+   box.innerHTML='\u5f88\u62b1\u6b49\uff0c4 \u7c73\u4ee5\u4e0a\u76ee\u524d\u7121\u6cd5\u65bd\u4f5c\uff0c\u8acb\u6d3d\u8a62\u5ba2\u670d <a href="'+LINE_CS+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">\u806f\u7e6b LINE \u2192</a>';
+   s.parentNode.insertBefore(box,s.nextSibling);}}
+ } else {
+  [].slice.call(document.querySelectorAll('[data-qshm]')).forEach(function(b){
+   b.removeAttribute('data-qshm');if(!b.hasAttribute('data-qsnb'))b.disabled=false;});
+  if(box&&box.parentNode)box.parentNode.removeChild(box);
+ }
+}catch(e){}}
+var _hiFormSyncing=false;
+function reconcileHiForm(){try{
+ if(window.__qsAdding||_hiSyncing||_hiFormSyncing)return;/* 與既有 reconcileHi 共用時序,避免同一輪各改一次 */
+ var want=_hiWant();
+ _hiBlock(want==='X');/* 每輪都重新宣告一次,避免被地區那道鎖的解鎖動作誤放 */
+ if(want===null||want==='X')return;
+ var max=_indoorInCart()+_outdoorInCart();
+ if(max<=0)return;/* 購物車沒機器 → 交給既有 reconcileHi */
+ var target=Math.min(want,max);
+ var cur=_hiInCart();
+ if(cur===target)return;
+ var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /\u6311\u9ad8\u65bd\u4f5c/.test(x.textContent||'');})[0];
+ if(!it){
+  if(target<=0)return;
+  var r=_resolveBtn('\u6311\u9ad8\u65bd\u4f5c');if(!r)return;
+  _hiFormSyncing=true;try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}
+  setTimeout(function(){_hiFormSyncing=false;},1400);return;/* 先加1台,下一輪再設成正確數量 */
+ }
+ if(target<=0){
+  var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+  if(!rb)return;_hiFormSyncing=true;try{rb.click();}catch(e){}
+  setTimeout(function(){_hiFormSyncing=false;},1900);return;
+ }
+ var iq=it.getAttribute('data-item');_hiFormSyncing=true;
+ try{
+  if(window.cartChangeItem&&iq!=null)window.cartChangeItem(iq,target);
+  else{var b=[].slice.call(it.querySelectorAll('button')).filter(function(x){var t=(x.textContent||'').trim();return t==='+'||t==='-';})[0];
+       if(b&&window.selectQty)window.selectQty(b,target-cur);}
+ }catch(e){}
+ setTimeout(function(){_hiFormSyncing=false;},2000);
+}catch(e){_hiFormSyncing=false;}}
 function checkoutArea(){
   try{
     var cs=document.querySelector('select[name="CountyAndCity"]'),as=document.querySelector('select[name="Area"]');
@@ -1196,7 +1271,7 @@ function reconcileAdjustWatch(){try{
   _adjWatchLastX=X;
   if(_adjWatchStuck>=3){_adjSyncing=false;_adjWatchStuck=0;}/* 連續~6秒卡住(不論太低或太高)→強制解鎖,下一輪reconcileAdjust會重算 */
 }catch(e){}}
-setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileOrphanAddon();reconcileAdjust();checkoutArea();},1500);
+setInterval(function(){reconcileBz();reconcileTf();reconcileFan();reconcileHi();reconcileOrphanAddon();reconcileAdjust();checkoutArea();reconcileHiForm();},1500);
 setInterval(function(){reconcileAdjust();},600);/* 加購品保護快線:每0.6秒巡一次，校正被刪/不足時最快補回，壓縮破防空窗 */
 setInterval(reconcileAdjustWatch,2000);/* 校正看門狗:每2秒巡一次 */
 function fillAddr(){
@@ -1441,7 +1516,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_hiPlaceholder();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
