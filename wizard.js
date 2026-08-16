@@ -1080,6 +1080,27 @@ function _hiTip(){try{
    if(k>=6){clearInterval(iv);box.style.boxShadow='none';}},200);
  }
 }catch(e){}}
+/* disabled 的按鈕完全不產生點擊事件(連冒泡都沒有)→ 在它上面疊一層透明感應區接點擊。
+   按鈕本身維持 disabled,訂單絕對送不出去 */
+function _hiTapOverlay(){try{
+ var b=null,bs=document.querySelectorAll('[data-qshm]');
+ for(var i=0;i<bs.length;i++){var rr=bs[i].getBoundingClientRect();
+  if(rr.width>0&&rr.height>0&&rr.bottom>0&&rr.top<window.innerHeight){b=bs[i];break;}}
+ var ov=document.getElementById('qs-hitap');
+ if(!b){if(ov)ov.style.display='none';return;}
+ if(!ov){ov=document.createElement('div');ov.id='qs-hitap';
+  ov.style.cssText='position:fixed;z-index:100001;background:transparent;cursor:not-allowed';
+  ov.addEventListener('click',function(e){try{e.preventDefault();e.stopPropagation();}catch(x){}_hiTip();},true);
+  ov.addEventListener('touchend',function(e){try{e.preventDefault();}catch(x){}_hiTip();},true);
+  document.body.appendChild(ov);}
+ var r=b.getBoundingClientRect();
+ ov.style.display='block';
+ ov.style.left=Math.round(r.left)+'px';ov.style.top=Math.round(r.top)+'px';
+ ov.style.width=Math.round(r.width)+'px';ov.style.height=Math.round(r.height)+'px';
+ if(!ov.getAttribute('data-qsbnd')){ov.setAttribute('data-qsbnd','1');
+  window.addEventListener('scroll',function(){if(_hiBlocked)_hiTapOverlay();},true);
+  window.addEventListener('resize',function(){if(_hiBlocked)_hiTapOverlay();});}
+}catch(e){}}
 function _hiBindTap(){if(_hiTapBound)return;_hiTapBound=true;
  document.addEventListener('click',function(e){try{
   if(!_hiBlocked)return;
@@ -1094,7 +1115,7 @@ function _hiBlock(on){try{
   if(b.closest('#qw-ovl'))return false;
   return /\u4e0b\u4e00\u6b65|\u9001\u51fa|\u78ba\u8a8d\u8a02\u55ae|\u78ba\u8a8d\u4ed8\u6b3e|\u524d\u5f80\u4ed8\u6b3e|\u6210\u7acb\u8a02\u55ae|\u524d\u5f80\u7d50\u5e33|\u7acb\u5373\u7d50\u5e33/.test((b.textContent||'').trim());});
  if(on){
-  _hiBlocked=true;_hiBindTap();
+  _hiBlocked=true;_hiBindTap();setTimeout(_hiTapOverlay,0);
  btns.forEach(function(b){b.disabled=true;b.setAttribute('data-qshm','1');
   if(!b.hasAttribute('data-qshmst'))b.setAttribute('data-qshmst',b.getAttribute('style')||'');
   b.style.setProperty('background','#c0392b','important');
@@ -1114,6 +1135,7 @@ function _hiBlock(on){try{
    var st=b.getAttribute('data-qshmst');
    if(st!==null){if(st)b.setAttribute('style',st);else b.removeAttribute('style');b.removeAttribute('data-qshmst');}});
   var tp=document.getElementById('qs-hitip');if(tp)tp.style.display='none';
+  var ovx=document.getElementById('qs-hitap');if(ovx)ovx.style.display='none';
   if(box&&box.parentNode)box.parentNode.removeChild(box);
  }
 }catch(e){}}
