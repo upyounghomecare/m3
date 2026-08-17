@@ -1150,16 +1150,18 @@ var _TM_CSS='#qs-terms{border:1.5px solid #d8e3ee;border-radius:10px;margin:10px
 +'#qs-terms .qstm-s{font-size:11.5px;color:#8a97a5;margin-top:4px;line-height:1.6}';
 function addTerms(){try{
  /* 錨點:先用補充欄位確認「已經在第三步」(看不見就是還沒到),
-    再往同一層找最後一個看得見的欄位 —— 備註是 1SHOP 內建欄位不叫 cf-,
-    只認 cf- 會被排到備註前面,說明就不在送出鈕正上方了 */
+    再往整張表單找最後一個看得見的欄位。
+    ⚠️ 補充欄位在 .customfields-wrap 裡,備註(.form-note)是 form.step3 的直接子元素,
+       兩者不同層 —— 只找同層或只找 cf- 都會被排到備註前面 */
  var fs=document.querySelectorAll('[name^="cf-"]'),cf=null;
  for(var i=0;i<fs.length;i++){var r=fs[i].closest('.form-group');
   if(r&&r.getBoundingClientRect().height>2)cf=r;}
  if(!cf)return;
- var last=cf,sib=cf.parentNode?cf.parentNode.children:[];
- for(var j=0;j<sib.length;j++){var s=sib[j];
-  if(s.id==='qs-terms')continue;
-  if(s.classList&&s.classList.contains('form-group')&&s.getBoundingClientRect().height>2)last=s;}
+ var form=cf.closest('form')||cf.parentNode;
+ var gs=form.querySelectorAll('.form-group'),last=cf;
+ for(var j=0;j<gs.length;j++){var g=gs[j];
+  if(g.id==='qs-terms'||g.closest('#qs-terms'))continue;
+  if(g.getBoundingClientRect().height>2)last=g;}
  var p=(window.__qsPlan==='early')?'early':(window.__qsPlan?'std':'none');
  var box=document.getElementById('qs-terms');
  /* 方案沒變、位置也沒被彈窗重繪掉 → 什麼都不做(每0.7秒跑一次,不能一直重畫) */
