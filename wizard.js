@@ -1106,6 +1106,82 @@ function _ageBlock(on){try{
  }
 }catch(e){}}
 function reconcileAgeForm(){try{_ageBlock(_ageWant()==='X');}catch(e){}}
+/* ===== 結帳前「取消・改約・保固」說明(結帳彈窗第三步,送出鈕正上方) =====
+   ⚠️ 文案唯一來源:客服 FAQ 題庫 Google Sheet
+      1KSPp7QQICFUiZRNjS9t18Sfdtcj2EwId1zlSufgm6bg
+      取消/改約=「日期確認後想改約或取消，規費是多少？」;保固=「清洗後若冷氣出現問題該怎麼處理？」
+   這是對客戶的承諾,不可自行增刪字句。要改先改 FAQ 再同步過來,兩邊必須一致 */
+var _TMS=[['服務日前 5 個工作天 17:00 前','免費','g'],
+ ['服務日前 5 個工作天 17:00 後','NT$300','a'],
+ ['服務日前 4 個工作天 17:00 後','NT$600','a'],
+ ['服務日前 1 個工作天 17:00 後或當日','NT$1,000','a']];
+var _TME=[['約定後至服務前','一律 NT$600','a'],
+ ['服務日前 1 個工作天 17:00 後或當日','NT$1,000','a']];
+function _tmRows(a){var s='';for(var i=0;i<a.length;i++){
+ s+='<div class="qstm-r"><span>· '+a[i][0]+'</span><b class="qstm-'+a[i][2]+'">'+a[i][1]+'</b></div>';}return s;}
+function _tmBox(t,a,mine,sub){
+ return '<div class="qstm-p'+(mine?' mine':' oth')+'"><div class="qstm-pt">'+t
+  +(mine?'<span class="qstm-bg">你選的方案</span>':'')+'</div>'
+  +_tmRows(a)+(sub?'<div class="qstm-s">'+sub+'</div>':'')+'</div>';}
+var _TM_CSS='#qs-terms{border:1.5px solid #d8e3ee;border-radius:10px;margin:10px 0 4px;overflow:hidden;background:#fbfdff;font-family:inherit;text-align:left}'
++'#qs-terms .qstm-h{display:flex;align-items:center;gap:8px;padding:11px 13px;cursor:pointer;font-size:13.5px;font-weight:800;color:#0C447C;-webkit-user-select:none;user-select:none}'
++'#qs-terms .qstm-ar{margin-left:auto;color:#8a97a5;font-size:12px;transition:transform .18s}'
++'#qs-terms.on .qstm-ar{transform:rotate(90deg)}'
++'#qs-terms .qstm-bd{display:none;padding:0 13px 12px;font-size:12.5px;line-height:1.85;color:#3d4b5a}'
++'#qs-terms.on .qstm-bd{display:block}'
++'#qs-terms .qstm-ok{background:#e7f3ec;color:#1d6b45;border-radius:7px;padding:8px 10px;font-weight:800;line-height:1.65;margin:0 0 9px}'
++'#qs-terms .qstm-lead{font-size:12.5px;color:#5d6c7b;margin-bottom:8px;line-height:1.7}'
++'#qs-terms .qstm-p{border:1.5px solid #dde6ef;border-radius:9px;padding:9px 11px;margin-bottom:8px;background:#fff}'
++'#qs-terms .qstm-p.mine{border-color:#0C447C;background:#f5f9fe}'
++'#qs-terms .qstm-p.oth{opacity:.62}'
++'#qs-terms .qstm-pt{font-size:13px;font-weight:900;color:#042C53;margin-bottom:5px;display:flex;align-items:center;gap:7px}'
++'#qs-terms .qstm-p.oth .qstm-pt{color:#5d6c7b}'
++'#qs-terms .qstm-bg{font-size:10.5px;font-weight:800;background:#0C447C;color:#fff;border-radius:99px;padding:2px 8px}'
++'#qs-terms .qstm-r{display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:12.5px;line-height:1.6}'
++'#qs-terms .qstm-r>span{flex:1}'
++'#qs-terms .qstm-r>b{white-space:nowrap;font-weight:800}'
+/* 保固那兩列:左右兩段各自不折行,窄螢幕放不下時整段換行,不會有單字掉一行 */
++'#qs-terms .qstm-r.nb{flex-wrap:wrap}'
++'#qs-terms .qstm-r.nb>span{flex:0 1 auto;white-space:nowrap}'
++'#qs-terms .qstm-r.nb>b{margin-left:auto;color:#1d6b45}'
++'#qs-terms .qstm-g{color:#1d7a45}#qs-terms .qstm-a{color:#c0392b}'
++'#qs-terms .qstm-sec{margin-top:10px;padding-top:9px;border-top:1px dashed #dde6ef;font-weight:900;color:#042C53;font-size:13px;margin-bottom:6px}'
++'#qs-terms .qstm-ex{color:#8a6410;background:#fff6e0;border-radius:7px;padding:7px 10px;margin-top:6px;font-size:12px;line-height:1.75}'
++'#qs-terms .qstm-s{font-size:11.5px;color:#8a97a5;margin-top:4px;line-height:1.6}';
+function addTerms(){try{
+ /* 錨點:結帳彈窗第三步最後一個「看得見」的補充欄位。看不見就是還沒到第三步 */
+ var fs=document.querySelectorAll('[name^="cf-"]'),last=null;
+ for(var i=0;i<fs.length;i++){var r=fs[i].closest('.form-group');
+  if(r&&r.getBoundingClientRect().height>2)last=r;}
+ if(!last)return;
+ var p=(window.__qsPlan==='early')?'early':(window.__qsPlan?'std':'none');
+ var box=document.getElementById('qs-terms');
+ /* 方案沒變、位置也沒被彈窗重繪掉 → 什麼都不做(每0.7秒跑一次,不能一直重畫) */
+ if(box&&box.getAttribute('data-qsp')===p&&box.previousElementSibling===last)return;
+ if(!document.getElementById('qs-terms-css')){var cs=document.createElement('style');
+  cs.id='qs-terms-css';cs.textContent=_TM_CSS;document.head.appendChild(cs);}
+ var std=_tmBox('標準方案',_TMS,p==='std',''),
+     ear=_tmBox('早鳥方案',_TME,p==='early','享早鳥優惠價，約定後即依上列計費');
+ var html='<div class="qstm-h"><span>📋</span><span>取消・改約・保固說明</span><span class="qstm-ar">›</span></div>'
+ +'<div class="qstm-bd">'
+ +'<div class="qstm-ok">✓ 正式約定服務日期前，兩方案皆可免費取消／改約</div>'
+ +'<div class="qstm-lead">到府服務日期一經約定，取消／改約補償費（<b>每人</b>）依方案不同：</div>'
+ +((p==='early')?(ear+std):(std+ear))
+ +'<div class="qstm-sec">保固</div>'
+ +'<div class="qstm-ok">✓ 自清洗服務完成日起，享有 30 天基本功能保固</div>'
+ +'<div class="qstm-r nb"><span>· 經原廠鑑定為<b>清洗所致</b>的功能異常</span><b>依機齡分級理賠</b></div>'
+ +'<div class="qstm-r nb"><span>· 人員疏失造成<b>傢俱損傷</b></span><b>最高賠 NT$10,000</b></div>'
+ +'<div class="qstm-ex"><b>以下情況不提供保固：</b><br>・設備使用超過 10 年（零件老化風險高）<br>・清洗前已存在的設備問題或舊有損壞<br>・消耗性零配件自然損耗、設備自然磨損<br>・天災、外力或使用者不當操作所致</div>'
+ +'<div class="qstm-s">※ 以上為重點摘要，完整條款以賣場公告為準。</div>'
+ +'</div>';
+ var wasOpen=!!(box&&box.className.indexOf('on')>=0);/* 換方案重畫時,別把客戶展開的內容收回去 */
+ if(!box)box=document.createElement('div');
+ box.id='qs-terms';box.className='qstm'+(wasOpen?' on':'');
+ box.innerHTML=html;box.setAttribute('data-qsp',p);
+ last.parentNode.insertBefore(box,last.nextSibling);
+ box.querySelector('.qstm-h').onclick=function(){
+  box.className=(box.className.indexOf('on')>=0)?'qstm':'qstm on';};
+}catch(e){}}
 function _hiField(){try{
  var ss=document.querySelectorAll('select[name^="cf-"]');
  for(var i=0;i<ss.length;i++){var r=ss[i].closest('.form-group');
@@ -1663,7 +1739,7 @@ function addGoBottomBtn(){try{
   var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
   li.style.display=show?'block':'none';
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
