@@ -1149,11 +1149,17 @@ var _TM_CSS='#qs-terms{border:1.5px solid #d8e3ee;border-radius:10px;margin:10px
 +'#qs-terms .qstm-ex{color:#8a6410;background:#fff6e0;border-radius:7px;padding:7px 10px;margin-top:6px;font-size:12px;line-height:1.75}'
 +'#qs-terms .qstm-s{font-size:11.5px;color:#8a97a5;margin-top:4px;line-height:1.6}';
 function addTerms(){try{
- /* 錨點:結帳彈窗第三步最後一個「看得見」的補充欄位。看不見就是還沒到第三步 */
- var fs=document.querySelectorAll('[name^="cf-"]'),last=null;
+ /* 錨點:先用補充欄位確認「已經在第三步」(看不見就是還沒到),
+    再往同一層找最後一個看得見的欄位 —— 備註是 1SHOP 內建欄位不叫 cf-,
+    只認 cf- 會被排到備註前面,說明就不在送出鈕正上方了 */
+ var fs=document.querySelectorAll('[name^="cf-"]'),cf=null;
  for(var i=0;i<fs.length;i++){var r=fs[i].closest('.form-group');
-  if(r&&r.getBoundingClientRect().height>2)last=r;}
- if(!last)return;
+  if(r&&r.getBoundingClientRect().height>2)cf=r;}
+ if(!cf)return;
+ var last=cf,sib=cf.parentNode?cf.parentNode.children:[];
+ for(var j=0;j<sib.length;j++){var s=sib[j];
+  if(s.id==='qs-terms')continue;
+  if(s.classList&&s.classList.contains('form-group')&&s.getBoundingClientRect().height>2)last=s;}
  var p=(window.__qsPlan==='early')?'early':(window.__qsPlan?'std':'none');
  var box=document.getElementById('qs-terms');
  /* 方案沒變、位置也沒被彈窗重繪掉 → 什麼都不做(每0.7秒跑一次,不能一直重畫) */
@@ -1719,6 +1725,22 @@ function liftCornerBtns(){try{
   if(want)chat.style.setProperty('bottom',want,'important');
   else chat.style.removeProperty('bottom');
 }catch(e){}}
+/* 購物車區的標題(1SHOP用h1)。找不到就退回 #cart-section */
+function _cartHead(){try{
+  var hs=document.querySelectorAll('h1');
+  for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0)return hs[k];}
+}catch(e){}return document.getElementById('cart-section');}
+/* 這顆鈕的下一站看客戶現在在哪:
+   還沒到商品區 → 商品區;已經在商品區 → 購物車;已經在購物車 → 頁面最底。
+   舊版固定跳商品區,而且捲過商品區就自己隱藏 → 精靈關閉後會自動捲到購物車,
+   這顆鈕就消失了,老闆按到的其實是1SHOP原生的「回到上方」 */
+function _goNext(){
+  var p=document.querySelector('.product-row')||document.querySelector('.product-wrap');
+  var c=_cartHead(),vh=window.innerHeight;
+  if(p&&p.getBoundingClientRect().top>vh*0.6)return {el:p,off:60,t:'前往選購'};
+  if(c&&c.getBoundingClientRect().top>vh*0.6)return {el:c,off:70,t:'前往已選購項目'};
+  return {el:null,off:0,t:'前往頁面最下方'};
+}
 function addGoBottomBtn(){try{
   var list=document.querySelector('.chat ul.action-list');if(!list)return;
   var ref=list.querySelector('li.goTopBtn');if(!ref)return;
@@ -1729,15 +1751,15 @@ function addGoBottomBtn(){try{
     li.style.cssText='display:block;list-style:none;margin:'+cs.margin+';padding:'+cs.padding;
     li.innerHTML='<button type="button" class="btn btn-top" title="前往選購"><i class="far fa-arrow-down"></i></button>';
     li.querySelector('button').onclick=function(){
-      var t=document.querySelector('.product-row')||document.querySelector('.product-wrap');
-      var y=t?(t.getBoundingClientRect().top+window.pageYOffset-60):document.body.scrollHeight;
+      var g=_goNext();
+      var y=g.el?(g.el.getBoundingClientRect().top+window.pageYOffset-g.off):document.body.scrollHeight;
       try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}
     };
     list.insertBefore(li,ref);
   }
-  var t2=document.querySelector('.product-row')||document.querySelector('.product-wrap');
-  var show=t2?(t2.getBoundingClientRect().top>window.innerHeight*0.6):false;
-  li.style.display=show?'block':'none';
+  li.style.display='block';/* 不再自動隱藏:每一段都要按得到 */
+  var b=li.querySelector('button'),g=_goNext();
+  if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
 setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
