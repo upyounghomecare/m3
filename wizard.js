@@ -919,14 +919,21 @@ function _renderPlanSum(wrap,collapsed){
     for(var i=0;i<picks.length;i++){picks[i].onclick=function(){var np=this.getAttribute('data-p');if(np!==_curPlan()){window.__qsPlan=np;try{if(window.__qsApplyPlanCoupon)window.__qsApplyPlanCoupon(function(){});}catch(e){}}_renderPlanSum(wrap,true);};}
   }
 }
-/* 購物車裡「只有場勘費、沒有任何清洗服務」→ 這是一張場勘單 */
+/* 購物車裡「只有場勘費、沒有任何清洗服務」→ 這是一張場勘單。
+   ⚠️ 這個判斷必須「黏著」:移除優惠券的那一瞬間 1SHOP 的購物車陣列會短暫讀不到內容,
+      若此時回傳 false,優惠券看門狗就會以為是一般訂單把券補回來,
+      我的 stripCouponForSurvey 再移除 → 畫面上折扣列無限閃爍(老闆實機看到)。
+      所以讀不到購物車時沿用上一次的結論,不要臨時翻臉。 */
 function _surveyOnly(){try{
-  var c=_cartArr();if(!c.length)return false;
+  var c=_cartArr();
+  if(!c.length)return !!window.__qsSurvey;/* 過渡狀態:沿用上次結論 */
   var has=false;
   for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf(SURVEY_PREFIX)===0){has=true;break;}}
-  if(!has)return false;
-  return (_indoorInCart()+_outdoorInCart())===0;
-}catch(e){return false;}}
+  if(!has){window.__qsSurvey=0;return false;}
+  var only=(_indoorInCart()+_outdoorInCart())===0;
+  window.__qsSurvey=only?1:0;
+  return only;
+}catch(e){return !!window.__qsSurvey;}}
 /* 場勘單不需要選到府方案(沒有清洗要排程)。
    方案選擇區 #qs-planbox 是「內文JS」產生的,那邊已經沒有空間可改(14,865/15,000),
    所以在這裡把它藏起來並補一行說明。
@@ -934,11 +941,15 @@ function _surveyOnly(){try{
       並且補上 .sel 讓那種檢查一定過得了。離開場勘情境時全部還原。 */
 /* 場勘單若已經被套上優惠券(看門狗補回的、或客戶自己輸入的),主動移除。
    場勘費是固定價,打折就是少收錢 */
-var _svCpSyncing=false;
+var _svCpSyncing=false,_svCpTry=0;
 function stripCouponForSurvey(){try{
   if(window.__qsAdding||_svCpSyncing)return;
-  if(!_surveyOnly())return;
-  if(_cartOff()<=0.001)return;/* 沒有折扣,不用動 */
+  if(!_surveyOnly()){_svCpTry=0;return;}
+  if(_cartOff()<=0.001){_svCpTry=0;return;}/* 沒有折扣,不用動;順便把次數歸零 */
+  /* 安全閥:萬一還有別的東西一直把券補回來,移三次就收手。
+     寧可金額不對讓老闆看得見,也不要畫面無限閃爍讓客戶以為當機 */
+  if(_svCpTry>=3)return;
+  _svCpTry++;
   /* 折扣列的 ProductType=99,在購物車上是獨立一列 */
   var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){
     var t=(x.textContent||'');
