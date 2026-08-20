@@ -227,6 +227,8 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .qsv-d b{font-size:13px}'
 +'.qw .qsum{border:1.5px solid #e2e9f1;border-radius:11px;overflow:hidden;margin:12px 0 4px}'
 +'.qw .qsr{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;font-size:13px;border-bottom:1px solid #eef2f7}'
+/* 場勘確認頁「偏遠」小標籤 */
++'.qw .qsr-tag{display:inline-block;margin-left:6px;background:rgba(184,134,11,.14);color:#8a6410;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:99px;vertical-align:1px}'
 +'.qw .qsr:last-child{border-bottom:0}.qw .qsr span{color:#7a8a9a}.qw .qsr b{font-weight:800}'
 +'.qw .qsr.big b{font-size:19px;color:#B8860B}'
 +'.qw .qsok{background:#e7f3ec;color:#1d6b45;border-radius:9px;padding:10px 12px;font-size:12.5px;font-weight:800;line-height:1.65;margin-top:10px}'
@@ -344,21 +346,32 @@ function render(){
           反而讓客戶找不到入口。老闆決定「可以接受被折,但場勘只吃標準方案的 95 折」,
           改由 capCouponForSurvey() 把折扣上限鎖在 95 折,入口一律顯示。 */
     var _sv=_surveyOf();
+    /* 入口卡片的金額必須跟確認頁一致(含偏遠加價),否則客戶點進去金額會跳 */
+    var _svRm=(areaCls==='remote'), _svTot=_sv.p+(_svRm?600:0);
     var svCard='<div class="qsv" onclick="__qw.goSurvey()">'
       +'<div class="qsv-t"><span>🔍</span><span>還不確定要洗哪些？先請技師到府場勘</span><span class="qsv-ar">›</span></div>'
-      +'<div class="qsv-d">場勘估價費 <b>NT$ '+_sv.p.toLocaleString('en-US')+'</b> ／ 趟　·　'+_sv.lbl+'<br>'
+      +'<div class="qsv-d">場勘估價費 <b>NT$ '+_svTot.toLocaleString('en-US')+'</b> ／ 趟　·　'+_sv.lbl
+      +(_svRm?'<br><span style="opacity:.85">（含偏遠地區加價 $600）</span>':'')+'<br>'
       +'技師到府勘查後提供報價，<b>此費用可折抵後續清洗費用</b></div></div>';
     w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+svCard+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='survey'){
     var sv=_surveyOf();
+    /* ⚠️ 偏遠地區的場勘,結帳頁的 reconcileRm 會自動加一筆「偏遠地區加價 $600」。
+       這一頁若只寫 $600,客戶按下「加入購物車」金額會突然變成 $1,200 ——
+       說一個價收兩倍。(2026-08-20 實測苗栗縣大湖鄉抓到)
+       老闆定案:錢照收,但這裡要先把明細攤開來給客戶看。 */
+    var svRm=(areaCls==='remote'), svTot=sv.p+(svRm?600:0);
     w='<div class="qw">'
      +'<div class="qwbar"><span class="ws"><i class="wsn">1</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>場勘</span></div>'
      +'<h2>到府場勘估價</h2><p class="sub">技師到府現場勘查，並提供清洗報價</p>'
      +'<div class="qsum">'
-     +'<div class="qsr"><span>服務地區</span><b>'+(areaCity||'')+' '+(areaDist||'')+'</b></div>'
+     +'<div class="qsr"><span>服務地區</span><b>'+(areaCity||'')+' '+(areaDist||'')+(svRm?'<span class="qsr-tag">偏遠</span>':'')+'</b></div>'
      +'<div class="qsr"><span>服務環境</span><b>'+sv.lbl+'</b></div>'
-     +'<div class="qsr big"><span>場勘估價費</span><b>NT$ '+sv.p.toLocaleString('en-US')+'</b></div>'
+     +'<div class="qsr"><span>場勘估價費</span><b>NT$ '+sv.p.toLocaleString('en-US')+'</b></div>'
+     +(svRm?'<div class="qsr"><span>偏遠地區加價</span><b>NT$ 600</b></div>':'')
+     +'<div class="qsr big"><span>'+(svRm?'合計':'應付金額')+'</span><b>NT$ '+svTot.toLocaleString('en-US')+'</b></div>'
      +'</div>'
+     +(svRm?'<div class="qswarn">📍 您的服務地址屬<b>偏遠地區</b>，技師車程較遠，每張訂單加收 <b>$600</b>（僅收一次）</div>':'')
      +'<div class="qsok">✓ 場勘後若決定清洗，此費用可<b>全額折抵</b>清洗費用<br>下單清洗時由客服為您扣除</div>'
      +'<div class="qswarn">※ 場勘後若未安排清洗，此費用不予退還</div>'
      +'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">返回，我要直接選機型</button>'
