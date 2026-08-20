@@ -212,6 +212,8 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 /* ===== 到府場勘（單獨下車馬費）===== */
 +'.qw .qsv{border:1.5px dashed #B8860B;background:rgba(184,134,11,.07);border-radius:12px;padding:12px 13px;margin:14px 0 2px;cursor:pointer}'
 +'.qw .qsv-t{font-size:13.5px;font-weight:900;color:#8a6410;display:flex;align-items:center;gap:7px}'
+/* 右側箭頭:虛線框在這個介面裡一直是「警語」的樣式,不加箭頭客戶不會知道它可以點 */
++'.qw .qsv-ar{margin-left:auto;font-size:17px;font-weight:900;opacity:.65}'
 +'.qw .qsv-d{font-size:12px;color:#8a6410;line-height:1.7;margin-top:5px;opacity:.92}'
 +'.qw .qsv-d b{font-size:13px}'
 +'.qw .qsum{border:1.5px solid #e2e9f1;border-radius:11px;overflow:hidden;margin:12px 0 4px}'
@@ -330,7 +332,7 @@ function render(){
     /* 「我不知道要洗哪些」是客戶在這一步最常卡住的地方,給他一條出路:先請人來看 */
     var _sv=_surveyOf();
     var svCard='<div class="qsv" onclick="__qw.goSurvey()">'
-      +'<div class="qsv-t"><span>🔍</span><span>還不確定要洗哪些？先請技師到府場勘</span></div>'
+      +'<div class="qsv-t"><span>🔍</span><span>還不確定要洗哪些？先請技師到府場勘</span><span class="qsv-ar">›</span></div>'
       +'<div class="qsv-d">場勘車馬費 <b>NT$ '+_sv.p.toLocaleString('en-US')+'</b> ／ 趟　·　'+_sv.lbl+'<br>'
       +'技師到府勘查後提供報價，<b>此費用可折抵後續清洗費用</b></div></div>';
     w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+svCard+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
@@ -905,6 +907,51 @@ function _renderPlanSum(wrap,collapsed){
     for(var i=0;i<picks.length;i++){picks[i].onclick=function(){var np=this.getAttribute('data-p');if(np!==_curPlan()){window.__qsPlan=np;try{if(window.__qsApplyPlanCoupon)window.__qsApplyPlanCoupon(function(){});}catch(e){}}_renderPlanSum(wrap,true);};}
   }
 }
+/* 購物車裡「只有場勘費、沒有任何清洗服務」→ 這是一張場勘單 */
+function _surveyOnly(){try{
+  var c=_cartArr();if(!c.length)return false;
+  var has=false;
+  for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf(SURVEY_PREFIX)===0){has=true;break;}}
+  if(!has)return false;
+  return (_indoorInCart()+_outdoorInCart())===0;
+}catch(e){return false;}}
+/* 場勘單不需要選到府方案(沒有清洗要排程)。
+   方案選擇區 #qs-planbox 是「內文JS」產生的,那邊已經沒有空間可改(14,865/15,000),
+   所以在這裡把它藏起來並補一行說明。
+   ⚠️ 不用移除節點,只隱藏 —— 萬一內文JS 送出前要檢查「有沒有選方案」,節點還在才不會擋住結帳;
+      並且補上 .sel 讓那種檢查一定過得了。離開場勘情境時全部還原。 */
+function hidePlanForSurvey(){try{
+  var ov=document.getElementById('qs-ovl');
+  if(!ov||getComputedStyle(ov).display==='none')return;
+  var box=document.getElementById('qs-planbox');if(!box)return;
+  var on=_surveyOnly();
+  if(on){
+    if(box.getAttribute('data-qssv')==='1')return;
+    box.setAttribute('data-qssv','1');
+    box.setAttribute('data-qssvst',box.getAttribute('style')||'');
+    box.style.display='none';
+    /* 保險:讓「有沒有選方案」這類檢查一定通過(只加 class,不觸發它的 onclick,所以不會套用方案券) */
+    try{var ps=box.querySelectorAll('.qs-plan');
+      if(ps.length&&!box.querySelector('.qs-plan.sel'))ps[0].className+=' sel';}catch(e){}
+    var only=document.getElementById('qs-planonly');
+    if(only){only.setAttribute('data-qssv','1');only.style.display='none';}
+    if(!document.getElementById('qs-svnote')){
+      var n=document.createElement('div');n.id='qs-svnote';
+      n.style.cssText='background:#fff6e0;color:#8a6410;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:800;line-height:1.7;margin:0 0 14px';
+      n.innerHTML='🔍 本次為<b>到府場勘估價</b>，不需選擇到府方案。<br>場勘後若決定清洗，再選擇早鳥或標準方案即可。';
+      box.parentNode.insertBefore(n,box);
+    }
+  } else {
+    if(box.getAttribute('data-qssv')!=='1')return;
+    box.removeAttribute('data-qssv');
+    var st=box.getAttribute('data-qssvst');
+    if(st!==null){if(st)box.setAttribute('style',st);else box.removeAttribute('style');}
+    box.removeAttribute('data-qssvst');
+    var o2=document.getElementById('qs-planonly');
+    if(o2&&o2.getAttribute('data-qssv')==='1'){o2.removeAttribute('data-qssv');o2.style.display='';}
+    var n2=document.getElementById('qs-svnote');if(n2&&n2.parentNode)n2.parentNode.removeChild(n2);
+  }
+}catch(e){}}
 function addPlanSummary(){
   try{
     var ov=document.getElementById('qs-ovl');
@@ -1837,7 +1884,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
