@@ -76,6 +76,17 @@ var ADDON=[
  {k:'rm',n:'偏遠地區加價',d:'一張訂單收一次'},
  {k:'bz',n:'商用/重油汙加價',d:'冷氣重油汙(如近廚房)每台加收'}
 ];
+/* ===== 到府場勘：客戶還不確定要洗哪些,先請技師來看並報價 =====
+   價格依「服務環境」自動判斷,客戶不必自己選。
+   ⚠️ 這兩個在後台是「一般產品」(不是加購品),客戶才能單獨結帳。
+   ⚠️ 名稱裡有「車馬費」三個字,會被 reconcileOrphanAddon / reconcileTf 的比對誤傷,
+      那兩處都已加排除條件,改名前務必一起確認 */
+var SURVEY_PREFIX='到府場勘車馬費';
+var SURVEY={
+ home:{n:'到府場勘車馬費(一般住家)',p:600,lbl:'一般住家'},
+ biz :{n:'到府場勘車馬費(營業場所/社區住宅)',p:1500,lbl:'營業場所／社區住宅'}
+};
+function _surveyOf(){return SURVEY[(env==='biz')?'biz':'home'];}
 var ICO_GUIDE='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3"/></svg>';
 var ICO_LIST='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.4"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.4"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.4"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.4"/></svg>';
 
@@ -197,7 +208,18 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
    且已把內文CSS 撐到 14,976/15,000 字元。整塊原封不動搬來這裡,值完全沒改。
    ★ 必須放在 CSS 字串最尾端:如此才能重現原本「內文CSS 蓋過 wizard 基底規則」的優先順序;
      而前面那些 #qw-ovl ... !important 的修正規則優先權更高,不受影響。 */
-+'.qw{position:relative;background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}.qw .steps{display:flex;align-items:center;gap:6px;margin-bottom:4px}.qw .dot{width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#E6F1FB;color:#8a97a5}.qw .dot.on{background:#0C447C;color:#fff}.qw .dot.done{background:#B8860B;color:#fff}.qw .ln{flex:1;height:2px;background:#c9d7e6}.qw .ln.done{background:#B8860B}.qw h2{-webkit-text-stroke:.5px currentColor;font-size:18px;margin:12px 0 3px;color:#042C53;font-weight:900!important}.qw .sub{font-size:12.5px;color:#8a97a5;margin:0 0 14px}.qw .grp-lbl{font-size:12px;font-weight:700;color:#0C447C;margin:12px 0 6px}.qw .opt{display:block;border:1.5px solid #c9d7e6;border-radius:12px;padding:10px 12px;margin-bottom:9px;cursor:pointer}.qw .opt.sel{border-color:#0C447C;background:#E6F1FB}.qw .opt-main{display:flex;align-items:center;gap:11px}.qw .opt img{width:46px;height:46px;border-radius:8px;border:1px solid #c9d7e6;object-fit:cover;flex-shrink:0}.qw .oi{flex:1;min-width:0}.qw .on{font-size:14.5px;font-weight:500;display:block}.qw .od{display:block;font-size:11px;color:#8a97a5}.qw .op{color:#B8860B;font-weight:800;font-size:14px;white-space:nowrap}.qw .det-body{margin-top:9px;background:#E6F1FB;border-radius:8px;padding:9px 11px}.qw .det-cap{font-size:12px;font-weight:700;color:#0C447C;margin-bottom:4px}.qw .det-body ul{margin:0;padding:0;list-style:none}.qw .det-body li{font-size:12px;color:#1c2733;line-height:1.75}.qw .det-warn{font-size:11.5px;color:#c0392b;font-weight:700;margin-top:5px}.qw .step-ctl{display:flex;align-items:center;gap:8px;background:#E6F1FB;border-radius:999px;padding:4px}.qw .step-ctl button{width:28px;height:28px;border-radius:50%;border:none;background:#fff;color:#0C447C;font-size:15px;font-weight:700;cursor:pointer}.qw .step-ctl .q{min-width:18px;text-align:center;font-weight:700;font-size:14px;color:#042C53}.qw .op-wrap{justify-content:flex-end;width:100%;margin-top:9px;padding-top:10px;border-top:1px dashed #d7e0ea;display:flex;align-items:center;gap:8px}.qw .warnbox{font-size:11.5px;color:#c0392b;background:rgba(192,57,43,.08);border-radius:8px;padding:7px 10px;margin:2px 0 10px;line-height:1.5}.qw .optnote{font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:0 0 12px;line-height:1.5}.qw .optnote b{color:#B8860B;font-weight:800}.qw .airnote{font-size:11.5px;color:#8a97a5;background:#E6F1FB;border-radius:8px;padding:7px 10px;margin:2px 0 10px;line-height:1.5}.qw .nav{display:flex;gap:9px;margin-top:14px}.qw .qwfoot{position:sticky;bottom:0;z-index:5;background:#fff;box-shadow:0 -12px 18px -8px rgba(4,44,83,.16)}.qw .qwfoot-l::before{content:"";position:absolute;left:0;right:0;top:-26px;height:26px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.96));pointer-events:none}.qw .qwmore{position:absolute;left:0;right:0;top:-16px;text-align:center;pointer-events:none;transition:opacity .18s}.qw .qwmore span{display:inline-block;background:#fff;color:#0C447C;font-size:12px;font-weight:800;border-radius:999px;padding:6px 14px;box-shadow:0 2px 12px rgba(4,44,83,.26);pointer-events:auto;cursor:pointer;border:1px solid #dfe8f2}.qw .qwmore.off{opacity:0}.qw .btn{flex:1;border-radius:999px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;border:none}.qw .btn.pri{background:#0C447C;color:#fff}.qw .btn.pri:disabled{background:#a9bdd2;cursor:not-allowed}.qw .btn.gho{background:none;border:1.5px solid #c9d7e6;color:#042C53}.qw .skip{text-align:center;font-size:13px;color:#8a97a5;text-decoration:underline;margin-top:12px;cursor:pointer}.qw .laststep{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;color:#B8860B;background:rgba(184,134,11,.1);border-radius:5px;padding:3px 9px;margin-bottom:4px}.qw .plans{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:2px}.qw .plan{border:1.5px solid #c9d7e6;border-radius:12px;padding:13px 12px;cursor:pointer}.qw .plan.sel{border-color:#0C447C;background:#E6F1FB}.qw .plan .pn{font-size:15px;font-weight:800;color:#042C53}.qw .plan .phot{display:inline-block;font-size:10px;font-weight:800;color:#fff;background:#B8860B;border-radius:4px;padding:2px 7px;margin-top:5px}.qw .plan .phot-x{background:none;padding:2px 0;color:transparent}.qw .plan .pdisc{font-size:24px;font-weight:800;color:#B8860B;margin:7px 0 3px}.qw .plan .pd{font-size:11.5px;color:#8a97a5;line-height:1.5}.qw .callnote{font-weight:800;font-size:11.5px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:11px 0 2px;line-height:1.55}.qw.wel{text-align:center}.qw .wel-brand{font-size:11px;font-weight:800;letter-spacing:.1em;color:#0C447C;margin-bottom:12px}.qw .wel-bar{width:34px;height:3px;background:#B8860B;border-radius:2px;margin:2px auto 15px}.qw .wel-h{text-wrap:balance;-webkit-text-stroke:0.4px #16202b;font-size:24px;font-weight:800;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap}.qw .wel-p{font-size:13px;color:#7c8998;line-height:1.7;margin:0 0 6px}.qw .wel-steps{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:4px;margin:6px 0 22px;white-space:nowrap}.qw .ws{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;color:#042C53}.qw .wsn{width:21px;height:21px;flex-shrink:0;border-radius:50%;background:none;border:1.5px solid #B8860B;color:#B8860B;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}.qw .wsa{color:#B8860B;font-weight:800;font-size:11px;opacity:.5;margin:0 -1px}.qw .wel-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}.qw .wel-tile{overflow:hidden;background:none;-webkit-tap-highlight-color:transparent;transition:transform .12s;box-shadow:0 2px 10px rgba(4,44,83,.12);aspect-ratio:1/1;border:none;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;line-height:1.35;text-align:center;padding:8px}.qw .wt-pri{background:#0C447C;color:#fff}.qw .wt-gho{background:#fff;color:#0C447C;box-shadow:inset 0 0 0 1.5px #d3dde9}#qw-toast{position:fixed;left:0;right:0;bottom:24px;z-index:100001;text-align:center;pointer-events:none}#qw-toast span{background:#042C53;color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;font-family:inherit}.qw .qwbar{display:flex;align-items:center;gap:6px;margin-bottom:4px;padding-right:32px !important}';
++'.qw{position:relative;background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}.qw .steps{display:flex;align-items:center;gap:6px;margin-bottom:4px}.qw .dot{width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#E6F1FB;color:#8a97a5}.qw .dot.on{background:#0C447C;color:#fff}.qw .dot.done{background:#B8860B;color:#fff}.qw .ln{flex:1;height:2px;background:#c9d7e6}.qw .ln.done{background:#B8860B}.qw h2{-webkit-text-stroke:.5px currentColor;font-size:18px;margin:12px 0 3px;color:#042C53;font-weight:900!important}.qw .sub{font-size:12.5px;color:#8a97a5;margin:0 0 14px}.qw .grp-lbl{font-size:12px;font-weight:700;color:#0C447C;margin:12px 0 6px}.qw .opt{display:block;border:1.5px solid #c9d7e6;border-radius:12px;padding:10px 12px;margin-bottom:9px;cursor:pointer}.qw .opt.sel{border-color:#0C447C;background:#E6F1FB}.qw .opt-main{display:flex;align-items:center;gap:11px}.qw .opt img{width:46px;height:46px;border-radius:8px;border:1px solid #c9d7e6;object-fit:cover;flex-shrink:0}.qw .oi{flex:1;min-width:0}.qw .on{font-size:14.5px;font-weight:500;display:block}.qw .od{display:block;font-size:11px;color:#8a97a5}.qw .op{color:#B8860B;font-weight:800;font-size:14px;white-space:nowrap}.qw .det-body{margin-top:9px;background:#E6F1FB;border-radius:8px;padding:9px 11px}.qw .det-cap{font-size:12px;font-weight:700;color:#0C447C;margin-bottom:4px}.qw .det-body ul{margin:0;padding:0;list-style:none}.qw .det-body li{font-size:12px;color:#1c2733;line-height:1.75}.qw .det-warn{font-size:11.5px;color:#c0392b;font-weight:700;margin-top:5px}.qw .step-ctl{display:flex;align-items:center;gap:8px;background:#E6F1FB;border-radius:999px;padding:4px}.qw .step-ctl button{width:28px;height:28px;border-radius:50%;border:none;background:#fff;color:#0C447C;font-size:15px;font-weight:700;cursor:pointer}.qw .step-ctl .q{min-width:18px;text-align:center;font-weight:700;font-size:14px;color:#042C53}.qw .op-wrap{justify-content:flex-end;width:100%;margin-top:9px;padding-top:10px;border-top:1px dashed #d7e0ea;display:flex;align-items:center;gap:8px}.qw .warnbox{font-size:11.5px;color:#c0392b;background:rgba(192,57,43,.08);border-radius:8px;padding:7px 10px;margin:2px 0 10px;line-height:1.5}.qw .optnote{font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:0 0 12px;line-height:1.5}.qw .optnote b{color:#B8860B;font-weight:800}.qw .airnote{font-size:11.5px;color:#8a97a5;background:#E6F1FB;border-radius:8px;padding:7px 10px;margin:2px 0 10px;line-height:1.5}.qw .nav{display:flex;gap:9px;margin-top:14px}.qw .qwfoot{position:sticky;bottom:0;z-index:5;background:#fff;box-shadow:0 -12px 18px -8px rgba(4,44,83,.16)}.qw .qwfoot-l::before{content:"";position:absolute;left:0;right:0;top:-26px;height:26px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.96));pointer-events:none}.qw .qwmore{position:absolute;left:0;right:0;top:-16px;text-align:center;pointer-events:none;transition:opacity .18s}.qw .qwmore span{display:inline-block;background:#fff;color:#0C447C;font-size:12px;font-weight:800;border-radius:999px;padding:6px 14px;box-shadow:0 2px 12px rgba(4,44,83,.26);pointer-events:auto;cursor:pointer;border:1px solid #dfe8f2}.qw .qwmore.off{opacity:0}.qw .btn{flex:1;border-radius:999px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;border:none}.qw .btn.pri{background:#0C447C;color:#fff}.qw .btn.pri:disabled{background:#a9bdd2;cursor:not-allowed}.qw .btn.gho{background:none;border:1.5px solid #c9d7e6;color:#042C53}.qw .skip{text-align:center;font-size:13px;color:#8a97a5;text-decoration:underline;margin-top:12px;cursor:pointer}.qw .laststep{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;color:#B8860B;background:rgba(184,134,11,.1);border-radius:5px;padding:3px 9px;margin-bottom:4px}.qw .plans{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:2px}.qw .plan{border:1.5px solid #c9d7e6;border-radius:12px;padding:13px 12px;cursor:pointer}.qw .plan.sel{border-color:#0C447C;background:#E6F1FB}.qw .plan .pn{font-size:15px;font-weight:800;color:#042C53}.qw .plan .phot{display:inline-block;font-size:10px;font-weight:800;color:#fff;background:#B8860B;border-radius:4px;padding:2px 7px;margin-top:5px}.qw .plan .phot-x{background:none;padding:2px 0;color:transparent}.qw .plan .pdisc{font-size:24px;font-weight:800;color:#B8860B;margin:7px 0 3px}.qw .plan .pd{font-size:11.5px;color:#8a97a5;line-height:1.5}.qw .callnote{font-weight:800;font-size:11.5px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:11px 0 2px;line-height:1.55}.qw.wel{text-align:center}.qw .wel-brand{font-size:11px;font-weight:800;letter-spacing:.1em;color:#0C447C;margin-bottom:12px}.qw .wel-bar{width:34px;height:3px;background:#B8860B;border-radius:2px;margin:2px auto 15px}.qw .wel-h{text-wrap:balance;-webkit-text-stroke:0.4px #16202b;font-size:24px;font-weight:800;color:#16202b;margin:0 0 10px;line-height:1.42;white-space:nowrap}.qw .wel-p{font-size:13px;color:#7c8998;line-height:1.7;margin:0 0 6px}.qw .wel-steps{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:4px;margin:6px 0 22px;white-space:nowrap}.qw .ws{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;color:#042C53}.qw .wsn{width:21px;height:21px;flex-shrink:0;border-radius:50%;background:none;border:1.5px solid #B8860B;color:#B8860B;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}.qw .wsa{color:#B8860B;font-weight:800;font-size:11px;opacity:.5;margin:0 -1px}.qw .wel-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}.qw .wel-tile{overflow:hidden;background:none;-webkit-tap-highlight-color:transparent;transition:transform .12s;box-shadow:0 2px 10px rgba(4,44,83,.12);aspect-ratio:1/1;border:none;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;line-height:1.35;text-align:center;padding:8px}.qw .wt-pri{background:#0C447C;color:#fff}.qw .wt-gho{background:#fff;color:#0C447C;box-shadow:inset 0 0 0 1.5px #d3dde9}#qw-toast{position:fixed;left:0;right:0;bottom:24px;z-index:100001;text-align:center;pointer-events:none}#qw-toast span{background:#042C53;color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;font-family:inherit}.qw .qwbar{display:flex;align-items:center;gap:6px;margin-bottom:4px;padding-right:32px !important}'
+/* ===== 到府場勘（單獨下車馬費）===== */
++'.qw .qsv{border:1.5px dashed #B8860B;background:rgba(184,134,11,.07);border-radius:12px;padding:12px 13px;margin:14px 0 2px;cursor:pointer}'
++'.qw .qsv-t{font-size:13.5px;font-weight:900;color:#8a6410;display:flex;align-items:center;gap:7px}'
++'.qw .qsv-d{font-size:12px;color:#8a6410;line-height:1.7;margin-top:5px;opacity:.92}'
++'.qw .qsv-d b{font-size:13px}'
++'.qw .qsum{border:1.5px solid #e2e9f1;border-radius:11px;overflow:hidden;margin:12px 0 4px}'
++'.qw .qsr{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;font-size:13px;border-bottom:1px solid #eef2f7}'
++'.qw .qsr:last-child{border-bottom:0}.qw .qsr span{color:#7a8a9a}.qw .qsr b{font-weight:800}'
++'.qw .qsr.big b{font-size:19px;color:#B8860B}'
++'.qw .qsok{background:#e7f3ec;color:#1d6b45;border-radius:9px;padding:10px 12px;font-size:12.5px;font-weight:800;line-height:1.65;margin-top:10px}'
++'.qw .qswarn{background:#fff6e0;color:#8a6410;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;line-height:1.6;margin-top:7px}';
 
 var qty={},opened={},step=0,plan=null,env=null,ovl=null,_finishing=false;
 var areaCity=null,areaDist=null,areaCls=null;
@@ -305,7 +327,27 @@ function render(){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
     var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'式機型適用</div>'+groups[g].map(optRow).join('');});
     var inLbl=sumKeys(['wall','cs','cm','cl','m4','f4'])>0?'下一步：室外機':'只洗室外機，下一步';
-    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    /* 「我不知道要洗哪些」是客戶在這一步最常卡住的地方,給他一條出路:先請人來看 */
+    var _sv=_surveyOf();
+    var svCard='<div class="qsv" onclick="__qw.goSurvey()">'
+      +'<div class="qsv-t"><span>🔍</span><span>還不確定要洗哪些？先請技師到府場勘</span></div>'
+      +'<div class="qsv-d">場勘車馬費 <b>NT$ '+_sv.p.toLocaleString('en-US')+'</b> ／ 趟　·　'+_sv.lbl+'<br>'
+      +'技師到府勘查後提供報價，<b>此費用可折抵後續清洗費用</b></div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+svCard+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+  } else if(step==='survey'){
+    var sv=_surveyOf();
+    w='<div class="qw">'
+     +'<div class="qwbar"><span class="ws"><i class="wsn">1</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>場勘</span></div>'
+     +'<h2>到府場勘估價</h2><p class="sub">技師到府現場勘查，並提供清洗報價</p>'
+     +'<div class="qsum">'
+     +'<div class="qsr"><span>服務地區</span><b>'+(areaCity||'')+' '+(areaDist||'')+'</b></div>'
+     +'<div class="qsr"><span>服務環境</span><b>'+sv.lbl+'</b></div>'
+     +'<div class="qsr big"><span>場勘車馬費</span><b>NT$ '+sv.p.toLocaleString('en-US')+'</b></div>'
+     +'</div>'
+     +'<div class="qsok">✓ 場勘後若決定清洗，此費用可<b>全額折抵</b>清洗費用<br>下單清洗時由客服為您扣除</div>'
+     +'<div class="qswarn">※ 場勘後若未安排清洗，此費用不予退還</div>'
+     +'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">返回，我要直接選機型</button>'
+     +'<button class="btn pri" onclick="__qw.finishSurvey()">加入購物車</button></div></div>';
   } else if(step===2){
     var outN=sumKeys(['o1','om']),inNow=sumKeys(['wall','cs','cm','cl','m4','f4']);
     var tfHint=(env==='home'&&inNow===0&&outN===1);
@@ -441,6 +483,32 @@ var api={
   zoom:function(src){if(document.getElementById('qw-zoom'))return;var z=document.createElement('div');z.id='qw-zoom';z.innerHTML='<img src="'+src+'" alt="">';z.onclick=function(){if(z.parentNode)z.parentNode.removeChild(z);};document.body.appendChild(z);},
   chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK)+sumKeys(['o1','om']);if(v>mx)v=mx;}qty[k]=v;render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
+  goSurvey:function(){step='survey';render();},
+  /* 單獨買場勘費:不經過方案步驟(沒有清洗要排程,方案沒有意義),
+     所以不設 __qsPlan、也不呼叫 __qsApplyPlanCoupon */
+  finishSurvey:function(){
+    if(_finishing||window.__qsAdding)return;
+    var sv=_surveyOf();
+    var r=_resolveBtn(sv.n);
+    if(!r){alert('抱歉，目前無法加入「'+sv.n+'」，請洽詢客服協助。');return;}
+    _finishing=true;
+    var btn=ovl?ovl.querySelector('.btn.pri'):null;if(btn){btn.disabled=true;btn.textContent='加入中…';}
+    try{
+      window.__qsAdding=true;
+      window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
+      window.__qsSurvey=1;/* 標記這是場勘單,其他保護機制看得到 */
+      try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}
+      setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
+      close();toast('已加入到府場勘，可直接結帳');
+      setTimeout(function(){try{
+        var t=null,hs=document.querySelectorAll('h1');
+        for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0){t=hs[k];break;}}
+        if(!t)t=document.getElementById('cart-section');
+        if(t){var y=t.getBoundingClientRect().top+window.pageYOffset-70;
+          try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}}
+      }catch(e){}},420);
+    }catch(e){_finishing=false;window.__qsAdding=false;}
+  },
   go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){alert('請至少選擇一台室內機或室外機清洗喔！\n可回上一步（室內機／室外機）選擇台數。');return;}}step=n;render();},
   /* 方案確認彈窗:按「完成，前往結帳」時先跳一次確認(兩種方案各自內容),確認後才真的加入購物車 */
   confirmPlan:function(){
@@ -651,7 +719,8 @@ function addPopularBadge(){
   }catch(e){}
 }
 /* 車馬費純自動:隱藏商品頁的車馬費加購卡,客戶不能手動加(由精靈依規則自動加入購物車) */
-function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0||nm.indexOf('加購品已享優惠價')>=0){ws[i].style.display='none';}}}catch(e){}}
+function hideTravelCard(){try{var ws=document.querySelectorAll('.product-row .product-wrap');for(var i=0;i<ws.length;i++){var h=ws[i].querySelector('h3');var nm=h?(h.textContent||''):'';/* 場勘車馬費也藏起來:只從精靈的入口進去,不讓客戶在商品列表直接點(會漏掉環境判斷與說明) */
+if(nm.indexOf('車馬費')>=0||nm.indexOf('偏遠地區加價')>=0||nm.indexOf('加購品已享優惠價')>=0||nm.indexOf(SURVEY_PREFIX)===0){ws[i].style.display='none';}}}catch(e){}}
 /* 購物車裡的「方案折扣校正」改成白話說明、隱藏數量/單價/刪除鈕(系統自動管理,客戶不需操作) */
 /* 校正計算期間把會跳動的金額蓋成「計算中…」,算完一次顯示正確值(客戶不會看到金額亂跳);9秒安全上限,萬一卡住也會自動顯示真實金額 */
 function _corrBusy(){var t=window.__qsCorrBusy||0;return t>0&&(Date.now()-t)<12000;}
@@ -1360,7 +1429,9 @@ function reconcileTf(){
     var target=(!isBiz&&indoor===0&&outdoor===1)?1:0;
     var cur=_tfInCart();
     if(cur===target)return;
-    var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){return /車馬費/.test(x.textContent||'');})[0];
+    /* ⚠️ 排除場勘車馬費:它也含「車馬費」三個字,不排除會誤認成已經有車馬費(該加的不加)或誤刪 */
+    var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){
+      var t=x.textContent||'';return /車馬費/.test(t)&&t.indexOf(SURVEY_PREFIX)<0;})[0];
     if(target<=0){
       if(!it)return;
       var rb=[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
@@ -1388,6 +1459,9 @@ function reconcileOrphanAddon(){try{
   for(var i=0;i<c.length;i++){
     var nm=c[i].ProductName||'';
     if(nm.indexOf('加購品已享優惠價')>=0)continue;   /* 校正產品不動 */
+    /* ⚠️ 場勘車馬費是「一般產品」,本來就設計成可以單獨買。
+       它的名稱含「車馬費」三個字,不排除的話會被下面的比對當成孤兒加購品自動刪掉 */
+    if(nm.indexOf(SURVEY_PREFIX)===0)continue;
     for(var j=0;j<_ADDON_NAMES.length;j++){
       if(nm.indexOf(_ADDON_NAMES[j])>=0){target=nm;break;}
     }
