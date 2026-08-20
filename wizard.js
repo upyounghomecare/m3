@@ -212,8 +212,12 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 /* ===== 到府場勘（單獨下車馬費）===== */
 +'.qw .qsv{border:1.5px dashed #B8860B;background:rgba(184,134,11,.07);border-radius:12px;padding:12px 13px;margin:14px 0 2px;cursor:pointer}'
 +'.qw .qsv-t{font-size:13.5px;font-weight:900;color:#8a6410;display:flex;align-items:center;gap:7px}'
-/* 右側箭頭:虛線框在這個介面裡一直是「警語」的樣式,不加箭頭客戶不會知道它可以點 */
-+'.qw .qsv-ar{margin-left:auto;font-size:17px;font-weight:900;opacity:.65}'
+/* 右側箭頭:虛線框在這個介面裡一直是「警語」的樣式,不加箭頭客戶不會知道它可以點。
+   第一版用淡色純字元(opacity .65),老闆實機看不到 → 改成實心圓底的白色箭頭,對比拉滿 */
++'.qw .qsv-ar{margin-left:auto;flex:0 0 auto;width:24px;height:24px;border-radius:50%;'
++'background:#B8860B;color:#fff;font-size:15px;font-weight:900;line-height:24px;text-align:center;'
++'box-shadow:0 1px 4px rgba(184,134,11,.45)}'
++'.qw .qsv-t>span:nth-child(2){flex:1;min-width:0}'
 +'.qw .qsv-d{font-size:12px;color:#8a6410;line-height:1.7;margin-top:5px;opacity:.92}'
 +'.qw .qsv-d b{font-size:13px}'
 +'.qw .qsum{border:1.5px solid #e2e9f1;border-radius:11px;overflow:hidden;margin:12px 0 4px}'
@@ -920,19 +924,45 @@ function _surveyOnly(){try{
    所以在這裡把它藏起來並補一行說明。
    ⚠️ 不用移除節點,只隱藏 —— 萬一內文JS 送出前要檢查「有沒有選方案」,節點還在才不會擋住結帳;
       並且補上 .sel 讓那種檢查一定過得了。離開場勘情境時全部還原。 */
+/* 場勘單若已經被套上優惠券(看門狗補回的、或客戶自己輸入的),主動移除。
+   場勘費是固定價,打折就是少收錢 */
+var _svCpSyncing=false;
+function stripCouponForSurvey(){try{
+  if(window.__qsAdding||_svCpSyncing)return;
+  if(!_surveyOnly())return;
+  if(_cartOff()<=0.001)return;/* 沒有折扣,不用動 */
+  /* 折扣列的 ProductType=99,在購物車上是獨立一列 */
+  var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){
+    var t=(x.textContent||'');
+    return (/折\)?$|折\(限|折優惠|9折|折扣/.test(t)&&/-\s*NT\$|−\s*NT\$/.test(t))||/限標準方案|限早鳥方案/.test(t);
+  })[0];
+  if(!it)return;
+  var rb=[].slice.call(it.querySelectorAll('button,a,i,span')).filter(function(b){
+    return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
+  if(!rb)return;
+  _svCpSyncing=true;
+  try{window.removeCartItem(rb);}catch(e){}
+  try{toast('到府場勘為固定費用，不適用優惠折扣');}catch(e){}
+  setTimeout(function(){_svCpSyncing=false;},1500);
+}catch(e){_svCpSyncing=false;}}
 function hidePlanForSurvey(){try{
   var ov=document.getElementById('qs-ovl');
   if(!ov||getComputedStyle(ov).display==='none')return;
-  var box=document.getElementById('qs-planbox');if(!box)return;
+  /* 兩個 id 都要找:場勘模式時它已經被我改名成 qs-planbox-sv,只查原名會找不到、就永遠還原不回來 */
+  var box=document.getElementById('qs-planbox')||document.getElementById('qs-planbox-sv');
+  if(!box)return;
   var on=_surveyOnly();
-  if(on){
-    if(box.getAttribute('data-qssv')==='1')return;
+  if(on&&box.getAttribute('data-qssv')!=='1'){
     box.setAttribute('data-qssv','1');
     box.setAttribute('data-qssvst',box.getAttribute('style')||'');
     box.style.display='none';
-    /* 保險:讓「有沒有選方案」這類檢查一定通過(只加 class,不觸發它的 onclick,所以不會套用方案券) */
-    try{var ps=box.querySelectorAll('.qs-plan');
-      if(ps.length&&!box.querySelector('.qs-plan.sel'))ps[0].className+=' sel';}catch(e){}
+    /* ⚠️ 關鍵:內文JS 的 updateGo() 是
+         var needPlan=document.getElementById('qs-planbox');
+         go.disabled = !agreed || (needPlan && !pickedPlan);
+       它看的是「節點存不存在」,不是看不看得見 —— 只 display:none 結帳鈕會永遠停在
+       「請先選擇到府方案」按不下去(實機證實)。
+       這裡改掉 id 讓 getElementById 找不到,節點本身留著、離開場勘情境再改回來,完全可逆。 */
+    box.id='qs-planbox-sv';
     var only=document.getElementById('qs-planonly');
     if(only){only.setAttribute('data-qssv','1');only.style.display='none';}
     if(!document.getElementById('qs-svnote')){
@@ -941,9 +971,9 @@ function hidePlanForSurvey(){try{
       n.innerHTML='🔍 本次為<b>到府場勘估價</b>，不需選擇到府方案。<br>場勘後若決定清洗，再選擇早鳥或標準方案即可。';
       box.parentNode.insertBefore(n,box);
     }
-  } else {
-    if(box.getAttribute('data-qssv')!=='1')return;
+  } else if(!on&&box.getAttribute('data-qssv')==='1'){
     box.removeAttribute('data-qssv');
+    box.id='qs-planbox';
     var st=box.getAttribute('data-qssvst');
     if(st!==null){if(st)box.setAttribute('style',st);else box.removeAttribute('style');}
     box.removeAttribute('data-qssvst');
@@ -951,6 +981,12 @@ function hidePlanForSurvey(){try{
     if(o2&&o2.getAttribute('data-qssv')==='1'){o2.removeAttribute('data-qssv');o2.style.display='';}
     var n2=document.getElementById('qs-svnote');if(n2&&n2.parentNode)n2.parentNode.removeChild(n2);
   }
+  /* 改完 id 之後 updateGo() 不會自己重跑(它只在勾選同意時觸發),這裡照它的規則同步一次按鈕 */
+  try{
+    var go=document.getElementById('qs-go');
+    var ag=document.getElementById('qs-agree');
+    if(go&&ag&&on&&ag.checked&&go.disabled){go.disabled=false;go.textContent='同意並繼續結帳';}
+  }catch(e){}
 }catch(e){}}
 function addPlanSummary(){
   try{
@@ -1807,6 +1843,10 @@ function couponRestoreWatch(){try{
   /* 用 _corrBusy() 而不是直接看 __qsCorrBusy:它有 12 秒自動到期,
      萬一底下的解鎖 setTimeout 沒跑到(分頁在背景會被凍結),看門狗才不會被自己鎖死。 */
   if(window.__qsAdding||_corrBusy())return;/* 加購/清空進行中不要插手 */
+  /* 場勘單($600/$1,500)是固定價,不該被任何方案券或優惠碼折到。
+     看門狗會把上一次購物留在 localStorage 的「最佳券」自動補回來(實機看到 95 折被套上、
+     $1,500 變 $1,425),所以這裡直接跳過,並且不要清掉記憶(客戶下次買清洗還要用) */
+  if(_surveyOnly())return;
   if(!_cartHasGoods()){_cpTry=0;_cpSeen=0;return;}
   var best=_cpLoad();if(!best)return;
   var sub=_cartSub();
@@ -1884,7 +1924,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();stripCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
