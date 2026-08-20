@@ -989,9 +989,18 @@ function capCouponForSurvey(){try{
   try{_lockCheckout(true);}catch(e){}
   el.value=SURVEY_CAP_CODE;
   try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
+  /* ⚠️ 一定要舉起 _cpFixing —— 否則會被「我自己的」防降級保護擋下來。
+     bindCouponGuard 的規則是「比車上更差的碼一律擋」,而 95 折對 85 折來說正是更差,
+     所以不舉旗的話這裡送出去完全沒有反應(2026-08-20 實測,送了三次都石沉大海)。
+     _cpFixing 就是原本留給「系統主動換券」用的開關,跟 couponRestoreWatch 同一套。 */
+  _cpFixing=1;
   btn.click();
+  /* 送出後 bindCouponGuard 會把碼記在 _cpPending,看門狗接著會把它存成「客戶的最佳券」。
+     這是系統自己換的、不是客戶用的,不可以寫進記憶(會讓他下次買清洗只剩 95 折)。
+     _cpSave 本身雖然不會用差的蓋掉好的,但記憶是空的時候就會被寫進去 —— 直接清掉最保險。 */
+  _cpPending=null;
   try{toast('到府場勘屬標準方案，優惠固定為 95 折<br>您原本的優惠碼已保留，可留待清洗訂單使用');}catch(e){}
-  setTimeout(function(){window.__qsCpBusy=0;},2600);
+  setTimeout(function(){window.__qsCpBusy=0;_cpFixing=0;_cpPending=null;},2600);
 }catch(e){}}
 function hidePlanForSurvey(){try{
   var ov=document.getElementById('qs-ovl');
