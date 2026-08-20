@@ -1393,7 +1393,9 @@ function addTerms(){try{
  if(!document.getElementById('qs-terms-css')){var cs=document.createElement('style');
   cs.id='qs-terms-css';cs.textContent=_TM_CSS;document.head.appendChild(cs);}
  var sv=(p==='sv');
- var std=_tmBox(sv?'取消／改約補償費':'標準方案',_TMS,false,''),
+ /* ⚠️ 第三個參數是「這是不是客戶選的方案」(會加藍框和『你選的方案』標籤)。
+    場勘沒有方案可選,傳 false;一般訂單必須維持 p==='std',不可寫死 —— 寫死會讓高亮消失。 */
+ var std=_tmBox(sv?'取消／改約補償費':'標準方案',_TMS,(!sv&&p==='std'),''),
      ear=_tmBox('早鳥方案',_TME,p==='early','享早鳥優惠價，約定後即依上列計費');
  var html='<div class="qstm-h"><span>📋</span><span>'+(sv?'取消・改約說明':'取消・改約・保固說明')+'</span><span class="qstm-ar">›</span></div>'
  +'<div class="qstm-bd">'
