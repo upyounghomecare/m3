@@ -225,6 +225,10 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .qsv-t>span:nth-child(2){flex:1;min-width:0}'
 +'.qw .qsv-d{font-size:12px;color:#8a6410;line-height:1.7;margin-top:5px;opacity:.92}'
 +'.qw .qsv-d b{font-size:13px}'
+/* 購物車有東西時的替代提示:低調但看得到,不能讓入口憑空消失 */
++'.qw .qsv-off{border:1px dashed #d3ddea;border-radius:10px;padding:10px 12px;margin:14px 0 2px;'
++'font-size:12px;color:#8a97a5;line-height:1.7;text-align:center}'
++'.qw .qsv-off b{color:#8a6410;font-weight:800}'
 +'.qw .qsum{border:1.5px solid #e2e9f1;border-radius:11px;overflow:hidden;margin:12px 0 4px}'
 +'.qw .qsr{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;font-size:13px;border-bottom:1px solid #eef2f7}'
 +'.qw .qsr:last-child{border-bottom:0}.qw .qsr span{color:#7a8a9a}.qw .qsr b{font-weight:800}'
@@ -338,12 +342,20 @@ function render(){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
     var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'式機型適用</div>'+groups[g].map(optRow).join('');});
     var inLbl=sumKeys(['wall','cs','cm','cl','m4','f4'])>0?'下一步：室外機':'只洗室外機，下一步';
-    /* 「我不知道要洗哪些」是客戶在這一步最常卡住的地方,給他一條出路:先請人來看 */
+    /* 「我不知道要洗哪些」是客戶在這一步最常卡住的地方,給他一條出路:先請人來看。
+       ⚠️ 購物車已經有東西時不提供入口 —— 1SHOP 會把方案券綁在購物車 session 上而且拿不掉,
+          場勘費 $600 會被折成 $570。空購物車就不會有券,金額才保證正確。
+          但不能讓入口「憑空消失」,要留一行字告訴客戶怎麼走。 */
     var _sv=_surveyOf();
-    var svCard='<div class="qsv" onclick="__qw.goSurvey()">'
+    var svCard;
+    if(_cartHasGoods()){
+      svCard='<div class="qsv-off">還不確定要洗哪些？<b>先清空購物車</b>即可使用「到府場勘估價」</div>';
+    } else {
+      svCard='<div class="qsv" onclick="__qw.goSurvey()">'
       +'<div class="qsv-t"><span>🔍</span><span>還不確定要洗哪些？先請技師到府場勘</span><span class="qsv-ar">›</span></div>'
       +'<div class="qsv-d">場勘估價費 <b>NT$ '+_sv.p.toLocaleString('en-US')+'</b> ／ 趟　·　'+_sv.lbl+'<br>'
       +'技師到府勘查後提供報價，<b>此費用可折抵後續清洗費用</b></div></div>';
+    }
     w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+svCard+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='survey'){
     var sv=_surveyOf();
@@ -494,7 +506,13 @@ var api={
   zoom:function(src){if(document.getElementById('qw-zoom'))return;var z=document.createElement('div');z.id='qw-zoom';z.innerHTML='<img src="'+src+'" alt="">';z.onclick=function(){if(z.parentNode)z.parentNode.removeChild(z);};document.body.appendChild(z);},
   chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK)+sumKeys(['o1','om']);if(v>mx)v=mx;}qty[k]=v;render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
-  goSurvey:function(){step='survey';render();},
+  /* 第二道保險:畫面若因故沒重繪、客戶還是點到了舊卡片,這裡再擋一次 */
+  goSurvey:function(){
+    if(_cartHasGoods()){
+      alert('購物車裡已經有選購項目了。\n\n「到府場勘估價」需要在空購物車的狀態下單獨購買，\n請先清空購物車再試一次。');
+      render();return;
+    }
+    step='survey';render();},
   /* 單獨買場勘費:不經過方案步驟(沒有清洗要排程,方案沒有意義),
      所以不設 __qsPlan、也不呼叫 __qsApplyPlanCoupon */
   finishSurvey:function(){
@@ -920,10 +938,9 @@ function _renderPlanSum(wrap,collapsed){
   }
 }
 /* 購物車裡「只有場勘費、沒有任何清洗服務」→ 這是一張場勘單。
-   ⚠️ 這個判斷必須「黏著」:移除優惠券的那一瞬間 1SHOP 的購物車陣列會短暫讀不到內容,
-      若此時回傳 false,優惠券看門狗就會以為是一般訂單把券補回來,
-      我的 stripCouponForSurvey 再移除 → 畫面上折扣列無限閃爍(老闆實機看到)。
-      所以讀不到購物車時沿用上一次的結論,不要臨時翻臉。 */
+   這個判斷必須「黏著」:1SHOP 更新購物車的瞬間,陣列會短暫讀不到內容,
+   若此時回傳 false,hidePlanForSurvey 會誤判成一般訂單而把方案選擇閃回來。
+   所以讀不到購物車時沿用上一次的結論(window.__qsSurvey),不要臨時翻臉。 */
 function _surveyOnly(){try{
   var c=_cartArr();
   if(!c.length)return !!window.__qsSurvey;/* 過渡狀態:沿用上次結論 */
@@ -939,31 +956,13 @@ function _surveyOnly(){try{
    所以在這裡把它藏起來並補一行說明。
    ⚠️ 不用移除節點,只隱藏 —— 萬一內文JS 送出前要檢查「有沒有選方案」,節點還在才不會擋住結帳;
       並且補上 .sel 讓那種檢查一定過得了。離開場勘情境時全部還原。 */
-/* 場勘單若已經被套上優惠券(看門狗補回的、或客戶自己輸入的),主動移除。
-   場勘費是固定價,打折就是少收錢 */
-var _svCpSyncing=false,_svCpTry=0;
-function stripCouponForSurvey(){try{
-  if(window.__qsAdding||_svCpSyncing)return;
-  if(!_surveyOnly()){_svCpTry=0;return;}
-  if(_cartOff()<=0.001){_svCpTry=0;return;}/* 沒有折扣,不用動;順便把次數歸零 */
-  /* 安全閥:萬一還有別的東西一直把券補回來,移三次就收手。
-     寧可金額不對讓老闆看得見,也不要畫面無限閃爍讓客戶以為當機 */
-  if(_svCpTry>=3)return;
-  _svCpTry++;
-  /* 折扣列的 ProductType=99,在購物車上是獨立一列 */
-  var it=[].slice.call(document.querySelectorAll('.cart-item')).filter(function(x){
-    var t=(x.textContent||'');
-    return (/折\)?$|折\(限|折優惠|9折|折扣/.test(t)&&/-\s*NT\$|−\s*NT\$/.test(t))||/限標準方案|限早鳥方案/.test(t);
-  })[0];
-  if(!it)return;
-  var rb=[].slice.call(it.querySelectorAll('button,a,i,span')).filter(function(b){
-    return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];
-  if(!rb)return;
-  _svCpSyncing=true;
-  try{window.removeCartItem(rb);}catch(e){}
-  try{toast('到府場勘為固定費用，不適用優惠折扣');}catch(e){}
-  setTimeout(function(){_svCpSyncing=false;},1500);
-}catch(e){_svCpSyncing=false;}}
+/* ⚠️ 曾經在這裡寫過 stripCouponForSurvey():場勘單若被套上方案券就自動移除。
+   2026-08-20 實測後移除,原因記在這裡免得有人再寫一次:
+   在測試頁裝監聽器抓過 —— submitCouponNumber 與 __qsApplyPlanCoupon 兩個入口
+   「從頭到尾都沒有被呼叫」,券是 1SHOP 伺服器端自己掛回購物車的,
+   而 1SHOP 沒有提供「移除優惠券」的 API(只有送出,沒有取消)。
+   所以移掉畫面上那一列沒有用,下一輪又回來 → 折扣列每 5.6 秒閃一次,客戶會以為當機。
+   結論:不跟它搶。改成「購物車有東西時就不提供場勘入口」,從源頭避開券。 */
 function hidePlanForSurvey(){try{
   var ov=document.getElementById('qs-ovl');
   if(!ov||getComputedStyle(ov).display==='none')return;
@@ -1943,7 +1942,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();stripCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
