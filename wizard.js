@@ -79,12 +79,17 @@ var ADDON=[
 /* ===== 到府場勘：客戶還不確定要洗哪些,先請技師來看並報價 =====
    價格依「服務環境」自動判斷,客戶不必自己選。
    ⚠️ 這兩個在後台是「一般產品」(不是加購品),客戶才能單獨結帳。
-   ⚠️ 名稱裡有「車馬費」三個字,會被 reconcileOrphanAddon / reconcileTf 的比對誤傷,
-      那兩處都已加排除條件,改名前務必一起確認 */
-var SURVEY_PREFIX='到府場勘車馬費';
+   ⚠️⚠️ 商品名稱「絕對不可以」含「車馬費」三個字。
+      第一版叫「到府場勘車馬費」,結果被四個既有機制用 indexOf('車馬費') 抓到而誤傷:
+        reconcileOrphanAddon → 單獨買時被當孤兒加購品自動刪掉(功能完全失效)
+        reconcileTf          → 誤認為已經有車馬費,該補的 $600 不補
+        autoFeeNotes         → 購物車貼上「只洗1台室外機需加收車馬費…」完全不相干的說明
+        hideTravelCard       → (這個是刻意的)
+      2026-08-20 改名為「到府場勘估價」根治。下面的排除條件保留當第二道防線。 */
+var SURVEY_PREFIX='到府場勘估價';
 var SURVEY={
- home:{n:'到府場勘車馬費(一般住家)',p:600,lbl:'一般住家'},
- biz :{n:'到府場勘車馬費(營業場所/社區住宅)',p:1500,lbl:'營業場所／社區住宅'}
+ home:{n:'到府場勘估價(一般住家)',p:600,lbl:'一般住家'},
+ biz :{n:'到府場勘估價(營業場所/社區住宅)',p:1500,lbl:'營業場所／社區住宅'}
 };
 function _surveyOf(){return SURVEY[(env==='biz')?'biz':'home'];}
 var ICO_GUIDE='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3"/></svg>';
@@ -337,7 +342,7 @@ function render(){
     var _sv=_surveyOf();
     var svCard='<div class="qsv" onclick="__qw.goSurvey()">'
       +'<div class="qsv-t"><span>🔍</span><span>還不確定要洗哪些？先請技師到府場勘</span><span class="qsv-ar">›</span></div>'
-      +'<div class="qsv-d">場勘車馬費 <b>NT$ '+_sv.p.toLocaleString('en-US')+'</b> ／ 趟　·　'+_sv.lbl+'<br>'
+      +'<div class="qsv-d">場勘估價費 <b>NT$ '+_sv.p.toLocaleString('en-US')+'</b> ／ 趟　·　'+_sv.lbl+'<br>'
       +'技師到府勘查後提供報價，<b>此費用可折抵後續清洗費用</b></div></div>';
     w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+svCard+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='survey'){
@@ -348,7 +353,7 @@ function render(){
      +'<div class="qsum">'
      +'<div class="qsr"><span>服務地區</span><b>'+(areaCity||'')+' '+(areaDist||'')+'</b></div>'
      +'<div class="qsr"><span>服務環境</span><b>'+sv.lbl+'</b></div>'
-     +'<div class="qsr big"><span>場勘車馬費</span><b>NT$ '+sv.p.toLocaleString('en-US')+'</b></div>'
+     +'<div class="qsr big"><span>場勘估價費</span><b>NT$ '+sv.p.toLocaleString('en-US')+'</b></div>'
      +'</div>'
      +'<div class="qsok">✓ 場勘後若決定清洗，此費用可<b>全額折抵</b>清洗費用<br>下單清洗時由客服為您扣除</div>'
      +'<div class="qswarn">※ 場勘後若未安排清洗，此費用不予退還</div>'
@@ -873,6 +878,9 @@ function autoFeeNotes(){try{
   if(/cart-empty/.test(it.className)||(it.closest&&it.closest('#qw-ovl')))return;
   var content=it.querySelector('.item-content')||it;
   var nmEl=it.querySelector('.item-name');var nm=nmEl?(nmEl.textContent||''):(it.textContent||'');
+  /* ⚠️ 場勘車馬費不套任何自動說明:它的名稱含「車馬費」,會被下面的比對抓到,
+     在購物車貼上「只洗1台室外機需加收車馬費…」那句完全不相干的說明(實機證實) */
+  if(nm.indexOf(SURVEY_PREFIX)>=0)return;
   var old=content.querySelector('.qs-feenote');
   for(var i=0;i<_FEENOTE.length;i++){var f=_FEENOTE[i];
    if(nm.indexOf(f.m)>=0){
