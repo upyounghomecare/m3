@@ -1384,24 +1384,34 @@ function addTerms(){try{
  for(var j=0;j<gs.length;j++){var g=gs[j];
   if(g.id==='qs-terms'||g.closest('#qs-terms'))continue;
   if(g.getBoundingClientRect().height>2)last=g;}
- var p=(window.__qsPlan==='early')?'early':(window.__qsPlan?'std':'none');
+ /* 場勘單沒有方案可選,老闆 2026-08-20 定案:場勘的取消/改約一律套用「標準方案」那一組規則。
+    所以這裡把 p 直接鎖成 'sv',底下只印標準方案那一格,不印早鳥(客戶根本選不到早鳥)。 */
+ var p=_surveyOnly()?'sv':((window.__qsPlan==='early')?'early':(window.__qsPlan?'std':'none'));
  var box=document.getElementById('qs-terms');
  /* 方案沒變、位置也沒被彈窗重繪掉 → 什麼都不做(每0.7秒跑一次,不能一直重畫) */
  if(box&&box.getAttribute('data-qsp')===p&&box.previousElementSibling===last)return;
  if(!document.getElementById('qs-terms-css')){var cs=document.createElement('style');
   cs.id='qs-terms-css';cs.textContent=_TM_CSS;document.head.appendChild(cs);}
- var std=_tmBox('標準方案',_TMS,p==='std',''),
+ var sv=(p==='sv');
+ var std=_tmBox(sv?'取消／改約補償費':'標準方案',_TMS,false,''),
      ear=_tmBox('早鳥方案',_TME,p==='early','享早鳥優惠價，約定後即依上列計費');
- var html='<div class="qstm-h"><span>📋</span><span>取消・改約・保固說明</span><span class="qstm-ar">›</span></div>'
+ var html='<div class="qstm-h"><span>📋</span><span>'+(sv?'取消・改約說明':'取消・改約・保固說明')+'</span><span class="qstm-ar">›</span></div>'
  +'<div class="qstm-bd">'
- +'<div class="qstm-ok">✓ 正式約定服務日期前，兩方案皆可免費取消／改約</div>'
- +'<div class="qstm-lead">到府服務日期一經約定，取消／改約補償費（<b>每人</b>）依方案不同：</div>'
- +((p==='early')?(ear+std):(std+ear))
- +'<div class="qstm-sec">保固</div>'
+ +(sv
+   ?('<div class="qstm-ok">✓ 正式約定場勘日期前，可免費取消／改約</div>'
+     +'<div class="qstm-lead">到府場勘日期一經約定，取消／改約補償費（<b>每人</b>）如下：</div>'
+     +std)
+   :('<div class="qstm-ok">✓ 正式約定服務日期前，兩方案皆可免費取消／改約</div>'
+     +'<div class="qstm-lead">到府服務日期一經約定，取消／改約補償費（<b>每人</b>）依方案不同：</div>'
+     +((p==='early')?(ear+std):(std+ear))))
+ /* 場勘只是到府看、沒有動到機器,保固整段不適用,印出來只會讓客戶誤會場勘也有 30 天保固 */
+ +(sv?'':(
+  '<div class="qstm-sec">保固</div>'
  +'<div class="qstm-ok">✓ 自清洗服務完成日起，享有 30 天基本功能保固</div>'
  +'<div class="qstm-r nb"><span>· 經原廠鑑定為<b>清洗所致</b>的功能異常</span><b>依機齡分級理賠</b></div>'
  +'<div class="qstm-r nb"><span>· 人員疏失造成<b>傢俱損傷</b></span><b>最高賠 NT$10,000</b></div>'
- +'<div class="qstm-ex"><b>以下情況不提供保固：</b><br>・設備使用超過 10 年（零件老化風險高）<br>・清洗前已存在的設備問題或舊有損壞<br>・消耗性零配件自然損耗、設備自然磨損<br>・天災、外力或使用者不當操作所致</div>'
+ +'<div class="qstm-ex"><b>以下情況不提供保固：</b><br>・設備使用超過 10 年（零件老化風險高）<br>・清洗前已存在的設備問題或舊有損壞<br>・消耗性零配件自然損耗、設備自然磨損<br>・天災、外力或使用者不當操作所致</div>'))
+ +(sv?'<div class="qstm-ex">※ 場勘為到府勘查估價，不含清洗施作，故無保固適用。<br>※ 場勘後若決定清洗，此費用可全額折抵；未安排清洗則不予退還。</div>':'')
  +'<div class="qstm-s">※ 以上為重點摘要，完整條款以賣場公告為準。</div>'
  +'</div>';
  var wasOpen=!!(box&&box.className.indexOf('on')>=0);/* 換方案重畫時,別把客戶展開的內容收回去 */
