@@ -512,6 +512,10 @@ var api={
       window.__qsAdding=true;
       window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
       window.__qsSurvey=1;/* 標記這是場勘單,其他保護機制看得到 */
+      /* 場勘沒有方案可言。客戶若先走過清洗流程,__qsPlan 會留著 'early'/'std',
+         那會讓彈窗冒出矛盾的方案摘要條(寫85折但實收95折),也會讓 bindCouponGuard
+         拿早鳥的 0.15 去跟客戶輸入的碼比較而擋錯人。這裡直接清掉。 */
+      window.__qsPlan=null;plan=null;
       try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}
       setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
       close();toast('已加入到府場勘，可直接結帳');
@@ -1049,6 +1053,15 @@ function addPlanSummary(){
   try{
     var ov=document.getElementById('qs-ovl');
     if(!ov||(ov.textContent||'').indexOf('結帳前請確認')<0)return;
+    /* ⚠️ 場勘單不可以顯示方案摘要條。
+       客戶若先走過清洗流程(__qsPlan 被設成 early)再改買場勘,彈窗會同時出現
+       「本次為到府場勘估價,不需選擇到府方案」和「您選擇的方案 早鳥方案·85折」——
+       兩句話互相矛盾,而且金額實際是 95 折卻寫著 85 折。(2026-08-20 實機抓到) */
+    if(_surveyOnly()){
+      var old=document.getElementById('qs-plansum-wrap');
+      if(old&&old.parentNode)old.parentNode.removeChild(old);
+      return;
+    }
     if(!window.__qsPlan)return;
     var modal=ov.querySelector('#qs-modal')||ov;
     if(modal.querySelector('#qs-plansum-wrap'))return;
