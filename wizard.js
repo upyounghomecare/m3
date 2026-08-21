@@ -846,6 +846,28 @@ function _showBackBtn(){try{
   return b;
 }catch(e){return null;}}
 function _hideBackBtn(){try{var b=document.getElementById('qw-back');if(b&&b.parentNode)b.parentNode.removeChild(b);}catch(e){}}
+/* ===== 發票資訊頁:把預設值從「捐贈」改成「個人」 =====
+   1SHOP 的發票類型選單順序是 捐贈(v=1) / 個人(v=0) / 公司(v=2),
+   預設選中第一個「捐贈」。客戶沒注意直接按送出,發票就被捐掉了 ——
+   而且捐出去的發票**收不回來**,客訴成本很高。(2026-08-21 測試頁實測確認)
+   ⚠️ 只在畫面第一次穩定後動一次。客戶之後自己選什麼就是什麼,絕不覆蓋。
+      要等一輪才動,是為了避開 Vue 首次渲染 —— 太早設會被它蓋回去,
+      每輪都設則會跟 Vue 打架變成閃爍(場勘折扣列那次的教訓)。 */
+var _rtSeen=false,_rtDone=false;
+function fixReceiptDefault(){try{
+  if(_rtDone)return;
+  var s=document.querySelector('select[name="ReceiptType"]');
+  if(!s||!s.options.length)return;
+  if(!_rtSeen){_rtSeen=true;return;}   /* 第一輪只記錄,讓 Vue 先渲染完 */
+  _rtDone=true;
+  var per=null;
+  for(var i=0;i<s.options.length;i++){
+    if((s.options[i].text||'').trim()==='個人'){per=s.options[i].value;break;}
+  }
+  if(per===null||s.value===per)return;
+  s.value=per;
+  try{s.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}
+}catch(e){}}
 function backBtnWatch(){try{
   if(document.getElementById('qw-ovl')){_hideBackBtn();return;}   /* 精靈開著 */
   if(!window.__qwShown)return;                                     /* 客戶還沒用過精靈 */
@@ -2043,7 +2065,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
