@@ -401,7 +401,12 @@ function render(){
        同時出現在購物車最容易變成客訴,而退款成本遠高於那 $600。
        ⚠️ 這是**純顯示**的擋法,不碰購物車。今天兩次出包(門檻擋門、無限抖動)
           都是「自動增刪購物車」造成的,那種寫法在這一頁很容易跟其他機制打架。 */
-    var _svHasClean=(_indoorInCart()+_outdoorInCart())>0;
+    /* 已經挑了機型就不再顯示場勘入口(老闆提的):
+       ①場勘與清洗互斥,留著入口等於邀請客戶去按一個等下會被擋的按鈕;
+       ②更要緊的是 finishSurvey 只加場勘,**客戶已挑的台數會被無聲丟掉** ——
+         挑了 3 台 $9,600 按下去,購物車只剩場勘 $600,沒有任何提示。
+       qty 一改 pick()/chg() 都會 render(),所以歸零時入口會自己回來。 */
+    var _svHasClean=(_indoorInCart()+_outdoorInCart())>0||_qwCount()>0;
     var _sv=_surveyOf();
     /* 入口卡片的金額必須跟確認頁一致(含偏遠加價),否則客戶點進去金額會跳 */
     var _svRm=(areaCls==='remote'), _svTot=_sv.p+(_svRm?600:0);
