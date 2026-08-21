@@ -969,6 +969,36 @@ function svHintWatch(){try{
   var has=h.className.indexOf('on')>=0;
   if(on!==has)h.className='qsvh'+(on?' on':'');
 }catch(e){}}
+/* ===== 場勘在購物車時,擋下「加入清洗服務」 =====
+   ⚠️ 老闆要的是「擋」,我第一版只做了提醒 + 一段永遠不會觸發的死程式(購物車有商品時
+      客戶根本進不了精靈),等於完全沒擋。老闆實機截圖抓到:場勘 + 吊隱式大清洗同時在購物車。
+   這裡用**攔截加入動作**,不是事後刪購物車 —— 後者就是今天害畫面無限抖動的寫法。
+   只攔室內機/室外機清洗;偏遠加價、商用加價、車馬費、場勘本身都是系統自己加的,不能攔。 */
+function guardSurveyExclusive(){try{
+  if(window.__qsSvGuard)return;
+  var orig=window.viewProduct;
+  if(typeof orig!=='function')return;
+  window.__qsSvGuard=true;
+  window.viewProduct=function(btn,pid){
+    try{
+      var w=(btn&&btn.closest)?btn.closest('.product-wrap'):null;
+      var h=w?w.querySelector('h3'):null;
+      var nm=h?(h.textContent||'').trim():'';
+      var isClean=false;
+      for(var i=0;i<INNAMES.length;i++){if(nm.indexOf(INNAMES[i])===0){isClean=true;break;}}
+      if(!isClean)for(var j=0;j<OUTNAMES.length;j++){if(nm.indexOf(OUTNAMES[j])===0){isClean=true;break;}}
+      if(isClean){
+        var c=_cartArr(),hasSv=false;
+        for(var k=0;k<c.length;k++){if((c[k].ProductName||'').indexOf(SURVEY_PREFIX)===0){hasSv=true;break;}}
+        if(hasSv){
+          alert('購物車裡已經有「到府場勘估價」。\n\n場勘是為了讓技師先到府確認要洗哪些，\n如果您已經確定要清洗的品項，請先移除場勘，再選購清洗服務。');
+          return;
+        }
+      }
+    }catch(e){}
+    return orig.apply(this,arguments);
+  };
+}catch(e){}}
 function backBtnWatch(){try{
   if(document.getElementById('qw-ovl')){_hideBackBtn();return;}   /* 精靈開著 */
   if(!window.__qwShown)return;                                     /* 客戶還沒用過精靈 */
@@ -2200,7 +2230,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
