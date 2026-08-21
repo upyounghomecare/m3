@@ -1746,6 +1746,16 @@ function reconcileOrphanAddon(){try{
   var c=_cartArr();if(!c.length)return;
   var svc=_indoorInCart()+_outdoorInCart();
   if(svc>0)return;                       /* 有清洗服務 → 正常 */
+  /* ⚠️ 購物車裡有場勘時,「偏遠地區加價」是合法的隨附項目,不是孤兒。
+     2026-08-21 老闆實測:偏遠地區 + 場勘 → 購物車畫面無限抖動。原因是兩支程式打架 ——
+       reconcileRm 看到偏遠地址就加上「偏遠地區加價 $600」
+       → 這裡看到「沒有清洗服務」就把它當孤兒刪掉
+       → reconcileRm 再加回來… 無限循環。
+     場勘的偏遠加價是老闆定案要收的(見確認頁的合計 $1,200/$2,100),所以要放行。 */
+  var hasSurvey=false;
+  for(var s0=0;s0<c.length;s0++){
+    if((c[s0].ProductName||'').indexOf(SURVEY_PREFIX)===0){hasSurvey=true;break;}
+  }
   var target=null;
   for(var i=0;i<c.length;i++){
     var nm=c[i].ProductName||'';
@@ -1753,6 +1763,7 @@ function reconcileOrphanAddon(){try{
     /* ⚠️ 場勘車馬費是「一般產品」,本來就設計成可以單獨買。
        它的名稱含「車馬費」三個字,不排除的話會被下面的比對當成孤兒加購品自動刪掉 */
     if(nm.indexOf(SURVEY_PREFIX)===0)continue;
+    if(hasSurvey&&nm.indexOf('偏遠地區加價')>=0)continue;  /* 場勘的偏遠加價,合法 */
     for(var j=0;j<_ADDON_NAMES.length;j++){
       if(nm.indexOf(_ADDON_NAMES[j])>=0){target=nm;break;}
     }
