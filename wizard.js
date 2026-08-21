@@ -237,12 +237,20 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'.qw .qsvh{position:sticky;bottom:0;z-index:3;display:none;align-items:center;gap:8px;cursor:pointer;'
 +'background:rgba(4,44,83,.94);color:#fff;border-radius:10px;padding:10px 13px;margin:8px 0 2px;'
 +'font-size:12.5px;line-height:1.5;box-shadow:0 4px 14px rgba(4,44,83,.3);'
-+'opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}'
-+'.qw .qsvh.on{display:flex;opacity:1;transform:translateY(0)}'+'.qw .qsvh:active{transform:scale(.985)}'
++'opacity:0;transition:opacity .25s}'
+/* 進場只用淡入 —— transform 讓給彈動動畫,兩者搶同一個屬性會互相蓋掉 */
++'.qw .qsvh.on{display:flex;opacity:1;animation:qsvhpop 2.8s ease-in-out infinite}'
++'.qw .qsvh:active{animation:none;transform:scale(.985)}'
+/* 2.8 秒一循環,但 86% 的時間完全靜止 —— 只在最後輕輕彈兩下。
+   一直抖會很吵也顯得廉價,間歇性的動作反而更抓得住眼睛。 */
++'@keyframes qsvhpop{0%,86%,100%{transform:translateY(0);box-shadow:0 4px 14px rgba(4,44,83,.30)}'
++'90%{transform:translateY(-5px);box-shadow:0 12px 24px rgba(4,44,83,.44)}'
++'94%{transform:translateY(0);box-shadow:0 4px 14px rgba(4,44,83,.30)}'
++'97%{transform:translateY(-2px)}}'
 +'.qw .qsvh b{color:#e6c876;font-weight:900}'
 +'.qw .qsvh-a{margin-left:auto;font-size:15px;font-weight:900;color:#e6c876;animation:qsvhb 1.4s ease-in-out infinite}'
 +'@keyframes qsvhb{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}'
-+'@media(prefers-reduced-motion:reduce){.qw .qsvh-a{animation:none}.qw .qsvh{transition:none}}'
++'@media(prefers-reduced-motion:reduce){.qw .qsvh-a{animation:none}.qw .qsvh,.qw .qsvh.on{transition:none;animation:none}}'
 +'.qw .qsum{border:1.5px solid #e2e9f1;border-radius:11px;overflow:hidden;margin:12px 0 4px}'
 +'.qw .qsr{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;font-size:13px;border-bottom:1px solid #eef2f7}'
 /* 場勘確認頁「偏遠」小標籤 */
