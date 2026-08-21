@@ -234,7 +234,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'font-weight:800;white-space:nowrap;box-shadow:0 3px 10px rgba(12,68,124,.28)}'
 /* 跟著捲動出現的場勘提示。黏在卡片底部(卡片本身有 overflow-y:auto),
    預設隱藏,由 svHintWatch() 依「捲動距離＋還沒選機型」決定要不要顯示 */
-+'.qw .qsvh{position:sticky;bottom:0;z-index:3;display:none;align-items:center;gap:8px;'
++'.qw .qsvh{position:sticky;bottom:0;z-index:3;display:none;align-items:center;gap:8px;pointer-events:none;'
 +'background:rgba(4,44,83,.94);color:#fff;border-radius:10px;padding:10px 13px;margin:8px 0 2px;'
 +'font-size:12.5px;line-height:1.5;box-shadow:0 4px 14px rgba(4,44,83,.3);'
 +'opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}'
@@ -919,6 +919,17 @@ function svHintWatch(){try{
       var r=sv.getBoundingClientRect(), cr=card.getBoundingClientRect();
       if(r.top<cr.bottom-40)on=false;
     }
+  }
+  /* ⚠️ 底部按鈕列 .qwfoot 也是 sticky bottom:0 —— 提示條若也用 bottom:0,
+     會被它整個蓋住:元素在、class 也對,但客戶完全看不到。
+     (2026-08-21 老闆實機回報「沒顯示」,實測提示條 704~762 剛好落在 qwfoot 的 696~780 內。
+      我先前在「視窗 0x0 的凍結分頁」上只驗了 class 就說通過 —— 那個驗證不算數。)
+     所以要動態量按鈕列的高度,把提示條墊到它上面。高度會隨文字換行變動,不能寫死。 */
+  if(on){
+    var foot=card.querySelector('.qwfoot');
+    var fh=foot?Math.round(foot.getBoundingClientRect().height):0;
+    var want=((fh||0)+8)+'px';
+    if(h.style.bottom!==want)h.style.bottom=want;
   }
   var has=h.className.indexOf('on')>=0;
   if(on!==has)h.className='qsvh'+(on?' on':'');
