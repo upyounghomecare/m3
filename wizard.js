@@ -1010,7 +1010,15 @@ function planMemoryWatch(){try{
      不擋這關的話,一重整就會在購物車載入前先把記憶清掉,修正等於白做。 */
   if(!(window._UserSession&&window._UserSession.Cart))return;
   if(!_cartHasGoods()){try{localStorage.removeItem(_PLAN_KEY);}catch(e){}return;}/* 車空了就忘掉,免得下一單被舊選擇預選 */
-  if(_surveyOnly())return;/* 場勘沒有方案可言 */
+  /* ⚠️ 純場勘單沒有方案可言。finishSurvey 特地把 __qsPlan 清成 null 就是為了這個 ——
+     留著方案會讓彈窗冒出矛盾的摘要條(寫85折、實收95折),也會讓 bindCouponGuard
+     拿早鳥的 0.15 去跟客戶輸入的碼比較而擋錯人。
+     ⚠️⚠️ 這裡「不可以」用 _surveyOnly() —— 它是黏著的,購物車讀不到時沿用上次結論,
+     實測它在剛加入場勘的那幾秒回 false,害我把 __qsPlan 設成 'early',
+     場勘變成 85 折 $510(應該封頂 95 折 $570,少收 $60)。直接查購物車現況才可靠。 */
+  var _c=_cartArr(), _hasSv=false;
+  for(var _i=0;_i<_c.length;_i++){if((_c[_i].ProductName||'').indexOf(SURVEY_PREFIX)===0){_hasSv=true;break;}}
+  if(_hasSv&&(_indoorInCart()+_outdoorInCart())===0){window.__qsPlan=null;return;}
   if(window.__qsPlan==='std'||window.__qsPlan==='early'){_planSave(window.__qsPlan);return;}
   var p=null;
   var el=document.querySelector('.cart-item.coupon');
