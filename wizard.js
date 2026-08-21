@@ -100,13 +100,8 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +''
 +'#qw-ovl .qw{max-width:640px!important}'/* 內文CSS有一份舊的.qw(max-width:400px)排在後面會壓過來,故用#qw-ovl前綴+!important搶回;必須放在下面兩個@media之前,否則會反過來壓掉桌機規則 */
 +'@media (min-width:760px){#qw-ovl .qw{max-width:640px!important;padding:12px 14px 14px!important}}'+'@media (min-width:1100px){#qw-ovl .qw{max-width:720px!important}}'+'@media (min-width:760px){#qw-terms .qwt-m{max-width:520px!important}}'+'#qw-ovl .qw .wel-start{max-width:89%!important;margin-left:auto!important;margin-right:auto!important;display:block!important}'+'.qw .qpnote{margin-top:11px;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.75}'+'.qw .qpn-info{background:#eaf2fb;border:1px solid #b9d3ee;color:#0C447C}'+'.qw .qpn-warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}'+'.qw .qdl{margin-top:12px;background:#fff;border:1.5px solid #dbe3ec;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(4,44,83,.06);cursor:pointer}'+'.qw .qdl:active{transform:scale(.99)}'+'.qw .qdl-ic{width:34px;height:34px;flex:0 0 auto;border-radius:9px;background:rgba(184,134,11,.09);display:flex;align-items:center;justify-content:center;font-size:17px}'+'.qw .qdl-tx{flex:1;min-width:0}.qw .qdl-t1{font-size:14px;font-weight:900;color:#042C53}.qw .qdl-t2{font-size:11.5px;color:#5f6b78;margin-top:2px}'+'.qw .qdl-ar{color:#B8860B;font-size:18px;font-weight:900}'+'#qw-ovl .qw .wel-h{font-size:clamp(17px,5.7vw,24px)!important;white-space:normal!important;text-wrap:balance!important;font-weight:900!important}'/* 同上:內文CSS有舊的.wel-h(24px+nowrap)會把標題切掉,強制蓋回 */
-+'#qw-ovl .qw .callnote,#qw-ovl .qw .envnote,#qw-ovl .qw .optnote,#qw-ovl .qw .warnbox{font-size:13.5px!important;font-weight:800!important;line-height:1.6!important;padding:10px 13px!important}'+'#qw-ovl .qw .callnote b,#qw-ovl .qw .envnote b,#qw-ovl .qw .optnote b,#qw-ovl .qw .warnbox b{font-weight:900!important}'/* 說明類文字統一放大加粗:內文CSS內有舊的.qw重複樣式會壓過wizard.js,故用#qw-ovl前綴+!important強制生效 */+'#qs-ovl,#qs-ovl2{align-items:flex-start!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}#qs-ovl>*,#qs-ovl2>*{margin:auto!important}'
-/* 修:內文JS的結帳彈窗比視窗高時,底部按鈕列與右上角 × 都會落在畫面外點不到
-   (老闆實測 800x620 抓到:按鈕列在 723~799px、視窗只有 620px)。捲到底又換 × 消失,
-   兩個永遠不能同時看到。改成把它們黏在可視範圍的上下緣,不管捲到哪都按得到。
-   ⚠️ 捲動的是 #qs-ovl(上一行設的),所以 sticky 的參考對象是它,不是 #qs-modal。 */
-+'#qs-mbtns{position:sticky!important;bottom:0!important;z-index:6;background:#fff;padding:10px 0 2px!important;margin-top:8px!important;box-shadow:0 -10px 16px -8px rgba(0,0,0,.16)}'
-+'#qs-x{position:sticky!important;top:6px!important;right:auto!important;z-index:7;display:block!important;margin-left:auto!important;margin-bottom:-30px!important;background:#fff!important;border-radius:50%!important;width:34px!important;height:34px!important;line-height:34px!important;text-align:center!important;box-shadow:0 2px 10px rgba(0,0,0,.22)!important}'/* 修:內文JS彈窗原本垂直置中又沒開捲動,內容比螢幕高時頂端會被切掉且捲不到(需縮放才看得到) */
++'#qw-ovl .qw .callnote,#qw-ovl .qw .envnote,#qw-ovl .qw .optnote,#qw-ovl .qw .warnbox{font-size:13.5px!important;font-weight:800!important;line-height:1.6!important;padding:10px 13px!important}'+'#qw-ovl .qw .callnote b,#qw-ovl .qw .envnote b,#qw-ovl .qw .optnote b,#qw-ovl .qw .warnbox b{font-weight:900!important}'/* 說明類文字統一放大加粗:內文CSS內有舊的.qw重複樣式會壓過wizard.js,故用#qw-ovl前綴+!important強制生效 *//* ⚠️ 彈窗的三條修正已移到 ensureModalCss():這份 CSS 只有「開過精靈」才會注入,
+   客戶直接從商品列表加入再按立即結帳時根本沒載到,修正等於不存在(老闆實測抓到) */
 +'.qw .on.qw-on-sm{font-size:12.5px;white-space:nowrap;letter-spacing:-.2px}'
 +'.qw .qw-thumb{cursor:zoom-in}'
 +'#qw-zoom{position:fixed;inset:0;z-index:100005;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}#qw-zoom img{max-width:100%;max-height:90vh;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.5)}'
@@ -985,6 +980,22 @@ function svHintWatch(){try{
       客戶根本進不了精靈),等於完全沒擋。老闆實機截圖抓到:場勘 + 吊隱式大清洗同時在購物車。
    這裡用**攔截加入動作**,不是事後刪購物車 —— 後者就是今天害畫面無限抖動的寫法。
    只攔室內機/室外機清洗;偏遠加價、商用加價、車馬費、場勘本身都是系統自己加的,不能攔。 */
+/* ===== 內文JS 結帳彈窗的版面修正(必須「永遠」注入) =====
+   ⚠️ 這三條原本放在精靈的 CSS 變數裡,而那份只在 open() 開精靈時才注入 <style id="qw-style">。
+      客戶若沒走精靈(直接從商品列表加入 → 按立即結帳),修正完全沒載到:
+      彈窗維持 align-items:center + overflow:visible → 內容比視窗高時
+      **上面被切掉、下面被切掉,而且完全捲不動** —— 右上角 × 與底部按鈕都按不到。
+      老闆 2026-08-21 實測(800x620)抓到:彈窗高 801px,X 在 -85px、按鈕只露出 7px。
+   ①讓遮罩本身可捲、內容靠上 ②按鈕列黏在可視底部 ③× 黏在可視右上角。 */
+function ensureModalCss(){try{
+  if(document.getElementById('qs-mfix'))return;
+  var s=document.createElement('style');s.id='qs-mfix';
+  s.textContent='#qs-ovl,#qs-ovl2{align-items:flex-start!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}'
+   +'#qs-ovl>*,#qs-ovl2>*{margin:auto!important}'
+   +'#qs-mbtns{position:sticky!important;bottom:0!important;z-index:6;background:#fff;padding:10px 0 2px!important;margin-top:8px!important;box-shadow:0 -10px 16px -8px rgba(0,0,0,.16)}'
+   +'#qs-x{position:sticky!important;top:6px!important;right:auto!important;z-index:7;display:block!important;margin-left:auto!important;margin-bottom:-30px!important;background:#fff!important;border-radius:50%!important;width:34px!important;height:34px!important;line-height:34px!important;text-align:center!important;box-shadow:0 2px 10px rgba(0,0,0,.22)!important}';
+  document.head.appendChild(s);
+}catch(e){}}
 function guardSurveyExclusive(){try{
   if(window.__qsSvGuard)return;
   var orig=window.viewProduct;
@@ -2254,7 +2265,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
