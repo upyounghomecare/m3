@@ -907,12 +907,13 @@ function fixReceiptDefault(){try{
 function svHintWatch(){try{
   var h=document.getElementById('qs-svhint'); if(!h)return;
   var card=h.closest('.qw'); if(!card)return;
-  var now=(new Date()).getTime();
-  /* 每次重新進到這一步都是新的元素,用 data 屬性重新計時 */
-  var t0=Number(h.getAttribute('data-t0')||0);
-  if(!t0){t0=now;h.setAttribute('data-t0',String(t0));}
-  var on=(card.scrollTop>=40)||(now-t0>=3500);      /* ① 滑了 或 停留夠久 */
-  if(on&&_qwCount()>0)on=false;                     /* ② 已經選了機型 */
+  /* 一進到這一步就顯示,不設任何延遲。
+     演進史(免得有人又加回去):
+       第一版「要先滑才顯示」→ 最不滑的客戶正是最需要提示的人,錯。
+       第二版「滑動 或 停留3.5秒」→ 老闆問「怎麼不一開始就顯示」,那 3.5 秒的顧慮沒有根據。
+       現在:進來就顯示,選了機型或看到場勘卡片才收。 */
+  var on=true;
+  if(_qwCount()>0)on=false;                         /* ② 已經選了機型 */
   if(on){                                           /* ③ 場勘卡片已經看得到 */
     var sv=card.querySelector('.qsv');
     if(sv){
