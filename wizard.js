@@ -981,18 +981,31 @@ function guardSurveyExclusive(){try{
   window.__qsSvGuard=true;
   window.viewProduct=function(btn,pid){
     try{
-      var w=(btn&&btn.closest)?btn.closest('.product-wrap'):null;
-      var h=w?w.querySelector('h3'):null;
-      var nm=h?(h.textContent||'').trim():'';
-      var isClean=false;
-      for(var i=0;i<INNAMES.length;i++){if(nm.indexOf(INNAMES[i])===0){isClean=true;break;}}
-      if(!isClean)for(var j=0;j<OUTNAMES.length;j++){if(nm.indexOf(OUTNAMES[j])===0){isClean=true;break;}}
-      if(isClean){
-        var c=_cartArr(),hasSv=false;
-        for(var k=0;k<c.length;k++){if((c[k].ProductName||'').indexOf(SURVEY_PREFIX)===0){hasSv=true;break;}}
-        if(hasSv){
-          alert('購物車裡已經有「到府場勘估價」。\n\n場勘是為了讓技師先到府確認要洗哪些，\n如果您已經確定要清洗的品項，請先移除場勘，再選購清洗服務。');
-          return;
+      /* 精靈正在批次加入時不能攔(精靈自己也是呼叫 viewProduct) */
+      if(!window.__qsAdding){
+        var w=(btn&&btn.closest)?btn.closest('.product-wrap'):null;
+        var h=w?w.querySelector('h3'):null;
+        var nm=h?(h.textContent||'').trim():'';
+        var isClean=false;
+        for(var i=0;i<INNAMES.length;i++){if(nm.indexOf(INNAMES[i])===0){isClean=true;break;}}
+        if(!isClean)for(var j=0;j<OUTNAMES.length;j++){if(nm.indexOf(OUTNAMES[j])===0){isClean=true;break;}}
+        var isSv=(nm.indexOf(SURVEY_PREFIX)===0);
+        if(isClean||isSv){
+          var c=_cartArr(),hasSv=false,hasClean=false,cn,a,b2;
+          for(var k=0;k<c.length;k++){
+            cn=c[k].ProductName||'';
+            if(cn.indexOf(SURVEY_PREFIX)===0){hasSv=true;continue;}
+            for(a=0;a<INNAMES.length;a++){if(cn.indexOf(INNAMES[a])===0){hasClean=true;break;}}
+            if(!hasClean)for(b2=0;b2<OUTNAMES.length;b2++){if(cn.indexOf(OUTNAMES[b2])===0){hasClean=true;break;}}
+          }
+          if(isClean&&hasSv){
+            alert('購物車裡已經有「到府場勘估價」。\n\n場勘是為了讓技師先到府確認要洗哪些，\n如果您已經確定要清洗的品項，請先移除場勘，再選購清洗服務。');
+            return;
+          }
+          if(isSv&&hasClean){
+            alert('購物車裡已經有清洗服務。\n\n到府場勘是給「還不確定要洗哪些」的客戶用的，\n您已經選好清洗品項，不需要再加場勘。\n\n如果仍想先請技師到府確認，請先移除清洗品項。');
+            return;
+          }
         }
       }
     }catch(e){}
