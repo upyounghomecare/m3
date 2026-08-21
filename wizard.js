@@ -987,6 +987,39 @@ function svHintWatch(){try{
       **上面被切掉、下面被切掉,而且完全捲不動** —— 右上角 × 與底部按鈕都按不到。
       老闆 2026-08-21 實測(800x620)抓到:彈窗高 801px,X 在 -85px、按鈕只露出 7px。
    ①讓遮罩本身可捲、內容靠上 ②按鈕列黏在可視底部 ③× 黏在可視右上角。 */
+/* ===== 方案記憶:重整後不可以變回「尚未選擇」 =====
+   ⚠️ window.__qsPlan 只是個記憶體變數,客戶按 F5 就歸零。
+      重整後再按立即結帳,內文JS 看到 __qsPlan 是空的就重畫方案卡、兩張都沒選中,
+      送出鈕變成 disabled 的「請先選擇到府方案」—— 但購物車裡方案折扣其實還在,
+      客戶看到的狀態跟實際收費互相矛盾,而且被卡住不能結帳(老闆 2026-08-21 實測回報)。
+   還原順序:①先問購物車真正掛著哪張方案券(最可信)
+            ②問不出來才用 localStorage 的記憶 —— 因為客戶自己的券(例如 VIP88折)
+              會被 couponRestoreWatch 換上去,把方案券蓋掉,這時購物車問不出方案。
+   ⚠️ 折扣列 ProductType 99 沒有 ProductName,只能讀畫面上 .cart-item.coupon 的文字。 */
+var _PLAN_KEY='qs_plan_sel';
+function _planSave(p){try{localStorage.setItem(_PLAN_KEY,JSON.stringify({p:p,t:(new Date()).getTime()}));}catch(e){}}
+function _planLoad(){try{
+  var o=JSON.parse(localStorage.getItem(_PLAN_KEY)||'null');
+  if(!o||(o.p!=='std'&&o.p!=='early'))return null;
+  if((new Date()).getTime()-(o.t||0)>864e5)return null;/* 隔一天以上就不猜,讓客戶自己重選 */
+  return o.p;
+}catch(e){return null}}
+function planMemoryWatch(){try{
+  if(window.__qsAdding||_corrBusy())return;
+  /* ⚠️ 購物車還沒載進來時 _cartArr() 也是回空陣列,分不出「車是空的」和「還沒載到」。
+     不擋這關的話,一重整就會在購物車載入前先把記憶清掉,修正等於白做。 */
+  if(!(window._UserSession&&window._UserSession.Cart))return;
+  if(!_cartHasGoods()){try{localStorage.removeItem(_PLAN_KEY);}catch(e){}return;}/* 車空了就忘掉,免得下一單被舊選擇預選 */
+  if(_surveyOnly())return;/* 場勘沒有方案可言 */
+  if(window.__qsPlan==='std'||window.__qsPlan==='early'){_planSave(window.__qsPlan);return;}
+  var p=null;
+  var el=document.querySelector('.cart-item.coupon');
+  var nm=el?(el.textContent||''):'';
+  if(nm.indexOf('早鳥')>=0)p='early';
+  else if(nm.indexOf('標準95折')>=0)p='std';
+  if(!p)p=_planLoad();
+  if(p)window.__qsPlan=p;
+}catch(e){}}
 function ensureModalCss(){try{
   if(document.getElementById('qs-mfix'))return;
   var s=document.createElement('style');s.id='qs-mfix';
@@ -2265,7 +2298,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
