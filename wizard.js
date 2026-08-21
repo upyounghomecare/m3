@@ -234,11 +234,11 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'font-weight:800;white-space:nowrap;box-shadow:0 3px 10px rgba(12,68,124,.28)}'
 /* 跟著捲動出現的場勘提示。黏在卡片底部(卡片本身有 overflow-y:auto),
    預設隱藏,由 svHintWatch() 依「捲動距離＋還沒選機型」決定要不要顯示 */
-+'.qw .qsvh{position:sticky;bottom:0;z-index:3;display:none;align-items:center;gap:8px;pointer-events:none;'
++'.qw .qsvh{position:sticky;bottom:0;z-index:3;display:none;align-items:center;gap:8px;cursor:pointer;'
 +'background:rgba(4,44,83,.94);color:#fff;border-radius:10px;padding:10px 13px;margin:8px 0 2px;'
 +'font-size:12.5px;line-height:1.5;box-shadow:0 4px 14px rgba(4,44,83,.3);'
 +'opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}'
-+'.qw .qsvh.on{display:flex;opacity:1;transform:translateY(0)}'
++'.qw .qsvh.on{display:flex;opacity:1;transform:translateY(0)}'+'.qw .qsvh:active{transform:scale(.985)}'
 +'.qw .qsvh b{color:#e6c876;font-weight:900}'
 +'.qw .qsvh-a{margin-left:auto;font-size:15px;font-weight:900;color:#e6c876;animation:qsvhb 1.4s ease-in-out infinite}'
 +'@keyframes qsvhb{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}'
@@ -404,7 +404,7 @@ function render(){
       +(_svRm?'<div class="qsv-rm">📍 您的地區屬偏遠，含偏遠地區加價 $600</div>':'')
       +'<div class="qsv-r"><div class="qsv-p">NT$ '+_svTot.toLocaleString('en-US')+'<u>／趟</u></div>'
       +'<div class="qsv-go">預約到府場勘</div></div></div>';
-    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+svCard+'<div id="qs-svhint" class="qsvh"><span>🔍</span><span>還不確定要洗哪些？<b>滑到最下方</b>可預約到府場勘</span><span class="qsvh-a">↓</span></div>'+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+svCard+'<div id="qs-svhint" class="qsvh"><span>🔍</span><span>還不確定要洗哪些？<b>點這裡</b>預約到府場勘</span><span class="qsvh-a">↓</span></div>'+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='survey'){
     var sv=_surveyOf();
     /* ⚠️ 偏遠地區的場勘,結帳頁的 reconcileRm 會自動加一筆「偏遠地區加價 $600」。
@@ -907,6 +907,25 @@ function fixReceiptDefault(){try{
 function svHintWatch(){try{
   var h=document.getElementById('qs-svhint'); if(!h)return;
   var card=h.closest('.qw'); if(!card)return;
+  /* 點提示條 → 直接捲到場勘卡片。老闆:「客戶點這區就可以自動跳轉到最下面」——
+     只給文字要客戶自己滑,等於把工作丟回去給他。
+     ⚠️ 捲的是卡片自己的內部捲軸(.qw 有 overflow-y:auto),不是整頁,
+        所以不能用 _scrollTo()(那是給 window 用的)。
+     ⚠️ 位置要用 getBoundingClientRect 相減算,不能用 offsetTop ——
+        offsetParent 不一定是 .qw,算出來會偏掉。 */
+  if(!h.getAttribute('data-b')){
+    h.setAttribute('data-b','1');
+    h.onclick=function(){
+      try{
+        var sv=card.querySelector('.qsv'); if(!sv)return;
+        var top=card.scrollTop+(sv.getBoundingClientRect().top-card.getBoundingClientRect().top)-12;
+        if(top<0)top=0;
+        try{card.scrollTo({top:top,behavior:'smooth'});}catch(e){card.scrollTop=top;}
+        /* 原生 smooth 會靜默失效(前往選購箭頭踩過),600ms 後沒到位就硬跳 */
+        setTimeout(function(){try{if(Math.abs(card.scrollTop-top)>8)card.scrollTop=top;}catch(e){}},600);
+      }catch(e){}
+    };
+  }
   /* 一進到這一步就顯示,不設任何延遲。
      演進史(免得有人又加回去):
        第一版「要先滑才顯示」→ 最不滑的客戶正是最需要提示的人,錯。
