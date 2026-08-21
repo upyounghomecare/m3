@@ -238,6 +238,30 @@ var qty={},opened={},step=0,plan=null,env=null,ovl=null,_finishing=false;
 var areaCity=null,areaDist=null,areaCls=null;
 var INK=['wall','cs','cm','cl','m4','f4'];
 function money(n){return 'NT$ '+n.toLocaleString('en-US');}
+/* 統一的捲動函式。
+   ⚠️ 不要用原生 window.scrollTo({behavior:'smooth'}) ——
+      它在某些環境會「靜默失效」:不捲動、也不丟例外,所以 try/catch 完全接不到,
+      按鈕看起來就像壞掉。(2026-08-21 正式頁實測:原生 smooth 完全沒作用,
+       但同一頁 1SHOP 自己的「回到上方」鈕正常 —— 它用的是 jQuery animate。)
+   所以優先走 jQuery(1SHOP 頁面本來就載了),沒有 jQuery 才退回原生,
+   最後再補一道「300ms 後還沒動就硬跳」的保險。 */
+function _scrollTo(y){
+  try{
+    y=Math.max(0,Math.round(y));
+    var before=window.pageYOffset;
+    if(window.jQuery){
+      window.jQuery('html, body').stop().animate({scrollTop:y},600);
+    }else{
+      _scrollTo(y);
+    }
+    /* 保險:若 600ms 後完全沒動(且本來就不在目標位置),直接硬跳 */
+    setTimeout(function(){
+      try{
+        if(Math.abs(window.pageYOffset-before)<2&&Math.abs(window.pageYOffset-y)>4)window.scrollTo(0,y);
+      }catch(e){}
+    },600);
+  }catch(e){try{window.scrollTo(0,y);}catch(e2){}}
+}
 function sumKeys(ks){var s=0;ks.forEach(function(k){s+=qty[k]||0;});return s;}
 function hasBlow(){return (qty.cm||0)+(qty.cl||0)>0;}
 /* 商用/重油汙加價台數：室內機每台加價；室外機「隨室內機清洗」不加價，只有「單獨清洗室外機」時才每台加價 */
@@ -537,7 +561,7 @@ var api={
         for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0){t=hs[k];break;}}
         if(!t)t=document.getElementById('cart-section');
         if(t){var y=t.getBoundingClientRect().top+window.pageYOffset-70;
-          try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}}
+          _scrollTo(y);}
       }catch(e){}},420);
     }catch(e){_finishing=false;window.__qsAdding=false;}
   },
@@ -579,7 +603,7 @@ var api={
       var t=null,ws=document.querySelectorAll('div');
       for(var i=0;i<ws.length;i++){var im=ws[i].querySelectorAll('img');if(im.length>=8&&/img\.1shop\.tw/.test(im[0].src||'')){t=ws[i];break;}}
       if(!t)t=document.querySelector('.product-row');
-      if(t){try{window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-60,behavior:'smooth'});}catch(e){window.scrollTo(0,t.getBoundingClientRect().top+window.pageYOffset-60);}}
+      if(t){_scrollTo(t.getBoundingClientRect().top+window.pageYOffset-60);}
     },180);
   },
   finish:function(){
@@ -616,7 +640,7 @@ var api={
           for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0){t=hs[k];break;}}
           if(!t)t=document.getElementById('cart-section');
           if(t){var y=t.getBoundingClientRect().top+window.pageYOffset-70;
-            try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}}
+            _scrollTo(y);}
         }catch(e){}},420);
         return;
       }
@@ -1488,7 +1512,7 @@ function _hiTip(){try{
  window.__qsHiTipT=setTimeout(function(){t.style.display='none';},2800);
  var box=document.getElementById(isArea?'qs-nosvc':isAge?'qs-ageblk':'qs-hiblk');
  if(box){
-  try{box.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){try{box.scrollIntoView();}catch(e2){}}
+  _scrollTo(box.getBoundingClientRect().top+window.pageYOffset-Math.max(0,(window.innerHeight-box.getBoundingClientRect().height)/2));
   var k=0,iv=setInterval(function(){k++;
    box.style.boxShadow=(k%2)?'0 0 0 3px rgba(192,57,43,.55)':'none';
    if(k>=6){clearInterval(iv);box.style.boxShadow='none';}},200);
@@ -2011,7 +2035,7 @@ function addGoBottomBtn(){try{
     li.querySelector('button').onclick=function(){
       var g=_goNext();
       var y=g.el?(g.el.getBoundingClientRect().top+window.pageYOffset-g.off):document.body.scrollHeight;
-      try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}
+      _scrollTo(y);
     };
     list.insertBefore(li,ref);
   }
