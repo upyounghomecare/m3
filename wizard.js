@@ -395,6 +395,13 @@ function render(){
           2026-08-20 實測不成立:券是在「加入商品之後」才由 1SHOP 掛上來的,擋購物車擋不到,
           反而讓客戶找不到入口。老闆決定「可以接受被折,但場勘只吃標準方案的 95 折」,
           改由 capCouponForSurvey() 把折扣上限鎖在 95 折,入口一律顯示。 */
+    /* ⚠️ 購物車已經有清洗項目 → 不顯示場勘入口。
+       老闆定案(2026-08-21):場勘的意義是「我不知道要洗什麼」,客戶既然已經選好了,
+       這個需求就消失了。技師到府清洗時順便看其他機器是很自然的事,不該再收 $600 ——
+       同時出現在購物車最容易變成客訴,而退款成本遠高於那 $600。
+       ⚠️ 這是**純顯示**的擋法,不碰購物車。今天兩次出包(門檻擋門、無限抖動)
+          都是「自動增刪購物車」造成的,那種寫法在這一頁很容易跟其他機制打架。 */
+    var _svHasClean=(_indoorInCart()+_outdoorInCart())>0;
     var _sv=_surveyOf();
     /* 入口卡片的金額必須跟確認頁一致(含偏遠加價),否則客戶點進去金額會跳 */
     var _svRm=(areaCls==='remote'), _svTot=_sv.p+(_svRm?600:0);
@@ -412,7 +419,7 @@ function render(){
       +(_svRm?'<div class="qsv-rm">📍 您的地區屬偏遠，含偏遠地區加價 $600</div>':'')
       +'<div class="qsv-r"><div class="qsv-p">NT$ '+_svTot.toLocaleString('en-US')+'<u>／趟</u></div>'
       +'<div class="qsv-go">預約到府場勘</div></div></div>';
-    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+svCard+'<div id="qs-svhint" class="qsvh"><span>🔍</span><span>還不確定要洗哪些？<b>點這裡</b>預約到府場勘</span><span class="qsvh-a">↓</span></div>'+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+(_svHasClean?'':svCard)+(_svHasClean?'':'<div id="qs-svhint" class="qsvh"><span>🔍</span><span>還不確定要洗哪些？<b>點這裡</b>預約到府場勘</span><span class="qsvh-a">↓</span></div>')+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='survey'){
     var sv=_surveyOf();
     /* ⚠️ 偏遠地區的場勘,結帳頁的 reconcileRm 會自動加一筆「偏遠地區加價 $600」。
@@ -1033,6 +1040,29 @@ var _FEENOTE=[
  {m:'商用/重油汙加價',t:function(){return '🏢 營業場所/重油汙加價，每台'+(_indoorInCart()>0?'室內機':'室外機')+' +$1,000';}},
  {m:'偏遠地區加價',t:'📍 您的服務地址屬偏遠地區，每張訂單收一次 +$600'}
 ];
+/* 場勘 + 清洗同時在購物車 → 在場勘那一列貼一行提醒。
+   精靈那邊已經擋掉入口了,但客戶還是可能「先買場勘 → 再自己從產品列表加清洗」。
+   ⚠️ 只提醒,不自動刪東西 —— 決定權留給客戶,也留給客服。
+      (今天的教訓:會自動增刪購物車的機制在這一頁很容易跟其他機制打架成無限迴圈) */
+function surveyMixNote(){try{
+  var items=[].slice.call(document.querySelectorAll('.cart-item'));
+  var hasClean=(_indoorInCart()+_outdoorInCart())>0;
+  items.forEach(function(it){
+    if(/cart-empty/.test(it.className)||(it.closest&&it.closest('#qw-ovl')))return;
+    var nmEl=it.querySelector('.item-name');
+    var nm=nmEl?(nmEl.textContent||''):(it.textContent||'');
+    if(nm.indexOf(SURVEY_PREFIX)<0)return;              /* 只貼在場勘那一列 */
+    var content=it.querySelector('.item-content')||it;
+    var old=content.querySelector('.qs-svmix');
+    if(!hasClean){ if(old&&old.parentNode)old.parentNode.removeChild(old); return; }
+    if(old)return;
+    var d=document.createElement('div');d.className='qs-svmix';
+    d.textContent='⚠️ 您已選購到府場勘。若已確定要清洗的品項，場勘費可能不需要 —— 送出前可先洽客服確認。';
+    d.style.cssText='clear:both;font-size:12px;color:#8a6410;background:rgba(184,134,11,.13);'
+      +'border-radius:7px;padding:7px 10px;margin:8px 0 2px;line-height:1.55;font-weight:700';
+    content.appendChild(d);
+  });
+}catch(e){}}
 function autoFeeNotes(){try{
  var items=[].slice.call(document.querySelectorAll('.cart-item'));
  items.forEach(function(it){
@@ -2170,7 +2200,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
