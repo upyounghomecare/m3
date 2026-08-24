@@ -1123,6 +1123,7 @@ function svcPassNote(){try{
 var _plcTry=0,_plcAt=0,_plcKey='';
 function planCouponWatch(){try{
   if(window.__qsAdding||_corrBusy()||_cpBusy())return;
+  if(((new Date()).getTime()-(window.__qsUserCpAt||0))<12000)return;/* 客戶正在自己換碼,別插手 */
   if(window.__qsPlan!=='std'&&window.__qsPlan!=='early')return;
   if(!(window._UserSession&&window._UserSession.Cart))return;
   if(!_cartHasGoods())return;
@@ -2309,6 +2310,10 @@ function bindCouponGuard(){try{
          ⚠️ 只拿掉「擋下」,**保留 trim+轉大寫**(1SHOP 區分大小寫,小寫必失敗)
          與 `_cpPending` 記錄(套用失敗時才能自動補回,那是純保護、不違背客戶意願)。 */
       _cpPending=code;_cpPendBefore=_cartOff();
+      /* ⚠️ 客戶自己送碼時,1SHOP 是「先移除舊券→再套新券」,中間有一段購物車完全沒折扣。
+         planCouponWatch 看到「沒折扣」就會把方案券搶回去,客戶等於換不掉(實測踩到)。
+         這裡舉旗,讓那支保險在客戶操作後 12 秒內完全不出手。 */
+      window.__qsUserCpAt=(new Date()).getTime();
     }catch(e){}
     return orig.apply(this,arguments);
   };
