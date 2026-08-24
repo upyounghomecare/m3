@@ -1111,6 +1111,34 @@ function svcPassNote(){try{
   }catch(e){ta.value=nv;}
   try{ta.dispatchEvent(new Event('input',{bubbles:true}));ta.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}
 }catch(e){}}
+/* ===== 方案券沒掛上的保險 =====
+   ⚠️ 2026-08-21 實測抓到的**既有**問題(跟通行碼無關,真.偏遠地區也一樣):
+   購物車有 3 筆以上時(清洗＋偏遠加價＋商用加價),精靈完成後**方案券套不上去** ——
+   客戶看到的是原價 $4,600 而不是 $3,910,**多付 $690**。
+   兩次重現、換成台中大甲(真偏遠、沒用通行碼)也一樣,所以不是例外單專屬。
+   原因:1SHOP 的購物車一次只吃一個操作,併發會被靜默丟棄;
+        品項越多、加入耗時越久,方案券那一發就越容易撞上還沒落地的加購動作。
+   ⚠️ **只在購物車「完全沒有任何折扣」時才出手** —— 這樣就不會跟老闆定案的
+      「客戶可以自己換成比較差的碼」打架(客戶換過的話折扣>0,這裡直接不管)。 */
+var _plcTry=0,_plcAt=0,_plcKey='';
+function planCouponWatch(){try{
+  if(window.__qsAdding||_corrBusy()||_cpBusy())return;
+  if(window.__qsPlan!=='std'&&window.__qsPlan!=='early')return;
+  if(!(window._UserSession&&window._UserSession.Cart))return;
+  if(!_cartHasGoods())return;
+  /* 場勘單有自己的 95 折封頂機制,不要插手。⚠️ 不可用 _surveyOnly()(黏著的) */
+  var c=_cartArr(),hasSv=false;
+  for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf(SURVEY_PREFIX)===0){hasSv=true;break;}}
+  if(hasSv)return;
+  if(_cartOff()>0.001)return;/* 已經有折扣就不管,尊重客戶自己的選擇 */
+  var key=_cartSub();
+  if(key!==_plcKey){_plcKey=key;_plcTry=0;}
+  var now=(new Date()).getTime();
+  if(now-_plcAt<4000)return;
+  if(_plcTry>=3)return;
+  _plcTry++;_plcAt=now;
+  try{if(window.__qsApplyPlanCoupon)window.__qsApplyPlanCoupon(function(){});}catch(e){}
+}catch(e){}}
 function ensureModalCss(){try{
   if(document.getElementById('qs-mfix'))return;
   var s=document.createElement('style');s.id='qs-mfix';
@@ -2389,7 +2417,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
