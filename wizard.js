@@ -2157,8 +2157,10 @@ function _cartHasGoods(){try{
    (實測第二輪抓到的洞 —— 重整後打錯字,85折 被清掉救不回來,多付 $300)。 */
 var _CP_KEY='qs_cp_best';
 function _cpSave(code,rate){try{
-  var old=_cpLoad();
-  if(old&&old.r>rate+0.001)return;/* 不要用比較差的碼蓋掉比較好的記憶 */
+  /* 2026-08-21 改:原本「不要用比較差的碼蓋掉比較好的記憶」會讓看門狗
+     在客戶主動換成 92 折後,2 秒內又把 88 折補回去 —— 客戶會覺得換不掉、陰魂不散。
+     改成單純記「客戶最後一次成功套用的碼」,看門狗就會尊重客戶的選擇。
+     打錯字的保護不受影響:套用失敗時折扣會低於記憶值,看門狗照樣補回上一張好券。 */
   localStorage.setItem(_CP_KEY,JSON.stringify({c:code,r:rate,t:(new Date()).getTime()}));
 }catch(e){}}
 function _cpLoad(){try{
@@ -2189,20 +2191,11 @@ function bindCouponGuard(){try{
       var code=raw.trim().toUpperCase();
       /* 自動去空白+轉大寫(1SHOP 的優惠碼區分大小寫,小寫輸入必失敗) */
       if(inp&&raw!==code){inp.value=code;try{inp.dispatchEvent(new Event('input',{bubbles:true}));}catch(e3){}}
-      var incoming=_codeOff(code);
-      if(incoming!==null&&!_cpFixing){
-        var cartR=_cartOff(),planR=_PLAN_OFF[window.__qsPlan]||0,cur=Math.max(cartR,planR);
-        /* 比現有的差 → 擋下,連移除都不會發生 */
-        if(cur-incoming>0.001){
-          if(window.notificationMsg)window.notificationMsg('您目前的 '+Math.round((1-cur)*100)+' 折更優惠，已為您保留原折扣','success',4);
-          return;
-        }
-        /* 跟現有的一樣 → 也擋下,免得白白燒掉一組只能用一次的專屬碼 */
-        if(cartR>0&&Math.abs(cartR-incoming)<=0.001){
-          if(window.notificationMsg)window.notificationMsg('您目前已經是 '+Math.round((1-cartR)*100)+' 折，這組優惠碼請留著下次使用','success',4);
-          return;
-        }
-      }
+      /* 2026-08-21 老闆定案:客戶要換成比較差的碼也讓他換。
+         舊版會擋下並顯示「您目前的 88 折更優惠，已為您保留原折扣」——
+         老闆的立場是「即便 88 折比 92 折好，也要讓消費者自行替換」。
+         ⚠️ 只拿掉「擋下」,**保留 trim+轉大寫**(1SHOP 區分大小寫,小寫必失敗)
+         與 `_cpPending` 記錄(套用失敗時才能自動補回,那是純保護、不違背客戶意願)。 */
       _cpPending=code;
     }catch(e){}
     return orig.apply(this,arguments);
