@@ -2171,6 +2171,7 @@ function _cpLoad(){try{
 }catch(e){return null}}
 function _cpClear(){try{localStorage.removeItem(_CP_KEY);}catch(e){}}
 var _cpPending=null;/* 這次送出的碼 */
+var _cpPendBefore=-1;/* 送出前購物車的折扣率,用來判斷這次送出「有沒有真的改變什麼」 */
 var _cpTry=0;       /* 自動補回的嘗試次數上限,防無限迴圈 */
 var _cpAt=0;        /* 上次補回的時間,要留時間讓它落地,不然 700ms 迴圈會空燒次數 */
 var _cpSeen=0;      /* 第一次發現折扣變差的時間,要先靜候讓 1SHOP 把手上的操作做完 */
@@ -2196,7 +2197,7 @@ function bindCouponGuard(){try{
          老闆的立場是「即便 88 折比 92 折好，也要讓消費者自行替換」。
          ⚠️ 只拿掉「擋下」,**保留 trim+轉大寫**(1SHOP 區分大小寫,小寫必失敗)
          與 `_cpPending` 記錄(套用失敗時才能自動補回,那是純保護、不違背客戶意願)。 */
-      _cpPending=code;
+      _cpPending=code;_cpPendBefore=_cartOff();
     }catch(e){}
     return orig.apply(this,arguments);
   };
@@ -2213,7 +2214,13 @@ function couponRestoreWatch(){try{
   if(_cpPending){
     var pv=_codeOff(_cpPending);
     if(pv===null||pv<=0)_cpPending=null;
-    else if(Math.abs(_cartOff()-pv)<=0.001){_cpSave(_cpPending,pv);_cpPending=null;_cpTry=0;_cpFixing=0;}
+    /* ⚠️ 2026-08-21 修迴歸:`_codeOff()` 是「用前綴猜折扣」,不會驗證這組碼是否真的存在。
+       拿掉 bindCouponGuard 的「一樣好也擋下」之後,客戶打錯字(例如 UPB92QQQQQ)也會被送出,
+       而送出的瞬間購物車還掛著舊券、折扣率剛好等於猜出來的 0.08 ——
+       看門狗就把這組**不存在的假碼**存成記憶,之後永遠套不上,
+       客戶折扣救不回來,而且購物車會在 3,000 ↔ 2,850 之間來回抖動(實測 25 秒抖 3 次)。
+       修法:加上「折扣率必須真的變了」這個條件。寧可不更新記憶,也不要存到假碼。 */
+    else if(Math.abs(_cartOff()-pv)<=0.001&&Math.abs(_cartOff()-_cpPendBefore)>0.001){_cpSave(_cpPending,pv);_cpPending=null;_cpPendBefore=-1;_cpTry=0;_cpFixing=0;}
   }
   /* 用 _corrBusy() 而不是直接看 __qsCorrBusy:它有 12 秒自動到期,
      萬一底下的解鎖 setTimeout 沒跑到(分頁在背景會被凍結),看門狗才不會被自己鎖死。 */
