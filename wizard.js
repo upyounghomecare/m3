@@ -639,7 +639,9 @@ var api={
     if(!raw.trim()){say('請先輸入通行碼');return;}
     say('確認中…');
     _svcTry(areaCity,areaDist,raw).then(function(r){
-      if(r==='ok'){render();}                       /* classify 會變 remote,整頁重畫 */
+      /* ⚠️ areaCls 是 pickDist 當下算好存起來的變數,render() 不會重算 ——
+         只呼叫 render() 畫面不會變(實測踩過)。必須先自己重算一次。 */
+      if(r==='ok'){areaCls=classify(areaCity,areaDist);render();}
       else if(r==='used')say('這組通行碼在這台裝置已經用過了，請洽客服');
       else if(r==='empty')say('請先輸入通行碼');
       else say('通行碼不正確，或不適用於此地區。請向客服確認');
