@@ -36,7 +36,46 @@ var TW={
 };
 var REMOTE=['台中市外埔區','台中市大安區','台中市大甲區','台中市新社區','台中市東勢區','台中市石岡區','屏東縣崁頂鄉','屏東縣潮州鎮','屏東縣竹田鄉','屏東縣萬丹鄉','新竹縣北埔鄉','新竹縣芎林鄉','苗栗縣卓蘭鎮','苗栗縣大湖鄉','苗栗縣獅潭鄉','苗栗縣苑裡鎮','苗栗縣通霄鎮','雲林縣二崙鄉','雲林縣元長鄉','雲林縣台西鄉','雲林縣土庫鎮','雲林縣大埤鄉','雲林縣崙背鄉','雲林縣東勢鄉','雲林縣林內鄉','雲林縣褒忠鄉','雲林縣麥寮鄉','高雄市旗山區','高雄市梓官區'];
 var NOSVC=['南投縣中寮鄉','南投縣仁愛鄉','南投縣信義鄉','南投縣國姓鄉','南投縣埔里鎮','南投縣水里鄉','南投縣竹山鎮','南投縣集集鎮','南投縣魚池鄉','南投縣鹿谷鄉','台中市和平區','台南市六甲區','台南市北門區','台南市南化區','台南市大內區','台南市學甲區','台南市將軍區','台南市山上區','台南市左鎮區','台南市後壁區','台南市新營區','台南市東山區','台南市柳營區','台南市楠西區','台南市白河區','台南市龍崎區','嘉義縣中埔鄉','嘉義縣大埔鄉','嘉義縣布袋鎮','嘉義縣東石鄉','嘉義縣梅山鄉','嘉義縣番路鄉','嘉義縣竹崎鄉','嘉義縣義竹鄉','嘉義縣阿里山鄉','宜蘭縣南澳鄉','宜蘭縣大同鄉','屏東縣三地門鄉','屏東縣佳冬鄉','屏東縣來義鄉','屏東縣內埔鄉','屏東縣南州鄉','屏東縣恆春鎮','屏東縣新園鄉','屏東縣新埤鄉','屏東縣春日鄉','屏東縣東港鎮','屏東縣枋寮鄉','屏東縣枋山鄉','屏東縣林邊鄉','屏東縣泰武鄉','屏東縣滿州鄉','屏東縣牡丹鄉','屏東縣獅子鄉','屏東縣瑪家鄉','屏東縣萬巒鄉','屏東縣車城鄉','屏東縣霧台鄉','彰化縣二水鄉','彰化縣大城鄉','彰化縣溪州鄉','彰化縣竹塘鄉','新北市三芝區','新北市坪林區','新北市平溪區','新北市深坑區','新北市烏來區','新北市瑞芳區','新北市石碇區','新北市萬里區','新北市貢寮區','新北市金山區','新北市雙溪區','新竹縣五峰鄉','新竹縣尖石鄉','新竹縣峨眉鄉','新竹縣橫山鄉','桃園市大溪區','桃園市復興區','苗栗縣南庄鄉','苗栗縣泰安鄉','雲林縣北港鎮','雲林縣口湖鄉','雲林縣古坑鄉','雲林縣四湖鄉','雲林縣水林鄉','高雄市內門區','高雄市六龜區','高雄市杉林區','高雄市桃源區','高雄市田寮區','高雄市甲仙區','高雄市美濃區','高雄市茂林區','高雄市那瑪夏區','花蓮縣花蓮市','花蓮縣新城鄉','花蓮縣秀林鄉','花蓮縣吉安鄉','花蓮縣壽豐鄉','花蓮縣鳳林鎮','花蓮縣光復鄉','花蓮縣豐濱鄉','花蓮縣瑞穗鄉','花蓮縣萬榮鄉','花蓮縣玉里鎮','花蓮縣卓溪鄉','花蓮縣富里鄉','台東縣台東市','台東縣延平鄉','台東縣卑南鄉','台東縣鹿野鄉','台東縣關山鎮','台東縣海端鄉','台東縣池上鄉','台東縣東河鄉','台東縣成功鎮','台東縣長濱鄉','台東縣太麻里鄉','台東縣金峰鄉','台東縣大武鄉','台東縣達仁鄉','台東縣綠島鄉','台東縣蘭嶼鄉','屏東縣琉球鄉','宜蘭縣釣魚台列嶼','高雄市東沙群島','高雄市南沙群島','新北市石門區','苗栗縣三灣鄉','台南市玉井區'];
-function classify(c,d){if(!c||!d)return null;var k=c+d;if(NOSVC.indexOf(k)>=0)return 'nosvc';if(REMOTE.indexOf(k)>=0)return 'remote';return 'normal';}
+/* ===== 客服核准的單次例外(不服務地區) =====
+   老闆 2026-08-21 定案:技師確認過可以跑的個案,客服發一組「通行碼」讓客戶自己下單。
+   ⚠️ 表裡只存**雜湊值**(SHA-256 前 12 碼),看前台原始碼看不到明碼。
+   ⚠️ 雜湊是 `地區名|通行碼` 一起算的 —— 所以**平溪區的碼只能開平溪區**,
+      客戶轉貼給別區的朋友沒用。
+   ⚠️ 老闆定案:例外訂單**一律當偏遠地區處理**(自動加 $600、且 $600 照樣被優惠券折)。
+      所以解鎖後 classify() 回的是 'remote' 而不是 'normal' —— 精靈報價、結帳頁加價、
+      場勘金額全部會自動跟著算,不需要另外改。
+   ⚠️ 純前端做不到跨裝置的「一次性」。同一台裝置擋得住,轉貼給同地區的人用別台裝置擋不住;
+      靠「一組一用的客服清單」＋「訂單自動加註通行碼」在流程上管理。 */
+var NOSVC_PASS={"0":["d59190a0c21a","a3049c1ad3bd","8bf4fa1907d3"],"1":["3f7b83320f43","f8b4f9a8942f","3a344735f11e"],"2":["5075b572290c","27802c59de71","04e9e9196711"],"3":["6708bf46d05e","4d910a2f87ef","d099afe759cc"],"4":["db8750972b53","270429dfe9a0","eeba1cc8c709"],"5":["75430aa933bd","40e0bcd869b0","6eb4822cfe4d"],"6":["1491d43c6746","729d01afacf0","49bbccffedb5"],"7":["6a4158227934","97a673c77ccc","a35a650712ce"],"8":["4144cd6e099f","d9b4adb689d0","abb169ecbcef"],"9":["60fb13f3680f","67a2396c2c65","dbd469813bad"],"10":["5883ce522da3","6778cad93883","e9df98157db1"],"11":["14e82107444b","4266b766a633","6749a30ba9f8"],"12":["c13fb6d44de9","397a9ed0c302","de938139dac4"],"13":["7b0f6e480b45","1cf6571dfa46","b37baae886a6"],"14":["fb84a2a31920","87f39b6fbc0e","7129415a350c"],"15":["8c15566f76c1","d09d27bd0c33","042b0f0f1aa1"],"16":["01c9e11bb382","fa743ec8abec","44c902f1426f"],"17":["4dbaabc73c64","5ced3610c00b","f86a650f0632"],"18":["b9b27b393c2d","d1f9095bd644","1215fc0e6fb2"],"19":["0c3ad6b76682","8cc16a5312f0","2eccb1bd7849"],"20":["bb6e2378efa1","6fb3479541ea","399b1e5c6588"],"21":["f837a221600f","094b05fb94a1","8b1b991cbd4a"],"22":["0877a1532ea8","65d4b0b0f6cb","1a9c740f8547"],"23":["679969b8d4ea","956a08626bce","7c3a1ff0c701"],"24":["abc1831eea05","06d8c84e2025","88662affc0c6"],"25":["a17faf49c6ba","725d91af8228","48044c944c21"],"26":["146b5b588e50","85639f73cc1e","c0bd69fc2e82"],"27":["3a9c819de0a4","e7a91bd4b17a","22bdf06c4546"],"28":["531be60d60cf","fe622ae60a32","78602dcd4311"],"29":["aa1594994a23","61e92a35bcc1","e0db7598b903"],"30":["d1f1b694fd1f","71c7bdb2a429","3a79361e71e6"],"31":["3c3b2a7b87c7","0e3d7f8a910e","a983423629b9"],"32":["6b826b8e9032","5e67948a634b","3f2aa82b5697"],"33":["3458c59d8525","59b72ec4a4f5","f82a8aef34e0"],"34":["588280e59662","3438d035a660","724ad43bfa11"],"35":["7d6dbf5e5422","516d047fe357","df102cc9613b"],"36":["cea3076c91a5","99980d0ba67e","01468d004aa7"],"37":["5f6b13dfa994","c98be4fdc40d","8598c6d9ad56"],"38":["90d736a8fc47","ece9d095f641","92344b7e7f0d"],"39":["cfd8304d4d86","a71f07aa1d8e","9acb61d08e79"],"40":["463559cbc08c","df99261a0b66","780802fd6fe8"],"41":["903bd17f3904","4090efba1e1a","8377979bc467"],"42":["6367459aade2","26f51bd49121","2fe826e22e6e"],"43":["e0f38d652eed","61be2c911c04","895e4800e6b7"],"44":["16ef84d103ac","7fd872fa45ec","d3daadce3589"],"45":["3f6db57fae49","5b6528eafe05","c2af43ddc41f"],"46":["bdae3a5fba8d","3cbfe9f662de","9770cb33d00b"],"47":["ac17632c29bb","502765e71444","b51e114463c5"],"48":["a34024d0623d","070d42b31038","54bb7b4368b2"],"49":["00f2df089c5a","3fb3d4394886","bed559f151fd"],"50":["920f136ab644","aba2e29cecf3","fab72841c515"],"51":["02f79a64ac0e","0d748269f869","ec0de7c61425"],"52":["8805d3084176","96001dd792ad","c046fb8446ce"],"53":["808e1438faf2","6f498758fcc2","9aeb3de4bfb4"],"54":["f445a18ec746","bb2a037fbe7d","d8a60a554bbb"],"55":["a3bb6199bcd4","0cf2bbf520ba","8ba9c46df954"],"56":["f12e57a5eca0","b227ef2b2cd0","9fd1ac21a1bd"],"57":["7d55e88d6989","f41bb07fd99c","a5577cfd5f16"],"58":["f7d7be7cf5c4","e52f780b9f57","cad155e4f2d2"],"59":["516a5735a3c8","5bb03024da21","90b054e1d7c2"],"60":["f74d9ac7826b","003bd3ab1d73","9b5ac169ce34"],"61":["5484bece3fd0","41f01f785ba1","75a6fd71a195"],"62":["d422377855c8","113e54b2d076","f047e93fb967"],"63":["c53b9d0b47a9","cae2457fb3f5","aff653effcdb"],"64":["11d7678f355e","43c0c4c08a84","32b3759d9f74"],"65":["b38713bdc04b","9080becafb80","d3f962cbb21f"],"66":["f792b0512b16","8131585f7a4f","2dfac2cbf1e9"],"67":["e80de2ac6e30","9eaf80359108","96389f412f47"],"68":["1d9d7a9ac739","c18aa9451d7e","95d0ae6fec40"],"69":["e17fabbc4b76","e6738dfe8ede","8da157c192fc"],"70":["79b35adbbdc3","cfa4754ee31b","5d120e0fd514"],"71":["06fb293ad315","69529e931b7f","fed37764ce35"],"72":["5db3179d669c","c1892fbaf718","aa9f642fe7f5"],"73":["637d1f57e5d2","221da9d47ce8","f631c866146e"],"74":["7f0526e338a5","b444212b288d","22967f9d09ca"],"75":["8156ff372220","7a56ccc0dce2","5144a17fac91"],"76":["3203db683b75","53c3a677962b","6b47b8338c58"],"77":["7ace485dbdb8","0685fa7c5980","b6839a1412b3"],"78":["bf86312654e6","692b184443ee","e60b318b6560"],"79":["b7277d14e151","5609648c781c","4c665b41cf2e"],"80":["54d436c8c245","3332768b0def","fdf542c211cf"],"81":["b5776cfe8d12","08554d214279","f4b2dab7ef71"],"82":["a4502edf8d7b","01dab642bd81","d1ec15f63186"],"83":["eef624f5a56e","d31b33c66727","c47f2553b046"],"84":["69121f5fc613","f0f24c2f2dfb","eeb3df5e8e1f"],"85":["1d5bd2c63299","ee0edc748c91","eeba7a0c5279"],"86":["762e72b7647c","a98fd37d9fa1","fdd40b9d7349"],"87":["3777add83ad9","51a2d42b5f37","7564f124712f"],"88":["b41c7f2d992f","b7fbdd40a257","2c9a66192140"],"89":["c78ef4531b73","b129ce5e4971","144f93fa91b9"],"90":["2957520209db","fe3258876d33","f920af3d5e1e"],"91":["1fd14dcd3714","54bc7df40a9c","7628861da7e5"],"92":["821d95468b14","7e3c37fde6aa","0851d4cfa9d9"],"93":["52a29f524602","780f16911c5b","09b265a75f8f"],"94":["86b69fcbedd4","3c583ccb5565","f59d58b5a407"],"95":["f64356cf3f2d","178605287a5e","a453184bacd1"],"96":["4843417574e7","cd66daeb3964","f9ec37e10a7c"],"97":["5b8cd8229e35","8a17730ac9b7","d1ac804b450d"],"98":["dda24c181ec7","c34f269fa6bd","b9dceb660806"],"99":["29f1d9a61646","b61bf1579b2f","b7067dff210f"],"100":["a49f7c275865","b385064de9e9","6e6ada35267a"],"101":["a34c73bfcc72","79bb49a20f2c","334293657a5c"],"102":["1700fd5780fe","9860b5c4f9fb","eef9ca087e72"],"103":["c838f4b8a9d5","6883eec36817","5e5fdb1a05fe"],"104":["97a56d19e255","4f1fbba8118a","340ad58e0491"],"105":["3bf973686699","e2d11a713113","193b4a5be51d"],"106":["13d768922ede","103f50748a35","404e634f5b3f"],"107":["e6bc95ea585b","74f30cfb7aeb","e64c6e1a39cf"],"108":["466d52565ae5","41f90a077e53","d56be6f4931e"],"109":["a4722c6a161a","521ba6dd4085","cf7bde8ecc70"],"110":["54b637c3040e","e4b700480b2c","2a161b2418b0"],"111":["1709db4b23ef","d502e6239793","fa5293b4d346"],"112":["5a88f364ce6b","bc568b184ec3","368ff28f34b7"],"113":["7acf4e703906","e246f3d530a5","7227dec8bcb6"],"114":["0bce878c0d4a","4f716aff7ce8","78799570aae0"],"115":["50a5d87cef90","d5ab5a7f405e","6499c1785d2a"],"116":["9c9a1784bce6","70e996d41b3d","ed881727d65b"],"117":["fee78dd4b546","1701aa26ad3e","a8e669ade365"],"118":["54aa234e9cc4","1c3996e6feb5","5278115eb905"],"119":["182ce82febb2","53257d418f33","fa38d7362180"],"120":["bdbe8de8f967","08b4aa77e3de","e1bcc3301499"],"121":["540f4d8c9e75","1b961f28a0a7","fca7574975f1"],"122":["750be0bd52a2","2469a4a6ee39","4773eea47ff0"],"123":["22b877dc299c","b428871aeaa6","8e699326e75a"],"124":["1dd7b07efe0d","ab8bc12fcfab","6e79404e8280"],"125":["f11db1168677","58cd96a42db9","bd4ca15acde2"],"126":["91fe7134652a","6226309ad376","3fe77ba20112"],"127":["a8dfbf8b850c","447558522e91","08b794500c56"],"128":["a1dfeb292892","2b4f966bf21f","b5a4d37ee22d"],"129":["6370598750fd","6d35d757c651","916142863f60"],"130":["1a1ad9aaa856","685a0ef9e9bd","7de9f54ebc6f"]};
+var _SVC_KEY='qs_svc_pass';
+function _svcPass(){try{
+  var o=JSON.parse(localStorage.getItem(_SVC_KEY)||'null');
+  if(!o||!o.a||!o.c)return null;
+  if((new Date()).getTime()-(o.t||0)>30*864e5){localStorage.removeItem(_SVC_KEY);return null;}/* 放30天就失效 */
+  return o;
+}catch(e){return null}}
+function _svcUnlocked(k){var o=_svcPass();return !!(o&&o.a===k);}
+function classify(c,d){if(!c||!d)return null;var k=c+d;
+  if(NOSVC.indexOf(k)>=0)return _svcUnlocked(k)?'remote':'nosvc';/* 客服已核准 → 當偏遠處理 */
+  if(REMOTE.indexOf(k)>=0)return 'remote';return 'normal';}
+/* 用過的碼記在本機,同一台裝置不能重複用 */
+function _svcUsed(code){try{return (JSON.parse(localStorage.getItem('qs_svc_used')||'[]')).indexOf(code)>=0;}catch(e){return false}}
+function _svcMarkUsed(code){try{var a=JSON.parse(localStorage.getItem('qs_svc_used')||'[]');
+  if(a.indexOf(code)<0){a.push(code);localStorage.setItem('qs_svc_used',JSON.stringify(a.slice(-50)));}}catch(e){}}
+async function _svcTry(city,dist,raw){
+  var k=city+dist, code=(raw||'').trim().toUpperCase().replace(/\s/g,'');
+  var idx=NOSVC.indexOf(k);
+  if(idx<0)return 'notneeded';
+  if(!code)return 'empty';
+  if(_svcUsed(code))return 'used';
+  var list=NOSVC_PASS[idx]||[];
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(k+'|'+code));
+  var hex=[].slice.call(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('').slice(0,12);
+  if(list.indexOf(hex)<0)return 'bad';
+  try{localStorage.setItem(_SVC_KEY,JSON.stringify({a:k,c:code,t:(new Date()).getTime()}));}catch(e){}
+  _svcMarkUsed(code);
+  return 'ok';
+}
 var P={
  wall:{pid:'KmEBAGDMzKbYZNjnkZ3l52W4',price:3000,img:imj('BW4907rb3bP68bk9NQGK6kwy')},
  cs:{pid:'p9KbWMJZ7NmJvaAW1x3VEYmB',price:1600,img:imj('DPq15dgL3Pqjg67ylrBbJ2am')},
@@ -99,7 +138,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'#qw-ovl *{box-sizing:border-box}'
 +''
 +'#qw-ovl .qw{max-width:640px!important}'/* 內文CSS有一份舊的.qw(max-width:400px)排在後面會壓過來,故用#qw-ovl前綴+!important搶回;必須放在下面兩個@media之前,否則會反過來壓掉桌機規則 */
-+'@media (min-width:760px){#qw-ovl .qw{max-width:640px!important;padding:12px 14px 14px!important}}'+'@media (min-width:1100px){#qw-ovl .qw{max-width:720px!important}}'+'@media (min-width:760px){#qw-terms .qwt-m{max-width:520px!important}}'+'#qw-ovl .qw .wel-start{max-width:89%!important;margin-left:auto!important;margin-right:auto!important;display:block!important}'+'.qw .qpnote{margin-top:11px;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.75}'+'.qw .qpn-info{background:#eaf2fb;border:1px solid #b9d3ee;color:#0C447C}'+'.qw .qpn-warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}'+'.qw .qdl{margin-top:12px;background:#fff;border:1.5px solid #dbe3ec;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(4,44,83,.06);cursor:pointer}'+'.qw .qdl:active{transform:scale(.99)}'+'.qw .qdl-ic{width:34px;height:34px;flex:0 0 auto;border-radius:9px;background:rgba(184,134,11,.09);display:flex;align-items:center;justify-content:center;font-size:17px}'+'.qw .qdl-tx{flex:1;min-width:0}.qw .qdl-t1{font-size:14px;font-weight:900;color:#042C53}.qw .qdl-t2{font-size:11.5px;color:#5f6b78;margin-top:2px}'+'.qw .qdl-ar{color:#B8860B;font-size:18px;font-weight:900}'+'#qw-ovl .qw .wel-h{font-size:clamp(17px,5.7vw,24px)!important;white-space:normal!important;text-wrap:balance!important;font-weight:900!important}'/* 同上:內文CSS有舊的.wel-h(24px+nowrap)會把標題切掉,強制蓋回 */
++'@media (min-width:760px){#qw-ovl .qw{max-width:640px!important;padding:12px 14px 14px!important}}'+'@media (min-width:1100px){#qw-ovl .qw{max-width:720px!important}}'+'@media (min-width:760px){#qw-terms .qwt-m{max-width:520px!important}}'+'#qw-ovl .qw .wel-start{max-width:89%!important;margin-left:auto!important;margin-right:auto!important;display:block!important}'+'.qw .qsvc{margin-top:11px;border:1.5px dashed #B8860B;background:#fdf6e3;border-radius:11px;padding:12px 13px}'+'.qw .qsvc-t{font-size:12.5px;font-weight:900;color:#8a6410;line-height:1.55;margin-bottom:8px}'+'.qw .qsvc-r{display:flex;gap:7px}'+'.qw .qsvc-i{flex:1;min-width:0;border:1px solid #dbe3ec;border-radius:8px;padding:9px 10px;font-size:14px;letter-spacing:.06em;font-family:ui-monospace,Menlo,monospace;background:#fff;color:#16202b}'+'.qw .qsvc-b{border:none;background:#B8860B;color:#fff;border-radius:8px;padding:9px 15px;font-size:13.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap}'+'.qw .qsvc-b:active{transform:scale(.97)}'+'.qw .qsvc-m{font-size:12px;font-weight:800;margin-top:7px;line-height:1.5}'+'.qw .qsvc-m.bad{color:#c0392b}.qw .qsvc-m.ok{color:#1f7a52}'+'.qw .qsvc-ok{margin-top:11px;background:#e8f4ee;color:#1f7a52;border-radius:10px;padding:11px 13px;font-size:12.5px;font-weight:800;line-height:1.65}'+'.qw .qpnote{margin-top:11px;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.75}'+'.qw .qpn-info{background:#eaf2fb;border:1px solid #b9d3ee;color:#0C447C}'+'.qw .qpn-warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}'+'.qw .qdl{margin-top:12px;background:#fff;border:1.5px solid #dbe3ec;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(4,44,83,.06);cursor:pointer}'+'.qw .qdl:active{transform:scale(.99)}'+'.qw .qdl-ic{width:34px;height:34px;flex:0 0 auto;border-radius:9px;background:rgba(184,134,11,.09);display:flex;align-items:center;justify-content:center;font-size:17px}'+'.qw .qdl-tx{flex:1;min-width:0}.qw .qdl-t1{font-size:14px;font-weight:900;color:#042C53}.qw .qdl-t2{font-size:11.5px;color:#5f6b78;margin-top:2px}'+'.qw .qdl-ar{color:#B8860B;font-size:18px;font-weight:900}'+'#qw-ovl .qw .wel-h{font-size:clamp(17px,5.7vw,24px)!important;white-space:normal!important;text-wrap:balance!important;font-weight:900!important}'/* 同上:內文CSS有舊的.wel-h(24px+nowrap)會把標題切掉,強制蓋回 */
 +'#qw-ovl .qw .callnote,#qw-ovl .qw .envnote,#qw-ovl .qw .optnote,#qw-ovl .qw .warnbox{font-size:13.5px!important;font-weight:800!important;line-height:1.6!important;padding:10px 13px!important}'+'#qw-ovl .qw .callnote b,#qw-ovl .qw .envnote b,#qw-ovl .qw .optnote b,#qw-ovl .qw .warnbox b{font-weight:900!important}'/* 說明類文字統一放大加粗:內文CSS內有舊的.qw重複樣式會壓過wizard.js,故用#qw-ovl前綴+!important強制生效 *//* ⚠️ 彈窗的三條修正已移到 ensureModalCss():這份 CSS 只有「開過精靈」才會注入,
    客戶直接從商品列表加入再按立即結帳時根本沒載到,修正等於不存在(老闆實測抓到) */
 +'.qw .on.qw-on-sm{font-size:12.5px;white-space:nowrap;letter-spacing:-.2px}'
@@ -379,7 +418,13 @@ function render(){
      +'<div class="flbl">縣市</div><select class="qsel" onchange="__qw.pickCity(this.value)">'+cityOpts+'</select>'
      +'<div class="flbl">鄉鎮市區</div><select class="qsel" onchange="__qw.pickDist(this.value)">'+distOpts+'</select>'
      +resImg
-     +(areaCls==='nosvc'?'<a class="cslink" href="'+LINE_CS+'" target="_blank" rel="noopener">聯繫客服 →</a>':'')
+     +(areaCls==='nosvc'?'<a class="cslink" href="'+LINE_CS+'" target="_blank" rel="noopener">聯繫客服 →</a>'
+        +'<div class="qsvc"><div class="qsvc-t">🔑 已經和客服確認可以服務？<br>請輸入客服提供的通行碼</div>'
+        +'<div class="qsvc-r"><input id="qsvc-in" class="qsvc-i" type="text" placeholder="例如 UPX……" autocomplete="off" spellcheck="false">'
+        +'<button type="button" class="qsvc-b" onclick="__qw.unlock()">解鎖</button></div>'
+        +'<div id="qsvc-msg" class="qsvc-m"></div></div>':'')
+     /* 客服核准後 classify() 已經回 'remote',所以這裡看到的是偏遠畫面。加一條說明讓客戶知道為什麼 */
+     +((areaCls==='remote'&&_svcUnlocked(areaCity+areaDist))?'<div class="qsvc-ok">✅ 客服已確認此地址可安排服務<br>因路程較遠，每張訂單加收偏遠地區加價 <b>$600</b>（僅收一次）</div>':'')
      +'<div class="nav"><button class="btn gho" onclick="__qw.go(0)">上一步</button><button class="btn pri" '+(canNext?'':'disabled')+' onclick="__qw.go(&quot;env&quot;)">下一步</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='env'){
     w='<div class="qw">'+stepBar()+'<h2>冷氣的使用環境為？</h2><p class="sub">先確認環境，幫你算好正確價格</p>'
@@ -586,6 +631,20 @@ var api={
   zoom:function(src){if(document.getElementById('qw-zoom'))return;var z=document.createElement('div');z.id='qw-zoom';z.innerHTML='<img src="'+src+'" alt="">';z.onclick=function(){if(z.parentNode)z.parentNode.removeChild(z);};document.body.appendChild(z);},
   chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK)+sumKeys(['o1','om']);if(v>mx)v=mx;}qty[k]=v;render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
+  unlock:function(){
+    var inp=document.getElementById('qsvc-in'), msg=document.getElementById('qsvc-msg');
+    if(!inp)return;
+    var raw=inp.value;
+    function say(t,ok){if(msg){msg.textContent=t;msg.className='qsvc-m'+(ok?' ok':' bad');}}
+    if(!raw.trim()){say('請先輸入通行碼');return;}
+    say('確認中…');
+    _svcTry(areaCity,areaDist,raw).then(function(r){
+      if(r==='ok'){render();}                       /* classify 會變 remote,整頁重畫 */
+      else if(r==='used')say('這組通行碼在這台裝置已經用過了，請洽客服');
+      else if(r==='empty')say('請先輸入通行碼');
+      else say('通行碼不正確，或不適用於此地區。請向客服確認');
+    }).catch(function(){say('確認失敗，請稍後再試或洽客服');});
+  },
   goSurvey:function(){step='survey';render();},
   /* 單獨買場勘費:不經過方案步驟(沒有清洗要排程,方案沒有意義),
      所以不設 __qsPlan、也不呼叫 __qsApplyPlanCoupon */
@@ -1027,6 +1086,28 @@ function planMemoryWatch(){try{
   else if(nm.indexOf('標準95折')>=0)p='std';
   if(!p)p=_planLoad();
   if(p)window.__qsPlan=p;
+}catch(e){}}
+/* ===== 客服核准例外 → 訂單備註自動加註 =====
+   老闆要一眼看得出「這張是例外核准的,不是系統漏洞」,而且對帳時查得到是哪一組通行碼放行的。
+   ⚠️ 備註是 1SHOP 內建的 `.form-note`,不是自訂欄位(cf-),層級也不同 —— 見 [[m3-live-status]]。
+   ⚠️ 只加一次,而且不覆蓋客戶自己打的字(接在後面)。客戶手動刪掉就不再補,免得跟他打架。 */
+function svcPassNote(){try{
+  var o=_svcPass(); if(!o)return;
+  var wrap=document.querySelector('form.step3 .form-group.form-note')||document.querySelector('.form-group.form-note');
+  if(!wrap)return;
+  var ta=wrap.querySelector('textarea')||document.querySelector('textarea[name="Note"]');
+  if(!ta||ta.getAttribute('data-qssvc')==='1')return;
+  ta.setAttribute('data-qssvc','1');
+  var tag='【客服核准例外】地區：'+o.a+'・通行碼：'+o.c;
+  if((ta.value||'').indexOf('【客服核准例外】')>=0)return;
+  var v=(ta.value||'').trim();
+  var nv=v?(v+'\n'+tag):tag;
+  try{
+    ta.focus();
+    var st=Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value').set;
+    st.call(ta,nv);
+  }catch(e){ta.value=nv;}
+  try{ta.dispatchEvent(new Event('input',{bubbles:true}));ta.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}
 }catch(e){}}
 function ensureModalCss(){try{
   if(document.getElementById('qs-mfix'))return;
@@ -2306,7 +2387,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
