@@ -2241,6 +2241,7 @@ var _PUB_OFF={UP95:0.05,KQ7X9ZP2:0.15,UP88VIP:0.12,UPYOUNG999:0.10};
 function _codeOff(code){
   if(/^UPB92/.test(code))return 0.08;/* LINE綁定禮 92折 */
   if(/^UPR85/.test(code))return 0.15;/* 老客戶回購禮 85折 */
+  if(/^UPE80/.test(code))return 0.20;/* 員工價 8折(2026-08-25 新增,比任何券都優惠) */
   var v=_PUB_OFF[code];return v===undefined?null:v;/* null = 不認得,不擋 */
 }
 /* 購物車現在實際生效的折扣率(折扣列 ProductType=99、金額在 CouponPrice) */
