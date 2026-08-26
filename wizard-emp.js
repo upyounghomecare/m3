@@ -1232,15 +1232,33 @@ function _empCoupon(){try{
       但那段程式還是會把 __qsPlan 設成 'std',害結帳彈窗冒出
       「您選擇的方案 標準方案·95折 [變更]」—— 員工頁沒有 95 折,而且按變更會跑出早鳥。
       現在改成:只要看到 __qsPlan 有值就清掉。 */
-function empNoPlan(){try{
-  if(window.__qsPlan){window.__qsPlan=null;}
-  try{localStorage.removeItem('qs_plan_sel');}catch(e){}
-  /* 結帳彈窗若已經被塞了方案摘要條,一併移除 */
+/* ===== 員工頁：一律標準方案,不給選 =====
+   ⚠️ 2026-08-26 實測踩到的兩個坑,合起來記：
+   (1) 舊的 empPlanLock() 會把 __qsPlan 設成 'std',害結帳彈窗冒出
+       「您選擇的方案 標準方案·95折 [變更]」—— 員工頁沒有 95 折,按變更還會跑出早鳥。
+   (2) 但反過來把 __qsPlan 清成 null 也不行 ——
+       結帳按鈕會檢查「有沒有選方案」,清掉之後按鈕直接卡在
+       「請先選擇到府方案」,員工根本結不了帳。
+   正解:內部固定 std(員工就是兩週內到府),幫他把卡片選好讓按鈕解鎖,
+        然後把整個方案選擇區(#qs-plan-wrap:標題+副標+兩張卡)藏起來,
+        以及把寫著折數的摘要條移掉。 */
+function empForceStd(){try{
+  if(window.__qsPlan!=='std')window.__qsPlan='std';
+  var box=document.getElementById('qs-planbox');
+  if(box){
+    var std=box.querySelector('.qs-plan[data-plan="std"]');
+    /* 先幫他選好,結帳按鈕才會解鎖 */
+    if(std&&!std.classList.contains('sel')){try{std.click();}catch(e){}}
+  }
+  /* 藏整個 wrap,不是只藏 box —— 標題與副標在 box 裡但 wrap 才是完整區塊 */
+  var wrap=document.getElementById('qs-plan-wrap')||box;
+  if(wrap&&wrap.getAttribute('data-emphide')!=='1'){
+    wrap.setAttribute('data-emphide','1');
+    wrap.style.display='none';
+  }
+  /* 摘要條寫著「標準方案·95折」,員工頁沒有這個折數,直接移掉 */
   var w=document.getElementById('qs-plansum-wrap');
   if(w&&w.parentNode)w.parentNode.removeChild(w);
-  /* 頁面上的方案選擇區塊也不該出現 */
-  var box=document.getElementById('qs-planbox');
-  if(box&&box.style.display!=='none')box.style.display='none';
 }catch(e){}}
 function killPlanCoupon(){try{
   /* (1) 覆寫必須「每次都檢查」,不能設旗標只做一次 ——
@@ -1417,7 +1435,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();killPlanCoupon();empLineHint();planMemoryWatch();svcPassNote();planCouponWatch();empNoPlan();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();killPlanCoupon();empLineHint();planMemoryWatch();svcPassNote();planCouponWatch();empForceStd();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
