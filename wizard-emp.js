@@ -569,9 +569,15 @@ function render(){
     /* 員工頁沒有早鳥/標準方案 —— 折扣一律靠員工優惠碼,所以最後一步改成「確認清單」。
        plan 永遠是 null,planCouponWatch/planMemoryWatch 會因此自動停擺,不必另外關。 */
     var _sub=_qwSub();
-    var _rows=INDOOR.concat(OUTLIST,ADDON).filter(function(x){return qty[x.k]>0;}).map(function(x){
-      return '<div class="qw-sr"><span class="qw-srn">'+(x.dn||x.n)+' × '+qty[x.k]+'</span><span class="qw-srp">'+money((P[x.k]&&P[x.k].price||0)*qty[x.k])+'</span></div>';
+    function _srow(nm,q,unit){return '<div class="qw-sr"><span class="qw-srn">'+nm+' × '+q+'</span><span class="qw-srp">'+money(unit*q)+'</span></div>';}
+    var _rows=INDOOR.concat(OUTLIST,ADDON).filter(function(x){return !_AUTOK[x.k]&&qty[x.k]>0;}).map(function(x){
+      return _srow(x.dn||x.n,qty[x.k],(P[x.k]&&P[x.k].price)||0);
     }).join('');
+    /* ⚠️ 偏遠/車馬費/商用是程式自動決定的,不在 qty 裡。
+       _qwSub() 有把它們算進小計,明細也必須列出來,否則客戶會覺得金額對不上。 */
+    var _bzN=bzQty();if(_bzN>0&&P.bz)_rows+=_srow('商用/重油汙加價',_bzN,P.bz.price);
+    var _tfN=tfQty();if(_tfN>0&&P.tf)_rows+=_srow('車馬費',_tfN,P.tf.price);
+    if(areaCls==='remote'&&P.rm)_rows+=_srow('偏遠地區加價',1,P.rm.price);
     w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">確認您的清洗項目</h2>'
      +'<p class="sub">'+(brand==='other'?'其他品牌':'三菱重工')+'・以下為對外牌價</p>'
      +'<div class="qw-sum">'+_rows
@@ -806,7 +812,6 @@ var api={
     function next(){
       if(i>=jobs.length){
         window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
-        if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
         setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
         close();toast('已為您加入購物車，可再調整或結帳');
         /* 加完自動帶到「目前已經選購」購物車區,讓客戶馬上看到結果(不然精靈關掉後不知道發生什麼事) */
@@ -2391,6 +2396,17 @@ var _cpFixing=0;    /* 正在補回中 */
 /* ===== 購物車優惠碼欄位旁的 LINE 索碼提示 =====
    員工是在「想輸入卻發現沒有碼」的當下才需要這個連結,所以放在欄位正下方。
    ⚠️ 1SHOP 的購物車會整塊重畫,所以要放在 700ms 迴圈裡反覆確認,不能只掛一次。 */
+/* ===== 擋掉內文JS的自動套券 =====
+   ⚠️ 2026-08-26 實測抓到:員工頁的內文JS是從正式頁複製來的,裡面的 __qsApplyPlanCoupon
+      在 __qsPlan 為 null 時會預設套上客戶的「標準95折」。員工頁沒有方案,不該自動給任何券,
+      折扣一律由員工自己輸入的 UPE75 碼決定。
+   ⚠️ 用覆寫而不是只拿掉呼叫 —— 內文JS 自己也可能在別處呼叫它,覆寫才擋得住全部。 */
+function killPlanCoupon(){try{
+  if(window.__qsPlanCouponKilled)return;
+  if(typeof window.__qsApplyPlanCoupon!=='function')return;
+  window.__qsApplyPlanCoupon=function(done){if(done)done();};
+  window.__qsPlanCouponKilled=1;
+}catch(e){}}
 function empLineHint(){try{
   var inp=document.querySelector('[name="CouponNumber"]');
   if(!inp)return;
@@ -2540,7 +2556,7 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();empLineHint();planMemoryWatch();svcPassNote();planCouponWatch();empPlanLock();},700);
+setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();killPlanCoupon();empLineHint();planMemoryWatch();svcPassNote();planCouponWatch();empPlanLock();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
