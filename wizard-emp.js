@@ -2397,7 +2397,9 @@ function empLineHint(){try{
   var a=document.createElement('a');
   a.id='qs-lnhint';
   a.href=LINE_CS;a.target='_blank';a.rel='noopener';
-  a.textContent='\uD83D\uDCAC 還沒有員工優惠碼？加 LINE 官方帳號索取 →';
+  a.innerHTML='\uD83D\uDCAC 還沒有員工優惠碼？加 LINE @063kttbk 索取 →'
+    +'<small style="display:block;font-weight:600;font-size:11px;color:#5f6b78;margin-top:2px">'
+    +'加入後請主動告知姓名與員工編號</small>';
   a.style.cssText='display:block;margin:7px 0 2px;font-size:12.5px;font-weight:800;color:#06C755;'
     +'text-decoration:none;line-height:1.5;font-family:inherit';
   box.parentNode.insertBefore(a,box.nextSibling);
