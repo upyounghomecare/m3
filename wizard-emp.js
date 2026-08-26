@@ -2402,10 +2402,30 @@ var _cpFixing=0;    /* 正在補回中 */
       折扣一律由員工自己輸入的 UPE75 碼決定。
    ⚠️ 用覆寫而不是只拿掉呼叫 —— 內文JS 自己也可能在別處呼叫它,覆寫才擋得住全部。 */
 function killPlanCoupon(){try{
-  if(window.__qsPlanCouponKilled)return;
-  if(typeof window.__qsApplyPlanCoupon!=='function')return;
-  window.__qsApplyPlanCoupon=function(done){if(done)done();};
-  window.__qsPlanCouponKilled=1;
+  /* (1) 覆寫必須「每次都檢查」,不能設旗標只做一次 ——
+     實測發現內文JS 會在我覆寫之後又重新定義這個函式,一次性覆寫會被蓋掉。
+     用函式上的 __qsNoop 標記來判斷「現在這個是不是我的空函式」。 */
+  var f=window.__qsApplyPlanCoupon;
+  if(typeof f==='function'&&!f.__qsNoop){
+    var noop=function(done){if(done)done();};
+    noop.__qsNoop=1;
+    window.__qsApplyPlanCoupon=noop;
+  }
+  /* (2) 光覆寫還不夠 —— 內文JS 可能在定義的同一瞬間就呼叫了,700ms 迴圈來不及擋。
+     所以看到「標準/早鳥」這種客戶方案券出現、而員工自己又沒輸入過任何碼,就按掉它。
+     ⚠️ 只認方案券,員工自己輸入的 UPE75 或任何其他碼一律不動。
+     ⚠️ 有次數上限,避免跟內文JS 互相拉扯變成無限迴圈。 */
+  if(window.__qsAdding)return;
+  if(((new Date()).getTime()-(window.__qsUserCpAt||0))<15000)return;/* 員工剛輸入過碼就別插手 */
+  var row=document.querySelector('.cart-item.coupon');
+  if(!row){window.__qsKillTry=0;return;}
+  var txt=row.textContent||'';
+  if(!/標準\s*9?5\s*折|早鳥\s*8?5\s*折/.test(txt))return;/* 不是方案券,不動 */
+  if((window.__qsKillTry||0)>=5)return;
+  var t=row.querySelector('.fa-trash-alt');
+  if(!t)return;
+  window.__qsKillTry=(window.__qsKillTry||0)+1;
+  try{(t.closest('a')||t.closest('button')||t).click();}catch(e){}
 }catch(e){}}
 function empLineHint(){try{
   var inp=document.querySelector('[name="CouponNumber"]');
