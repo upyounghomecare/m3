@@ -383,7 +383,13 @@ function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop
    而且精靈會「自動加」車馬費/商用/偏遠 —— 客戶沒主動選卻要付,過程中看得到才不會有疑慮。
    算法與 finish() 建購物車時完全一致:品項 + 商用×台數 + 車馬費 + 偏遠。 */
 function _qwCount(){var n=0;INK.concat(OUTK).forEach(function(k){n+=qty[k]||0;});return n;}
-var _AUTOK={bz:1,tf:1,rm:1};/* 這三項由程式自動決定,不能從 qty 讀 */
+/* ⚠️ 2026-08-26 實測抓到的 bug：
+   原本 bz(商用/重油汙) 也在這裡,因為正式頁是「選營業場所就自動加購」。
+   但員工頁沒有營業場所(env 永遠 home),bzQty() 永遠回 0 ——
+   結果員工手動加購商用/重油汙時,精靈的小計與明細都當它不存在,
+   購物車卻照樣收 $1,000,金額對不起來。
+   員工頁的 bz 是「純手動加購」,所以要從自動項目名單裡拿掉。 */
+var _AUTOK={tf:1,rm:1};/* 這兩項才是程式自動決定,不能從 qty 讀 */
 function _qwSub(){try{
   var s=0;
   for(var k in qty){if(!qty.hasOwnProperty(k))continue;
@@ -534,7 +540,8 @@ function render(){
        老闆定案:錢照收,但這裡要先把明細攤開來給客戶看。 */
     var svRm=(areaCls==='remote'), svTot=sv.p+(svRm?600:0);
     w='<div class="qw">'
-     +'<div class="qwbar"><span class="ws"><i class="wsn">1</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>場勘</span></div>'
+     /* 員工頁沒有「環境」步驟,步驟列只有兩格 */
+     +'<div class="qwbar"><span class="ws"><i class="wsn">1</i>品牌</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>場勘</span></div>'
      +'<h2>到府場勘估價</h2><p class="sub">技師到府現場勘查，並提供清洗報價</p>'
      +'<div class="qsum">'
      +'<div class="qsr"><span>服務地區</span><b>'+(areaCity||'')+' '+(areaDist||'')+(svRm?'<span class="qsr-tag">偏遠</span>':'')+'</b></div>'
@@ -575,7 +582,6 @@ function render(){
     }).join('');
     /* ⚠️ 偏遠/車馬費/商用是程式自動決定的,不在 qty 裡。
        _qwSub() 有把它們算進小計,明細也必須列出來,否則客戶會覺得金額對不上。 */
-    var _bzN=bzQty();if(_bzN>0&&P.bz)_rows+=_srow('商用/重油汙加價',_bzN,P.bz.price);
     var _tfN=tfQty();if(_tfN>0&&P.tf)_rows+=_srow('車馬費',_tfN,P.tf.price);
     if(areaCls==='remote'&&P.rm)_rows+=_srow('偏遠地區加價',1,P.rm.price);
     w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">確認您的清洗項目</h2>'
