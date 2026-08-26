@@ -104,12 +104,12 @@ var P={
  obc:{price:2800,img:imj('EM7nvrbJlqVge7APNBpxVwjP')}
 };
 var INDOOR_MHI=[
- {k:'wall',n:'家用壁掛清洗保養',d:'壁掛式・約1.5-2小時/台',grp:'家用壁掛'},
+ {k:'wall',n:'家用壁掛清洗保養',d:'壁掛式・約1.5-2小時/台',grp:'家用壁掛式'},
  {k:'cs',n:'吊隱式小清洗保養',d:'約0.5-1小時/台',grp:'吊隱式'},
  {k:'cm',n:'吊隱式大清洗保養',d:'含風鼓拆洗',grp:'吊隱式'},
  {k:'cl',n:'吊隱式全清洗保養',d:'全機深度清洗',grp:'吊隱式'},
- {k:'m4',n:'迷你四方吹清洗保養',d:'嵌入式小型機',grp:'四方吹'},
- {k:'f4',n:'四方吹清洗保養',d:'嵌入式標準機',grp:'四方吹'}
+ {k:'m4',n:'迷你四方吹清洗保養',d:'嵌入式小型機',grp:'四方吹式'},
+ {k:'f4',n:'四方吹清洗保養',d:'嵌入式標準機',grp:'四方吹式'}
 ];
 var LK_MHI={wall:'家用壁掛',cs:'吊隱式小',cm:'吊隱式大',cl:'吊隱式全',m4:'迷你四方吹',f4:'四方吹'};
 var OUT_MHI=[
@@ -433,8 +433,9 @@ function _qwBar(){
   var ex=extra.length?'<span class="qwb-ex">含 '+extra.join('、')+'</span>':'';
   return '<div class="qwbar-sum"><div class="qwb-l">已選 '+n+' 台'+ex+'</div><div class="qwb-r">'+money(s)+'</div></div>';
 }
-function curPos(){return step==='brand'?1:(step==='area'?2:(step==='env'?3:(step===1?4:(step===2?4:(step===3?5:6)))));}
-function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+l(5)+d(6)+'</div>';}
+/* 員工頁沒有「環境」這一步(員工洗的都是自己家),所以是 5 格不是 6 格 */
+function curPos(){return step==='brand'?1:(step==='area'?2:(step===1?3:(step===2?3:(step===3?4:5))));}
+function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+'</div>';}
 function render(){
   var w='';
   if(env==='biz')qty.bz=bzQty();qty.tf=tfQty();
@@ -442,7 +443,7 @@ function render(){
     w='<div class="qw wel"><div class="wel-brand">上洋員工限定 · 冷氣清洗服務</div><div class="wel-bar"></div>'
     +'<h2 class="wel-h">快速選擇您的冷氣清洗保養項目</h2>'
     +'<p class="wel-p">員工專屬價，結帳輸入專屬優惠碼即可折抵</p>'
-    +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>品牌</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>機型</span><span class="wsa">›</span><span class="ws"><i class="wsn">5</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">6</i>完成</span></div>'
+    +'<div class="wel-steps"><span class="ws"><i class="wsn">1</i>品牌</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>機型</span><span class="wsa">›</span><span class="ws"><i class="wsn">4</i>加購</span><span class="wsa">›</span><span class="ws"><i class="wsn">5</i>完成</span></div>'
     +'<button class="wel-start" onclick="__qw.start()"><img src="'+IMG_QUICK+'" alt="開始快速選購"></button><div class="wel-skip" onclick="__qw.skip()">我已經知道要買什麼，自己看就好 →</div></div>';
   } else if(step==='brand'){
     /* 兩張卡是同構圖的實機照,只有紅色標籤的字不同 —— 並排才看得出差別,不要改成上下排。 */
@@ -474,8 +475,9 @@ function render(){
         +'<div id="qsvc-msg" class="qsvc-m"></div></div>':'')
      /* 客服核准後 classify() 已經回 'remote',所以這裡看到的是偏遠畫面。加一條說明讓客戶知道為什麼 */
      +((areaCls==='remote'&&_svcUnlocked(areaCity+areaDist))?'<div class="qsvc-ok">✅ 客服已確認此地址可安排服務<br>因路程較遠，每張訂單加收偏遠地區加價 <b>$600</b>（僅收一次）</div>':'')
-     +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;brand&quot;)">上一步</button><button class="btn pri" '+(canNext?'':'disabled')+' onclick="__qw.go(&quot;env&quot;)">下一步</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+     +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;brand&quot;)">上一步</button><button class="btn pri" '+(canNext?'':'disabled')+' onclick="__qw.go(1)">下一步：選機型</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='env'){
+    /* ⚠️ 員工頁走不到這裡(沒有營業場所,env 寫死 home)。留著只是為了跟正式版對照,勿刪 else-if 鏈。 */
     w='<div class="qw">'+stepBar()+'<h2>冷氣的使用環境為？</h2><p class="sub">先確認環境，幫你算好正確價格</p>'
     +'<div class="env-g"><button type="button" class="env-o '+(env==='home'?'sel':'')+'" onclick="__qw.pickEnv(&quot;home&quot;)"><img src="'+IMG_HOME+'" alt="一般家用"></button>'
     +'<button type="button" class="env-o '+(env==='biz'?'sel':'')+'" onclick="__qw.pickEnv(&quot;biz&quot;)"><img src="'+IMG_SHOP+'" alt="營業場所"></button></div>'
@@ -483,7 +485,7 @@ function render(){
     +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri" '+(env?'':'disabled')+' onclick="__qw.go(1)">下一步：室內機</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===1){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
-    var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'式機型適用</div>'+groups[g].map(optRow).join('');});
+    var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'機型適用</div>'+groups[g].map(optRow).join('');});
     var inLbl=sumKeys(INK)>0?'下一步：室外機':'只洗室外機，下一步';
     /* 「我不知道要洗哪些」是客戶在這一步最常卡住的地方,給他一條出路:先請人來看。
        ⚠️ 曾經在這裡擋過「購物車有東西就不給入口」,想藉空購物車避開優惠券。
@@ -519,7 +521,7 @@ function render(){
       +(_svRm?'<div class="qsv-rm">📍 您的地區屬偏遠，含偏遠地區加價 $600</div>':'')
       +'<div class="qsv-r"><div class="qsv-p">NT$ '+_svTot.toLocaleString('en-US')+'<u>／趟</u></div>'
       +'<div class="qsv-go">預約到府場勘</div></div></div>';
-    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+(_svHasClean?'':svCard)+(_svHasClean?'':'<div id="qs-svhint" class="qsvh"><span>🔍</span><span>還不確定要洗哪些？<b>點這裡</b>預約到府場勘</span><span class="qsvh-a">↓</span></div>')+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+(_svHasClean?'':svCard)+(_svHasClean?'':'<div id="qs-svhint" class="qsvh"><span>🔍</span><span>還不確定要洗哪些？<b>點這裡</b>預約到府場勘</span><span class="qsvh-a">↓</span></div>')+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='survey'){
     var sv=_surveyOf();
     /* ⚠️ 偏遠地區的場勘,結帳頁的 reconcileRm 會自動加一筆「偏遠地區加價 $600」。
@@ -674,7 +676,9 @@ function showTerms(k,mode,onConfirm){
 }
 
 var api={
-  start:function(){step='brand';render();},
+  /* 員工頁一律當「一般家用」——員工洗的是自己家,沒有營業場所。
+     env 保留變數是因為 tfQty()/reconcileBz() 都在讀它,直接寫死比拔掉安全。 */
+  start:function(){env='home';window.__qsEnv='home';step='brand';render();},
   pickBrand:function(b){if(brand===b)return;applyBrand(b);render();},
   skip:function(){close();},
   pickCity:function(v){areaCity=v||null;areaDist=null;areaCls=null;qty.rm=0;render();},
