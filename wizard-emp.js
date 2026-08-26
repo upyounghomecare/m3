@@ -2071,8 +2071,8 @@ function _hiCapNote(want,max){try{
  var el=document.getElementById('qs-hicap');
  var show=(typeof want==='number'&&max>0&&want>max);
  if(!show){if(el&&el.parentNode)el.parentNode.removeChild(el);return;}
- var txt='\u26A0\uFE0F 您選擇 '+want+' 台在 3.5–4M 高處,但購物車目前只有 '+max+' 台清洗服務。'
-   +'挑高加價已依實際台數調整為 '+max+' 台。若確實有 '+want+' 台要清洗,請先回上方增加清洗數量。';
+ var txt='\u26A0\uFE0F 您選擇 '+want+' 台在 3.5–4M 高處，但購物車目前只有 '+max+' 台清洗服務。'
+   +'挑高加價已依實際台數調整為 '+max+' 台。若確實有 '+want+' 台要清洗，請先回上方增加清洗數量。';
  if(!el){
   el=document.createElement('div');el.id='qs-hicap';
   el.style.cssText='font-size:12.5px;line-height:1.65;color:#8a4b0f;background:#fdf1e3;'
