@@ -352,7 +352,12 @@ function _qwSub(){try{
                              (客戶走完精靈再重開時 qty 還留著那些值) */
     var q=qty[k]||0;if(q<=0)continue;
     if(P[k]&&typeof P[k].price==='number')s+=P[k].price*q;}
-  var bz=bzQty();if(bz>0&&P.bz)s+=P.bz.price*bz;
+  /* ⚠️ 2026-08-26 修:商用/重油汙加價有兩種來源 ——
+     營業場所是「自動加購」(數量由 bzQty() 算),一般家用是「客戶手動加購」(數量在 qty.bz)。
+     原本只加 bzQty(),家用客戶手動加購時小計與方案卡都當它不存在,
+     但 finish() 照樣把它加進購物車 —— 客戶看到 $2,850、結帳卻變 $3,800。
+     切回一般家用時 pickEnv() 已經把 qty.bz 歸零,所以不會殘留營業場所的數量。 */
+  var bz=(env==='biz')?bzQty():(qty.bz||0);if(bz>0&&P.bz)s+=P.bz.price*bz;
   var tf=tfQty();if(tf>0&&P.tf)s+=P.tf.price*tf;
   if(areaCls==='remote'&&P.rm)s+=P.rm.price;
   return s;
