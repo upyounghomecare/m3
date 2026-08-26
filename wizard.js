@@ -94,12 +94,12 @@ var P={
  tf:{price:600,img:imj('wAjo1QaDle4m1WkZ390xLGMJ')}
 };
 var INDOOR=[
- {k:'wall',n:'家用壁掛清洗保養',d:'壁掛式・約1.5-2小時/台',grp:'家用壁掛'},
+ {k:'wall',n:'家用壁掛清洗保養',d:'壁掛式・約1.5-2小時/台',grp:'家用壁掛式'},
  {k:'cs',n:'吊隱式小清洗保養',d:'約0.5-1小時/台',grp:'吊隱式'},
  {k:'cm',n:'吊隱式大清洗保養',d:'含風鼓拆洗',grp:'吊隱式'},
  {k:'cl',n:'吊隱式全清洗保養',d:'全機深度清洗',grp:'吊隱式'},
- {k:'m4',n:'迷你四方吹清洗保養',d:'嵌入式小型機',grp:'四方吹'},
- {k:'f4',n:'四方吹清洗保養',d:'嵌入式標準機',grp:'四方吹'}
+ {k:'m4',n:'迷你四方吹清洗保養',d:'嵌入式小型機',grp:'四方吹式'},
+ {k:'f4',n:'四方吹清洗保養',d:'嵌入式標準機',grp:'四方吹式'}
 ];
 var LK={wall:'家用壁掛',cs:'吊隱式小',cm:'吊隱式大',cl:'吊隱式全',m4:'迷你四方吹',f4:'四方吹'};
 var OUTLIST=[
@@ -434,7 +434,7 @@ function render(){
     +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri" '+(env?'':'disabled')+' onclick="__qw.go(1)">下一步：室內機</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===1){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
-    var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'式機型適用</div>'+groups[g].map(optRow).join('');});
+    var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'機型適用</div>'+groups[g].map(optRow).join('');});
     var inLbl=sumKeys(['wall','cs','cm','cl','m4','f4'])>0?'下一步：室外機':'只洗室外機，下一步';
     /* 「我不知道要洗哪些」是客戶在這一步最常卡住的地方,給他一條出路:先請人來看。
        ⚠️ 曾經在這裡擋過「購物車有東西就不給入口」,想藉空購物車避開優惠券。
