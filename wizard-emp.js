@@ -2059,12 +2059,35 @@ function _hiBlock(on){try{
  }
 }catch(e){}}
 var _hiFormSyncing=false;
+/* ===== 挑高台數被壓低時的說明 =====
+   挑高加價的台數不能超過購物車裡的機器數(只買 1 台清洗,不可能有 2 台在高處)。
+   ⚠️ 2026-08-26 老闆實測踩到:購物車 1 台、表單選「3.5-4米:2 台」,
+      系統靜靜地只加 1 台挑高,客戶只會覺得「我選 2 台怎麼變 1 台」。
+      邏輯是對的,但一定要講出來,否則客戶會以為系統壞了,或漏買清洗數量。 */
+function _hiCapNote(want,max){try{
+ var f=_hiField();if(!f)return;
+ var row=(f.closest&&f.closest('.form-group'))||f.parentNode;
+ if(!row||!row.parentNode)return;
+ var el=document.getElementById('qs-hicap');
+ var show=(typeof want==='number'&&max>0&&want>max);
+ if(!show){if(el&&el.parentNode)el.parentNode.removeChild(el);return;}
+ var txt='\u26A0\uFE0F 您選擇 '+want+' 台在 3.5–4M 高處,但購物車目前只有 '+max+' 台清洗服務。'
+   +'挑高加價已依實際台數調整為 '+max+' 台。若確實有 '+want+' 台要清洗,請先回上方增加清洗數量。';
+ if(!el){
+  el=document.createElement('div');el.id='qs-hicap';
+  el.style.cssText='font-size:12.5px;line-height:1.65;color:#8a4b0f;background:#fdf1e3;'
+   +'border:1px solid #e8b980;border-radius:9px;padding:9px 11px;margin:6px 0 2px;font-weight:600';
+  row.parentNode.insertBefore(el,row.nextSibling);
+ }
+ if(el.textContent!==txt)el.textContent=txt;
+}catch(e){}}
 function reconcileHiForm(){try{
  if(window.__qsAdding||_hiSyncing||_hiFormSyncing)return;/* 與既有 reconcileHi 共用時序,避免同一輪各改一次 */
  var want=_hiWant();
  _hiBlock(want==='X');/* 每輪都重新宣告一次,避免被地區那道鎖的解鎖動作誤放 */
- if(want===null||want==='X')return;
  var max=_indoorInCart()+_outdoorInCart();
+ _hiCapNote(want,max);/* 提示要在 return 之前算,不然選到 4 米以上時舊提示會留在畫面上 */
+ if(want===null||want==='X')return;
  if(max<=0)return;/* 購物車沒機器 → 交給既有 reconcileHi */
  var target=Math.min(want,max);
  var cur=_hiInCart();
