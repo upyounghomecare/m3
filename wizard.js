@@ -1311,6 +1311,15 @@ function autoFeeNotes(){try{
 var _PLANI={early:{img:'earlybird2.jpg',name:'早鳥方案 · 85折',sub:'安排 30 天後到府服務',nc:'#B8860B',sc:'#8a6a1f'},std:{img:'standard.jpg',name:'標準方案 · 95折',sub:'安排兩週內到府服務',nc:'#0C447C',sc:'#5a6672'}};
 var _PLANB='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@a39b6d6e6c11f5bb4573ba9b32fb0fefe198d8c2/';
 function _curPlan(){return (window.__qsPlan==='early')?'early':'std';}
+/* ═══ 2026-08-31 緊急止血:暫停結帳彈窗裡的方案「變更」 ═══
+   1SHOP 改版後換券必須先移除舊券,而移除需要券的 id —— 他們的 API 現在時常不回傳 id,
+   於是「移除舊券」靜靜失敗、新券套不上。實測 8 回合有 5 回合:
+   客戶把方案改成「標準」,券卻賴著早鳥85折不走 → 畫面寫標準、實收 85 折 → 每單少收 10%。
+   (客戶不會抱怨,因為對他有利;老闆也不會發現。$3,000 的單少收 $300)
+   客戶「第一次」選方案時購物車還沒有券、不需要移除,所以精靈那條路一定正確 ——
+   因此止血方式是:拿掉結帳彈窗的變更入口,想換方案就重走精靈。
+   ⚠️ 等 1SHOP 修好(購物車 API 穩定回傳 id)後,把 PLAN_CHG_OFF 改回 0 即可恢復。 */
+var PLAN_CHG_OFF=1;
 function _renderPlanSum(wrap,collapsed){
   var p=_curPlan();
   if(collapsed){
@@ -1319,9 +1328,11 @@ function _renderPlanSum(wrap,collapsed){
       +'<div style="display:flex;align-items:center;gap:9px;background:#faf6ea;border:1px solid #ecdcae;border-radius:11px;padding:9px 10px">'
         +'<img src="'+_PLANB+info.img+'" style="width:72px;border-radius:7px;display:block;flex:0 0 auto">'
         +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:900;color:'+info.nc+';white-space:nowrap">'+info.name+'</div><div style="font-size:11px;color:'+info.sc+';margin-top:2px;white-space:nowrap">'+info.sub+'</div></div>'
-        +'<button type="button" class="qsps-chg" style="flex:0 0 auto;border:1px solid #d9b24a;background:#fff;color:#8a6410;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 13px;cursor:pointer;white-space:nowrap">變更</button>'
+        +(PLAN_CHG_OFF?'':'<button type="button" class="qsps-chg" style="flex:0 0 auto;border:1px solid #d9b24a;background:#fff;color:#8a6410;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 13px;cursor:pointer;white-space:nowrap">變更</button>')
       +'</div>'
-      +'<div style="font-size:11px;color:#9aa7b4;margin-top:5px;padding-left:2px">選錯了?點「變更」可調整方案</div>';
+      +'<div style="font-size:11px;color:#9aa7b4;margin-top:5px;padding-left:2px">'
+      +(PLAN_CHG_OFF?'想換方案？請關掉此視窗，用上方的「🪄 引導精靈」重新挑選':'選錯了?點「變更」可調整方案')
+      +'</div>';
     var c=wrap.querySelector('.qsps-chg');if(c)c.onclick=function(){_renderPlanSum(wrap,false);};
   }else{
     var card=function(k){var info=_PLANI[k];var sel=(k===p);return '<div class="qsps-pick" data-p="'+k+'" style="flex:1;border:'+(sel?'2.5px solid #B8860B':'2px solid #d3dde9')+';border-radius:11px;overflow:hidden;cursor:pointer;position:relative;box-shadow:0 2px 6px rgba(4,44,83,.08)"><img src="'+_PLANB+info.img+'" style="width:100%;display:block">'+(sel?'<div style="position:absolute;top:6px;right:6px;background:#B8860B;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 9px">已選</div>':'')+'</div>';};
@@ -2307,6 +2318,32 @@ function _cartHasGoods(){try{
   for(var i=0;i<cart.length;i++)if(Number(cart[i].ProductType)!==99)return true;
   return false;
 }catch(e){return false}}
+/* ═══ 2026-08-31 保險:方案顯示必須跟「實際收的錢」一致 ═══
+   止血是拿掉變更鈕(PLAN_CHG_OFF),但換券失敗還可能從別的路徑發生。
+   一旦「畫面寫的方案」跟「購物車真正掛著的券」對不起來,訂單就會是錯的金額。
+   這裡的原則:錢說了算 —— 券是 85 折就把方案顯示成早鳥,券是 95 折就顯示標準。
+   這樣客戶看到的、付的、我們排班的,永遠是同一件事,不會出現「寫標準收85折」。
+   ⚠️ 只在券穩定下來後才動作(避開換券中間的空窗),而且只改顯示、不碰購物車 ——
+      會自動增刪購物車的機制在這一頁很容易打架成無限迴圈(既有教訓)。 */
+var _pmAt=0;
+function planMoneyGuard(){try{
+  if(window.__qsAdding||_corrBusy()||_cpBusy())return;
+  if(!_cartHasGoods())return;
+  var cart=(window._UserSession&&window._UserSession.Cart)||[];
+  var hasCp=false;
+  for(var i=0;i<cart.length;i++){if(Number(cart[i].ProductType)===99){hasCp=true;break;}}
+  if(!hasCp)return;/* 沒券不管,planCouponWatch 會去補 */
+  var off=_cartOff();
+  var real=(off>0.10)?'early':((off>0.02)?'std':null);/* 85折≈0.15 / 95折≈0.05 */
+  if(!real)return;/* 折扣率不是這兩種(客戶自己的優惠碼)→ 不干涉 */
+  if(_curPlan()===real){_pmAt=0;return;}
+  var now=(new Date()).getTime();
+  if(!_pmAt){_pmAt=now;return;}/* 先觀察一輪,避開換券過程中的瞬間不一致 */
+  if(now-_pmAt<3000)return;
+  _pmAt=0;
+  window.__qsPlan=real;/* 讓方案跟著錢走 */
+  try{var w=document.getElementById('qs-plansum-wrap');if(w)_renderPlanSum(w,true);}catch(e){}
+}catch(e){}}
 /* 記住客戶自己輸入過、成功套用的最佳優惠碼。
    存 localStorage 而不是變數:客戶重新整理或關掉再開,記憶才不會歸零
    (實測第二輪抓到的洞 —— 重整後打錯字,85折 被清掉救不回來,多付 $300)。 */
@@ -2520,7 +2557,7 @@ function hookCartRender(){try{
     return r;
   };
 }catch(e){}}
-setInterval(function(){hookCartRender();repairCartIds();fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();},700);
+setInterval(function(){hookCartRender();repairCartIds();fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();planMoneyGuard();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
