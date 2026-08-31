@@ -2465,7 +2465,62 @@ function addGoBottomBtn(){try{
   var b=li.querySelector('button'),g=_goNext();
   if(b&&b.getAttribute('title')!==g.t)b.setAttribute('title',g.t);
 }catch(e){}}
-setInterval(function(){fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();},700);
+/* ═══ 2026-08-31 1SHOP 前後端不同步的補丁 ═══
+   1SHOP 把購物車列的識別由 data-item(數字索引) 換成 data-id(字串 product-索引-商品ID),
+   但他們自己的重繪函式 inputCart 讀的 i.id / i.can_remove 這兩個欄位,API 回傳的 Cart 物件裡沒有。
+   → 只要購物車一有變動(重繪),所有列的 data-id 就變成字串 "undefined"、券的移除鈕整個不見。
+   後果:客戶按垃圾桶刪不掉商品(RemoveItem 送 id:"undefined" → 「無效的產品資料」)、方案券換不掉。
+   開場是伺服器直接吐 HTML 所以正常,重整一次也會好 —— 但客戶不會知道要重整。
+   這裡在每次重繪後把 data-id 與券的移除鈕補回去。等 1SHOP 修好後這段自然沒事做。 */
+/* ⚠️ 券的購物車物件「有」 id 與 can_remove(實測 {Title,CouponPrice,ProductType:99,can_remove:1,id:"coupon-xxx"}),
+   缺欄位的只有『商品』列。所以券一律直接用資料裡的 id —— 千萬不要記住舊值再補,
+   換券之後那個舊 id 就過期了,拿它去 RemoveItem 會刪到不存在的東西(伺服器仍回成功),
+   舊券留著、新券套不上,反而製造出「換方案沒反應」。(2026-08-31 第一版就是這樣寫錯,實測抓到) */
+/* 券的 id 記憶:1SHOP 的回應時好時壞(像是分批更新伺服器),有 id 的那次就記下來,
+   之後遇到沒 id 的回應才有東西可以補。key 用券名(同一張券的 id 在同一個 session 內固定)。
+   商品列不必記 —— product-索引-ProductID 可以自己算出來。 */
+var _cpIdMap={};
+function repairCartIds(){try{
+  var rows=document.querySelectorAll('#cart-section .cart-item');
+  if(!rows.length)return;
+  var c=_cartArr();
+  for(var i=0;i<rows.length;i++){
+    var el=rows[i],cur=el.getAttribute('data-id'),it=c[i];
+    if(!it)continue;
+    var isCp=(it.ProductType===99)||el.classList.contains('coupon');
+    if(isCp){
+      var ttl=it.Title||'';
+      if(it.id){_cpIdMap[ttl]=it.id;}                    /* 好的回應 → 記起來 */
+      else if(cur&&cur.indexOf('coupon-')===0){_cpIdMap[ttl]=cur;}/* 開場伺服器渲染的也算 */
+      var gid=it.id||_cpIdMap[ttl]||null;
+      if(gid&&cur!==gid)el.setAttribute('data-id',gid);
+      /* 重繪時 can_remove 讀不到就不會產生移除鈕 → 補一顆,樣式與 1SHOP 原生一致 */
+      var tool=el.querySelector('.item-tool');
+      if(tool&&!tool.querySelector('button')&&gid){
+        var b=document.createElement('button');
+        b.type='button';b.className='btn btn-default btn-circle';
+        b.setAttribute('onclick','removeCartItem(this)');
+        b.innerHTML='<i class="far fa-trash-alt"></i>';
+        tool.appendChild(b);
+      }
+    }else if((!cur||cur==='undefined')&&it.ProductID){
+      el.setAttribute('data-id',it.id||('product-'+i+'-'+it.ProductID));
+    }
+  }
+}catch(e){}}
+/* 掛在 1SHOP 自己的重繪函式後面,壞掉的瞬間就補好(不必等 700ms 巡檢) */
+function hookCartRender(){try{
+  if(window.__qsCartHooked)return;
+  if(typeof window.inputCart!=='function')return;
+  window.__qsCartHooked=1;
+  var _orig=window.inputCart;
+  window.inputCart=function(){
+    var r=_orig.apply(this,arguments);
+    try{repairCartIds();}catch(e){}
+    return r;
+  };
+}catch(e){}}
+setInterval(function(){hookCartRender();repairCartIds();fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
