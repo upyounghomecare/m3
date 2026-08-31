@@ -2119,6 +2119,16 @@ var _adjSyncing=false,_adjC=null;
 function _readXiaoji(){try{if(typeof window._cartTotal==='number'&&window._cartTotal>0)return window._cartTotal;var box=document.querySelector('.cart-total');if(box){var m=(box.textContent||'').match(/小計[\s\S]*?NT\$\s*([\d,]+)/);if(m)return parseInt(m[1].replace(/,/g,''),10);}}catch(e){}return null;}
 /* 多面額校正:4個面額產品($1000/$100/$10/$1)同名「加購品已享優惠價」,靠購物車item的PriceBase區分面額、購物車陣列索引當cartChangeItem的itemQue */
 var _CORR_DENOMS=[1000,100,10,1];
+/* 2026-08-31:1SHOP 把 ChangeItem 的 id 從「接受數字索引」改成「只接受字串」,回 {"success":-1,"msg":"id 欄位必須是字串。"}
+   → 校正商品改不了數量 → 每個面額卡在 1 個 → 金額少收 + 遮罩卡死 + 結帳鈕鎖住。
+   購物車列真正的 id 在 DOM 的 data-id,格式 product-{索引}-{ProductID}。 */
+function _cartRowId(idx){try{var c=_cartArr(),x=c[idx];if(!x||!x.ProductID)return null;
+  var el=document.querySelector('.cart-item[data-id="product-'+idx+'-'+x.ProductID+'"]');
+  return el?el.getAttribute('data-id'):('product-'+idx+'-'+x.ProductID);}catch(e){return null;}}
+function _cartRow(idx){try{var id=_cartRowId(idx);
+  var el=id?document.querySelector('.cart-item[data-id="'+id+'"]'):null;
+  if(el)return el;
+  return document.querySelectorAll('.cart-item')[idx]||null;}catch(e){return null;}}
 function _corrMap(){var bm=window.__qsBtnMap||{},map={};for(var pid in bm){if(!bm.hasOwnProperty(pid))continue;var b=bm[pid];var w=(b&&b.closest)?b.closest('.product-wrap'):null;if(!w)continue;var h=w.querySelector('h3');var n=h?(h.textContent||'').trim():'';if(n.indexOf('加購品已享優惠價')!==0)continue;var m=(w.textContent||'').match(/NT\$\s*([\d,]+)/);if(!m)continue;var p=parseInt(m[1].replace(/,/g,''),10);if(_CORR_DENOMS.indexOf(p)>=0)map[p]={pid:pid,btn:b};}return map;}
 function _corrCart(){var res={},c=_cartArr();for(var i=0;i<c.length;i++){var x=c[i];if((x.ProductName||'').indexOf('加購品已享優惠價')<0)continue;var q=Number(x.Quantity)||0;var d=Number(x.PriceBase)||(q>0?Math.round((Number(x.LineTotal)||0)/q):0);if(_CORR_DENOMS.indexOf(d)>=0)res[d]={idx:i,qty:q};}return res;}
 function _corrInCart(){var c=_cartArr(),s=0;for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)s+=Number(c[i].LineTotal)||0;}return s;}
@@ -2139,8 +2149,12 @@ function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
      if(op.t==='add'){if(map[op.d]&&window.viewProduct)window.viewProduct(map[op.d].btn,map[op.d].pid);}
      else{var hv=_corrCart(),h=hv[op.d];
        if(h){
-         if(op.t==='rm'){var el=document.querySelector('.cart-item[data-item="'+h.idx+'"]');var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb)window.removeCartItem(rb);}
-         else if(h.qty!==op.n&&window.cartChangeItem){window.cartChangeItem(h.idx,op.n);}
+         if(op.t==='rm'){var el=_cartRow(h.idx);var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb)window.removeCartItem(rb);}
+         else if(h.qty!==op.n){var _cid=_cartRowId(h.idx);
+           if(_cid&&window.cartChangeItem){window.cartChangeItem(_cid,op.n);}
+           else{/* 備援:1SHOP 若再改 id 規則,改用畫面 +/- 按鈕,不讓校正卡死(2026-08-31 教訓) */
+             var _el=_cartRow(h.idx);var _b=_el?[].slice.call(_el.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0]:null;
+             if(_b&&window.selectQty)window.selectQty(_b,op.n-h.qty);}}
        }}
    }catch(e){}
    setTimeout(step,500);
