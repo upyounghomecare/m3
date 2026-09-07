@@ -1266,21 +1266,31 @@ function _lockCheckout(busy){try{
    ⚠️ 容差 $3:reconcileAdjust 自己的看門狗也是用 ±3,兩邊一致才不會互相打架。 */
 function _corrShort(){try{
   var cart=_cartArr();if(!cart.length)return false;
-  var P=0,X=0,sub=0;
+  var P=0,X=0,sub=0,hasCp=false;
   for(var i=0;i<cart.length;i++){
+    if(Number(cart[i].ProductType)===99){hasCp=true;continue;}
     var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
     if(nm.indexOf('加購品已享優惠價')>=0)X+=lt;
     else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0)P+=lt;
   }
   if(P<=0)return false;/* 沒有保護品就沒有校正的問題 */
-  var xiao=_readXiaoji();if(xiao==null)return false;
+  /* 洞 B(2026-09-07 壓力測試抓到):保護品 + 券都在、校正卻是 0 → 一定是少收,不必等算式。
+     換券過程中 X 會被拆到 0,而 C 用 (sub-xiao)/sub 算在券落地前會是 0 → 舊版在這裡 return false 放行。 */
+  if(hasCp&&X===0)return true;
+  if(!hasCp)return false;/* 完全沒券 → 沒折扣 → 沒東西要補 */
+  /* 洞 A:小計讀不到(重繪中)不能當作「沒事」;保護品在的時候把「未知」當「可疑」 */
+  var xiao=_readXiaoji();if(xiao==null)return true;
   var C=(X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0);
-  if(C<=0.0001)return false;/* 還沒套券,不能判斷 */
+  if(C<=0.0001)return (sub-xiao)>0;/* 券在但算不出折扣率 → 只要小計比商品總額低就視為在折,需校正 */
   var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
   return (xiao<target-3);/* 只擋「少收」;多收由既有機制自己修正 */
-}catch(e){return false}}
+}catch(e){return true}}
+var _corrShortLatched=false,_corrShortOk=0;/* 保險的黏著旗標:判定少收後要連續 3 輪(約 2 秒)都正常才解鎖 */
 function maskCalc(){try{
- var busy=_corrBusy()||_cpBusy()||_corrShort();_lockCheckout(busy);var sec=document.getElementById('cart-section');if(!sec)return;
+ var _sh=_corrShort();
+ if(_sh){_corrShortOk=0;_corrShortLatched=true;}
+ else if(_corrShortLatched){_corrShortOk++;if(_corrShortOk>=3)_corrShortLatched=false;}
+ var busy=_corrBusy()||_cpBusy()||_corrShortLatched;_lockCheckout(busy);var sec=document.getElementById('cart-section');if(!sec)return;
  var ov=document.getElementById('qs-calcov');
  if(busy){
    if(!ov){
