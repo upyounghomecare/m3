@@ -585,7 +585,7 @@ function showDeliveryPicker(onDone){
  var ov=document.createElement('div');ov.id='qw-dhcal';
  ov.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.35)">'
- +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px"><div style="font-size:11px;font-weight:800;opacity:.85">📦 三菱重工除濕機 · 另行宅配</div><div style="font-size:16.5px;font-weight:900;margin-top:3px">選擇除濕機期望配送日期與時段</div></div>'
+ +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative"><div style="font-size:11px;font-weight:800;opacity:.85">📦 三菱重工除濕機 · 另行宅配</div><div style="font-size:16.5px;font-weight:900;margin-top:3px;padding-right:34px">選擇除濕機期望配送日期與時段</div><button id="qwdh-x" type="button" aria-label="關閉" style="position:absolute;top:10px;right:12px;width:30px;height:30px;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:19px;line-height:1;border-radius:50%;cursor:pointer">×</button></div>'
  +'<div style="padding:15px 18px 18px">'
  +'<div style="font-size:12px;font-weight:800;color:#042C53;margin-bottom:8px">1. 期望配送日期<span style="color:#7c8998;font-weight:600">（僅可選 '+_dhFmt(MIN).slice(5)+'～'+_dhFmt(MAX).slice(5)+'，週日/國定假日不可選）</span></div>'
  +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><button data-nav="-1" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">‹</button><b id="qwdh-ml" style="font-size:14px"></b><button data-nav="1" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">›</button></div>'
@@ -620,19 +620,25 @@ function showDeliveryPicker(onDone){
   var day=e.target.closest('[data-d]');if(day){selDate=new Date(view.getFullYear(),view.getMonth(),+day.getAttribute('data-d'));render();sum();return;}
   var slot=e.target.closest('.qwdh-slot');if(slot){selSlot=slot.getAttribute('data-slot');[].slice.call(ov.querySelectorAll('.qwdh-slot')).forEach(function(x){x.style.borderColor='#d3ddea';x.style.background='#fff';x.style.color='#16202b';});slot.style.borderColor='#042C53';slot.style.background='#E6F1FB';slot.style.color='#042C53';sum();return;}
  });
- ov.querySelector('#qwdh-cancel').onclick=function(){if(ov.parentNode)ov.parentNode.removeChild(ov);};
+ /* 2026-09-07 統一兩個加購彈窗的退路:右上角×、底部取消文字、點灰底 —— 三種都要能離開。
+    原本這個彈窗只有底部一行小字,客戶沒往下滑會以為被困住。(老闆實測發現兩個彈窗不一致) */
+ var _dhCl=function(){if(ov.parentNode)ov.parentNode.removeChild(ov);};
+ ov.querySelector('#qwdh-cancel').onclick=_dhCl;
+ ov.querySelector('#qwdh-x').onclick=_dhCl;
+ ov.onclick=function(e){if(e.target===ov)_dhCl();};
  ov.querySelector('#qwdh-ok').onclick=function(){if(!selDate||!selSlot)return;window.__qsDhDelivery=_dhFmt(selDate)+'（'+selSlot+'）';if(ov.parentNode)ov.parentNode.removeChild(ov);if(onDone)onDone();};
  render();sum();
 }
 function showTerms(k,mode,onConfirm){
  var t=_TERMS[k];if(!t||document.getElementById('qw-terms'))return;
  var gate=(mode==='gate');
- var ft=gate?'<div class="qwt-ft"><label class="qwt-chk"><input type="checkbox" class="qwt-cb"> 我已閱讀並瞭解上述加購注意事項</label><button class="qwt-ok" type="button" disabled>確認加購</button><div class="qwt-hint">勾選後才能加購；系統會記錄您已閱讀</div></div>':'<div class="qwt-ft"><button class="qwt-ok" type="button">我知道了</button></div>';
+ var ft=gate?'<div class="qwt-ft"><label class="qwt-chk"><input type="checkbox" class="qwt-cb"> 我已閱讀並瞭解上述加購注意事項</label><button class="qwt-ok" type="button" disabled>確認加購</button><div class="qwt-hint">勾選後才能加購；系統會記錄您已閱讀</div><button class="qwt-no" type="button" style="width:100%;border:none;background:none;color:#7c8998;font-size:12.5px;margin-top:9px;cursor:pointer;text-decoration:underline">先不加購，回上一頁</button></div>':'<div class="qwt-ft"><button class="qwt-ok" type="button">我知道了</button></div>';
  var ov=document.createElement('div');ov.id='qw-terms';
  ov.innerHTML='<div class="qwt-m"><div class="qwt-hd"><div class="qwt-pill">'+t.pill+'</div><h3>'+t.title+'</h3><button class="qwt-x" type="button" aria-label="關閉">×</button></div><div class="qwt-bd">'+t.body+'</div>'+ft+'</div>';
  document.body.appendChild(ov);
  function cl(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
  ov.querySelector('.qwt-x').onclick=cl;
+ var _no=ov.querySelector('.qwt-no');if(_no)_no.onclick=cl;/* 與配送彈窗一致:底部也給一條明確的退路 */
  ov.onclick=function(e){if(e.target===ov)cl();};
  var ok=ov.querySelector('.qwt-ok');
  if(gate){var cb=ov.querySelector('.qwt-cb');cb.onchange=function(){ok.disabled=!cb.checked;};ok.onclick=function(){if(!cb.checked)return;window['__qsRead_'+k]=_readStamp();cl();var doAdd=function(){if(onConfirm){onConfirm();}else{qty[k]=1;render();}};if(k==='dh'){showDeliveryPicker(doAdd);}else{doAdd();}};}
