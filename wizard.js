@@ -1256,8 +1256,31 @@ function _lockCheckout(busy){try{
     }
   }
 }catch(e){}}
+/* ═══ 2026-09-07 保險:校正沒算對就不讓結帳 ═══
+   校正商品改成「單一面額 $1 × 數量」後(見 _setCorr),只要那一次「改數量」被 1SHOP 拒絕,
+   校正就會停在 $1 —— 早鳥85折+除濕機的情況會少收 3,864 元(四面額時代只會少收約 2,700)。
+   實測看過一次卡住 80 秒不動。改數量會失敗是既有風險(1SHOP 的 ChangeItem 時好時壞),
+   單一面額只是把「少收一點」放大成「幾乎全毀」。
+   與其賭它會成功,不如擋住錯誤的訂單:算不對就鎖結帳鈕、顯示計算中。
+   寧可少一張單,不要一張少收三千的單。
+   ⚠️ 容差 $3:reconcileAdjust 自己的看門狗也是用 ±3,兩邊一致才不會互相打架。 */
+function _corrShort(){try{
+  var cart=_cartArr();if(!cart.length)return false;
+  var P=0,X=0,sub=0;
+  for(var i=0;i<cart.length;i++){
+    var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
+    if(nm.indexOf('加購品已享優惠價')>=0)X+=lt;
+    else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0)P+=lt;
+  }
+  if(P<=0)return false;/* 沒有保護品就沒有校正的問題 */
+  var xiao=_readXiaoji();if(xiao==null)return false;
+  var C=(X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0);
+  if(C<=0.0001)return false;/* 還沒套券,不能判斷 */
+  var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
+  return (xiao<target-3);/* 只擋「少收」;多收由既有機制自己修正 */
+}catch(e){return false}}
 function maskCalc(){try{
- var busy=_corrBusy()||_cpBusy();_lockCheckout(busy);var sec=document.getElementById('cart-section');if(!sec)return;
+ var busy=_corrBusy()||_cpBusy()||_corrShort();_lockCheckout(busy);var sec=document.getElementById('cart-section');if(!sec)return;
  var ov=document.getElementById('qs-calcov');
  if(busy){
    if(!ov){
