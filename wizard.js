@@ -108,7 +108,7 @@ var OUTLIST=[
 ];
 var ADDON=[
  {k:'air',n:'AIRMON',dn:'AIRMON 智慧遠端控制器 MHICAD-WF100',d:'含全新設備費跟安裝設定費',air:true,pop:true,tag:'🔧 到府安裝',nmsm:true},
- {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機 DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜每日除濕 18.5 公升',pop:true,tag:'📦 另行宅配',gift:'🎁 加贈清洗75折券'},
+ {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機 DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜每日除濕 18.5 公升',pop:true,tag:'📦 另行宅配',gift:'🎁 加贈清洗8折券'},
  {k:'fan',n:'風鼓清洗',d:'僅適用吊隱大保養/全保養清洗',needBlow:true},
  {k:'tf',n:'車馬費',d:'技師車程與交通成本'},
  {k:'hi',n:'挑高施作3.5-4M加價',d:'每台加收'},
@@ -391,6 +391,18 @@ function _qwFoot(card){try{
  sp.onclick=function(){card.scrollTop+=card.clientHeight*0.7;};
  upd();
 }catch(e){}}
+/* 除濕機/AIRMON 是「不參與方案折扣」的加購品(購物車靠校正商品把折掉的錢補回來)。
+   精靈的方案卡若把它們一起打折,客戶會看到比實收更便宜的價格 ——
+   實測 家用壁掛1台+除濕機 標準95折:畫面寫 23,655、結帳收 24,750,差 1,095。(2026-09-07 老闆抓到)
+   這裡算出保護品金額,方案卡只折「可折的部分」,並沿用購物車的 Math.ceil 讓兩邊數字完全一致。 */
+function _qwProt(){try{
+  var s=0;
+  ['dh','air'].forEach(function(k){
+    var q=qty[k]||0;
+    if(q>0&&P[k]&&typeof P[k].price==='number')s+=P[k].price*q;
+  });
+  return s;
+}catch(e){return 0}}
 function _qwBar(){
   var n=_qwCount(),s=_qwSub();
   if(n<=0&&s<=0)return '';
@@ -520,11 +532,13 @@ function render(){
        實測 20 筆訂單只有 4 筆選早鳥,把省下的金額直接寫出來比抽象折數有感。
        此時品項已全選完,_qwSub() 算得出來;客戶按上一步改數量再回來會重算。 */
     var _sub=_qwSub();
+    var _prot=_qwProt();                    /* 除濕機/AIRMON:原價,不打折 */
+    var _base=Math.max(0,_sub-_prot);       /* 只有這部分吃折扣 */
     var _off={std:0.05,early:0.15};
     function planPrice(k){
       if(_sub<=0)return '';
-      var pay=_sub-Math.round(_sub*_off[k]);
-      var save=(k==='early')?(Math.round(_sub*_off.early)-Math.round(_sub*_off.std)):0;
+      var pay=_base-Math.ceil(_base*_off[k])+_prot;
+      var save=(k==='early')?(Math.ceil(_base*_off.early)-Math.ceil(_base*_off.std)):0;
       return '<div class="qp-money"><s>'+money(_sub)+'</s><b>'+money(pay)+'</b></div>'
         +(save>0?'<div class="qp-save">比標準方案再省 '+money(save)+'</div>':'');
     }
@@ -545,9 +559,9 @@ var _TERMS={
  dh:{pill:'📦 另行宅配',title:'三菱重工除濕機 DH18W-T 織紋白',body:
   '<div class="qwt-intro">本項目為冷氣清洗服務限定加購商品，須與冷氣清洗服務同筆訂購。</div>'
   +'<p>三菱重工除濕機為實體宅配商品，將於訂單確認後由物流另行配送至指定地址，不會由清洗技師攜帶，亦不一定與冷氣清洗服務於同日送達。</p>'
-  +'<div class="qwt-h">加購內容</div><ul class="qwt-ul"><li>三菱重工除濕機</li><li>物流宅配到府</li><li>原廠保固服務</li><li>加贈冷氣清洗75折折價券 1 張，限次回使用</li></ul>'
+  +'<div class="qwt-h">加購內容</div><ul class="qwt-ul"><li>三菱重工除濕機</li><li>物流宅配到府</li><li>原廠保固服務</li><li>加贈冷氣清洗8折折價券 1 張，限次回使用</li></ul>'
   +'<div class="qwt-h">配送及收件說明</div><p>除濕機與冷氣清洗服務為不同作業流程：</p><ul class="qwt-ul"><li>冷氣清洗服務：由約時人員聯繫安排技師到府</li><li>除濕機加購商品：由物流另行安排宅配</li></ul><p>實際出貨及到貨時間，將依訂單確認、商品庫存及物流配送狀況為準。</p><div class="qwt-note">※ 除濕機不會由清洗技師於服務當日攜帶或交付。</div><div class="qwt-note">※ 除濕機到貨日期與冷氣清洗服務日期可能不同。</div>'
-  +'<div class="qwt-h">75折折價券發放說明</div><p>加購除濕機並完成本次冷氣清洗服務者，將加贈「冷氣清洗75折折價券」1 張，限定次回購買冷氣清洗服務時使用。</p><ul class="qwt-ul"><li><b>發放時間：</b>本次冷氣清洗服務完成日之次一工作日。</li><li><b>發放方式：</b>客服將透過 LINE 官方帳號訊息通知並發放折價券。</li><li><b>領取條件：</b>請務必於折價券發放前完成 LINE 官方帳號好友加入，並確認可正常接收訊息。</li></ul><p>如本次冷氣清洗服務未完成，包含客戶取消服務、現場環境不符合施作條件、空調設備故障或其他因素致服務無法完成，恕不贈送 75 折折價券。</p><div class="qwt-note">※ 折價券僅限次回冷氣清洗服務使用，不適用於本次訂單。</div><div class="qwt-note">※ 折價券使用期限、適用項目、最低購買條件及其他使用限制，依券面及活動規則所載內容為準。</div>'
+  +'<div class="qwt-h">8折折價券發放說明</div><p>加購除濕機並完成本次冷氣清洗服務者，將加贈「冷氣清洗8折折價券」1 張，限定次回購買冷氣清洗服務時使用。</p><ul class="qwt-ul"><li><b>發放時間：</b>本次冷氣清洗服務完成日之次一工作日。</li><li><b>發放方式：</b>客服將透過 LINE 官方帳號訊息通知並發放折價券。</li><li><b>領取條件：</b>請務必於折價券發放前完成 LINE 官方帳號好友加入，並確認可正常接收訊息。</li></ul><p>如本次冷氣清洗服務未完成，包含客戶取消服務、現場環境不符合施作條件、空調設備故障或其他因素致服務無法完成，恕不贈送 8 折折價券。</p><div class="qwt-note">※ 折價券僅限次回冷氣清洗服務使用，不適用於本次訂單。</div><div class="qwt-note">※ 折價券使用期限、適用項目、最低購買條件及其他使用限制，依券面及活動規則所載內容為準。</div>'
   +'<div class="qwt-h">取消、退換貨及售後說明</div><p>本商品屬網路購買之實體宅配商品，消費者自收到商品次日起享有 7 日猶豫期，猶豫期並非試用期。</p><p>如需辦理退貨，請於收到商品後 7 日內聯繫客服提出申請，請勿自行寄回。</p><p>辦理退貨時，商品及相關內容物應保持完整，包括：</p><ul class="qwt-ul"><li>除濕機主機</li><li>原廠紙箱及包裝材料</li><li>說明書及保證書</li><li>配件及贈品</li></ul><p>消費者得於確認商品外觀、規格及功能所必要的範圍內拆封檢查；如因超出必要檢查範圍之使用，造成商品刮傷、污損、缺件、包裝嚴重毀損或其他商品價值減損情形，將依商品實際狀況依法處理。</p><p>如商品收到時有外觀損傷、缺件、無法正常運作或其他異常，請保留商品、包裝及相關內容物，並儘速聯繫客服協助處理。</p><p>設備後續如發生功能異常或故障，將依原廠保固及檢測流程辦理維修或相關售後服務。</p><div class="qwt-note">※ 除濕機商品之配送、退換貨及原廠保固，與冷氣清洗服務之預約、改約、取消及服務保固分開計算。</div><div class="qwt-note">※ 冷氣清洗服務取消或改期，不代表除濕機訂單將同步取消，仍須另行聯繫客服辦理。</div>'},
  air:{pill:'🔧 到府安裝',title:'AIRMON 智慧遠端控制器 MHICAD-WF100',body:
   '<div class="qwt-intro">本項目為冷氣清洗服務限定加購商品，須與冷氣清洗服務同筆訂購。</div>'
@@ -869,7 +883,7 @@ function addBrandBadge(){
 /* 人氣加購＋配送標籤＋注意事項連結 — 貼在 AIRMON 智慧遠端控制器、三菱重工除濕機 的商品卡 */
 function addPopularBadge(){
   try{
-    var map=[{key:'AIRMON',info:'🔧 到府安裝',tk:'air'},{key:'除濕機',info:'📦 另行宅配',tk:'dh',gift:'🎁 加贈清洗75折券'}];
+    var map=[{key:'AIRMON',info:'🔧 到府安裝',tk:'air'},{key:'除濕機',info:'📦 另行宅配',tk:'dh',gift:'🎁 加贈清洗8折券'}];
     var ws=document.querySelectorAll('.product-row .product-wrap');
     var POP='display:inline-flex;align-items:center;background:linear-gradient(100deg,#b8860b,#d9b24a);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:4px 12px;line-height:1;white-space:nowrap;box-shadow:0 2px 8px rgba(184,134,11,.32)';
     var INFO='display:inline-flex;align-items:center;background:#E6F1FB;color:#0C447C;border:1px solid #cddff0;font-size:11px;font-weight:800;border-radius:999px;padding:4px 12px;line-height:1;white-space:nowrap';
