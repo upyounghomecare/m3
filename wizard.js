@@ -2165,7 +2165,15 @@ function _corrCart(){var res={},c=_cartArr();for(var i=0;i<c.length;i++){var x=c
 function _corrInCart(){var c=_cartArr(),s=0;for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('加購品已享優惠價')>=0)s+=Number(c[i].LineTotal)||0;}return s;}
 /* _setCorr(M):設定校正「總金額」=M,拆成4面額($1000×q1000+$100×q100+$10×q10+$1×q1)。每次呼叫只做一個動作(加入/改量),靠多輪(600ms快線)收斂,避免並發非同步亂序 */
 function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
- var want={1000:Math.floor(M/1000),100:Math.floor((M%1000)/100),10:Math.floor((M%100)/10),1:M%10};
+ /* 2026-09-07 老闆定案:改成「單一面額 $1 × 數量」。
+    原本拆成 $1000/$100/$10/$1 四種面額,金額最省(數量小),但綠界付款頁與訂單明細會出現
+    四行一模一樣的「加購品已享優惠價，不適用優惠碼折扣」,客戶會以為重複計費 ——
+    這正是 2026-08-06 把除濕機/AIRMON 下架的原因。改成單一面額後付款頁只剩一行,
+    代價是數量會是個大數字(標準95折約 X1153、早鳥85折約 X3865),老闆評估後選擇一行。
+    ⚠️ _CORR_DENOMS 仍保留四種面額,是為了「移除」—— 舊版留在購物車裡的 $10/$100/$1000
+       才有辦法被清掉(want 設 0 → 排程會產生 rm)。只有『加入』集中在 $1。
+    附帶好處:操作次數從最多 8 次降到 2 次,「金額計算中」的等待明顯縮短。 */
+ var want={1000:0,100:0,10:0,1:M};
  var have=_corrCart(),map=_corrMap(),ops=[],k,d;
  /* 排程:移除多餘面額 → 加入缺的面額(加完若需>1再設量) → 既有面額調量。整串一次做完(間隔650ms循序,避免1SHOP併發丟棄),把畫面跳動壓在3-4秒 */
  for(k=0;k<_CORR_DENOMS.length;k++){d=_CORR_DENOMS[k];if(want[d]<=0&&have[d])ops.push({t:'rm',d:d});}
