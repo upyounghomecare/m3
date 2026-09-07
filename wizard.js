@@ -2394,9 +2394,13 @@ function planMoneyGuard(){try{
   var hasCp=false;
   for(var i=0;i<cart.length;i++){if(Number(cart[i].ProductType)===99){hasCp=true;break;}}
   if(!hasCp)return;/* 沒券不管,planCouponWatch 會去補 */
-  var off=_cartOff();
-  var real=(off>0.10)?'early':((off>0.02)?'std':null);/* 85折≈0.15 / 95折≈0.05 */
-  if(!real)return;/* 折扣率不是這兩種(客戶自己的優惠碼)→ 不干涉 */
+  /* 2026-09-07 老闆抓到:選標準、套 VIP88折(12%)後,結帳彈窗變成「早鳥」。
+     舊版用折扣率猜方案(>10% 當早鳥),客戶自己的碼(UP88VIP 12%、UPE75 25%)全會誤判 ——
+     錢沒錯,但約時會排成 30 天後。改成看券的名稱:只有兩張方案券才動方案,其餘一律不碰。 */
+  var _cpTitle='';
+  for(var j=0;j<cart.length;j++){if(Number(cart[j].ProductType)===99){_cpTitle=String(cart[j].Title||'');break;}}
+  var real=(_cpTitle.indexOf('早鳥85折')>=0)?'early':((_cpTitle.indexOf('標準95折')>=0)?'std':null);
+  if(!real)return;/* 不是方案券(客戶自己的優惠碼)→ 不干涉,方案維持客戶在精靈選的 */
   if(_curPlan()===real){_pmAt=0;return;}
   var now=(new Date()).getTime();
   if(!_pmAt){_pmAt=now;return;}/* 先觀察一輪,避開換券過程中的瞬間不一致 */
