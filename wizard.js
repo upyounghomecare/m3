@@ -86,11 +86,11 @@ var P={
  o1:{pid:'JZ8LKanp10Zlx48xkXVbQw04',price:1000,img:imj('0nMRz1wGlRwAygdyNV9Kjv6E')},
  om:{pid:'eobJKaG21M0Qr8ZRzA4BqnwO',price:1500,img:imj('1LPZao453vJ7yQjo3QAR86mM')},
  fan:{pid:'4WjbAXQV12Zg4J0Y1gqNOdal',price:500,img:imj('A7dLy5pv31v9D0krlXg0QzKr')},
- air:{pid:'28je90BY1yYVlQm91Mqp6lDN',price:1600,img:im('BW4907rb3bP61B6VNQGK6kwy')},
+ air:{pid:'28je90BY1yYVlQm91Mqp6lDN',price:1600,img:imj('LWx9yMqPlG7b699ZlEpb1wO7')},
  hi:{pid:'P02rqdam78ebxLvekNbvx6p8',price:1000,img:imj('eKP9MRgBYr85EzARlOvLWZrn')},
  bz:{pid:'aovEX3VGzav0AMmq1jy9xdYm',price:1000,img:imj('w560gEeAlo0aovA2NOqrx1ab')},
  rm:{pid:'ndwgBoML1AZ9omyv7lD8O52Z',price:600,img:imj('41brG7JDYpJLm4AXlxW5ywvg')},
- dh:{price:21900,oprice:25900,img:imj('O5gwrR4GNQbo4EnRYBpn071e')},
+ dh:{price:21900,oprice:25900,img:imj('GBnwbKdx3dvWpwwDNW7954ej')},
  tf:{price:600,img:imj('wAjo1QaDle4m1WkZ390xLGMJ')}
 };
 var INDOOR=[
