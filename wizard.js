@@ -487,7 +487,7 @@ function render(){
       +(_svRm?'<div class="qsv-rm">📍 您的地區屬偏遠，含偏遠地區加價 $600</div>':'')
       +'<div class="qsv-r"><div class="qsv-p">NT$ '+_svTot.toLocaleString('en-US')+'<u>／趟</u></div>'
       +'<div class="qsv-go">預約到府場勘</div></div></div>';
-    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+body+_whHint()+(_svHasClean?'':svCard)+(_svHasClean?'':'<div id="qs-svhint" class="qsvh"><span>🔍</span><span>還不確定要洗哪些？<b>點這裡</b>預約到府場勘</span><span class="qsvh-a">↓</span></div>')+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗哪種室內機？</h2><p class="sub">選擇機型與清洗方案，可選多台</p>'+_whHint()+body+(_svHasClean?'':svCard)+(_svHasClean?'':'<div id="qs-svhint" class="qsvh"><span>🔍</span><span>還不確定要洗哪些？<b>點這裡</b>預約到府場勘</span><span class="qsvh-a">↓</span></div>')+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;env&quot;)">上一步</button><button class="btn pri" onclick="__qw.go(2)">'+inLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='survey'){
     var sv=_surveyOf();
     /* ⚠️ 偏遠地區的場勘,結帳頁的 reconcileRm 會自動加一筆「偏遠地區加價 $600」。
@@ -1771,7 +1771,7 @@ var WH_OFF=0.08;
       做法是:抓客戶「已經選最多台的那個機型」當作他下一台會加的機型,並且把機型名字寫進文案,
       客戶加的若是別的機型,金額也會即時重算(qty 一動 render() 就重跑)。 */
 function _whBox(bg,head,right,pct,body){
-  return '<div style="border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.5;margin:2px 0 10px;background:'+bg+';color:#fff">'
+  return '<div style="border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.5;margin:0;background:'+bg+';color:#fff">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:900">'
     +'<span>'+head+'</span><span>'+right+'</span></div>'
     +'<div style="height:7px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden;margin:7px 0 5px">'
@@ -1812,9 +1812,16 @@ function whCartNote(){try{
     html=_whBox('linear-gradient(90deg,#0C447C,#1668b8)','🏠 全戶方案 92 折','還差 '+(WH_MIN-n)+' 台',pct,
       '再加 1 台「'+t.name+'」只多付 <b>'+money(extra)+'</b>（原價 '+money(t.price)+'）');
   }
-  if(!el){el=document.createElement('div');el.id='qs-whnote';tot.parentNode.insertBefore(el,tot);}
+  /* _whBox 的 margin 拿掉給精靈的 sticky 外層用了,購物車這邊要自己補上下間距 */
+  if(!el){el=document.createElement('div');el.id='qs-whnote';el.style.cssText='margin:8px 0 10px';tot.parentNode.insertBefore(el,tot);}
   if(el.innerHTML!==html)el.innerHTML=html;   /* 內容沒變就不重寫,免得每 700ms 閃一次 */
 }catch(e){}}
+/* 2026-09-09 老闆看了實機截圖:「有辦法不用滾動就可以醒目顯示嗎？」
+   —— 原本提示接在品項清單「後面」,客戶要滑過 6 種機型才看得到,等於沒講。
+   改成釘在精靈視窗頂端(.qw 有 overflow-y:auto,sticky 會相對它固定),
+   位置也移到清單前面,客戶一進這一步、或捲到任何位置都看得見。
+   ⚠️ top 用 -1px 不用 0:視窗有 20px 內距,用 0 捲動時會露出一條背景縫。 */
+function _whStick(h){return h?('<div style="position:sticky;top:-1px;z-index:5;background:#fff;padding:8px 0 4px">'+h+'</div>'):'';}
 function _whTopKind(){
   /* 客戶已選最多台的室內機機型 = 他下一台最可能加的 */
   var best=null,bq=0;
@@ -1833,17 +1840,17 @@ function _whHint(){try{
   var box=function(bg,head,right,body){return _whBox(bg,head,right,pct,body);};
   if(n>=WH_MIN){
     var more=Math.ceil(S*WH_OFF)-Math.ceil(S*0.05);   /* 比標準95折多折多少 */
-    return box('linear-gradient(90deg,#0f6f4c,#18956a)','✅ 已達全戶方案 92 折',n+' / '+WH_MIN+' 台',
+    return _whStick(box('linear-gradient(90deg,#0f6f4c,#18956a)','✅ 已達全戶方案 92 折',n+' / '+WH_MIN+' 台',
       '本單整筆改算 92 折，比標準方案多折 <b>'+money(more)+'</b>'
-      +'<br><span style="opacity:.82">第 '+(WH_MIN+1)+' 台起同樣 92 折，一次洗完最省車程</span>');
+      +'<br><span style="opacity:.82">第 '+(WH_MIN+1)+' 台起同樣 92 折，一次洗完最省車程</span>'));
   }
   var t=_whTopKind();if(!t||!t.price)return '';
   var S2=S+t.price;
   var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05)); /* 第3台實際多付 */
   var save=Math.ceil(S2*WH_OFF)-Math.ceil(S2*0.05);          /* 整筆多折 */
-  return box('linear-gradient(90deg,#0C447C,#1668b8)','🏠 全戶方案 92 折','還差 '+(WH_MIN-n)+' 台',
+  return _whStick(box('linear-gradient(90deg,#0C447C,#1668b8)','🏠 全戶方案 92 折','還差 '+(WH_MIN-n)+' 台',
     '再加 1 台「'+t.name+'」只多付 <b>'+money(extra)+'</b>（原價 '+money(t.price)+'）'
-    +'<br><span style="opacity:.85">整筆從 95 折改算 92 折，多折 <b>'+money(save)+'</b></span>');
+    +'<br><span style="opacity:.85">整筆從 95 折改算 92 折，多折 <b>'+money(save)+'</b></span>'));
 }catch(e){return '';}}
 function _whQualQ(){try{return env==='home'&&sumKeys(INK)>=WH_MIN;}catch(e){return false;}}
 function _whQualC(){try{return _bzInCart()===0&&_indoorInCart()>=WH_MIN;}catch(e){return false;}}
