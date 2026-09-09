@@ -713,12 +713,18 @@ var api={
   confirmPlan:function(){
     if(!plan||window.__qsAdding)return;/* 加購進行中不再跳確認窗 */
     if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
-    var D={std:{t:'確認您的標準方案',lead:'您選擇的是「標準方案 95 折」',
+    /* ⚠️ 達標時這裡的字一定要跟著換。2026-09-09 實測抓到:方案卡已經寫 92 折、算 8,280,
+       確認彈窗卻還寫「標準方案 95 折」—— 客戶按下確認前最後看到的就是這一句,
+       說一個折數收另一個折數是這頁最不能犯的錯。
+       這裡用 _whQualQ()(看精靈的 qty),因為確認彈窗出現在「加入購物車之前」,車上還是空的。 */
+    var _whQ=_whQualQ();
+    var _sN=_whQ?'全戶方案':'標準方案', _sO=_whQ?'92 折':'95 折';
+    var D={std:{t:'確認您的'+_sN,lead:'您選擇的是「'+_sN+' '+_sO+'」',
         li:['到府服務將安排在<b>專人去電聯繫起 2 週內</b>','實際到府日期，由約時人員<b>去電與您確認</b>','時間可以彈性的話，改選「早鳥方案」可享 <b>85 折</b>（需等候 30 天）'],
-        alt:'改選早鳥方案',ok:'我了解，確認標準方案',other:'early'},
+        alt:'改選早鳥方案',ok:'我了解，確認'+_sN,other:'early'},
       early:{t:'確認您的早鳥方案',lead:'您選擇的是「早鳥方案 85 折」',
-        li:['到府服務將安排在<b>專人去電聯繫約時起 30 天後</b>','實際到府日期，由約時人員<b>去電與您確認</b>','如需盡快服務，請改選「標準方案」（兩週內到府）'],
-        alt:'改選標準方案',ok:'我了解，確認早鳥方案',other:'std'}}[plan];
+        li:['到府服務將安排在<b>專人去電聯繫約時起 30 天後</b>','實際到府日期，由約時人員<b>去電與您確認</b>','如需盡快服務，請改選「'+_sN+'」（兩週內到府）'],
+        alt:'改選'+_sN,ok:'我了解，確認早鳥方案',other:'std'}}[plan];
     if(!D)return;
     var old=document.getElementById('qw-pc');if(old&&old.parentNode)old.parentNode.removeChild(old);
     var ov=document.createElement('div');ov.id='qw-pc';
@@ -1699,7 +1705,11 @@ function fillConsent(){
       row.setAttribute('data-qsc','1');
     }
     /* 存證:改為「內容有變才更新」(原本只寫一次會漏記後加的配送日/換方案/已閱讀)；保留第一次的時間戳、收斂後即不再寫，不抖動 */
-    var planTxt=(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)':'標準方案(兩週內到府・95折)';
+    /* 這行會寫進訂單的「同意存證」欄位,客服對帳時會看。達標時折數要跟著換,
+       否則存證寫 95 折、實收 92 折,存證就失去意義(它的用途正是證明客戶同意了什麼)。
+       用 _whQualC()(看購物車):這裡是結帳當下,商品已經在車上了。 */
+    var planTxt=(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)'
+                :(_whQualC()?'全戶方案(兩週內到府・92折)':'標準方案(兩週內到府・95折)');
     var _cur=el.value||'';
     var _mt=_cur.match(/｜時間:([^｜]+)$/);var ts;
     if(_mt){ts=_mt[1];}else{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
