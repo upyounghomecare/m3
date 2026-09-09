@@ -1797,6 +1797,15 @@ function whCartNote(){try{
   if(!tot){kill();return;}
   var n=_indoorInCart();
   if(_bzInCart()>0||n<WH_MIN-1){kill();return;}   /* 商用不適用;差2台以上不推 */
+  /* ⚠️ 2026-09-09 實測抓到:早鳥 3 台的購物車上還掛著「已達全戶方案 92 折」——
+     客戶實際拿的是更優惠的 85 折,這樣寫會讓他以為系統算錯,或以為自己被降級。
+     規則:只有走「標準線」(沒券、標準95折、全戶92折)才顯示這條提示。
+     早鳥券、或客戶自己的碼(VIP88/回購85/員工價)一律不顯示 —— 那些都比 92 折更好,
+     講「再加一台可以 92 折」對他們是往下推銷。 */
+  var _cp='';
+  var _c=_cartArr();
+  for(var _i=0;_i<_c.length;_i++){if(Number(_c[_i].ProductType)===99){_cp=String(_c[_i].Title||'');break;}}
+  if(_cp&&_cp.indexOf('標準95折')<0&&_cp.indexOf('全戶92折')<0){kill();return;}
   var S=_cartSub()-_whCartProt();
   if(S<=0){kill();return;}
   var pct=Math.min(100,Math.round(n/WH_MIN*100));
