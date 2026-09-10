@@ -1753,6 +1753,12 @@ function _bzInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].Produ
    ⚠️ 兩個判定式不能合併:
       _whQualQ() 看精靈的 qty —— 方案卡在「加入購物車之前」就要顯示價格,那時車上是空的。
       _whQualC() 看購物車 —— 決定「實際要套哪張券」只能以車上的東西為準,錢說了算。 */
+/* ═══ 甲案(2026-09-10 老闆選「照建議改」) ═══
+   3 台的實測金額:標準 $8,550、全戶 $8,280、早鳥 $7,650 —— **早鳥永遠更便宜**。
+   所以全戶方案其實只對「不能等 30 天」的客戶有意義,我們卻對所有人推。
+   與其讓客戶走到第5步才自己發現,不如在達標的當下就講,客戶反而覺得老實。
+   ⚠️ 代價:會有人改選早鳥,排程被推到 30 天後。不要這句就把它設成 ''(只有這一行要改)。 */
+var WH_EARLY_NOTE='時間能等 30 天的話，早鳥 85 折更划算';
 var WH_MIN=3;
 var WH_CODE='UP92WH';
 var WH_OFF=0.08;
@@ -1770,13 +1776,28 @@ var WH_OFF=0.08;
       這頁出過「方案卡寫 23,655、實收 24,750」的包,老闆對說一個價收另一個價非常敏感。
       做法是:抓客戶「已經選最多台的那個機型」當作他下一台會加的機型,並且把機型名字寫進文案,
       客戶加的若是別的機型,金額也會即時重算(qty 一動 render() 就重跑)。 */
-function _whBox(bg,head,right,pct,body){
-  return '<div style="border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.5;margin:0;background:'+bg+';color:#fff">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:900">'
-    +'<span>'+head+'</span><span>'+right+'</span></div>'
-    +'<div style="height:7px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden;margin:7px 0 5px">'
-    +'<i style="display:block;height:100%;width:'+pct+'%;background:#FFC400;border-radius:999px"></i></div>'
-    +body+'</div>';
+/* 2026-09-10 老闆定案「照建議改」:四行＋進度條砍成兩行。
+   原版的問題(我自己回頭看實機才發現):
+     ① 「只多付 $2,580」和「多折 $270」是同一件事的兩種說法,
+        一個是支出、一個是省下,方向相反卻並排 —— 客戶得自己算它們的關係。
+     ② 「整筆從 95 折改算 92 折」講太早:第2步還沒選方案,客戶不知道自己是 95 折。
+     ③ 進度條只是把「還差1台」的 1 畫成圖,沒增加資訊卻佔最重的視覺份量。
+     ④ 手機上 124px 高、又是固定的,等於永遠吃掉 15% 的可視高度。
+   只留客戶腦中真正在比的那個數字,高度砍一半(約 58px)。
+   ⚠️ 這一輪只改字和顏色,金額算式一個字都沒動。 */
+var _WH_SKIN={
+  /* 差一台:深藍實心,跟這頁的主色一致 */
+  go:'background:linear-gradient(90deg,#0C447C,#1668b8);color:#fff',
+  /* 達標:改用這頁本來就有的金色系(同意條款、方案摘要都用這個)。
+     原本用綠色,但綠色在整頁只出現這一次,看起來像系統通知不像品牌。 */
+  ok:'background:#fdf7e8;border:1px solid #e6d3a0;color:#6d5210'
+};
+function _whSlim(skin,t1,t2,t3){
+  return '<div style="border-radius:9px;padding:8px 11px;line-height:1.45;margin:0;'+skin+'">'
+    +'<div style="font-size:14px;font-weight:900;letter-spacing:-.01em">'+t1+'</div>'
+    +'<div style="font-size:11.5px;opacity:.85;margin-top:1px">'+t2+'</div>'
+    +(t3?'<div style="font-size:11.5px;opacity:.72;margin-top:2px">'+t3+'</div>':'')
+    +'</div>';
 }
 /* ═══ 全戶方案:購物車版提示(D1,老闆要求用跟 A4 一樣的視覺) ═══
    接住「不走精靈、直接點商品加購」的客戶 —— 他們看不到精靈第1步那一行。
@@ -1808,20 +1829,21 @@ function whCartNote(){try{
   if(_cp&&_cp.indexOf('標準95折')<0&&_cp.indexOf('全戶92折')<0){kill();return;}
   var S=_cartSub()-_whCartProt();
   if(S<=0){kill();return;}
-  var pct=Math.min(100,Math.round(n/WH_MIN*100));
   var html;
   if(n>=WH_MIN){
-    var more=Math.ceil(S*WH_OFF)-Math.ceil(S*0.05);
-    html=_whBox('linear-gradient(90deg,#0f6f4c,#18956a)','✅ 已達全戶方案 92 折',n+' / '+WH_MIN+' 台',pct,
-      '本單整筆改算 92 折，比標準方案多折 <b>'+money(more)+'</b>');
+    /* 改用「跟原價比省下多少」。原本寫「比標準方案多折 $270」,
+       但客戶不知道標準方案是什麼,而且 $270 遠不如 $720 有感。 */
+    var save=Math.ceil(S*WH_OFF);
+    html=_whSlim(_WH_SKIN.ok,'✅ 已達全戶方案，本單省下 '+money(save),
+      '家用 3 台以上自動套用，不需輸入優惠碼',WH_EARLY_NOTE);
   }else{
     var t=_whCartTop();if(!t||!t.price){kill();return;}
     var S2=S+t.price;
     var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05));
-    html=_whBox('linear-gradient(90deg,#0C447C,#1668b8)','🏠 全戶方案 92 折','還差 '+(WH_MIN-n)+' 台',pct,
-      '再加 1 台「'+t.name+'」只多付 <b>'+money(extra)+'</b>（原價 '+money(t.price)+'）');
+    html=_whSlim(_WH_SKIN.go,'🏠 再洗 1 台，第 '+WH_MIN+' 台只要 '+money(extra),
+      '一般家用 3 台以上，本單改算 92 折','');
   }
-  /* _whBox 的 margin 拿掉給精靈的 sticky 外層用了,購物車這邊要自己補上下間距 */
+  /* _whSlim 本身 margin:0(留給精靈的 sticky 外層),購物車這邊要自己補上下間距 */
   if(!el){el=document.createElement('div');el.id='qs-whnote';el.style.cssText='margin:8px 0 10px';tot.parentNode.insertBefore(el,tot);}
   if(el.innerHTML!==html)el.innerHTML=html;   /* 內容沒變就不重寫,免得每 700ms 閃一次 */
 }catch(e){}}
@@ -1845,21 +1867,16 @@ function _whHint(){try{
   if(n<WH_MIN-1)return '';                      /* 差 2 台以上不推 */
   var S=_qwSub()-_qwProt();                     /* 只有這部分吃折扣(除濕機/AIRMON 不打折) */
   if(S<=0)return '';
-  var pct=Math.min(100,Math.round(n/WH_MIN*100));
-  var box=function(bg,head,right,body){return _whBox(bg,head,right,pct,body);};
   if(n>=WH_MIN){
-    var more=Math.ceil(S*WH_OFF)-Math.ceil(S*0.05);   /* 比標準95折多折多少 */
-    return _whStick(box('linear-gradient(90deg,#0f6f4c,#18956a)','✅ 已達全戶方案 92 折',n+' / '+WH_MIN+' 台',
-      '本單整筆改算 92 折，比標準方案多折 <b>'+money(more)+'</b>'
-      +'<br><span style="opacity:.82">第 '+(WH_MIN+1)+' 台起同樣 92 折，一次洗完最省車程</span>'));
+    var save=Math.ceil(S*WH_OFF);                   /* 跟原價比省下多少 */
+    return _whStick(_whSlim(_WH_SKIN.ok,'✅ 已達全戶方案，本單省下 '+money(save),
+      '家用 3 台以上自動套用，不需輸入優惠碼',WH_EARLY_NOTE));
   }
   var t=_whTopKind();if(!t||!t.price)return '';
   var S2=S+t.price;
-  var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05)); /* 第3台實際多付 */
-  var save=Math.ceil(S2*WH_OFF)-Math.ceil(S2*0.05);          /* 整筆多折 */
-  return _whStick(box('linear-gradient(90deg,#0C447C,#1668b8)','🏠 全戶方案 92 折','還差 '+(WH_MIN-n)+' 台',
-    '再加 1 台「'+t.name+'」只多付 <b>'+money(extra)+'</b>（原價 '+money(t.price)+'）'
-    +'<br><span style="opacity:.85">整筆從 95 折改算 92 折，多折 <b>'+money(save)+'</b></span>'));
+  var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05)); /* 第3台實際多付,算式沒變 */
+  return _whStick(_whSlim(_WH_SKIN.go,'🏠 再洗 1 台，第 '+WH_MIN+' 台只要 '+money(extra),
+    '一般家用 3 台以上，本單改算 92 折',''));
 }catch(e){return '';}}
 function _whQualQ(){try{return env==='home'&&sumKeys(INK)>=WH_MIN;}catch(e){return false;}}
 function _whQualC(){try{return _bzInCart()===0&&_indoorInCart()>=WH_MIN;}catch(e){return false;}}
