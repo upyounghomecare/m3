@@ -543,11 +543,11 @@ function render(){
       return '<div class="qp-money"><s>'+money(_sub)+'</s><b>'+money(pay)+'</b></div>'
         +(save>0?'<div class="qp-save">比標準方案再省 '+money(save)+'</div>':'');
     }
-    function planCard(k,img,note,ncls){var sel=plan===k;/* 方案名稱與折數是燒在圖裡的,圖載不出來時客戶只看得到兩個價格,分不出哪個是哪個 */var _whC=(k==='std'&&_wh);var _alt=(k==='early')?'\u65e9\u9ce5\u65b9\u6848 85\u6298':(_whC?'\u5168\u6236\u65b9\u6848 92\u6298':'\u6a19\u6e96\u65b9\u6848 95\u6298');
+    function planCard(k,img,note,ncls){var sel=plan===k;/* 方案名稱與折數是燒在圖裡的,圖載不出來時客戶只看得到兩個價格,分不出哪個是哪個 */var _whC=(k==='std'&&_wh);var _alt=(k==='early')?'\u65e9\u9ce5\u65b9\u6848 85\u6298':(_whC?'\u6a19\u6e96\u65b9\u6848 92\u6298(\u5168\u6236\u52a0\u78bc)':'\u6a19\u6e96\u65b9\u6848 95\u6298');
       /* \u26a0\ufe0f \u65b9\u6848\u7684\u540d\u7a31\u8207\u6298\u6578\u662f\u300c\u71d2\u5728\u5716\u88e1\u300d\u7684,\u5716\u6a94\u5beb\u6b7b 95 \u6298,\u6211\u5011\u6c92\u6709 92 \u6298\u7248\u672c\u7684\u5716\u3002
          \u6240\u4ee5\u9054\u6a19\u6642\u5728\u5716\u4e0b\u65b9\u88dc\u4e00\u689d\u5fbd\u7ae0\u84cb\u6389\u8a9e\u610f,\u4e0d\u7136\u5ba2\u6236\u6703\u770b\u5230\u300c\u5716\u5beb95\u6298\u3001\u50f9\u683c\u7b9792\u6298\u300d\u800c\u56f0\u60d1\u3002
          \u7528\u884c\u5167\u6a23\u5f0f\u800c\u4e0d\u662f\u65b0\u589e class \u2014\u2014 \u9019\u9801\u7684 CSS \u53ea\u5f9e wizard.js \u51fa,\u5c11\u4e00\u500b\u8981\u7dad\u8b77\u7684\u9078\u64c7\u5668\u3002 */
-      var _whBadge=_whC?'<div style="margin:5px 6px 0;background:linear-gradient(90deg,#0C447C,#1668b8);color:#fff;font-size:11.5px;font-weight:900;letter-spacing:.2px;border-radius:999px;padding:4px 8px;text-align:center;line-height:1.35">\ud83c\udfe0 \u5df2\u9054\u5168\u6236\u65b9\u6848\u30003 \u53f0\u4ee5\u4e0a\u6539\u7b97 <b>92 \u6298</b></div>':'';
+      var _whBadge=_whC?'<div style="margin:5px 6px 0;background:linear-gradient(90deg,#0C447C,#1668b8);color:#fff;font-size:11.5px;font-weight:900;letter-spacing:.2px;border-radius:999px;padding:4px 8px;text-align:center;line-height:1.35">\ud83c\udfe0 \u5df2\u52a0\u78bc\u5168\u6236\u512a\u60e0\u30003 \u53f0\u4ee5\u4e0a\u6298\u5230 <b>92 \u6298</b></div>':'';
       return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt="'+_alt+'">'+_whBadge+planPrice(k)+'<div class="qpn '+ncls+'">'+note+'</div></div>';}
     w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
@@ -717,14 +717,19 @@ var api={
        確認彈窗卻還寫「標準方案 95 折」—— 客戶按下確認前最後看到的就是這一句,
        說一個折數收另一個折數是這頁最不能犯的錯。
        這裡用 _whQualQ()(看精靈的 qty),因為確認彈窗出現在「加入購物車之前」,車上還是空的。 */
+    /* 2026-09-10 老闆定案丙案:「全戶不是另一個方案,是標準方案針對台數的加碼折扣」。
+       方案名稱從頭到尾只有「標準方案」,全戶降級成折扣的名字 ——
+       客戶在方案卡(圖上寫標準方案)、確認彈窗、結帳摘要看到的就都是同一個方案名。
+       ⚠️ 名字可以統一,折數不行:達標時一定要寫 92 折,不能說一套收一套。 */
     var _whQ=_whQualQ();
-    var _sN=_whQ?'全戶方案':'標準方案', _sO=_whQ?'92 折':'95 折';
-    var D={std:{t:'確認您的'+_sN,lead:'您選擇的是「'+_sN+' '+_sO+'」',
+    var _sO=_whQ?'92 折':'95 折';
+    var _sX=_whQ?'（已加碼全戶優惠）':'';
+    var D={std:{t:'確認您的標準方案',lead:'您選擇的是「標準方案 '+_sO+'」'+_sX,
         li:['到府服務將安排在<b>專人去電聯繫起 2 週內</b>','實際到府日期，由約時人員<b>去電與您確認</b>','時間可以彈性的話，改選「早鳥方案」可享 <b>85 折</b>（需等候 30 天）'],
-        alt:'改選早鳥方案',ok:'我了解，確認'+_sN,other:'early'},
+        alt:'改選早鳥方案',ok:'我了解，確認標準方案',other:'early'},
       early:{t:'確認您的早鳥方案',lead:'您選擇的是「早鳥方案 85 折」',
-        li:['到府服務將安排在<b>專人去電聯繫約時起 30 天後</b>','實際到府日期，由約時人員<b>去電與您確認</b>','如需盡快服務，請改選「'+_sN+'」（兩週內到府）'],
-        alt:'改選'+_sN,ok:'我了解，確認早鳥方案',other:'std'}}[plan];
+        li:['到府服務將安排在<b>專人去電聯繫約時起 30 天後</b>','實際到府日期，由約時人員<b>去電與您確認</b>','如需盡快服務，請改選「標準方案」（兩週內到府）'],
+        alt:'改選標準方案',ok:'我了解，確認早鳥方案',other:'std'}}[plan];
     if(!D)return;
     var old=document.getElementById('qw-pc');if(old&&old.parentNode)old.parentNode.removeChild(old);
     var ov=document.createElement('div');ov.id='qw-pc';
@@ -1382,7 +1387,7 @@ function _curPlan(){return (window.__qsPlan==='early')?'early':'std';}
       彈窗是結帳當下的畫面,要跟真正會被收的錢一致。 */
 function _planInfo(k){var i=_PLANI[k];
   if(k!=='std'||!_whQualC())return i;
-  return {img:i.img,name:'全戶方案 · 92折',sub:i.sub,nc:i.nc,sc:i.sc};}
+  return {img:i.img,name:'標準方案 · 92折',sub:'全戶加碼・兩週內到府',nc:i.nc,sc:i.sc};}
 /* ═══ 2026-08-31 緊急止血:暫停結帳彈窗裡的方案「變更」 ═══
    1SHOP 改版後換券必須先移除舊券,而移除需要券的 id —— 他們的 API 現在時常不回傳 id,
    於是「移除舊券」靜靜失敗、新券套不上。實測 8 回合有 5 回合:
@@ -1709,7 +1714,7 @@ function fillConsent(){
        否則存證寫 95 折、實收 92 折,存證就失去意義(它的用途正是證明客戶同意了什麼)。
        用 _whQualC()(看購物車):這裡是結帳當下,商品已經在車上了。 */
     var planTxt=(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)'
-                :(_whQualC()?'全戶方案(兩週內到府・92折)':'標準方案(兩週內到府・95折)');
+                :(_whQualC()?'標準方案(兩週內到府・全戶加碼92折)':'標準方案(兩週內到府・95折)');
     var _cur=el.value||'';
     var _mt=_cur.match(/｜時間:([^｜]+)$/);var ts;
     if(_mt){ts=_mt[1];}else{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
@@ -1834,14 +1839,14 @@ function whCartNote(){try{
     /* 改用「跟原價比省下多少」。原本寫「比標準方案多折 $270」,
        但客戶不知道標準方案是什麼,而且 $270 遠不如 $720 有感。 */
     var save=Math.ceil(S*WH_OFF);
-    html=_whSlim(_WH_SKIN.ok,'✅ 已達全戶方案，本單省下 '+money(save),
+    html=_whSlim(_WH_SKIN.ok,'✅ 已加碼全戶優惠，本單省下 '+money(save),
       '家用 3 台以上自動套用，不需輸入優惠碼',WH_EARLY_NOTE);
   }else{
     var t=_whCartTop();if(!t||!t.price){kill();return;}
     var S2=S+t.price;
     var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05));
     html=_whSlim(_WH_SKIN.go,'🏠 再洗 1 台，第 '+WH_MIN+' 台只要 '+money(extra),
-      '一般家用 3 台以上，本單改算 92 折','');
+      '一般家用 3 台以上，加碼折到 92 折','');
   }
   /* _whSlim 本身 margin:0(留給精靈的 sticky 外層),購物車這邊要自己補上下間距 */
   if(!el){el=document.createElement('div');el.id='qs-whnote';el.style.cssText='margin:8px 0 10px';tot.parentNode.insertBefore(el,tot);}
@@ -1869,14 +1874,14 @@ function _whHint(){try{
   if(S<=0)return '';
   if(n>=WH_MIN){
     var save=Math.ceil(S*WH_OFF);                   /* 跟原價比省下多少 */
-    return _whStick(_whSlim(_WH_SKIN.ok,'✅ 已達全戶方案，本單省下 '+money(save),
+    return _whStick(_whSlim(_WH_SKIN.ok,'✅ 已加碼全戶優惠，本單省下 '+money(save),
       '家用 3 台以上自動套用，不需輸入優惠碼',WH_EARLY_NOTE));
   }
   var t=_whTopKind();if(!t||!t.price)return '';
   var S2=S+t.price;
   var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05)); /* 第3台實際多付,算式沒變 */
   return _whStick(_whSlim(_WH_SKIN.go,'🏠 再洗 1 台，第 '+WH_MIN+' 台只要 '+money(extra),
-    '一般家用 3 台以上，本單改算 92 折',''));
+    '一般家用 3 台以上，加碼折到 92 折',''));
 }catch(e){return '';}}
 function _whQualQ(){try{return env==='home'&&sumKeys(INK)>=WH_MIN;}catch(e){return false;}}
 function _whQualC(){try{return _bzInCart()===0&&_indoorInCart()>=WH_MIN;}catch(e){return false;}}
