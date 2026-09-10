@@ -552,8 +552,11 @@ function render(){
          問題不是亮度,是徽章跟它正下方的價格區同樣是深藍,中間只有 5px 白縫,
          兩塊會被讀成同一個東西,等於徽章消失。金黃是這頁的行動色(立即選購那顆按鈕),
          客戶已經學會「黃色＝好康」,而且跟深藍互補、對比最強。
-         間距也從 5px 拉到 8px 並加陰影,讓它明確地是「另一塊」。 */
-      var _whBadge=_whC?'<div style="margin:8px 6px 2px;background:#FFC400;color:#0C447C;font-size:11.5px;font-weight:900;letter-spacing:.2px;border-radius:999px;padding:5px 8px;text-align:center;line-height:1.35;box-shadow:0 1px 4px rgba(0,0,0,.18)">\ud83c\udfe0 \u5df2\u52a0\u78bc\u5168\u6236\u512a\u60e0\u30003 \u53f0\u4ee5\u4e0a\u6298\u5230 <b>92 \u6298</b></div>':'';
+         間距也從 5px 拉到 8px 並加陰影,讓它明確地是「另一塊」。
+         ⚠️ 字級是「重點大、條件小」的兩層,不是整段同一級 ——
+         卡片在手機上只有約 155px 寬,整段放大會從 2 行變 3 行、把卡片撐得比早鳥那張高。
+         老闆 2026-09-10 的原話是「文字有一點點小」,解法是讓該大的大,不是全部一起大。 */
+      var _whBadge=_whC?'<div style="margin:8px 6px 2px;background:#FFC400;color:#0C447C;font-weight:900;border-radius:999px;padding:6px 7px;text-align:center;line-height:1.35;box-shadow:0 1px 4px rgba(0,0,0,.18)"><div style="font-size:15px;letter-spacing:-.2px">\ud83c\udfe0 \u5168\u6236\u52a0\u78bc <b>92 \u6298</b></div><div style="font-size:10.5px;opacity:.78;margin-top:1px">\u4e00\u822c\u5bb6\u7528 3 \u53f0\u4ee5\u4e0a</div></div>':'';
       return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt="'+_alt+'">'+_whBadge+planPrice(k)+'<div class="qpn '+ncls+'">'+note+'</div></div>';}
     w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
