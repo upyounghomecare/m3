@@ -1804,6 +1804,23 @@ function _whSlim(skin,t1,t2,t3){
     +(t3?'<div style="font-size:11.5px;opacity:.72;margin-top:2px">'+t3+'</div>':'')
     +'</div>';
 }
+/* 2026-09-10 老闆:「我還是希望 1 台就顯示藍色提示」。
+   原本我設成只在「還差1台」(選到2台)才提示,理由是差2台以上講了像推銷 ——
+   那是我自己的判斷,老闆要顯示就顯示。
+   兩種狀態用同一個句型,客戶讀起來才一致:
+     還差1台 → 「再洗 1 台，第 3 台只要 $2,580（原價 $3,000）」
+     還差2台 → 「再洗 2 台，這 2 台只要 $5,430（原價 $6,000）」
+   金額都是「實際會多付多少」對「原價多少」,同一種算法:
+     多付 = 湊到門檻後的應付 − 現在的應付。 */
+function _whGap(n,S,unitPrice,unitName){
+  var need=WH_MIN-n;                       /* 還差幾台 */
+  var S2=S+unitPrice*need;                 /* 湊到門檻後,吃折扣的金額 */
+  var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05));  /* 實際多付 */
+  var list=unitPrice*need;                 /* 這幾台的原價 */
+  var what=(need===1)?('第 '+WH_MIN+' 台'):('這 '+need+' 台');
+  return {t1:'🏠 再洗 '+need+' 台，'+what+'只要 '+money(extra)+'（原價 '+money(list)+'）',
+          t2:'一般家用 3 台以上，加碼折到 92 折'};
+}
 /* ═══ 全戶方案:購物車版提示(D1,老闆要求用跟 A4 一樣的視覺) ═══
    接住「不走精靈、直接點商品加購」的客戶 —— 他們看不到精靈第1步那一行。
    ⚠️ 這是純顯示,不碰購物車。這一頁所有出過包的機制都是「自動增刪購物車」造成的,
@@ -1822,7 +1839,7 @@ function whCartNote(){try{
   var kill=function(){if(el&&el.parentNode)el.parentNode.removeChild(el);};
   if(!tot){kill();return;}
   var n=_indoorInCart();
-  if(_bzInCart()>0||n<WH_MIN-1){kill();return;}   /* 商用不適用;差2台以上不推 */
+  if(_bzInCart()>0||n<1){kill();return;}   /* 商用不適用;還沒選任何室內機就不顯示 */
   /* ⚠️ 2026-09-09 實測抓到:早鳥 3 台的購物車上還掛著「已達全戶方案 92 折」——
      客戶實際拿的是更優惠的 85 折,這樣寫會讓他以為系統算錯,或以為自己被降級。
      規則:只有走「標準線」(沒券、標準95折、全戶92折)才顯示這條提示。
@@ -1843,10 +1860,8 @@ function whCartNote(){try{
       '家用 3 台以上自動套用，不需輸入優惠碼',WH_EARLY_NOTE);
   }else{
     var t=_whCartTop();if(!t||!t.price){kill();return;}
-    var S2=S+t.price;
-    var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05));
-    html=_whSlim(_WH_SKIN.go,'🏠 再洗 1 台，第 '+WH_MIN+' 台只要 '+money(extra),
-      '一般家用 3 台以上，加碼折到 92 折','');
+    var g=_whGap(n,S,t.price,t.name);
+    html=_whSlim(_WH_SKIN.go,g.t1,g.t2,'');
   }
   /* _whSlim 本身 margin:0(留給精靈的 sticky 外層),購物車這邊要自己補上下間距 */
   if(!el){el=document.createElement('div');el.id='qs-whnote';el.style.cssText='margin:8px 0 10px';tot.parentNode.insertBefore(el,tot);}
@@ -1869,7 +1884,7 @@ function _whTopKind(){
 function _whHint(){try{
   if(env!=='home')return '';                    /* 營業場所不適用 */
   var n=sumKeys(INK);
-  if(n<WH_MIN-1)return '';                      /* 差 2 台以上不推 */
+  if(n<1)return '';                             /* 還沒選任何室內機就不顯示 */
   var S=_qwSub()-_qwProt();                     /* 只有這部分吃折扣(除濕機/AIRMON 不打折) */
   if(S<=0)return '';
   if(n>=WH_MIN){
@@ -1878,10 +1893,8 @@ function _whHint(){try{
       '家用 3 台以上自動套用，不需輸入優惠碼',WH_EARLY_NOTE));
   }
   var t=_whTopKind();if(!t||!t.price)return '';
-  var S2=S+t.price;
-  var extra=(S2-Math.ceil(S2*WH_OFF))-(S-Math.ceil(S*0.05)); /* 第3台實際多付,算式沒變 */
-  return _whStick(_whSlim(_WH_SKIN.go,'🏠 再洗 1 台，第 '+WH_MIN+' 台只要 '+money(extra),
-    '一般家用 3 台以上，加碼折到 92 折',''));
+  var g=_whGap(n,S,t.price,t.name);
+  return _whStick(_whSlim(_WH_SKIN.go,g.t1,g.t2,''));
 }catch(e){return '';}}
 function _whQualQ(){try{return env==='home'&&sumKeys(INK)>=WH_MIN;}catch(e){return false;}}
 function _whQualC(){try{return _bzInCart()===0&&_indoorInCart()>=WH_MIN;}catch(e){return false;}}
