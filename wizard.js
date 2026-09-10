@@ -1773,6 +1773,17 @@ function _bzInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].Produ
    與其讓客戶走到第5步才自己發現,不如在達標的當下就講,客戶反而覺得老實。
    ⚠️ 代價:會有人改選早鳥,排程被推到 30 天後。不要這句就把它設成 ''(只有這一行要改)。 */
 var WH_EARLY_NOTE='時間能等 30 天的話，早鳥 85 折更划算';
+/* ═══ 全戶方案的總開關(2026-09-10) ═══
+   ⚠️ wizard.js 是**同一支檔案同時服務正式頁與測試頁**的,
+      所以全戶方案的程式一旦上線,兩邊都會拿到 —— 必須靠這道開關擋住正式頁。
+   為什麼一定要擋:正式頁的內文JS 沒有配套(planCode 不會送 UP92WH),
+     ① 畫面會對 3 台以上的客戶寫「已加碼全戶優惠，省下 $720」,實際卻只收 95 折 → 說一個價收另一個價
+     ② whCouponGuard 會想把 95 折換成 92 折,但那張券已限定測試頁 → 舊券刪掉、新券套不上,
+        **客戶的 95 折會整個消失、變成原價**
+   要上正式頁那天:把 'v8cs91' 加進來,並且**同一次**改好正式頁的內文JS
+   (VAL 加 UP92WH:0.08、planCode 加 __qsWHF 判斷),以及把 UP92WH 的使用範圍加回正式頁。 */
+var WH_PAGES=['ub3ibm'];
+var WH_ON=(function(){try{for(var i=0;i<WH_PAGES.length;i++){if(location.pathname.indexOf(WH_PAGES[i])>=0)return 1;}}catch(e){}return 0;})();
 var WH_MIN=3;
 var WH_CODE='UP92WH';
 var WH_OFF=0.08;
@@ -1846,6 +1857,7 @@ function whCartNote(){try{
   var tot=document.querySelector('.cart-total');
   var el=document.getElementById('qs-whnote');
   var kill=function(){if(el&&el.parentNode)el.parentNode.removeChild(el);};
+  if(!WH_ON){kill();return;}                    /* 這一頁沒開全戶方案 */
   if(!tot){kill();return;}
   var n=_indoorInCart();
   if(_bzInCart()>0||n<1){kill();return;}   /* 商用不適用;還沒選任何室內機就不顯示 */
@@ -1891,6 +1903,7 @@ function _whTopKind(){
   return {k:best,name:nm,price:(P[best]||{}).price||0};
 }
 function _whHint(){try{
+  if(!WH_ON)return '';                          /* 這一頁沒開全戶方案 */
   if(env!=='home')return '';                    /* 營業場所不適用 */
   var n=sumKeys(INK);
   if(n<1)return '';                             /* 還沒選任何室內機就不顯示 */
@@ -1905,8 +1918,8 @@ function _whHint(){try{
   var g=_whGap(n,S,t.price,t.name);
   return _whStick(_whSlim(_WH_SKIN.go,g.t1,g.t2,''));
 }catch(e){return '';}}
-function _whQualQ(){try{return env==='home'&&sumKeys(INK)>=WH_MIN;}catch(e){return false;}}
-function _whQualC(){try{return _bzInCart()===0&&_indoorInCart()>=WH_MIN;}catch(e){return false;}}
+function _whQualQ(){try{return !!WH_ON&&env==='home'&&sumKeys(INK)>=WH_MIN;}catch(e){return false;}}
+function _whQualC(){try{return !!WH_ON&&_bzInCart()===0&&_indoorInCart()>=WH_MIN;}catch(e){return false;}}
 /* 內文JS 的 planCode() 會即時呼叫這支決定要送 UP95 還是 UP92WH。
    ⚠️ 故意做成「函式」而不是旗標:旗標會有時間差 ——
       加入購物車完成的下一毫秒就要套券,巡檢還沒跑過,旗標會是上一輪的舊值。
@@ -2709,7 +2722,7 @@ function bindCouponGuard(){try{
          改成在送出前直接擋:不符資格就不讓它出門。
          ⚠️ 只擋 UP92WH。客戶自己的碼(VIP88/回購85/員工價)一律放行 ——
             老闆 2026-08-21 定案「即便客戶要換成比較差的碼,也要讓他自己換」。 */
-      if(code===WH_CODE&&!_whQualC()){
+      if(WH_ON&&code===WH_CODE&&!_whQualC()){
         var _n=_indoorInCart();
         var _why=(_bzInCart()>0)?'（營業場所／重油汙不適用）':('您目前為 '+_n+' 台');
         try{toast('全戶加碼 92 折需<b>一般家用清洗 3 台（含）以上</b><br>'+_why);}catch(e4){}
@@ -2860,20 +2873,21 @@ var _cpIdMap={};
    缺 id 時就跟它要一份,把 id 記進 _cpIdMap,再補回 data-id 與刪除鈕。
    ⚠️ 比「寫死一張券 id 對照表」好:綁定禮有 800 組一次性碼,寫不完,
       而且券在後台重建後編號會變,寫死的表會過期。 */
-var _idFetchAt=0,_idFetching=false;
+var _idFetchAt=0,_idFetching=false,_idFetchN=0;
 function _fetchCartIds(){
   if(_idFetching)return;
   var now=(new Date()).getTime();
   if(now-_idFetchAt<4000)return;      /* 節流:最快 4 秒問一次,別讓 700ms 巡檢狂打 */
+  if(_idFetchN>=6)return;             /* 硬上限:萬一伺服器也給不出 id,問6次就停手,不要無止境打 */
   if(!window.jQuery||!window._ShopID)return;
-  _idFetchAt=now;_idFetching=true;
+  _idFetchAt=now;_idFetching=true;_idFetchN++;
   try{
     jQuery.ajax({url:'/api/view/UserSession?ShopID='+window._ShopID+'&Cart=1',type:'GET'})
       .done(function(a){try{
         var c=(a&&a.data&&a.data.Cart)||[];
         for(var i=0;i<c.length;i++){
           var x=c[i];
-          if(x&&x.id&&Number(x.ProductType)===99)_cpIdMap[String(x.Title||'')]=x.id;
+          if(x&&x.id&&Number(x.ProductType)===99){_cpIdMap[String(x.Title||'')]=x.id;_idFetchN=0;}/* 拿到了就把次數歸零 */
         }
         _idFetching=false;
         try{repairCartIds();}catch(e){}   /* 拿到就立刻補,不必等下一輪 */
