@@ -2844,6 +2844,43 @@ function addGoBottomBtn(){try{
    之後遇到沒 id 的回應才有東西可以補。key 用券名(同一張券的 id 在同一個 session 內固定)。
    商品列不必記 —— product-索引-ProductID 可以自己算出來。 */
 var _cpIdMap={};
+/* ═══ 券的 id 不見時,向伺服器要一份新的(2026-09-10) ═══
+   ⚠️ 這一段在補的是一個**會讓客戶的優惠碼貼不上去**的洞,不要拿掉。
+
+   實測(正式頁,只用真實 UI 操作):
+     剛重新整理  → 商品列、優惠券列都有 id,券列有刪除鈕
+     加入商品之後 → 1SHOP 的回應**不含任何 id**,頁面照那份重畫,
+                    券列變成 data-id="undefined"、刪除鈕整顆消失。
+   後果:內文JS 換券是「先點券列的刪除鈕移除舊券 → 再套新券」,
+   鈕不存在就永遠刪不掉,客戶貼自己的 92 折綁定禮碼會等約 6 秒後看到
+   「優惠券套用失敗」,而他的碼其實是好的。
+
+   解法:`GET /api/view/UserSession?Cart=1` 這支**永遠回傳正確的 id**
+   (就是頁面載入時抓購物車的那一支,2026-09-10 在壞掉的狀態下實測仍正常)。
+   缺 id 時就跟它要一份,把 id 記進 _cpIdMap,再補回 data-id 與刪除鈕。
+   ⚠️ 比「寫死一張券 id 對照表」好:綁定禮有 800 組一次性碼,寫不完,
+      而且券在後台重建後編號會變,寫死的表會過期。 */
+var _idFetchAt=0,_idFetching=false;
+function _fetchCartIds(){
+  if(_idFetching)return;
+  var now=(new Date()).getTime();
+  if(now-_idFetchAt<4000)return;      /* 節流:最快 4 秒問一次,別讓 700ms 巡檢狂打 */
+  if(!window.jQuery||!window._ShopID)return;
+  _idFetchAt=now;_idFetching=true;
+  try{
+    jQuery.ajax({url:'/api/view/UserSession?ShopID='+window._ShopID+'&Cart=1',type:'GET'})
+      .done(function(a){try{
+        var c=(a&&a.data&&a.data.Cart)||[];
+        for(var i=0;i<c.length;i++){
+          var x=c[i];
+          if(x&&x.id&&Number(x.ProductType)===99)_cpIdMap[String(x.Title||'')]=x.id;
+        }
+        _idFetching=false;
+        try{repairCartIds();}catch(e){}   /* 拿到就立刻補,不必等下一輪 */
+      }catch(e){_idFetching=false;}})
+      .fail(function(){_idFetching=false;});
+  }catch(e){_idFetching=false;}
+}
 function repairCartIds(){try{
   var rows=document.querySelectorAll('#cart-section .cart-item');
   if(!rows.length)return;
@@ -2857,6 +2894,7 @@ function repairCartIds(){try{
       if(it.id){_cpIdMap[ttl]=it.id;}                    /* 好的回應 → 記起來 */
       else if(cur&&cur.indexOf('coupon-')===0){_cpIdMap[ttl]=cur;}/* 開場伺服器渲染的也算 */
       var gid=it.id||_cpIdMap[ttl]||null;
+      if(!gid)_fetchCartIds();   /* 這次載入沒看過這張券的 id → 跟伺服器要 */
       if(gid&&cur!==gid)el.setAttribute('data-id',gid);
       /* 重繪時 can_remove 讀不到就不會產生移除鈕 → 補一顆,樣式與 1SHOP 原生一致 */
       var tool=el.querySelector('.item-tool');
