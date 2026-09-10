@@ -547,7 +547,13 @@ function render(){
       /* \u26a0\ufe0f \u65b9\u6848\u7684\u540d\u7a31\u8207\u6298\u6578\u662f\u300c\u71d2\u5728\u5716\u88e1\u300d\u7684,\u5716\u6a94\u5beb\u6b7b 95 \u6298,\u6211\u5011\u6c92\u6709 92 \u6298\u7248\u672c\u7684\u5716\u3002
          \u6240\u4ee5\u9054\u6a19\u6642\u5728\u5716\u4e0b\u65b9\u88dc\u4e00\u689d\u5fbd\u7ae0\u84cb\u6389\u8a9e\u610f,\u4e0d\u7136\u5ba2\u6236\u6703\u770b\u5230\u300c\u5716\u5beb95\u6298\u3001\u50f9\u683c\u7b9792\u6298\u300d\u800c\u56f0\u60d1\u3002
          \u7528\u884c\u5167\u6a23\u5f0f\u800c\u4e0d\u662f\u65b0\u589e class \u2014\u2014 \u9019\u9801\u7684 CSS \u53ea\u5f9e wizard.js \u51fa,\u5c11\u4e00\u500b\u8981\u7dad\u8b77\u7684\u9078\u64c7\u5668\u3002 */
-      var _whBadge=_whC?'<div style="margin:5px 6px 0;background:linear-gradient(90deg,#0C447C,#1668b8);color:#fff;font-size:11.5px;font-weight:900;letter-spacing:.2px;border-radius:999px;padding:4px 8px;text-align:center;line-height:1.35">\ud83c\udfe0 \u5df2\u52a0\u78bc\u5168\u6236\u512a\u60e0\u30003 \u53f0\u4ee5\u4e0a\u6298\u5230 <b>92 \u6298</b></div>':'';
+      /* ⚠️ 徽章一定要用金黃底(#FFC400)+深藍字,不可以改回深藍底。
+         2026-09-10 老闆看實機:「背景色調是不是應該調整更醒目？」——
+         問題不是亮度,是徽章跟它正下方的價格區同樣是深藍,中間只有 5px 白縫,
+         兩塊會被讀成同一個東西,等於徽章消失。金黃是這頁的行動色(立即選購那顆按鈕),
+         客戶已經學會「黃色＝好康」,而且跟深藍互補、對比最強。
+         間距也從 5px 拉到 8px 並加陰影,讓它明確地是「另一塊」。 */
+      var _whBadge=_whC?'<div style="margin:8px 6px 2px;background:#FFC400;color:#0C447C;font-size:11.5px;font-weight:900;letter-spacing:.2px;border-radius:999px;padding:5px 8px;text-align:center;line-height:1.35;box-shadow:0 1px 4px rgba(0,0,0,.18)">\ud83c\udfe0 \u5df2\u52a0\u78bc\u5168\u6236\u512a\u60e0\u30003 \u53f0\u4ee5\u4e0a\u6298\u5230 <b>92 \u6298</b></div>':'';
       return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt="'+_alt+'">'+_whBadge+planPrice(k)+'<div class="qpn '+ncls+'">'+note+'</div></div>';}
     w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
