@@ -1416,9 +1416,11 @@ function _renderPlanSum(wrap,collapsed){
         +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:900;color:'+info.nc+';white-space:nowrap">'+info.name+'</div><div style="font-size:11px;color:'+info.sc+';margin-top:2px;white-space:nowrap">'+info.sub+'</div></div>'
         +(PLAN_CHG_OFF?'':'<button type="button" class="qsps-chg" style="flex:0 0 auto;border:1px solid #d9b24a;background:#fff;color:#8a6410;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 13px;cursor:pointer;white-space:nowrap">變更</button>')
       +'</div>'
-      +'<div style="font-size:11px;color:#9aa7b4;margin-top:5px;padding-left:2px">'
-      +(PLAN_CHG_OFF?'想換方案？請關掉此視窗，用上方的「🪄 引導精靈」重新挑選':'選錯了?點「變更」可調整方案')
-      +'</div>';
+      /* 2026-09-14 老闆要求移除底下那句提示。
+         原本 PLAN_CHG_OFF=1 時會寫「想換方案？請關掉此視窗，用上方的引導精靈重新挑選」——
+         那是 08-31 停用「變更」鈕時補的說明,老闆看實機後認為多餘。
+         ⚠️ PLAN_CHG_OFF 改回 0(恢復變更鈕)時,下面那句「選錯了?點變更」要一起回來。 */
+      +(PLAN_CHG_OFF?'':'<div style="font-size:11px;color:#9aa7b4;margin-top:5px;padding-left:2px">選錯了?點「變更」可調整方案</div>');
     var c=wrap.querySelector('.qsps-chg');if(c)c.onclick=function(){_renderPlanSum(wrap,false);};
   }else{
     var card=function(k){var info=_planInfo(k);var sel=(k===p);return '<div class="qsps-pick" data-p="'+k+'" style="flex:1;border:'+(sel?'2.5px solid #B8860B':'2px solid #d3dde9')+';border-radius:11px;overflow:hidden;cursor:pointer;position:relative;box-shadow:0 2px 6px rgba(4,44,83,.08)"><img src="'+_PLANB+info.img+'" style="width:100%;display:block">'+(sel?'<div style="position:absolute;top:6px;right:6px;background:#B8860B;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 9px">已選</div>':'')+'</div>';};
@@ -2547,15 +2549,115 @@ function fillAddr(){
     }
   }catch(e){}
 }
+/* ═══ 街道地址欄位:讓客戶看得出來這裡要打字(2026-09-14 老闆定案「戊」) ═══
+   問題(實機量的):1SHOP 的地址輸入框 border:none、背景透明、padding:0 ——
+   空的時候它在畫面上**完全隱形**。而我們原本那塊藍色提示(高35px)還插在輸入框(高25px)「上面」,
+   欄位方框裡唯一看得到的東西就是那塊藍框,整欄看起來像已經填好了。
+   旁邊的收件人、電話都已經有值,更強化了這個錯覺。客戶按下一步被擋,才回頭找問題。
+
+   做法:
+     ① 把輸入框補成真的看得出來的格子(邊框+底色+內距)
+     ② 補灰字範例,灰字出現在「要打字的位置」才是最直接的訊號
+     ③ 未填時整欄琥珀描邊 + 「必填」標籤 + 👇 箭頭
+     ④ **一填進去就全部收起來**,變回安靜的樣子(該吵的時候吵,填完就安靜)
+     ⑤ 原本的規則說明改成小字,移到輸入框「下面」
+   ⚠️ 老闆明確要求「不要呼吸光暈」:琥珀色一直閃在結帳頁會被讀成「這裡有錯誤」,
+      而且客戶填其他欄位時它一直在旁邊動。靜態描邊已經夠。
+   ⚠️ 只碰樣式與我們自己加的元素,不碰 1SHOP 的表單結構、驗證與送出流程。 */
+var _ADDR_PH='例：中山路一段12巷5號3樓';
+function _addrSet(el,css){try{el.style.cssText=css;}catch(e){}}
 function addAddrHint(){
   try{
-    if(document.getElementById('qs-addrhint'))return;
-    var addr=document.querySelector('input[name="Address"]');
-    if(!addr||!addr.parentNode)return;
-    var h=document.createElement('div');h.id='qs-addrhint';
-    h.style.cssText='font-size:12px;color:#0C447C;background:#E6F1FB;border-radius:8px;padding:8px 11px;margin:6px 0;line-height:1.55;font-weight:700';
-    h.innerHTML='📍 請填寫完整地址：<b style="color:#B8860B">巷弄街道 ＋ 門牌號碼 ＋ 樓層</b>';
-    addr.parentNode.insertBefore(h,addr);
+    var a=document.querySelector('input[name="Address"]');
+    if(!a||!a.parentNode)return;
+    var grp=a.parentNode;
+
+    /* ---- 只做一次的部分 ---- */
+    if(a.getAttribute('data-qsaddr')!=='1'){
+      a.setAttribute('data-qsaddr','1');
+      if(!a.placeholder)a.placeholder=_ADDR_PH;
+      /* 記住 1SHOP 原本的樣子,填好後要還原 */
+      grp.setAttribute('data-qsb',grp.style.border||'');
+      grp.setAttribute('data-qsbl',grp.style.borderLeft||'');
+      grp.setAttribute('data-qsbg',grp.style.background||'');
+      /* 打字就立刻切換,不必等 700ms 巡檢 */
+      try{a.addEventListener('input',function(){try{addAddrHint();}catch(e){}});}catch(e){}
+      try{a.addEventListener('blur',function(){try{addAddrHint();}catch(e){}});}catch(e){}
+    }
+
+    var filled=String(a.value||'').trim().length>0;
+
+    /* ---- 輸入框本體:補成看得出來的格子 ---- */
+    var BOX_EMPTY='border:2px solid #E8A33D!important;background:#FFFBF3!important;border-radius:7px!important;padding:9px 11px!important;font-size:15.5px!important;box-shadow:0 0 0 3px rgba(232,163,61,.20)!important;width:100%!important';
+    var BOX_FILL ='border:1.5px solid #c7ccd1!important;background:#fff!important;border-radius:7px!important;padding:9px 11px!important;font-size:15.5px!important;box-shadow:none!important;width:100%!important';
+    var want=filled?BOX_FILL:BOX_EMPTY;
+    if(a.getAttribute('data-qsbox')!==(filled?'f':'e')){a.setAttribute('data-qsbox',filled?'f':'e');_addrSet(a,want);}
+
+    /* ---- 欄位外框:未填時琥珀描邊 ---- */
+    if(filled){
+      grp.style.border=grp.getAttribute('data-qsb')||'';
+      grp.style.borderLeft=grp.getAttribute('data-qsbl')||'';
+      grp.style.background=grp.getAttribute('data-qsbg')||'';
+    }else{
+      grp.style.border='1.5px solid #E8A33D';
+      grp.style.borderLeft='4px solid #E8A33D';
+      grp.style.background='#FFFDF8';
+    }
+
+    /* ---- 「必填」標籤 ---- */
+    var lbl=grp.querySelector('label');
+    if(lbl){
+      var pill=lbl.querySelector('#qs-addrpill');
+      if(!filled&&!pill){
+        pill=document.createElement('span');pill.id='qs-addrpill';
+        pill.style.cssText='display:inline-block;font-size:10.5px;font-weight:900;color:#fff;background:#E8A33D;border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:1px';
+        pill.textContent='必填';lbl.appendChild(pill);
+      }else if(filled&&pill&&pill.parentNode){pill.parentNode.removeChild(pill);}
+    }
+
+    /* ---- 👇 箭頭:只在未填時,放在輸入框上面 ---- */
+    var arw=document.getElementById('qs-addrarrow');
+    if(!filled){
+      if(!arw){
+        arw=document.createElement('div');arw.id='qs-addrarrow';
+        arw.style.cssText='font-size:12px;font-weight:900;color:#a8560c;margin:5px 0 3px';
+        arw.textContent='👇 請在這裡輸入地址';
+        grp.insertBefore(arw,a);
+      }
+    }else if(arw&&arw.parentNode){arw.parentNode.removeChild(arw);}
+
+    /* ---- 規則說明:小字,移到輸入框「下面」 ---- */
+    var note=document.getElementById('qs-addrhint');
+    if(!note){
+      note=document.createElement('div');note.id='qs-addrhint';
+      note.style.cssText='font-size:11.5px;color:#8a8f95;margin-top:6px;line-height:1.5';
+      note.innerHTML='📍 請填<b style="color:#6d7276">巷弄街道 ＋ 門牌號碼 ＋ 樓層</b>，技師才找得到';
+    }
+    if(note.previousElementSibling!==a){grp.insertBefore(note,a.nextSibling);}
+  }catch(e){}
+}
+/* 客戶按了「下一步」卻因為地址空白被擋下來時,把畫面捲過去並把游標放進去。
+   ⚠️ 刻意「不」在一進到這一步就自動聚焦 —— 那會讓手機鍵盤蓋掉半個畫面,
+      客戶連上面的姓名電話都還沒看到。只有在他正在找「到底哪裡沒填」的那一刻才幫他。
+   ⚠️ 不攔截、不 preventDefault,1SHOP 自己的驗證照常跑,我們只是事後補一個動作。 */
+function addrFocusOnBlock(){
+  try{
+    if(window.__qsAddrHooked)return;
+    window.__qsAddrHooked=1;
+    document.addEventListener('click',function(ev){
+      try{
+        var t=ev.target;if(!t)return;
+        var btn=(t.closest?t.closest('button,a'):null);if(!btn)return;
+        if(!/^下一步/.test((btn.textContent||'').trim()))return;
+        setTimeout(function(){try{
+          var a=document.querySelector('input[name="Address"]');
+          if(!a||!a.offsetHeight)return;
+          if(String(a.value||'').trim())return;      /* 已經填了就別吵 */
+          try{a.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){a.scrollIntoView();}
+          try{a.focus();}catch(e){}
+        }catch(e){}},350);
+      }catch(e){}
+    },true);
   }catch(e){}
 }
 /* ===== 懸浮「立即結帳」按鈕(手機底部常駐)：小計＋結帳鈕 ===== */
@@ -2936,7 +3038,7 @@ function hookCartRender(){try{
     return r;
   };
 }catch(e){}}
-setInterval(function(){hookCartRender();repairCartIds();fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();planMoneyGuard();whCartNote();whCouponGuard();},700);
+setInterval(function(){hookCartRender();repairCartIds();fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();addrFocusOnBlock();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();planMoneyGuard();whCartNote();whCouponGuard();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
