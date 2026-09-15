@@ -1789,6 +1789,13 @@ var WH_ON=(function(){try{for(var i=0;i<WH_PAGES.length;i++){if(location.pathnam
 var WH_MIN=3;
 var WH_CODE='UP92WH';
 var VIP85_CODE='UP85VIP';/* VIP 85折,限標準方案(見 bindCouponGuard 的擋碼) */
+/* ═══ 只能用在標準方案的碼(2026-09-16) ═══
+   UP85VIP、維修客戶專屬88折(UPR88*)、美學客戶專屬88折(UPA88*)。
+   1SHOP 本身沒有「限定方案」這種設定,只能在這裡擋。
+   ⚠️ UPR88 跟老客戶回購禮 UPR85 只差第 5 碼,判斷時整段前綴一起比,不要只比 UPR。
+   ⚠️ 早鳥85折本來就比88折更優惠,擋下來同時要告訴客戶「留著下次用」,
+      否則他會以為系統故障,或白白把一次性的碼燒掉。 */
+function _stdOnlyCode(c){c=String(c||'').toUpperCase();return c===VIP85_CODE||/^UPR88/.test(c)||/^UPA88/.test(c);}
 var WH_OFF=0.08;
 /* ═══ 全戶方案的「差一台」提示(2026-09-09 老闆選 A4 + B3) ═══
    放在精靈第1步(選室內機)的品項列表下方 —— 客戶決定台數就在這一秒,
@@ -2720,6 +2727,8 @@ function _codeOff(code){
   if(/^UPB92/.test(code))return 0.08;/* LINE綁定禮 92折 */
   if(/^UPR85/.test(code))return 0.15;/* 老客戶回購禮 85折 */
   if(/^UPE80/.test(code))return 0.20;/* 員工價 8折(2026-08-25 新增,比任何券都優惠) */
+  if(/^UPR88/.test(code))return 0.12;/* 維修客戶專屬88折(2026-09-16,500組) */
+  if(/^UPA88/.test(code))return 0.12;/* 美學客戶專屬88折(2026-09-16,500組) */
   var v=_PUB_OFF[code];return v===undefined?null:v;/* null = 不認得,不擋 */
 }
 /* 購物車現在實際生效的折扣率(折扣列 ProductType=99、金額在 CouponPrice) */
@@ -2839,8 +2848,11 @@ function bindCouponGuard(){try{
          只會把購物車裡的「早鳥85折」換成「VIP限定85折」,讓訂單看不出他選的是早鳥,
          約時人員可能就照兩週內排,但客戶其實同意的是 30 天後 —— 排程會亂。
          ⚠️ 擋下來而不是默默換掉:客戶需要知道「你已經是 85 折了,不必用這張」。 */
-      if(code===VIP85_CODE&&_curPlan()==='early'){
-        try{toast('VIP 85 折<b>僅適用標準方案</b>（兩週內到府）<br>您已選擇早鳥方案，本來就是 85 折，不需使用此券');}catch(e6){}
+      if(_stdOnlyCode(code)&&_curPlan()==='early'){
+        var _sm=(code===VIP85_CODE)
+          ?'VIP 85 折<b>僅適用標準方案</b>（兩週內到府）<br>您已選擇早鳥方案，本來就是 85 折，不需使用此券'
+          :'這組 88 折優惠碼<b>僅適用標準方案</b>（兩週內到府）<br>您目前選擇的是早鳥方案（85 折，30 天後到府），比 88 折更優惠<br>請留著這組碼下次使用';
+        try{toast(_sm);}catch(e6){}
         if(inp){inp.value='';try{inp.dispatchEvent(new Event('input',{bubbles:true}));}catch(e7){}}
         return;/* 不往下送 */
       }
