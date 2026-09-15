@@ -1788,6 +1788,7 @@ var WH_PAGES=['ub3ibm'];
 var WH_ON=(function(){try{for(var i=0;i<WH_PAGES.length;i++){if(location.pathname.indexOf(WH_PAGES[i])>=0)return 1;}}catch(e){}return 0;})();
 var WH_MIN=3;
 var WH_CODE='UP92WH';
+var VIP85_CODE='UP85VIP';/* VIP 85折,限標準方案(見 bindCouponGuard 的擋碼) */
 var WH_OFF=0.08;
 /* ═══ 全戶方案的「差一台」提示(2026-09-09 老闆選 A4 + B3) ═══
    放在精靈第1步(選室內機)的品項列表下方 —— 客戶決定台數就在這一秒,
@@ -2714,7 +2715,7 @@ function updateFab(){
    C. 大小寫:1SHOP 的優惠碼區分大小寫,小寫輸入必失敗,然後就觸發 B。 */
 var _PLAN_OFF={early:0.15,std:0.05,wh:0.08};/* wh=全戶方案(標準95折的3台以上級距) */
 /* 已知折扣值:自家專屬碼看前綴(不必逐組登記),公開碼查表 */
-var _PUB_OFF={UP95:0.05,KQ7X9ZP2:0.15,UP88VIP:0.12,UPYOUNG999:0.10,UP92WH:0.08};/* UP92WH=全戶方案券 */
+var _PUB_OFF={UP95:0.05,KQ7X9ZP2:0.15,UP88VIP:0.12,UPYOUNG999:0.10,UP92WH:0.08,UP85VIP:0.15};/* UP92WH=全戶方案券 */
 function _codeOff(code){
   if(/^UPB92/.test(code))return 0.08;/* LINE綁定禮 92折 */
   if(/^UPR85/.test(code))return 0.15;/* 老客戶回購禮 85折 */
@@ -2830,6 +2831,18 @@ function bindCouponGuard(){try{
         try{toast('全戶加碼 92 折需<b>一般家用清洗 3 台（含）以上</b><br>'+_why);}catch(e4){}
         if(inp){inp.value='';try{inp.dispatchEvent(new Event('input',{bubbles:true}));}catch(e5){}}
         return;/* 不往下送,券根本不會被套上 */
+      }
+      /* ═══ VIP 85折限標準方案(2026-09-15 老闆定案) ═══
+         這張券的賣點是「85 折而且兩週內到府」,是標準方案的 VIP 加碼,
+         跟早鳥85折是同一個折數、不同的等待時間。
+         早鳥客戶本來就已經是 85 折,再套這張券金額一毛都不會變,
+         只會把購物車裡的「早鳥85折」換成「VIP限定85折」,讓訂單看不出他選的是早鳥,
+         約時人員可能就照兩週內排,但客戶其實同意的是 30 天後 —— 排程會亂。
+         ⚠️ 擋下來而不是默默換掉:客戶需要知道「你已經是 85 折了,不必用這張」。 */
+      if(code===VIP85_CODE&&_curPlan()==='early'){
+        try{toast('VIP 85 折<b>僅適用標準方案</b>（兩週內到府）<br>您已選擇早鳥方案，本來就是 85 折，不需使用此券');}catch(e6){}
+        if(inp){inp.value='';try{inp.dispatchEvent(new Event('input',{bubbles:true}));}catch(e7){}}
+        return;/* 不往下送 */
       }
       _cpPending=code;_cpPendBefore=_cartOff();
       /* ⚠️ 客戶自己送碼時,1SHOP 是「先移除舊券→再套新券」,中間有一段購物車完全沒折扣。
