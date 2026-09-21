@@ -1212,8 +1212,28 @@ function planCouponWatch(){try{
   if(now-_plcAt<4000)return;
   if(_plcTry>=3)return;
   _plcTry++;_plcAt=now;
-  try{if(window.__qsApplyPlanCoupon)window.__qsApplyPlanCoupon(function(){});}catch(e){}
+  /* 2026-09-22 實測抓到:券其實「已經套上」,只是畫面被舊資料蓋掉 ——
+     精靈加最後一項商品的回應比套券晚到,1SHOP 用那份「套券前」的購物車重畫畫面,折扣列就不見了。
+     此時再送券,伺服器只回「已輸入相同的優惠券」(10 次都沒用)。
+     更危險的是:畫面以為沒券 → 不補「價差調整」→ 伺服器那邊除濕機/控制器被打折,少收約 $1,175。
+     所以先問伺服器真正的購物車:伺服器有券 → 用它重畫畫面(1SHOP 加商品時也是這樣畫);伺服器也沒券 → 才送券。 */
+  _cartResync(function(fixed){
+    if(fixed)return;
+    try{if(window.__qsApplyPlanCoupon)window.__qsApplyPlanCoupon(function(){});}catch(e){}
+  });
 }catch(e){}}
+function _cartResync(cb){try{
+  if(!(window.$&&$.ajax&&window.inputCart&&window._api&&window._ShopID&&window.getCartVar&&window.getFbVar)){cb(false);return;}
+  var done=false;function fin(v){if(done)return;done=true;try{cb(v);}catch(e){}}
+  setTimeout(function(){fin(false);},5000);
+  $.ajax({url:_api+'view/UserSession?ShopID='+_ShopID+'&'+getCartVar()+'&'+getFbVar(),type:'GET'})
+   .done(function(t){try{
+     var c=(t&&t.success==0&&t.data&&t.data.Cart)||[],hasCp=false;
+     for(var i=0;i<c.length;i++){if(Number(c[i].ProductType)===99){hasCp=true;break;}}
+     if(hasCp&&!done){inputCart('new',t.data);fin(true);}else fin(false);
+   }catch(e){fin(false);}})
+   .fail(function(){fin(false);});
+}catch(e){try{cb(false);}catch(e2){}}}
 function ensureModalCss(){try{
   if(document.getElementById('qs-mfix'))return;
   var s=document.createElement('style');s.id='qs-mfix';
