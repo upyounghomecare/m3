@@ -3128,5 +3128,72 @@ var boot=setInterval(function(){
   if(tries>40)clearInterval(boot);
 },400);
 setTimeout(fixCards,1500);setTimeout(fixCards,3500);setTimeout(fixCards,6000);
+/* ===== 2026-09-22 詳情頁「目錄＋段落收展」=====
+   詳情頁是 19 張圖(內文「程式區塊」),每張圖的 alt 是「02_為什麼需要冷氣清洗」這種編號名稱。
+   這裡依編號把圖分成 6 段:頂部放一條會黏住的目錄(點了跳到該段),每段有標題列可收合/展開。
+   老闆定案:分段照下表、只有「預約與到府流程」「常見問題」預設收合(2026-09-22)。
+   ⚠️ 只「搬動」原本的 <img>,不改 src、不改 lazy loading(圖片共 12MB,不可全部提早載入)。
+   ⚠️ 找不到詳情圖(例如換了詳情圖檔名)就什麼都不做,頁面維持原樣。 */
+var QD_GROUPS=[
+ ['認識清洗','🧼',['02','03'],1],
+ ['適用機型與清洗須知','📋',['04','05','06','07'],1],
+ ['方案與價格','💰',['09','10','11','12'],1],
+ ['預約與到府流程','📅',['13','14','15','16'],0],
+ ['常見問題','❓',['17','18','19'],0],
+ ['聯繫我們','📞',['20'],1]
+];
+function _qdOf(alt,keys){for(var i=0;i<keys.length;i++){if(alt.indexOf(keys[i]+'_')===0||alt.indexOf(keys[i]+'b_')===0)return true;}return false;}
+function buildDetailToc(){try{
+  if(document.querySelector('.qd-toc'))return true;
+  if((window._pageData||{}).Template==='order')return true;
+  var imgs=[].slice.call(document.querySelectorAll('section.code img')).filter(function(i){return /^\d{2}b?_/.test(i.getAttribute('alt')||'');});
+  if(imgs.length<8)return false;
+  var box=imgs[0].parentElement;
+  if(!box||!box.parentElement)return false;
+  if(!document.getElementById('qd-css')){
+    var st=document.createElement('style');st.id='qd-css';
+    st.textContent='.qd-toc{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e3e8ef;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}'
+      +'.qd-toc::-webkit-scrollbar{display:none}'
+      +'.qd-toc a{flex:none;font-size:13px;line-height:1.2;padding:7px 12px;border-radius:999px;background:#eef3f9;color:#123a66!important;text-decoration:none!important;white-space:nowrap}'
+      +'.qd-toc a.on{background:#123a66;color:#fff!important}'
+      +'.qd-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:#f6f8fb;border-top:1px solid #e3e8ef;font-size:16px;font-weight:700;color:#123a66;cursor:pointer;scroll-margin-top:60px;-webkit-tap-highlight-color:transparent}'
+      +'.qd-h .qd-t{flex:none;font-size:13px;font-weight:500;color:#8a6a1f}'
+      +'.qd-b.qd-shut{display:none}';
+    document.head.appendChild(st);
+  }
+  var toc=document.createElement('nav');toc.className='qd-toc';toc.setAttribute('aria-label','詳情目錄');
+  var heads=[];
+  QD_GROUPS.forEach(function(g,gi){
+    var mine=imgs.filter(function(i){return _qdOf(i.getAttribute('alt')||'',g[2]);});
+    if(!mine.length)return;
+    var h=document.createElement('div');h.className='qd-h';h.id='qd-'+gi;h.setAttribute('role','button');h.setAttribute('tabindex','0');
+    var b=document.createElement('div');b.className='qd-b'+(g[3]?'':' qd-shut');
+    h.innerHTML='<span>'+g[1]+' '+g[0]+'</span><span class="qd-t"></span>';
+    function lbl(){var shut=b.classList.contains('qd-shut');h.querySelector('.qd-t').textContent=shut?'展開 ▼':'收合 ▲';h.setAttribute('aria-expanded',shut?'false':'true');}
+    lbl();
+    h.onclick=function(){b.classList.toggle('qd-shut');lbl();};
+    h.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();h.onclick();}};
+    box.insertBefore(h,mine[0]);box.insertBefore(b,mine[0]);
+    mine.forEach(function(i){b.appendChild(i);});
+    var a=document.createElement('a');a.href='#qd-'+gi;a.textContent=g[0];
+    a.onclick=function(e){e.preventDefault();if(b.classList.contains('qd-shut')){b.classList.remove('qd-shut');lbl();}
+      h.scrollIntoView({block:'start'});
+      setTimeout(function(){h.scrollIntoView({block:'start'});},450);/* 上方圖片延遲載入會把位置推走,再對準一次 */
+    };
+    toc.appendChild(a);heads.push([h,a]);
+  });
+  if(!heads.length)return true;
+  box.parentElement.insertBefore(toc,box);
+  /* 捲動時把目前所在段落的目錄標成深色,並讓它滑進目錄列可見範圍 */
+  var cur=null,tk=0;
+  window.addEventListener('scroll',function(){if(tk)return;tk=setTimeout(function(){tk=0;try{
+    var on=null;for(var i=0;i<heads.length;i++){if(heads[i][0].getBoundingClientRect().top<=90)on=heads[i][1];}
+    if(on===cur)return;cur=on;
+    heads.forEach(function(x){x[1].classList.toggle('on',x[1]===on);});
+    if(on)toc.scrollLeft=on.offsetLeft-toc.clientWidth/2+on.offsetWidth/2;
+  }catch(e){}},120);},{passive:true});
+  return true;
+}catch(e){return true;}}
+var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30)clearInterval(_qdT);},500);
 }catch(e){}
 })();
