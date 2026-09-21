@@ -1306,7 +1306,7 @@ function _corrShort(){try{
   if(!hasCp)return false;/* 完全沒券 → 沒折扣 → 沒東西要補 */
   /* 洞 A:小計讀不到(重繪中)不能當作「沒事」;保護品在的時候把「未知」當「可疑」 */
   var xiao=_readXiaoji();if(xiao==null)return true;
-  var C=(X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0);
+  var C=Math.round(((X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0))*100)/100;
   if(C<=0.0001)return (sub-xiao)>0;/* 券在但算不出折扣率 → 只要小計比商品總額低就視為在折,需校正 */
   var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
   return (xiao<target-3);/* 只擋「少收」;多收由既有機制自己修正 */
@@ -2517,7 +2517,10 @@ function reconcileAdjust(){try{
   else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
  var xiao=_readXiaoji();if(xiao==null)return;
  if(X===0||_adjC==null){_adjC=sub>0?(sub-xiao)/sub:0;}
- var C=_adjC||0;
+ var C=Math.round((_adjC||0)*100)/100;/* 2026-09-21:折扣率對齊到整數%。頁面重新整理時補差已在購物車裡,重新量到的折扣率會被1SHOP四捨五入污染
+    (例:5%量成5.0013%、12%量成11.9988%),ceil(C*S)因此差1元 → 客戶少付$1且程式誤判已達標(實測24,750→24,749)。
+    現有券全是整數%(5/8/10/12/15/25),對齊後重新整理也精準到$1。_corrShort、reconcileAdjustWatch 同步對齊。
+    ⚠️定額券會被對齊成0%(定額券已停用,見記憶 m3-addon-coupon-math)*/
  if(C<=0.0001||P<=0){if(X>0){if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();_setCorr(0);}else{window.__qsCorrBusy=0;}return;}
  var Cnow=sub>0?(sub-xiao)/sub:0;if(X>0&&Math.abs(Cnow-C)>0.02){if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();_setCorr(0);return;}
  var S=sub-P-X;var target=S-Math.ceil(C*S)+P;var gap=target-xiao;
@@ -2535,7 +2538,7 @@ function reconcileAdjustWatch(){try{
     else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
   if(P<=0){_adjWatchStuck=0;_adjWatchLastX=X;return;}
   var xiao=_readXiaoji();if(xiao==null)return;
-  var C=(X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0);
+  var C=Math.round(((X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0))*100)/100;
   if(C<=0.0001){_adjWatchStuck=0;_adjWatchLastX=X;return;}
   var S=sub-P-X;var target=S-Math.ceil(C*S)+P;
   if(xiao>=target-3&&xiao<=target+3){_adjWatchStuck=0;_adjWatchLastX=X;return;}/* 已正確。雙向容差:小計太低=少收、太高=多收,兩個方向都要救(原本只檢查太低,校正卡在過高時看門狗會誤判為正常→客戶被多收) */
