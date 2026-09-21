@@ -787,11 +787,26 @@ var api={
     if(env==='biz')qty.bz=bzQty();qty.tf=tfQty();
     if(areaCls==='remote')qty.rm=1;
     var items=INDOOR.concat(OUTLIST,ADDON).filter(function(x){return qty[x.k]>0;});
-    var jobs=[];items.forEach(function(x){var r=resolve(x.n);if(r){for(var i=0;i<qty[x.k];i++){jobs.push(r);}}});
+    var jobs=[];items.forEach(function(x){var r=resolve(x.n);if(r){var ad=ADDON.indexOf(x)>=0;for(var i=0;i<qty[x.k];i++){jobs.push({btn:r.btn,pid:r.pid,addon:ad});}}});
     if(jobs.length===0){alert('抱歉，加入購物車時發生問題，請再試一次；若持續失敗，可關閉精靈自行選購。');_finishing=false;return;}
     var btn=ovl?ovl.querySelector('.btn.pri'):null;if(btn){btn.disabled=true;btn.textContent='加入中…';}
-    var i=0;
+    var i=0,_waitMain=0,_verified=false;
+    /* 2026-09-21 修:精靈每 0.55 秒加一樣,控制器緊接在清洗服務後面。1SHOP 規定購物車要先有主商品才收加購品,
+       清洗服務還沒落地時控制器會被「默默拒絕」→ 客戶選了控制器、購物車卻沒有(測試 9 次漏 4 次,永遠是控制器)。
+       ①加購品先等購物車裡確定有清洗服務(最多等 8 秒) ②全部加完再核對控制器/除濕機數量,少了補加一次。
+       其他加購(挑高/商用/偏遠/車馬費/風鼓)各有 reconcile 自動補回,不在此核對。 */
+    function _cq(nm){var c=_cartArr(),n=0;c.forEach(function(it){if((it.ProductName||'').indexOf(nm)===0)n+=Number(it.Quantity)||0;});return n;}
     function next(){
+      if(i>=jobs.length&&!_verified){
+        _verified=true;
+        setTimeout(function(){
+          var miss=[];
+          [['air','AIRMON'],['dh','三菱重工除濕機']].forEach(function(p){var want=qty[p[0]]||0;if(want<=0)return;var r=resolve(p[1]);if(!r)return;for(var m=_cq(p[1]);m<want;m++)miss.push({btn:r.btn,pid:r.pid,addon:true,chk:p[1],want:m+1});});
+          if(miss.length)jobs=jobs.concat(miss);
+          next();
+        },2500);
+        return;
+      }
       if(i>=jobs.length){
         window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
         if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
@@ -807,7 +822,11 @@ var api={
         }catch(e){}},420);
         return;
       }
-      var job=jobs[i++];
+      var job=jobs[i];
+      if(job.addon&&(_indoorInCart()+_outdoorInCart())<=0&&_waitMain<16){_waitMain++;setTimeout(next,500);return;}
+      /* 補加前再核一次:原本那次只是慢、此刻已落地 → 跳過,絕不多加(多加一台除濕機=多收 $21,900) */
+      if(job.chk&&_cq(job.chk)>=job.want){i++;setTimeout(next,50);return;}
+      i++;
       try{if(window.viewProduct)window.viewProduct(job.btn||null,job.pid);}catch(e){}
       setTimeout(next,550);
     }
