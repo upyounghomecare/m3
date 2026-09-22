@@ -1,0 +1,1151 @@
+<style> :host { --red: #C8102E; --red-dark: #9E0B23; --navy: #0D1B2A; --navy-mid: #1A2E45; --navy-light: #243B55; --gold: #C9A84C; --gold-light: #E8C97A; --white: #FFFFFF; --off-white: #F7F5F0; --gray-light: #EAE8E4; --gray: #9A9690; --text: #1A1714; --warning: #B45309; --warning-bg: #FFFBEB; --danger: #B91C1C; --danger-bg: #FEE2E2; } * { margin: 0; padding: 0; box-sizing: border-box; } .qdd { background: var(--off-white); color: var(--text); font-family: -apple-system,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif; font-size: 15px; line-height: 1.7; max-width: 920px; margin: 0 auto; } /* ── HERO ── */ .hero { background: var(--navy); position: relative; overflow: hidden; padding: 36px 40px 32px; text-align: center; } .hero::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px); } .hero-badge { display: inline-block; border: 1px solid var(--gold); color: var(--gold); font-size: 11px; letter-spacing: 3px; padding: 5px 18px; margin-bottom: 20px; } .hero-logo-line { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 16px; } .hero-logo-mark { width: 44px; height: 44px; background: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; } .hero-logo-mark svg { width: 28px; height: 28px; } .hero-brand { color: var(--white); font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 18px; font-weight: 700; letter-spacing: 2px; } .hero-title { color: var(--white); font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 30px; font-weight: 900; line-height: 1.3; margin-bottom: 10px; } .hero-title span { color: var(--gold-light); } .hero-sub { color: rgba(255,255,255,0.55); font-size: 13px; letter-spacing: 1px; } .hero-divider { width: 60px; height: 2px; background: var(--red); margin: 22px auto; } .hero-tagline { color: rgba(255,255,255,0.8); font-size: 14px; max-width: 420px; margin: 0 auto; line-height: 1.9; } /* ── SECTION WRAPPERS ── */ .section { padding: 48px 32px; } .section-white { background: var(--white); } .section-dark { background: var(--navy); color: var(--white); } .section-warning-bg { background: var(--warning-bg); } .section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; } .section-title .line { flex: 1; height: 1px; background: var(--gray-light); } .section-title .line-w { background: rgba(255,255,255,0.15); } .section-title h2 { font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 20px; font-weight: 700; white-space: nowrap; letter-spacing: 1px; } .section-title .dot { width: 8px; height: 8px; background: var(--red); flex-shrink: 0; } /* ── NOTICE BOX ── */ .notice-box { background: #f9fafb; border: 1px solid var(--gray-light); padding: 24px 28px; margin-bottom: 32px; text-align: center; } .notice-box h3 { font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 17px; font-weight: 700; margin-bottom: 8px; } .notice-box p { font-size: 13px; color: #555; line-height: 1.8; margin-top: 6px; } .notice-box .notice-bold { font-weight: 700; font-size: 15px; color: var(--navy); } /* ── PLAN CARDS ── */ .plan-group-label { font-size: 11px; letter-spacing: 3px; color: var(--gray); margin-bottom: 12px; margin-top: 28px; padding-left: 4px; } .plan-group-label:first-of-type { margin-top: 0; } .plan-card { background: var(--white); border: 1px solid var(--gray-light); margin-bottom: 16px; position: relative; overflow: hidden; transition: box-shadow 0.2s; } .plan-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); } .plan-card-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gray-light); } .plan-card.level-basic .plan-card-accent { background: #60A5FA; } .plan-card.level-standard .plan-card-accent { background: var(--gold); } .plan-card.level-premium .plan-card-accent { background: var(--red); } .plan-card.level-special .plan-card-accent { background: #8B5CF6; } .plan-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 24px 16px 28px; gap: 12px; } .plan-header-left { flex: 1; } .plan-machine { font-size: 11px; letter-spacing: 1px; color: var(--gray); margin-bottom: 4px; } .plan-name { font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 18px; font-weight: 700; color: var(--navy); line-height: 1.3; } .plan-badge { display: inline-block; font-size: 10px; padding: 2px 8px; letter-spacing: 1px; margin-top: 6px; } .badge-basic { background: #EFF6FF; color: #2563EB; } .badge-standard { background: #FFFBEB; color: #92400E; } .badge-premium { background: #FFF1F2; color: var(--red-dark); } .badge-special { background: #F5F3FF; color: #5B21B6; } .plan-price-box { text-align: right; flex-shrink: 0; } .plan-price-label { font-size: 10px; color: var(--gray); letter-spacing: 1px; } .plan-price { font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 30px; font-weight: 900; color: var(--red); line-height: 1.1; } .plan-price small { font-size: 14px; font-weight: 500; } .plan-price-unit { font-size: 11px; color: var(--gray); } .plan-body { padding: 0 24px 20px 28px; border-top: 1px solid var(--gray-light); } .plan-services { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; padding: 16px 0; } .plan-service-item { display: flex; align-items: flex-start; gap: 7px; font-size: 13px; color: #444; } .plan-service-item::before { content: '✓'; color: var(--red); font-weight: 700; flex-shrink: 0; margin-top: 1px; font-size: 12px; } .plan-footer { display: flex; align-items: center; gap: 16px; padding: 12px 24px 12px 28px; background: var(--off-white); border-top: 1px solid var(--gray-light); font-size: 12px; flex-wrap: wrap; } .plan-meta { display: flex; align-items: center; gap: 5px; color: #555; } .plan-meta svg { width: 14px; height: 14px; opacity: 0.6; } .plan-note { margin-left: auto; color: var(--gold); font-weight: 500; font-size: 12px; } /* ── PRICE TABLE ── */ .price-table { width: 100%; border-collapse: collapse; font-size: 14px; } .price-table th { background: var(--navy-light); color: var(--white); padding: 12px 16px; text-align: left; font-weight: 500; font-size: 12px; letter-spacing: 1px; } .price-table th:last-child { text-align: right; } .price-table td { padding: 13px 16px; border-bottom: 1px solid var(--gray-light); vertical-align: middle; } .price-table td:last-child { text-align: right; font-weight: 700; color: var(--red); font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 16px; } .price-table tr:last-child td { border-bottom: none; } .price-table tr:nth-child(even) td { background: rgba(0,0,0,0.015); } .price-table .group-row td { background: var(--navy); color: var(--gold-light) !important; font-size: 11px; letter-spacing: 2px; padding: 8px 16px; font-weight: 500; text-align: left !important; font-family: -apple-system,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif !important; } /* ── FEATURES GRID ── */ .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; } .feature-card { background: var(--white); border: 1px solid var(--gray-light); padding: 24px 16px; text-align: center; transition: box-shadow 0.2s; } .feature-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); } .feature-card svg { width: 36px; height: 36px; color: var(--red); margin-bottom: 12px; } .feature-card h3 { font-size: 13px; font-weight: 700; color: var(--navy); } /* ── TIME INFO ── */ .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; } .time-card { background: var(--white); border: 1px solid var(--gray-light); padding: 24px; display: flex; align-items: flex-start; gap: 18px; } .time-card svg { width: 44px; height: 44px; color: var(--red); flex-shrink: 0; } .time-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--navy); } .time-card p { font-size: 13px; color: #555; } .time-card strong { font-size: 22px; font-weight: 900; color: var(--navy); font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; } /* ── PURCHASE FLOW ── */ .purchase-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; } .purchase-step { background: var(--white); border: 1px solid var(--gray-light); padding: 24px 16px; text-align: center; position: relative; transition: box-shadow 0.2s; } .purchase-step:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); } .purchase-step-num { width: 28px; height: 28px; background: var(--red); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; margin: 0 auto 16px; } .purchase-step svg { width: 44px; height: 44px; color: var(--red); margin-bottom: 12px; } .purchase-step h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 8px; } .purchase-step p { font-size: 12px; color: #666; line-height: 1.7; } /* ── CONTACT TIME EXAMPLES ── */ .contact-examples { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; } .contact-card { background: var(--white); border: 1px solid var(--gray-light); overflow: hidden; } .contact-card-header { background: var(--navy); color: var(--gold-light); padding: 12px 16px; font-size: 12px; font-weight: 600; text-align: center; } .contact-card-body { padding: 16px; font-size: 13px; color: #555; line-height: 1.8; } .contact-card-body strong { color: var(--navy); } .contact-note { margin-top: 16px; font-size: 12px; color: var(--warning); text-align: center; } /* ── ONSITE FLOW ── */ .onsite-flow { display: flex; justify-content: space-between; align-items: flex-start; position: relative; margin-top: 8px; } .onsite-flow::before { content: ''; position: absolute; top: 40px; left: 5%; right: 5%; height: 2px; background: var(--gray-light); z-index: 1; } .onsite-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 18%; position: relative; z-index: 2; } .onsite-icon-wrap { width: 80px; height: 80px; border-radius: 50%; background: var(--white); border: 3px solid var(--gray-light); display: flex; justify-content: center; align-items: center; margin-bottom: 16px; transition: all 0.3s; position: relative; } .onsite-icon-wrap svg { width: 36px; height: 36px; color: var(--gray); transition: all 0.3s; } .onsite-step:hover .onsite-icon-wrap { border-color: var(--red); } .onsite-step:hover .onsite-icon-wrap svg { color: var(--red); } .onsite-step-num { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); background: var(--navy); color: var(--white); width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 11px; border: 2px solid var(--white); } .onsite-step h4 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; min-height: 36px; } .onsite-step p { font-size: 11px; color: #666; line-height: 1.6; } /* ── SERVICE AREA TABLE ── */ .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--gray-light); } .service-area-table { width: 100%; border-collapse: collapse; text-align: left; } .service-area-table th { background: var(--navy); color: var(--white); padding: 12px 16px; font-size: 12px; font-weight: 500; text-align: center; letter-spacing: 1px; } .service-area-table th:not(:last-child), .service-area-table td:not(:last-child) { border-right: 1px solid var(--gray-light); } .service-area-table td { padding: 12px 16px; border-bottom: 1px solid var(--gray-light); vertical-align: middle; } .service-area-table tbody tr:last-child td { border-bottom: none; } .county-cell { font-weight: 700; font-size: 14px; color: var(--navy); white-space: nowrap; text-align: center; } .area-list { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none; justify-content: center; } .area-list li { padding: 4px 10px; font-size: 12px; font-weight: 500; } .area-available { background: #EFF6FF; color: #1D4ED8; } .area-remote { background: var(--warning-bg); color: var(--warning); } .area-unavailable { background: var(--danger-bg); color: var(--danger); } /* ── WARRANTY ── */ .warranty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; } .warranty-card { padding: 20px; border: 1px solid; } .warranty-card.ok { background: #F0FDF4; border-color: #BBF7D0; } .warranty-card.warn { background: var(--danger-bg); border-color: #FECACA; } .warranty-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--navy); } .warranty-card p { font-size: 13px; color: #555; line-height: 1.7; } .warranty-card p strong { color: var(--danger); } .claim-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; } .claim-card { padding: 16px 12px; text-align: center; border: 2px solid; border-radius: 2px; } .claim-card p:first-child { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 6px; } .claim-pct { font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 26px; font-weight: 900; line-height: 1.1; } .claim-card p:last-child { font-size: 10px; color: #888; margin-top: 4px; } .claim-c1 { background: #F0FDF4; border-color: #86EFAC; } .claim-c1 .claim-pct { color: #16A34A; } .claim-c2 { background: #F0FDFA; border-color: #99F6E4; } .claim-c2 .claim-pct { color: #0D9488; } .claim-c3 { background: #FEFCE8; border-color: #FDE047; } .claim-c3 .claim-pct { color: #CA8A04; } .claim-c4 { background: #FFF7ED; border-color: #FDBA74; } .claim-c4 .claim-pct { color: #EA580C; } .extra-claims { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; } .extra-claim-card { background: #F9F9F9; border: 1px solid var(--gray-light); padding: 16px; } .extra-claim-card h4 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; } .extra-claim-card p { font-size: 12px; color: #666; line-height: 1.7; } .exclusion-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; } .exclusion-card { background: #F9F9F9; border: 1px solid var(--gray-light); padding: 20px 16px; text-align: center; } .exclusion-card svg { width: 36px; height: 36px; color: #9CA3AF; margin-bottom: 10px; } .exclusion-card h4 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; } .exclusion-card p { font-size: 12px; color: #666; } /* ── WARRANTY PROCESS ── */ .process-flow { display: flex; align-items: stretch; gap: 0; justify-content: space-between; } .process-step { flex: 1; text-align: center; padding: 20px 12px; } .process-num { width: 56px; height: 56px; border-radius: 50%; background: #EFF6FF; border: 2px solid #BFDBFE; color: #2563EB; display: flex; align-items: center; justify-content: center; font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 18px; font-weight: 700; margin: 0 auto 12px; } .process-step h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px; } .process-step p { font-size: 12px; color: #666; line-height: 1.6; } .process-arrow { display: flex; align-items: center; color: #FFFFFF; padding-top: 20px; } .process-arrow svg { width: 32px; height: 32px; } .process-result { background: #F9F9F9; border: 1px solid var(--gray-light); padding: 16px 20px; font-size: 13px; color: #555; line-height: 1.8; } .process-result p { margin-bottom: 6px; } /* ── CANCEL TABLE ── */ .cancel-table { width: 100%; border-collapse: collapse; font-size: 14px; } .cancel-table th { background: var(--navy); color: var(--white); padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 500; letter-spacing: 1px; } .cancel-table td { padding: 14px 16px; border-bottom: 1px solid var(--gray-light); vertical-align: middle; } .cancel-table tr:last-child td { border-bottom: none; } .cancel-table tr:nth-child(even) td { background: rgba(0,0,0,0.015); } .cancel-table .fee { font-weight: 700; color: var(--red); font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; } .cancel-note { margin-top: 16px; padding: 12px 16px; background: var(--warning-bg); border-left: 3px solid var(--warning); font-size: 13px; color: var(--warning); } .cancel-note li { margin-left: 16px; margin-top: 4px; } /* ── NOTES SECTION ── */ .note-item { background: var(--warning-bg); border-left: 4px solid #F59E0B; padding: 16px 20px; margin-bottom: 12px; display: flex; gap: 14px; } .note-item svg { width: 20px; height: 20px; color: #D97706; flex-shrink: 0; margin-top: 2px; } .note-item h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px; } .note-item p, .note-item ul { font-size: 13px; color: #555; line-height: 1.8; } .note-item ul { list-style: disc; padding-left: 18px; } /* ── FAQ ── */ .faq-group { margin-bottom: 48px; } .faq-group-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 2px solid var(--navy); } .faq-group-title-left { display: flex; align-items: flex-end; gap: 16px; } .faq-group-letter { font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 52px; font-weight: 900; color: var(--red); line-height: 1; flex-shrink: 0; } .faq-group-label { font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 17px; font-weight: 700; color: var(--navy); padding-bottom: 4px; line-height: 1.3; } .faq-group-illus { flex-shrink: 0; opacity: 0.92; } .faq-item { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--gray-light); } .faq-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; } .faq-item p.q { font-weight: 700; color: var(--navy); font-size: 14px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px; } .faq-item p.q::before { content: 'Q'; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:var(--navy); color:var(--white); font-size:10px; font-weight:700; flex-shrink:0; margin-top:1px; } .faq-item p.a { font-size: 13px; color: #555; line-height: 1.85; padding-left: 28px; } /* ── DARK SECTION NOTES ── */ .dark-notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } .dark-note-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 18px 20px; } .dark-note-card h4 { font-size: 13px; font-weight: 600; color: var(--gold-light); margin-bottom: 8px; } .dark-note-card ul { list-style: none; font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.9; } .dark-note-card ul li::before { content: '— '; color: rgba(255,255,255,0.3); } /* ── BRAND FOOTER ── */ .brand-footer { background: var(--navy); padding: 36px 32px; text-align: center; border-top: 3px solid var(--red); } .brand-footer .footer-logo { font-family: 'Noto Serif TC','Songti TC','PMingLiU',serif; font-size: 16px; color: rgba(255,255,255,0.7); letter-spacing: 3px; font-weight: 700; } .footer-red { color: var(--red); } .brand-footer p { color: rgba(255,255,255,0.35); font-size: 11px; letter-spacing: 1px; margin-top: 10px; line-height: 1.8; } /* ── SECTION DIVIDER ── */ .section-sep { height: 8px; background: var(--off-white); } /* ── RESPONSIVE ── */ @media (max-width: 600px) { .hero { padding: 44px 20px 40px; } .hero-title { font-size: 24px; } .hero-brand { font-size: 14px; } .section { padding: 36px 18px; } .plan-services { grid-template-columns: 1fr; } .plan-header { flex-direction: column; } .plan-price-box { text-align: left; } .features-grid { grid-template-columns: 1fr 1fr; } .purchase-flow { grid-template-columns: 1fr 1fr; } .contact-examples { grid-template-columns: 1fr; } .onsite-flow { flex-direction: column; align-items: center; gap: 20px; } .onsite-flow::before { display: none; } .onsite-step { width: 80%; } .onsite-step h4 { min-height: unset; } .time-grid { grid-template-columns: 1fr; } .warranty-grid { grid-template-columns: 1fr; } .claim-grid { grid-template-columns: 1fr 1fr; } .exclusion-grid { grid-template-columns: 1fr; } .extra-claims { grid-template-columns: 1fr; } .process-flow { flex-direction: column; } .process-arrow { transform: rotate(90deg); margin: -8px auto; } .dark-notes-grid { grid-template-columns: 1fr; } }
+ @media (max-width:600px){.qdd [style*="repeat(5,1fr)"],.qdd [style*="repeat(5, 1fr)"],.qdd [style*="repeat(4,1fr)"],.qdd [style*="repeat(4, 1fr)"],.qdd [style*="repeat(3,1fr)"],.qdd [style*="repeat(3, 1fr)"],.qdd [style*="1fr 1fr 1fr"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}.qdd img{max-width:100%}.qdd [style*="grid-template-columns:1fr 1fr;gap:16px;align-items:stretch"]{grid-template-columns:1fr!important}.qdd .table-wrapper{overflow:visible}.qdd #serviceAreaTable,.qdd #serviceAreaTable tbody{display:block;width:100%}.qdd #serviceAreaTable thead{display:none}.qdd #serviceAreaTable tr{display:block;border:1px solid #EAE8E4;border-radius:10px;margin:0 0 12px;padding:10px 12px;background:#fff}.qdd #serviceAreaTable td{display:block;border:0;padding:4px 0;width:auto;text-align:left}.qdd #serviceAreaTable td.county-cell{font-size:16px;font-weight:700;padding-bottom:6px;border-bottom:1px solid #F1EFE8;margin-bottom:6px}.qdd #serviceAreaTable td:nth-child(2)::before{content:"可服務";display:block;font-size:11px;color:#9A9690;margin-bottom:4px}.qdd #serviceAreaTable td:nth-child(3)::before{content:"偏遠地區（加收 NT$600）";display:block;font-size:11px;color:#B45309;margin-bottom:4px}.qdd #serviceAreaTable td:nth-child(4)::before{content:"未提供服務";display:block;font-size:11px;color:#B91C1C;margin-bottom:4px}.qdd #serviceAreaTable .area-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-start}.qdd #serviceAreaTable .area-list li{white-space:nowrap;writing-mode:horizontal-tb}}</style>
+<div class="qdd">
+<div data-qg="0" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>為什麼需要冷氣清洗？</h2><div class="line"></div></div>
+  
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">很多人到冷氣開始出現異味或效能下降才想到要清洗，其實這些問題早有跡可循。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e00.webp" alt="1分鐘自我檢測：你的冷氣發出求救訊號了嗎？" style="width:100%;display:block;border:1px solid var(--gray-light);">
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">長期未清洗的冷氣，不只影響使用效率，更可能在無聲無息中影響居家空氣品質。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e01.webp" alt="忽視清潔的三大慘痛代價" style="width:100%;display:block;border:1px solid var(--gray-light);margin-top:16px;margin-bottom:16px;">
+<div style="background:var(--navy);border-radius:10px;padding:28px 32px;margin-top:24px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:18px;flex:0 0 auto;">
+    <div style="background:var(--red);border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg style="width:32px;height:32px;color:#fff;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+    </div>
+    <div>
+      <div style="font-size:12px;color:var(--gold-light);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">原廠建議清洗頻率</div>
+      <div style="font-size:36px;font-weight:900;color:#fff;line-height:1;letter-spacing:-1px;">每年 <span style="color:var(--gold-light);">1</span> 次</div>
+    </div>
+  </div>
+  <div style="width:1px;height:64px;background:rgba(255,255,255,0.18);flex-shrink:0;"></div>
+  <div style="flex:1;min-width:220px;">
+    <div style="font-size:13.5px;color:rgba(255,255,255,0.85);line-height:1.9;margin-bottom:12px;">一般家庭每年清洗一次即可。<strong style="color:var(--gold-light);">以下情況建議提高頻率：</strong></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <span style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.22);color:#fff;font-size:12px;padding:5px 13px;border-radius:20px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><ellipse cx="6" cy="10" rx="1.7" ry="2.2"/><ellipse cx="10" cy="7.4" rx="1.7" ry="2.3"/><ellipse cx="14" cy="7.4" rx="1.7" ry="2.3"/><ellipse cx="18" cy="10" rx="1.7" ry="2.2"/><path d="M12 11.2c-2.4 0-4.4 1.9-4.9 4.1-.4 1.8 1 3.2 2.7 3.2.9 0 1.5-.4 2.2-.4s1.3.4 2.2.4c1.7 0 3.1-1.4 2.7-3.2-.5-2.2-2.5-4.1-4.9-4.1z"/></svg>家中有寵物</span>
+      <span style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.22);color:#fff;font-size:12px;padding:5px 13px;border-radius:20px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>過敏體質成員</span>
+      <span style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.22);color:#fff;font-size:12px;padding:5px 13px;border-radius:20px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><path d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21a.75.75 0 01.75.75V21"/></svg>靠近大馬路或工地</span>
+      <span style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.22);color:#fff;font-size:12px;padding:5px 13px;border-radius:20px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/><path d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1.001A3.75 3.75 0 0012 18z"/></svg>餐飲業或重油煙環境</span>
+      <span style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.22);color:#fff;font-size:12px;padding:5px 13px;border-radius:20px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M12 14.25h.008v.008H12v-.008z"/></svg>已超過 1 年未清洗</span>
+    </div>
+  </div>
+</div>
+</div>
+<div data-qg="0" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>為什麼選三菱重工原廠？</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">冷氣清洗不是誰都能做，更不是誰都能做對。身為三菱重工台灣官方總代理，上洋產業的技師通過原廠認證、熟悉全系列機型結構，使用環境友善藥水與專業工具，讓你安心把機器交給真正懂它的人。</p>
+
+  <!--Badge 牆-->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:32px;">
+    <div style="background:var(--white);border:1px solid var(--gray-light);border-left:4px solid var(--red);padding:20px 16px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+      <svg style="width:32px;height:32px;color:var(--red);margin-bottom:10px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">原廠認證技師</div>
+      <div style="font-size:11px;color:#666;line-height:1.6;">通過三菱重工原廠技術認證，熟悉全系列機型結構。</div>
+    </div>
+    <div style="background:var(--white);border:1px solid var(--gray-light);border-left:4px solid var(--gold);padding:20px 16px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+      <svg style="width:32px;height:32px;color:var(--gold);margin-bottom:10px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">環境友善藥水</div>
+      <div style="font-size:11px;color:#666;line-height:1.6;">使用環境友善清洗藥水，對人體及機器零傷害。</div>
+    </div>
+    <div style="background:var(--white);border:1px solid var(--gray-light);border-left:4px solid var(--navy);padding:20px 16px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+      <svg style="width:32px;height:32px;color:var(--navy);margin-bottom:10px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">30天功能保固</div>
+      <div style="font-size:11px;color:#666;line-height:1.6;">清洗完工後提供30天冷氣清洗服務功能保固。</div>
+    </div>
+    <div style="background:var(--white);border:1px solid var(--gray-light);border-left:4px solid var(--red-dark);padding:20px 16px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+      <svg style="width:32px;height:32px;color:var(--red-dark);margin-bottom:10px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">驗收單＋前後照片</div>
+      <div style="font-size:11px;color:#666;line-height:1.6;">完工出具服務驗收單，附施工前後對比照片。</div>
+    </div>
+    <div style="background:var(--white);border:1px solid var(--gray-light);border-left:4px solid var(--gold-light);padding:20px 16px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+      <svg style="width:32px;height:32px;color:var(--gold-light);margin-bottom:10px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">三菱重工台灣總代理</div>
+      <div style="font-size:11px;color:#666;line-height:1.6;">上洋產業官方總代理，銷售到售後一條龍服務。</div>
+    </div>
+  </div>
+
+
+  <div style="border-top:1px solid var(--gray-light);margin:24px 0 20px;"></div>
+
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">清洗冷氣不只是「洗乾淨」而已。正確的工具、藥劑與工序，才能確保清洗效果持久，不傷機器。</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3V5.25a3 3 0 013-3h13.5a3 3 0 013 3v6a3 3 0 01-3 3m-13.5 0v6a3 3 0 003 3h7.5a3 3 0 003-3v-6"/></svg>
+      <h3>深層殺菌洗劑</h3>
+    </div>
+    <div class="feature-card" style="text-align:center; padding:20px;">
+      <svg style="width:36px;height:36px;color:var(--red);margin-bottom:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <h3 style="font-size:13px;">專業清洗作業</h3>
+    </div>
+    <div class="feature-card">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.092 1.21-.138 2.43-.138 3.662v4.5a4.006 4.006 0 003.7 3.7c2.442.092 4.88.092 7.324 0a4.006 4.006 0 003.7-3.7v-4.5z"/></svg>
+      <h3>蒸發器刷洗</h3>
+    </div>
+    <div class="feature-card">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 19.5V15a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121.75 15v4.5M3.75 19.5h16.5"/></svg>
+      <h3>高壓水柱清洗</h3>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid var(--gray-light);margin:28px 0 24px;"></div>
+
+    <!--對比表-->
+  <div style="font-size:13px;font-weight:700;color:#0D1B2A;margin-bottom:12px;letter-spacing:1px;">▌ 原廠 vs 一般業者 — 一眼看差異</div>
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr>
+          <th style="background:#0D1B2A;color:#C9A84C;padding:12px 14px;text-align:center;border-radius:8px 0 0 0;font-weight:600;width:28%;">一般清潔業者</th>
+          <th style="background:#0D1B2A;color:#fff;padding:12px 14px;text-align:center;font-weight:600;width:44%;">比較項目</th>
+          <th style="background:#C8102E;color:#fff;padding:12px 14px;text-align:center;border-radius:0 8px 0 0;font-weight:700;width:28%;">三菱重工原廠</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:14px 12px;border-bottom:1px solid #f0e0e0;text-align:center;background:#FFF0F0;color:#c0392b;font-weight:700;font-size:14px;">
+            <span style="display:inline-block;background:#c0392b;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✗</span> 不一定
+          </td>
+          <td style="padding:14px 12px;border-bottom:1px solid #eee;text-align:center;color:#333;font-weight:600;background:#FAFAFA;">熟悉全系列機型結構</td>
+          <td style="padding:14px 12px;border-bottom:1px solid #d4edda;text-align:center;background:#EAFBE7;color:#1a7a1a;font-weight:700;font-size:14px;">
+            <span style="display:inline-block;background:#27ae60;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✓</span> 全系列熟悉
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 12px;border-bottom:1px solid #f0e0e0;text-align:center;background:#FFE8E8;color:#c0392b;font-weight:700;font-size:14px;">
+            <span style="display:inline-block;background:#c0392b;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✗</span> 無
+          </td>
+          <td style="padding:14px 12px;border-bottom:1px solid #eee;text-align:center;color:#333;font-weight:600;background:#fff;">原廠認證技師</td>
+          <td style="padding:14px 12px;border-bottom:1px solid #d4edda;text-align:center;background:#E0F8DC;color:#1a7a1a;font-weight:700;font-size:14px;">
+            <span style="display:inline-block;background:#27ae60;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✓</span> 三菱重工認證
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 12px;border-bottom:1px solid #f0e0e0;text-align:center;background:#FFF0F0;color:#c0392b;font-weight:700;font-size:14px;">
+            <span style="display:inline-block;background:#c0392b;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✗</span> 不明
+          </td>
+          <td style="padding:14px 12px;border-bottom:1px solid #eee;text-align:center;color:#333;font-weight:600;background:#FAFAFA;">環境友善清潔藥水</td>
+          <td style="padding:14px 12px;border-bottom:1px solid #d4edda;text-align:center;background:#EAFBE7;color:#1a7a1a;font-weight:700;font-size:14px;">
+            <span style="display:inline-block;background:#27ae60;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✓</span> 環境友善藥水
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 12px;border-bottom:1px solid #f0e0e0;text-align:center;background:#FFE8E8;color:#c0392b;font-weight:700;font-size:14px;">
+            <span style="display:inline-block;background:#c0392b;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✗</span> 無
+          </td>
+          <td style="padding:14px 12px;border-bottom:1px solid #eee;text-align:center;color:#333;font-weight:600;background:#fff;">清洗後功能保固</td>
+          <td style="padding:14px 12px;border-bottom:1px solid #d4edda;text-align:center;background:#E0F8DC;color:#1a7a1a;font-weight:700;font-size:14px;">
+            <span style="display:inline-block;background:#27ae60;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✓</span> 30天保固
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 12px;text-align:center;background:#FFF0F0;color:#c0392b;font-weight:700;font-size:14px;border-radius:0 0 0 8px;">
+            <span style="display:inline-block;background:#c0392b;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✗</span> 無
+          </td>
+          <td style="padding:14px 12px;text-align:center;color:#333;font-weight:600;background:#FAFAFA;">完工驗收單＋前後照片</td>
+          <td style="padding:14px 12px;text-align:center;background:#EAFBE7;color:#1a7a1a;font-weight:700;font-size:14px;border-radius:0 0 8px 0;">
+            <span style="display:inline-block;background:#27ae60;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-size:12px;margin-right:4px;">✓</span> 標準配備
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div data-qg="1" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>適用清洗機型</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">本服務適用三菱重工全系列家用空調，涵蓋壁掛式、吊隱式、四方吹（嵌入式）等室內機，以及 1 對 1 與 1 對多室外機。確認機型後即可線上預約；若不確定您的機型是否適用，歡迎預約前先聯繫客服確認。</p>
+  <div class="notice-box">
+    <h3 style="background:var(--navy);color:var(--white);margin:-24px -28px 20px;padding:16px 28px;font-family:'Noto Serif TC',serif;font-size:17px;letter-spacing:1px;"><span style="color:var(--gold-light);">三菱重工空調</span>｜適用清洗機型</h3>
+    <div style="display:flex;flex-direction:column;gap:20px;margin:8px 0;">
+      <!--室內機-->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;background:var(--navy);color:var(--white);padding:6px 16px;font-size:12px;font-weight:700;letter-spacing:1px;">
+            <svg style="width:13px;height:13px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5h18M3 7.5a2.25 2.25 0 01-2.25-2.25V5.25A2.25 2.25 0 013 3h18a2.25 2.25 0 012.25 2.25v.015A2.25 2.25 0 0121 7.5m-18 0v9.75A2.25 2.25 0 005.25 19.5h13.5A2.25 2.25 0 0021 17.25V7.5"/></svg>
+            室內機
+          </div>
+          <div style="flex:1;height:1px;background:var(--gray-light);"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="background:var(--white);border:1px solid var(--gray-light);padding:16px 12px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <img loading="lazy" decoding="async" src="__B__img/x1.webp" alt="壁掛式" style="height:72px;width:auto;object-fit:contain;margin-bottom:10px;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+            <div style="font-size:13px;font-weight:700;color:var(--navy);letter-spacing:1px;">壁掛式</div>
+          </div>
+          <div style="background:var(--white);border:1px solid var(--gray-light);padding:16px 12px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <img loading="lazy" decoding="async" src="__B__img/x2.webp" alt="吊隱式" style="height:72px;width:auto;object-fit:contain;margin-bottom:10px;" referrerpolicy="no-referrer">
+            <div style="font-size:13px;font-weight:700;color:var(--navy);letter-spacing:1px;">吊隱式</div>
+          </div>
+          <div style="background:var(--white);border:1px solid var(--gray-light);padding:16px 12px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <img loading="lazy" decoding="async" src="__B__img/x3.webp" alt="四方吹" style="height:72px;width:auto;object-fit:contain;margin-bottom:10px;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+            <div style="font-size:13px;font-weight:700;color:var(--navy);letter-spacing:1px;">四方吹</div>
+          </div>
+        </div>
+      </div>
+      <!--室外機-->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;background:var(--navy);color:var(--white);padding:6px 16px;font-size:12px;font-weight:700;letter-spacing:1px;">
+            <svg style="width:13px;height:13px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M3 12h2M19 12h2"/></svg>
+            室外機
+          </div>
+          <div style="flex:1;height:1px;background:var(--gray-light);"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="background:var(--white);border:1px solid var(--gray-light);padding:16px 12px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <img loading="lazy" decoding="async" src="__B__img/x4.webp" alt="1對1室外機" style="height:120px;width:auto;object-fit:contain;margin-bottom:10px;" onerror="this.style.display='none'">
+            <div style="font-size:13px;font-weight:700;color:var(--navy);letter-spacing:1px;">1對1</div>
+          </div>
+          <div style="background:var(--white);border:1px solid var(--gray-light);padding:16px 12px;text-align:center;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <img loading="lazy" decoding="async" src="__B__img/x5.webp" alt="1對多室外機" style="height:120px;width:auto;object-fit:contain;margin-bottom:10px;" onerror="this.style.display='none'">
+            <div style="font-size:13px;font-weight:700;color:var(--navy);letter-spacing:1px;">1對多（多聯）</div>
+          </div>
+          <div style="background:var(--white);border:1px solid var(--gray-light);padding:16px 12px;text-align:center;opacity:0;pointer-events:none;">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px;background:var(--warning-bg);border:1px solid #F59E0B;border-left:4px solid var(--warning);padding:14px 18px;margin-top:14px;text-align:left;">
+      <svg style="width:20px;height:20px;color:var(--warning);flex-shrink:0;margin-top:2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      <p style="font-size:13px;color:var(--warning);font-weight:600;line-height:1.8;margin:0;">為確保服務品質，針對部分結構特殊、出廠年份過久，或前一代理商代理之型號，<br>本公司保有最終決定是否提供服務之權利，如有疑問，歡迎預約前先與客服聯繫。</p>
+    </div>
+  </div>
+
+  
+</div>
+<div data-qg="1" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>家用壁掛式空調清洗前必看</h2><div class="line"></div></div>
+
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">完整的清洗不只是噴水沖一沖。以下是我們的標準作業流程，從清洗前的功能確認到完工驗收，每個步驟都有其目的。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e02.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">清洗前，技師會先檢測冷氣進出風口的溫差是否在 8～12°C 的標準範圍，確認冷媒系統與熱交換效能正常，才進行後續作業。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e03.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">拆下的零件逐一清洗，確保每個部位都能回到接近出廠的潔淨狀態。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e04.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+  
+  
+
+  
+
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">高壓水柱能有效清除深層污垢，搭配專業藥劑，效果遠比一般清潔方式來得徹底。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e05.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">針對頑固的黴菌與油脂，我們使用環境友善的專業藥劑，徹底分解而不殘留。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e06.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">清洗完成後，技師會進行功能測試並填寫驗收單，確認冷氣恢復正常運作才算完工。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e07.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+</div>
+<div data-qg="1" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>吊隱式空調清洗前必看</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">吊隱式冷氣的結構藏在天花板裡，清洗難度和壁掛式不同。預約前建議先看過這幾點，服務當天會更順暢。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e08.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">吊隱式的設計讓室內視覺更整潔，但也意味著內部零件更難以直接觀察和維護。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e09.webp" alt="表面極致美學，天花板內卻藏污納垢" style="width:100%;display:block;border:1px solid var(--gray-light);margin-bottom:16px;">
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">預約前，請先確認家中天花板是否預留了維修孔，這是能否順利進行清洗的關鍵條件。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e10.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">以下是師傅實際到府施工的現場紀錄，讓你清楚了解吊隱式清洗時的作業方式、空間配合要求與施工細節。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e11.webp" style="width:100%;display:block;border:1px solid var(--gray-light);">
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:16px 0 20px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">清洗前後的改變一目瞭然：出風量恢復、異味消除、製冷效率明顯提升，讓你實際感受原廠清洗的成效。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e12.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+</div>
+<div data-qg="1" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>室外機需要清洗嗎？</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">室外機長期在戶外運作，灰塵、葉片堵塞會直接影響冷氣效能。這張圖說明了為什麼定期維護室外機很重要。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e13.webp" style="width:100%;max-width:900px;display:block;margin:0 auto 24px;">
+</div>
+<div data-qg="1" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>冷氣清洗全紀錄</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 8px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">從拆機的那一刻到完工驗收，每一步都真實記錄。以下為實際到府清洗的完整過程，讓您清楚看見「機器有多髒、我們怎麼洗、洗得多乾淨」。</p>
+
+  <div style="display:flex;align-items:center;gap:12px;margin:30px 0 16px;"><div style="background:#C8102E;color:#fff;font-weight:900;font-family:'Noto Serif TC',serif;font-size:15px;letter-spacing:1px;padding:8px 16px;border-radius:4px;">STEP 01</div><div><div style="font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;color:#0D1B2A;">清洗前 ｜ 揭開隱藏的髒污</div><div style="font-size:12px;color:#888;">外觀看似正常，拆開才發現藏污納垢</div></div><div style="flex:1;height:2px;background:#C8102E;opacity:.25;"></div></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e14.webp" style="width:100%;height:150px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">① 機身外觀｜看似乾淨</div></div>
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e15.webp" style="width:100%;height:150px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">② 濾網｜積滿灰塵</div></div>
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e16.webp" style="width:100%;height:150px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">③ 蒸發器鰭片｜佈滿黑垢</div></div>
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e17.webp" style="width:100%;height:150px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">④ 貫流風鼓｜卡滿黴垢</div></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;margin:30px 0 16px;"><div style="background:#B45309;color:#fff;font-weight:900;font-family:'Noto Serif TC',serif;font-size:15px;letter-spacing:1px;padding:8px 16px;border-radius:4px;">STEP 02</div><div><div style="font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;color:#0D1B2A;">清洗中 ｜ 專業標準施工</div><div style="font-size:12px;color:#888;">原廠認證技師，居家防護、深層沖洗一步到位</div></div><div style="flex:1;height:2px;background:#B45309;opacity:.25;"></div></div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e18.webp" style="width:100%;height:130px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">1. 鋪設防護｜保護居家</div></div>
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e19.webp" style="width:100%;height:130px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">2. 拆解零件｜逐件處理</div></div>
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e20.webp" style="width:100%;height:130px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">3. 高壓沖洗｜深層溶解</div></div>
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e21.webp" style="width:100%;height:130px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">4. 污水排出｜洗出髒污</div></div>
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e22.webp" style="width:100%;height:130px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">5. 室外機清洗｜不遺漏</div></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;margin:30px 0 16px;"><div style="background:#16A34A;color:#fff;font-weight:900;font-family:'Noto Serif TC',serif;font-size:15px;letter-spacing:1px;padding:8px 16px;border-radius:4px;">STEP 03</div><div><div style="font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;color:#0D1B2A;">清洗後 ｜ 潔淨成果</div><div style="font-size:12px;color:#888;">各部位前後對比，出風、異味、效率全面改善</div></div><div style="flex:1;height:2px;background:#16A34A;opacity:.25;"></div></div>
+  <div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:#0D1B2A;margin-bottom:6px;">貫流風鼓</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div style="position:relative;"><img loading="lazy" decoding="async" src="__B__img/e23.webp" style="width:100%;height:150px;object-fit:cover;display:block;border:1px solid #EAE8E4;"><span style="position:absolute;top:8px;left:8px;background:#C8102E;color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px;">清洗前</span></div><div style="position:relative;"><img loading="lazy" decoding="async" src="__B__img/e24.webp" style="width:100%;height:150px;object-fit:cover;display:block;border:1px solid #EAE8E4;"><span style="position:absolute;top:8px;left:8px;background:#16A34A;color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px;">清洗後</span></div></div></div>
+  <div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:#0D1B2A;margin-bottom:6px;">蒸發器鰭片</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div style="position:relative;"><img loading="lazy" decoding="async" src="__B__img/e25.webp" style="width:100%;height:150px;object-fit:cover;display:block;border:1px solid #EAE8E4;"><span style="position:absolute;top:8px;left:8px;background:#C8102E;color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px;">清洗前</span></div><div style="position:relative;"><img loading="lazy" decoding="async" src="__B__img/e26.webp" style="width:100%;height:150px;object-fit:cover;display:block;border:1px solid #EAE8E4;"><span style="position:absolute;top:8px;left:8px;background:#16A34A;color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px;">清洗後</span></div></div></div>
+  <div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:#0D1B2A;margin-bottom:6px;">室外機（裝於鐵窗後，前→洗→後）</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;"><div style="position:relative;"><img loading="lazy" decoding="async" src="__B__img/e27.webp" style="width:100%;height:140px;object-fit:cover;display:block;border:1px solid #EAE8E4;"><span style="position:absolute;top:8px;left:8px;background:#C8102E;color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px;">清洗前</span></div><div style="position:relative;"><img loading="lazy" decoding="async" src="__B__img/e28.webp" style="width:100%;height:140px;object-fit:cover;display:block;border:1px solid #EAE8E4;"><span style="position:absolute;top:8px;left:8px;background:#B45309;color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px;">清洗中</span></div><div style="position:relative;"><img loading="lazy" decoding="async" src="__B__img/e29.webp" style="width:100%;height:140px;object-fit:cover;display:block;border:1px solid #EAE8E4;"><span style="position:absolute;top:8px;left:8px;background:#16A34A;color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px;">清洗後</span></div></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e30.webp" style="width:100%;height:150px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">✓ 裝回機身｜出風測試正常</div></div>
+    <div style="background:#fff;border:1px solid #EAE8E4;overflow:hidden;"><img loading="lazy" decoding="async" src="__B__img/e31.webp" style="width:100%;height:150px;object-fit:cover;display:block;"><div style="padding:8px 10px;font-size:12px;color:#444;text-align:center;">✓ 完工驗收｜煥然一新</div></div>
+  </div>
+</div>
+<div data-qg="2" class="section">
+  <div class="section-title"><div class="dot"></div><h2>服務方案總覽</h2><div class="line"></div></div>
+
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">不同機型有不同的清洗需求。請依照你家的冷氣類型，找到對應的服務方案。</p>
+
+  <div style="margin:32px 0 18px;padding:10px 18px;background:linear-gradient(90deg,#1a2744 0%,#2a3f6e 100%);border-radius:8px;color:#fff;font-size:17px;font-weight:700;letter-spacing:1.5px;">室內機</div>
+  <div class="plan-group-label">壁掛式空調</div>
+  <div class="plan-card level-standard">
+    <div class="plan-card-accent"></div>
+    <div class="plan-header">
+      <div class="plan-header-left">
+        <div class="plan-machine">家用壁掛式空調</div>
+        <div class="plan-name">深度保養清洗服務（掛洗）</div>
+        <span class="plan-badge badge-standard">推薦方案</span>
+      </div>
+      <img loading="lazy" decoding="async" src="__B__img/x1.webp" alt="壁掛式空調" style="height:80px;width:auto;object-fit:contain;opacity:0.92;flex-shrink:0;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      <div class="plan-price-box">
+        <div class="plan-price-label">含稅定價</div>
+        <div class="plan-price"><small>NT$</small>3,000</div>
+        <div class="plan-price-unit">/ 台</div>
+      </div>
+    </div>
+    <div class="plan-body">
+      <div class="plan-services">
+        <div class="plan-service-item">面板（蓋板）拆解清洗</div>
+        <div class="plan-service-item">機外殼拆解清洗</div>
+        <div class="plan-service-item">過濾網拆解清洗</div>
+        <div class="plan-service-item">扇葉拆解清洗</div>
+        <div class="plan-service-item">水盤拆解清洗</div>
+        <div class="plan-service-item">風鼓以不拆洗方式清洗</div>
+      </div>
+    </div>
+    <div class="plan-footer">
+      <div class="plan-meta"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>單人施作</div>
+    </div>
+  </div>
+
+  <div class="plan-group-label" style="margin-top:28px;">吊隱式空調</div>
+  <div class="plan-card level-basic">
+    <div class="plan-card-accent"></div>
+    <div class="plan-header">
+      <div class="plan-header-left">
+        <div class="plan-machine">吊隱式空調</div>
+        <div class="plan-name">小保養清洗服務</div>
+        <span class="plan-badge badge-basic">輕量保養</span>
+      </div>
+      <img loading="lazy" decoding="async" src="__B__img/x2.webp" alt="吊隱式空調" style="height:72px;width:auto;object-fit:contain;opacity:0.92;flex-shrink:0;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      <div class="plan-price-box">
+        <div class="plan-price-label">含稅定價</div>
+        <div class="plan-price"><small>NT$</small>1,600</div>
+        <div class="plan-price-unit">/ 台</div>
+      </div>
+    </div>
+    <div class="plan-body">
+      <div class="plan-services">
+        <div class="plan-service-item">排水管疏通</div>
+        <div class="plan-service-item">進迴風濾網拆解清洗</div>
+        <div class="plan-service-item">馬達潤滑上油</div>
+        <div class="plan-service-item">功能檢查</div>
+      </div>
+    </div>
+    <div class="plan-footer">
+      <div class="plan-meta"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>單人施作</div>
+      <div class="plan-note">不適用加洗風鼓</div>
+    </div>
+  </div>
+
+  <div class="plan-card level-standard">
+    <div class="plan-card-accent"></div>
+    <div class="plan-header">
+      <div class="plan-header-left">
+        <div class="plan-machine">吊隱式空調</div>
+        <div class="plan-name">大保養清洗服務</div>
+        <span class="plan-badge badge-standard">深度保養</span>
+      </div>
+      <img loading="lazy" decoding="async" src="__B__img/x2.webp" alt="吊隱式空調" style="height:72px;width:auto;object-fit:contain;opacity:0.92;flex-shrink:0;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      <div class="plan-price-box">
+        <div class="plan-price-label">含稅定價</div>
+        <div class="plan-price"><small>NT$</small>3,000</div>
+        <div class="plan-price-unit">/ 台</div>
+      </div>
+    </div>
+    <div class="plan-body">
+      <div class="plan-services">
+        <div class="plan-service-item">功能檢查</div>
+        <div class="plan-service-item">風鼓拆解清洗（基本含清洗兩風鼓）<svg style="width:14px;height:14px;margin-left:5px;color:var(--gold);flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg></div>
+        <div class="plan-service-item">排水管疏通</div>
+        <div class="plan-service-item">鰭片清洗</div>
+        <div class="plan-service-item">馬達潤滑上油</div>
+        <div class="plan-service-item">進迴風濾網清洗</div>
+      </div>
+    </div>
+    <div class="plan-footer">
+      <div class="plan-meta"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>一～兩人施作</div>
+      <div class="plan-note">加洗風鼓 +NT$500 / 個</div>
+    </div>
+  </div>
+
+  <div class="plan-card level-premium">
+    <div class="plan-card-accent"></div>
+    <div class="plan-header">
+      <div class="plan-header-left">
+        <div class="plan-machine">吊隱式空調</div>
+        <div class="plan-name">全保養 ／ 整機保養清洗服務</div>
+        <span class="plan-badge badge-premium">旗艦全拆洗</span>
+      </div>
+      <img loading="lazy" decoding="async" src="__B__img/x2.webp" alt="吊隱式空調" style="height:72px;width:auto;object-fit:contain;opacity:0.92;flex-shrink:0;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      <div class="plan-price-box">
+        <div class="plan-price-label">含稅定價</div>
+        <div class="plan-price"><small>NT$</small>5,000</div>
+        <div class="plan-price-unit">/ 台</div>
+      </div>
+    </div>
+    <div class="plan-body">
+      <div class="plan-services">
+        <div class="plan-service-item">功能檢查</div>
+        <div class="plan-service-item">風鼓拆解清洗（基本含清洗兩風鼓）<svg style="width:14px;height:14px;margin-left:5px;color:var(--gold);flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg></div>
+        <div class="plan-service-item">排水管疏通</div>
+        <div class="plan-service-item">鰭片清洗</div>
+        <div class="plan-service-item">馬達潤滑上油</div>
+        <div class="plan-service-item">進迴風濾網清洗</div>
+        <div class="plan-service-item">吊隱式下蓋全拆洗 *</div>
+        <div class="plan-service-item">蒸發器鰭片清洗 *</div>
+        <div class="plan-service-item">下方蓋板全拆洗 *</div>
+      </div>
+    </div>
+    <div class="plan-footer">
+      <div class="plan-meta"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>一～兩人施作</div>
+      <div class="plan-note">加洗風鼓 +NT$500 / 個 ｜ * 需現場評估</div>
+    </div>
+  </div>
+
+  <div class="plan-group-label" style="margin-top:28px;">四方吹冷氣</div>
+  <div class="plan-card level-special">
+    <div class="plan-card-accent"></div>
+    <div class="plan-header">
+      <div class="plan-header-left">
+        <div class="plan-machine">四方吹冷氣</div>
+        <div class="plan-name">四方吹冷氣清洗服務</div>
+        <span class="plan-badge badge-special">雙人專業施作</span>
+      </div>
+      <img loading="lazy" decoding="async" src="__B__img/x3.webp" alt="四方吹冷氣" style="height:80px;width:auto;object-fit:contain;opacity:0.92;flex-shrink:0;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      <div class="plan-price-box">
+        <div class="plan-price-label">含稅定價</div>
+        <div class="plan-price"><small>NT$</small>5,000</div>
+        <div class="plan-price-unit">/ 台</div>
+      </div>
+    </div>
+    <div class="plan-body">
+      <div class="plan-services">
+        <div class="plan-service-item">面板拆解清洗</div>
+        <div class="plan-service-item">水盤拆解清洗</div>
+        <div class="plan-service-item">風扇拆解清洗</div>
+        <div class="plan-service-item">蒸發器鰭片清洗</div>
+        <div class="plan-service-item">迴風濾網清洗</div>
+        <div class="plan-service-item">馬達軸承潤滑</div>
+        <div class="plan-service-item">功能測試／檢查</div>
+      </div>
+    </div>
+    <div class="plan-footer">
+      <div class="plan-meta"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>兩人施作</div>
+    </div>
+  </div>
+
+  <div class="plan-card level-special">
+    <div class="plan-card-accent"></div>
+    <div class="plan-header">
+      <div class="plan-header-left">
+        <div class="plan-machine">四方吹冷氣</div>
+        <div class="plan-name">迷你四方吹清洗服務</div>
+        <span class="plan-badge badge-special">雙人專業施作</span>
+      </div>
+      <img loading="lazy" decoding="async" src="__B__img/x3.webp" alt="四方吹冷氣" style="height:80px;width:auto;object-fit:contain;opacity:0.92;flex-shrink:0;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      <div class="plan-price-box">
+        <div class="plan-price-label">含稅定價</div>
+        <div class="plan-price"><small>NT$</small>4,000</div>
+        <div class="plan-price-unit">/ 台</div>
+      </div>
+    </div>
+    <div class="plan-body">
+      <div class="plan-services">
+        <div class="plan-service-item">面板拆解清洗</div>
+        <div class="plan-service-item">水盤拆解清洗</div>
+        <div class="plan-service-item">風扇拆解清洗</div>
+        <div class="plan-service-item">蒸發器鰭片清洗</div>
+        <div class="plan-service-item">迴風濾網清洗</div>
+        <div class="plan-service-item">馬達軸承潤滑</div>
+        <div class="plan-service-item">功能測試／檢查</div>
+      </div>
+    </div>
+    <div class="plan-footer">
+      <div class="plan-meta"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>兩人施作</div>
+    </div>
+  </div>
+
+  <div style="margin:32px 0 18px;padding:10px 18px;background:linear-gradient(90deg,#1a2744 0%,#2a3f6e 100%);border-radius:8px;color:#fff;font-size:17px;font-weight:700;letter-spacing:1.5px;">室外機</div>
+  <div class="plan-group-label" style="margin-top:28px;">室外機清洗（適用所有機型）</div>
+  <div class="plan-card level-standard">
+    <div class="plan-card-accent"></div>
+    <div class="plan-header">
+      <div class="plan-header-left">
+        <div class="plan-machine">室外機</div>
+        <div class="plan-name">1 對 1 室外機清洗</div>
+      </div>
+      <img loading="lazy" decoding="async" src="__B__img/x4.webp" alt="1對1室外機" style="height:80px;width:auto;object-fit:contain;opacity:0.92;flex-shrink:0;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      <div class="plan-price-box">
+        <div class="plan-price-label">含稅定價</div>
+        <div class="plan-price"><small>NT$</small>1,000</div>
+        <div class="plan-price-unit">/ 台</div>
+      </div>
+    </div>
+    <div class="plan-body">
+      <div class="plan-services">
+        <div class="plan-service-item">室外機外殼清洗</div>
+        <div class="plan-service-item">散熱鰭片清洗</div>
+        <div class="plan-service-item">高壓清洗設備作業</div>
+      </div>
+    </div>
+    <div class="plan-footer">
+      <div class="plan-meta"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>適用所有機型，可單獨清洗；單獨清洗且只洗 1 台需加收車馬費 NT$600，清洗 2 台以上或搭配室內機一起清洗免車馬費</div>
+    </div>
+  </div>
+
+  <div class="plan-card level-standard">
+    <div class="plan-card-accent"></div>
+    <div class="plan-header">
+      <div class="plan-header-left">
+        <div class="plan-machine">室外機</div>
+        <div class="plan-name">1 對多（多聯）室外機清洗</div>
+      </div>
+      <img loading="lazy" decoding="async" src="__B__img/x5.webp" alt="1對多室外機" style="height:80px;width:auto;object-fit:contain;opacity:0.92;flex-shrink:0;" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      <div class="plan-price-box">
+        <div class="plan-price-label">含稅定價</div>
+        <div class="plan-price"><small>NT$</small>1,500</div>
+        <div class="plan-price-unit">/ 台</div>
+      </div>
+    </div>
+    <div class="plan-body">
+      <div class="plan-services">
+        <div class="plan-service-item">室外機外殼清洗</div>
+        <div class="plan-service-item">散熱鰭片清洗</div>
+        <div class="plan-service-item">高壓清洗設備作業</div>
+      </div>
+    </div>
+    <div class="plan-footer">
+      <div class="plan-meta"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>適用所有機型，可單獨清洗；單獨清洗且只洗 1 台需加收車馬費 NT$600，清洗 2 台以上或搭配室內機一起清洗免車馬費</div>
+    </div>
+  </div>
+
+</div>
+<div data-qg="2" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>加購方案費用一覽</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">除了基本清洗方案，若有室外機清洗或其他特殊需求，可在預約時一併加購，技師到府一次處理。</p>
+  <table class="price-table">
+    <thead>
+      <tr><th colspan="3">項目說明</th><th style="text-align:center;">計價</th><th>費用</th></tr>
+    </thead>
+    <tbody>
+      <tr class="group-row"><td colspan="5">── 室外機清洗服務</td></tr>
+      <tr><td colspan="3"><svg style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;color:var(--navy);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M3 12h2M19 12h2"/></svg>1 對 1 室外機清洗<br><span style="font-size:11px;color:#999;padding-left:24px;">適用所有機型，可單獨清洗；單獨清洗且只洗 1 台需加收車馬費 NT$600，清洗 2 台以上或搭配室內機一起清洗免車馬費</span></td><td style="text-align:center;">台</td><td>NT$1,000</td></tr>
+      <tr><td colspan="3"><svg style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;color:var(--navy);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M3 12h2M19 12h2"/></svg>1 對多（多聯）室外機清洗<br><span style="font-size:11px;color:#999;padding-left:24px;">適用所有機型，可單獨清洗；單獨清洗且只洗 1 台需加收車馬費 NT$600，清洗 2 台以上或搭配室內機一起清洗免車馬費</span></td><td style="text-align:center;">台</td><td>NT$1,500</td></tr>
+      <tr class="group-row"><td colspan="5">── 加購項目</td></tr>
+      <tr><td colspan="3" style="color:#333;"><svg style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;color:var(--navy);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>加洗風鼓（吊隱式適用）<br><span style="font-size:11px;color:#999;padding-left:24px;">每增加一顆風鼓加洗</span></td><td style="text-align:center;">個</td><td>+NT$500</td></tr>
+      <tr><td colspan="3"><svg style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;color:var(--navy);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25"/></svg>挑高施作（3.5–4m）<br><span style="font-size:11px;color:#999;padding-left:24px;">4m以上無法施作</span></td><td style="text-align:center;">台</td><td>+NT$1,000</td></tr>
+      <tr><td colspan="3"><svg style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;color:var(--navy);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>偏遠地區（額外費用）</td><td style="text-align:center;">次</td><td>+NT$600</td></tr>
+      <tr><td colspan="3"><svg style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;color:var(--navy);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>場勘費用</td><td style="text-align:center;">次</td><td>+NT$600</td></tr>
+      <tr><td colspan="3"><svg style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;color:var(--navy);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>重度髒汙<br><span style="font-size:11px;color:#999;padding-left:24px;">油煙嚴重、餐飲業店面、非家用、清洗費時等</span></td><td style="text-align:center;">台</td><td>+NT$1,000</td></tr>
+      <tr><td colspan="3"><svg style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;color:var(--navy);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>無法施作車馬費<br><span style="font-size:11px;color:#999;padding-left:24px;">含客人不在家、電話不接等逾30分鐘</span></td><td style="text-align:center;">次</td><td>NT$600</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!--吊隱式風鼓加洗對照表-->
+<div class="section">
+  <div class="section-title"><div class="dot"></div><h2>吊隱式風鼓加洗對照</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 6px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">吊隱式大保養／全保養清洗基本已含 <b>2 個風鼓</b>；若機型風鼓數 <b>3 個以上</b>，超出部分每個 <b>+NT$500</b>。看機身標籤找型號，對照下方分區即可。</p>
+  <div style="display:flex;gap:6px;justify-content:center;margin:16px 0 20px;flex-wrap:wrap;"><span style="background:#F7F5F0;border:1px solid #EAE6DE;border-radius:30px;padding:7px 15px;font-size:12.5px;color:#5f5b53;"><b style="color:#C8102E;">1</b> 看機身標籤找型號</span><span style="background:#F7F5F0;border:1px solid #EAE6DE;border-radius:30px;padding:7px 15px;font-size:12.5px;color:#5f5b53;"><b style="color:#C8102E;">2</b> 對照下方分區</span><span style="background:#F7F5F0;border:1px solid #EAE6DE;border-radius:30px;padding:7px 15px;font-size:12.5px;color:#5f5b53;"><b style="color:#C8102E;">3</b> 得知加洗費用</span></div>
+  <div style="border:1px solid #ECE9E3;border-radius:14px;overflow:hidden;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:12px;background:#F0F9F2;padding:13px 18px;border-bottom:1px solid #ECE9E3;"><div style="width:34px;height:34px;border-radius:9px;background:#16A34A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">✓</div><div style="flex:1;"><div style="font-family:'Noto Serif TC',serif;font-weight:900;font-size:16px;color:#16A34A;">免加洗</div><div style="font-size:12px;color:#7c766c;">風鼓 1～2 個</div></div><div style="font-family:'Noto Serif TC',serif;font-size:23px;font-weight:900;color:#16A34A;">30<span style="font-size:12px;font-weight:400;color:#9a948a;"> 款</span></div></div><div style="padding:15px 18px;"><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">中低靜壓系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM22KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM22KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM28KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM28KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM36KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM36KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM45KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM45KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM56KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM56KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM71KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM71KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM71VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM90KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM90KXZE3T-W</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">微型系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUH22KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUH28KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUH36KXE6T3</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">晴空系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>DXR25ZST-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>DXR35ZST-W</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">未來系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM50VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUM60VHT</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">薄型系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUT22KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUT22KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUT28KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUT28KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUT36KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDUT36KXZE3T-W</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">高靜壓系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDU71KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;"></span>FDU90KXE6FTX</span></div></div></div><div style="border:1px solid #ECE9E3;border-radius:14px;overflow:hidden;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:12px;background:#FDF6EC;padding:13px 18px;border-bottom:1px solid #ECE9E3;"><div style="width:34px;height:34px;border-radius:9px;background:#D97706;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">＋</div><div style="flex:1;"><div style="font-family:'Noto Serif TC',serif;font-weight:900;font-size:16px;color:#D97706;">加洗1個 · ＋NT$500</div><div style="font-size:12px;color:#7c766c;">風鼓 3 個</div></div><div style="font-family:'Noto Serif TC',serif;font-size:23px;font-weight:900;color:#D97706;">25<span style="font-size:12px;font-weight:400;color:#9a948a;"> 款</span></div></div><div style="padding:15px 18px;"><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">中低靜壓系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM100VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM112KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM112KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM125VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM140KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM140KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM140VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM160KXE6T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUM160KXZE3T-W</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">晴空系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>DXR41ZST-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>DXR50ZST-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>DXR60ZST-W</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">薄型系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUT45KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUT45KXZE3T-W</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUT56KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDUT56KXZE3T-W</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">高靜壓系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU100VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU112KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU125VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU140KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU140VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU160KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU224KXZE1T3</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU250VHT</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;flex-shrink:0;"></span>FDU280KXZE1T3</span></div></div></div><div style="border:1px solid #ECE9E3;border-radius:14px;overflow:hidden;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:12px;background:#FDECEC;padding:13px 18px;border-bottom:1px solid #ECE9E3;"><div style="width:34px;height:34px;border-radius:9px;background:#C8102E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">＋</div><div style="flex:1;"><div style="font-family:'Noto Serif TC',serif;font-weight:900;font-size:16px;color:#C8102E;">加洗2個 · ＋NT$1,000</div><div style="font-size:12px;color:#7c766c;">風鼓 4 個</div></div><div style="font-family:'Noto Serif TC',serif;font-size:23px;font-weight:900;color:#C8102E;">3<span style="font-size:12px;font-weight:400;color:#9a948a;"> 款</span></div></div><div style="padding:15px 18px;"><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">晴空系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#C8102E;flex-shrink:0;"></span>DXR71ZST-W</span></div><div style="margin-bottom:12px;"><div style="font-size:11px;color:#9a948a;letter-spacing:1px;margin-bottom:5px;">薄型系列</div><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#C8102E;flex-shrink:0;"></span>FDUT71KXE6FTX</span><span style="display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:#0D1B2A;background:#fff;border:1px solid #E1DED7;padding:4px 11px 4px 9px;border-radius:20px;margin:3px 4px 0 0;"><span style="width:7px;height:7px;border-radius:50%;background:#C8102E;flex-shrink:0;"></span>FDUT71KXZE3T-W</span></div></div></div>
+  <p style="font-size:12px;color:#9a948a;margin-top:6px;">＊小圓點顏色代表費用（綠=免加洗、琥珀=+NT$500、紅=+NT$1,000）。型號不確定，歡迎 LINE 客服報型號協助確認；實際以現場評估為準。</p>
+</div>
+<div data-qg="2" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>選擇適合你的方案</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">兩種方案任你選：不趕時間、想省錢，選<strong>早鳥</strong>；想盡快清洗，選<strong>標準</strong>。</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch;">
+    <div style="border:2px solid var(--gold);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column;height:100%;"><img loading="lazy" decoding="async" src="__B__img/e32.webp" style="width:100%;display:block;aspect-ratio:2/1;object-fit:cover;"><div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1EFE8;font-size:14px;"><span style="color:var(--gray);width:56px;flex-shrink:0;">特色</span><span style="color:#333;flex:1;font-weight:500;"><span style="font-family:'Noto Serif TC',serif;font-weight:900;color:var(--red);font-size:17px;">85 折</span>（全室內外機清洗服務品項）</span></div><div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1EFE8;font-size:14px;"><span style="color:var(--gray);width:56px;flex-shrink:0;">多久約</span><span style="color:#333;flex:1;font-weight:500;">預約需安排 <b>30 天後</b>到府</span></div><div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1EFE8;font-size:14px;"><span style="color:var(--gray);width:56px;flex-shrink:0;">範例</span><span style="color:#333;flex:1;font-weight:500;">6/2 專人電話約時<br>→ 可安排 <b>7/2 後</b>到府</span></div><div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1EFE8;font-size:14px;"><span style="color:var(--gray);width:56px;flex-shrink:0;">適合</span><span style="color:#333;flex:1;font-weight:500;">提早規劃、省錢的您</span></div><div style="flex:1;"></div><div style="padding:11px 16px;"><span style="color:var(--gray);font-size:13px;display:block;margin-bottom:4px;">改約／取消</span><div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--gray-light);"><span style="color:#555;">正式約定服務日期前</span><span style="color:#16A34A;font-weight:700;">免費</span></div><div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--gray-light);"><span style="color:#555;">約定後至服務前</span><span style="color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">$600</span></div><div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--gray-light);"><span style="color:#555;">服務日前1工作天17:00後／當日</span><span style="color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">$1,000</span></div></div></div>
+    <div style="border:1px solid var(--gray-light);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column;height:100%;"><img loading="lazy" decoding="async" src="__B__img/e33.webp" style="width:100%;display:block;aspect-ratio:2/1;object-fit:cover;"><div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1EFE8;font-size:14px;"><span style="color:var(--gray);width:56px;flex-shrink:0;">特色</span><span style="color:#333;flex:1;font-weight:500;"><b>標準價格</b>（全室內外機清洗服務品項）</span></div><div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1EFE8;font-size:14px;"><span style="color:var(--gray);width:56px;flex-shrink:0;">多久約</span><span style="color:#333;flex:1;font-weight:500;">安排 <b>2 週內</b>到府</span></div><div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1EFE8;font-size:14px;"><span style="color:var(--gray);width:56px;flex-shrink:0;">範例</span><span style="color:#333;flex:1;font-weight:500;">6/2 專人電話約時<br>→ 可安排 <b>6/9~6/16</b>到府</span></div><div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1EFE8;font-size:14px;"><span style="color:var(--gray);width:56px;flex-shrink:0;">適合</span><span style="color:#333;flex:1;font-weight:500;">近期要清洗的您</span></div><div style="flex:1;"></div><div style="padding:11px 16px;"><span style="color:var(--gray);font-size:13px;display:block;margin-bottom:4px;">改約／取消</span><div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--gray-light);"><span style="color:#555;">服務日前5工作天17:00前</span><span style="color:#16A34A;font-weight:700;">免費</span></div><div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--gray-light);"><span style="color:#555;">服務日前5工作天17:00後</span><span style="color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">$300</span></div><div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--gray-light);"><span style="color:#555;">服務日前4工作天17:00後</span><span style="color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">$600</span></div><div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--gray-light);"><span style="color:#555;">服務日前1工作天17:00後／當日</span><span style="color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">$1,000</span></div></div></div>
+  </div>
+  <p style="text-align:center;font-size:12px;color:var(--gray);margin-top:14px;">＊完整改約／取消範例與說明，請見下方「訂單取消／改約須知」。</p>
+</div>
+<div data-qg="3" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>如何預約服務？</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">不確定怎麼預約？以下說明購買流程，有任何疑問也可以直接聯繫客服。</p>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><span style="background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:4px 12px;letter-spacing:1px;">服務流程</span><span style="font-family:'Noto Serif TC',serif;font-size:16px;font-weight:700;color:var(--navy);">從下單到完工，五步驟到位</span></div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+    <div style="position:relative;background:#F7F5F0;border-radius:12px;padding:24px 16px 20px;overflow:hidden;"><div style="position:absolute;top:-8px;right:6px;font-family:'Noto Serif TC',serif;font-size:60px;font-weight:900;color:rgba(13,27,42,0.06);line-height:1;">1</div><div style="position:relative;"><div style="font-weight:700;color:var(--navy);font-size:14px;margin-bottom:6px;">購買服務</div><div style="font-size:11.5px;color:#8a857d;line-height:1.7;">選規格、加入購物車結帳</div></div></div>
+    <div style="position:relative;background:#F7F5F0;border-radius:12px;padding:24px 16px 20px;overflow:hidden;"><div style="position:absolute;top:-8px;right:6px;font-family:'Noto Serif TC',serif;font-size:60px;font-weight:900;color:rgba(13,27,42,0.06);line-height:1;">2</div><div style="position:relative;"><div style="font-weight:700;color:var(--navy);font-size:14px;margin-bottom:6px;">預約服務時間</div><div style="font-size:11.5px;color:#8a857d;line-height:1.7;">1 個工作天內專人聯繫</div></div></div>
+    <div style="position:relative;background:#F7F5F0;border-radius:12px;padding:24px 16px 20px;overflow:hidden;"><div style="position:absolute;top:-8px;right:6px;font-family:'Noto Serif TC',serif;font-size:60px;font-weight:900;color:rgba(13,27,42,0.06);line-height:1;">3</div><div style="position:relative;"><div style="font-weight:700;color:var(--navy);font-size:14px;margin-bottom:6px;">到府服務</div><div style="font-size:11.5px;color:#8a857d;line-height:1.7;">服務前一天 Email 提醒</div></div></div>
+    <div style="position:relative;background:#F7F5F0;border-radius:12px;padding:24px 16px 20px;overflow:hidden;"><div style="position:absolute;top:-8px;right:6px;font-family:'Noto Serif TC',serif;font-size:60px;font-weight:900;color:rgba(13,27,42,0.06);line-height:1;">4</div><div style="position:relative;"><div style="font-weight:700;color:var(--navy);font-size:14px;margin-bottom:6px;">服務驗收</div><div style="font-size:11.5px;color:#8a857d;line-height:1.7;">清洗完成當場一同驗收確認</div></div></div>
+    <div style="position:relative;background:var(--navy);border-radius:12px;padding:24px 16px 20px;overflow:hidden;"><div style="position:absolute;top:-8px;right:6px;font-family:'Noto Serif TC',serif;font-size:60px;font-weight:900;color:rgba(255,255,255,0.09);line-height:1;">5</div><div style="position:relative;"><div style="font-weight:700;color:#ffffff;font-size:14px;margin-bottom:6px;">滿意度問卷</div><div style="font-size:11.5px;color:rgba(255,255,255,0.7);line-height:1.7;">完成後 1 天發送問卷</div></div></div>
+  </div>
+
+  <!--購買管道-->
+  <div style="margin-top:40px;display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+    <span style="background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:4px 12px;letter-spacing:1px;">購買管道</span>
+    <span style="font-family:'Noto Serif TC',serif;font-size:16px;font-weight:700;color:var(--navy);">選擇方便的付款方式下單</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:34px;">
+    <div style="background:#fff;border:1px solid var(--gray-light);border-top:3px solid var(--navy);padding:22px 16px;text-align:center;">
+      <div style="width:52px;height:52px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg></div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px;">1SHOP 線上商城</div>
+      <div style="font-size:12px;color:#666;">支援 <b>信用卡</b> 付款</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--gray-light);border-top:3px solid #06C755;padding:22px 16px;text-align:center;">
+      <div style="width:52px;height:52px;border-radius:12px;background:#06C755;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596a.626.626 0 01-.199.031c-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595a.62.62 0 01.194-.033c.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg></div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px;">LINE 線上商城</div>
+      <div style="font-size:12px;color:#666;">支援 <b>LINE Pay</b> 付款</div>
+    </div>
+    
+    </div>
+  <div style="margin:0 0 30px;background:#FDECEC;border:1px solid #F1C9C9;border-radius:12px;padding:16px 20px;display:flex;gap:14px;align-items:flex-start;"><div style="width:34px;height:34px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="19" height="19" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="1.9"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg></div><div style="font-size:13px;color:#333;line-height:1.85;"><b style="color:var(--red);font-size:14px;">防詐騙提醒</b><br>本服務客服<b>不會</b>主動通知「<b style="color:var(--red);">誤扣款／欠費／分期設定錯誤…等</b>」，要求您操作 <b>ATM、網路銀行或超商儲值</b>，請勿依指示操作、以免受騙。如接獲可疑來電或訊息，可撥打 <b>165</b> 反詐騙專線查證。</div></div>
+  <!--聯繫時間說明-->
+  <div style="margin-top:32px;">
+    <h3 style="font-family:'Noto Serif TC',serif;font-size:17px;font-weight:700;text-align:center;margin-bottom:6px;">關於「專人聯繫時間」</h3>
+    <p style="text-align:center;font-size:13px;color:#666;margin-bottom:4px;">為讓您提早安排行程，我們將在以下時間與您聯繫確認服務細節。</p>
+    <p style="text-align:center;font-size:12px;color:var(--warning);margin-bottom:16px;">※ 如遇國定假日或連續假期，聯繫時間順延至下一個工作日，敬請見諒。</p>
+    <div class="contact-examples">
+      <div class="contact-card">
+        <div class="contact-card-header">範例一：工作日 10:00 前付款</div>
+        <div class="contact-card-body"><p><strong>情境：</strong>週一上午 9:00 完成訂單。</p><p><strong>聯繫時間：</strong>最晚 <strong>週二 17:00 前</strong> 致電。</p></div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-card-header">範例二：工作日 10:00 後付款</div>
+        <div class="contact-card-body"><p><strong>情境：</strong>週一下午 15:00 完成訂單。</p><p><strong>聯繫時間：</strong>最晚 <strong>週三 17:00 前</strong> 聯繫。</p></div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-card-header">範例三：週末或假日前付款</div>
+        <div class="contact-card-body"><p><strong>情境：</strong>週五中午 12:00 完成訂單。</p><p><strong>聯繫時間：</strong>最晚 <strong>下週二 17:00 前</strong> 聯繫。</p></div>
+      </div>
+    </div>
+  </div>
+  <!--發票說明-->
+  <div style="margin-top:40px;display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+    <span style="background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:4px 12px;letter-spacing:1px;">發票開立</span>
+    <span style="font-family:'Noto Serif TC',serif;font-size:16px;font-weight:700;color:var(--navy);">採用綠界電子發票</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="border:1px solid var(--gray-light);border-radius:2px;padding:14px 16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;margin-bottom:5px;"><svg style="width:17px;height:17px;flex-shrink:0;color:var(--red);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>開立時間</div>
+      <div style="font-size:12px;color:#666;line-height:1.75;">1SHOP 系統自動開立；LINE 商城於付款確認後 <b>1 個工作天內</b>開立。</div>
+    </div>
+    <div style="border:1px solid var(--gray-light);border-radius:2px;padding:14px 16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;margin-bottom:5px;"><svg style="width:17px;height:17px;flex-shrink:0;color:var(--red);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>公司統編發票</div>
+      <div style="font-size:12px;color:#666;line-height:1.75;">需開統編者請於<b>下單時填寫「公司抬頭＋統一編號」</b>，將開立紙本發票。</div>
+    </div>
+    <div style="border:1px solid var(--gray-light);border-radius:2px;padding:14px 16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;margin-bottom:5px;"><svg style="width:17px;height:17px;flex-shrink:0;color:var(--red);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>手機載具</div>
+      <div style="font-size:12px;color:#666;line-height:1.75;">需載具者請於<b>下單時填寫手機條碼載具</b>。</div>
+    </div>
+    <div style="border:1px solid var(--gray-light);border-radius:2px;padding:14px 16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;margin-bottom:5px;"><svg style="width:17px;height:17px;flex-shrink:0;color:var(--red);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>發票通知</div>
+      <div style="font-size:12px;color:#666;line-height:1.75;">開立後綠界會寄「發票開立通知」至您的 Email，<b>請留意垃圾郵件匣</b>。</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;background:var(--warning-bg);border-left:3px solid var(--warning);padding:10px 14px;font-size:12px;color:#8a5a00;line-height:1.75;"><svg style="width:16px;height:16px;flex-shrink:0;color:#B45309;vertical-align:-2px;margin-right:4px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659"/></svg>電子發票如需紙本，可於收到通知信後，持發票資訊至 <b>7-11 ibon</b> 操作列印。</div>
+</div>
+<div data-qg="3" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>預約清洗前的準備</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">技師到府前，花 5 分鐘做好準備，能讓整個清洗流程更順暢，也能保護你家的環境與設備。</p>
+  <img loading="lazy" decoding="async" src="__B__img/e34.webp" alt="預約清洗服務前，您該準備好的3件事" style="width:100%;display:block;border:1px solid var(--gray-light);">
+</div>
+<div data-qg="3" class="section">
+  <div class="section-title"><div class="dot"></div><h2>到府標準服務流程</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">技師到府當天會依照以下標準流程進行，讓你提前了解服務的每個環節。</p>
+  <div class="onsite-flow">
+    <div class="onsite-step">
+      <div class="onsite-icon-wrap">
+        <div class="onsite-step-num">1</div>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="onsite-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <h4>服務內容說明</h4>
+      <p>向您說明服務項目，確認施作範圍。</p>
+    </div>
+    <div class="onsite-step">
+      <div class="onsite-icon-wrap">
+        <div class="onsite-step-num">2</div>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="onsite-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+      </div>
+      <h4>環境檢測與保護</h4>
+      <p>鋪設防護措施，避免廢水外漏、影響傢俱。</p>
+    </div>
+    <div class="onsite-step">
+      <div class="onsite-icon-wrap">
+        <div class="onsite-step-num">3</div>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="onsite-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+      </div>
+      <h4>執行專業清洗</h4>
+      <p>標準化工法搭配環境友善專業藥劑深層清洗。</p>
+    </div>
+    <div class="onsite-step">
+      <div class="onsite-icon-wrap">
+        <div class="onsite-step-num">4</div>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="onsite-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.776 48.776 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+      </div>
+      <h4>拍照記錄成果</h4>
+      <p>記錄清洗前後差異，Email提供驗收單存查。</p>
+    </div>
+    <div class="onsite-step">
+      <div class="onsite-icon-wrap">
+        <div class="onsite-step-num">5</div>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="onsite-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg>
+      </div>
+      <h4>完工驗收與復原</h4>
+      <p>邀您確認成果並簽名，整理現場恢復整潔。</p>
+    </div>
+  </div>
+</div>
+<div data-qg="3" class="section">
+  <div class="section-title"><div class="dot"></div><h2>到府時間怎麼估？</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">以下時間為單台清洗的參考工時，實際施工時間可能因現場狀況略有調整。</p>
+  <div class="time-grid">
+    <div class="time-card">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <div>
+        <h3>預估作業時間</h3>
+        <p>室內機：約 <strong>1.5~2.5</strong> 小時 / 台</p>
+        <p>室外機：約 <strong>0.5~1</strong> 小時 / 台</p>
+      </div>
+    </div>
+    <div class="time-card">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M12 14.25h.008v.008H12v-.008z"/></svg>
+      <div>
+        <h3>可預約時段</h3>
+        <p>週一至週日（全年無休）</p>
+        <p><strong>09:00 – 18:00</strong></p>
+      </div>
+    </div>
+  </div>
+  <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--red);">※ 實際作業時長因機型與現場狀況有所增減，最終到府時間以客服協調排程為準。</p>
+</div>
+<div data-qg="3" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>服務區域一覽</h2><div class="line"></div></div>
+  <p style="font-size:14px;color:#555;line-height:1.9;margin:0 0 22px;letter-spacing:0.3px;border-left:3px solid #C8102E;padding-left:14px;">目前服務涵蓋以下地區，如有疑問可於預約前先與客服確認。</p>
+  <div class="table-wrapper">
+    <table class="service-area-table" id="serviceAreaTable">
+      <thead>
+        <tr>
+          <th>縣市</th>
+          <th>可服務區域</th>
+          <th>偏遠地區<br>（加收 NT$600）</th>
+          <th>未提供服務區域</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+<div data-qg="3" class="section">
+  <div class="section-title"><div class="dot"></div><h2>清洗後的保固說明</h2><div class="line"></div></div>
+
+  <!--保固期限-->
+  <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px;">一、保固期限與適用範圍</h3>
+  <div class="warranty-grid">
+    <div class="warranty-card ok">
+      <h4><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M12 14.25h.008v.008H12v-.008z"/></svg>30天基本保固</h4>
+      <p>自服務完成當日起算，提供 30 天冷氣清洗服務功能保固。</p>
+    </div>
+    <div class="warranty-card warn">
+      <h4><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>設備年齡限制</h4>
+      <p><strong>超過 10 年：</strong>因零件可能老化，清洗風險高，恕不提供保固。建議審慎評估。</p>
+      <p style="margin-top:8px;"><strong>超過 15 年：</strong>為避免爭議，恕不提供清洗服務。</p>
+    </div>
+  </div>
+
+  <!--理賠上限-->
+  <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin:24px 0 8px;">二、保固內容與理賠上限</h3>
+  <p style="font-size:13px;color:#555;margin-bottom:14px;">保固期內若經原廠鑑定確認為清洗服務直接導致的功能異常，依設備機齡計算理賠上限：</p>
+  <div class="claim-grid">
+    <div class="claim-card claim-c1"><p>2年內機種</p><p class="claim-pct">600%</p><p>理賠上限</p></div>
+    <div class="claim-card claim-c2"><p>2～5年機種</p><p class="claim-pct">400%</p><p>理賠上限</p></div>
+    <div class="claim-card claim-c3"><p>5～7年機種</p><p class="claim-pct">200%</p><p>理賠上限</p></div>
+    <div class="claim-card claim-c4"><p>7～10年機種</p><p class="claim-pct">100%</p><p>理賠上限</p></div>
+  </div>
+  <div class="extra-claims">
+    <div class="extra-claim-card"><h4>零件停產</h4><p>若原廠或市場已無零件可換，理賠上限為清洗費用的 100%。</p></div>
+    <div class="extra-claim-card"><h4>財物損傷</h4><p>服務過程中因人員疏失造成傢俱損傷，釐清責任後最高賠償 NT$10,000 元。</p></div>
+  </div>
+
+  <!--除外條款-->
+  <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin:24px 0 14px;">三、非保固範圍（除外條款）</h3>
+  <div class="exclusion-grid">
+    <div class="exclusion-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><h4>既有問題</h4><p>清洗前已存在的設備問題或舊有損壞。</p></div>
+    <div class="exclusion-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><h4>自然損耗</h4><p>消耗性零配件（如濾網）自然損耗或設備自然磨損。</p></div>
+    <div class="exclusion-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><h4>人為／天災</h4><p>天災、外力或使用者不當操作等因素所致的異常。</p></div>
+  </div>
+
+  <!--保固啟用流程-->
+  <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin:24px 0 14px;">四、保固啟用與鑑定流程</h3>
+  <div class="process-flow">
+    <div class="process-step"><div class="process-num">1</div><h4>問題回報</h4><p>保固期內發現異常，聯繫客服並提供照片或影片。</p></div>
+    <div class="process-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></div>
+    <div class="process-step"><div class="process-num">2</div><h4>原廠到府鑑定</h4><p>指派原廠技術人員到府檢測，釐清問題根源。</p></div>
+    <div class="process-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></div>
+    <div class="process-step"><div class="process-num">3</div><h4>責任歸屬與處理</h4><p>依鑑定結果進行後續處理與賠償。</p></div>
+  </div>
+  <div class="process-result" style="margin-top:14px;">
+    <p><strong>• 確認為清洗所致：</strong>後續維修由本公司（原廠）全權協調處理。</p>
+    <p><strong>• 非關清洗問題：</strong>鑑定為設備原有問題或自然老化，相關維修費用由您負擔。</p>
+  </div>
+
+  <!--特別提醒-->
+  <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin:24px 0 14px;">五、特別提醒</h3>
+  <div class="warranty-grid">
+    <div class="warranty-card ok"><h4><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>保固無法延長</h4><p>請在期限內多加使用與測試冷氣，恕無法因「未使用、出國」等個人因素要求延長保固。</p></div>
+    <div class="warranty-card ok"><h4><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:5px;flex-shrink:0;"><path d="M9 12.75l2.25 2.25L15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>務必現場驗收</h4><p>服務完成後，請務必與技師一同檢視清潔成果並完成驗收，以保障您的權益。</p></div>
+  </div>
+</div>
+<div data-qg="3" class="section section-white">
+  <div class="section-title"><div class="dot"></div><h2>訂單取消/改約須知</h2><div class="line"></div></div>
+  <p style="font-size:13px;color:#555;margin-bottom:16px;">正式約定服務日期前，兩方案皆可免費取消／改約。約定後，依提出時間收取每人空班補償費（不含假日）：</p>
+  <table style="width:100%;border-collapse:collapse;font-size:14px;text-align:center;">
+    <thead><tr>
+      <th style="background:var(--navy);color:#fff;padding:12px 14px;text-align:left;font-size:12px;font-weight:500;letter-spacing:1px;width:50%;">約定後 · 提出取消／改約的時間</th>
+      <th style="background:var(--gold);color:#3a2e0a;padding:12px 14px;font-size:14px;font-weight:700;">早鳥方案</th>
+      <th style="background:#1A2E45;color:#fff;padding:12px 14px;font-size:14px;font-weight:700;">標準方案</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);text-align:left;">服務日前 5 個工作天 <strong>17:00 前</strong></td><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);background:#FBF6E8;color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">NT$600</td><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);color:#16A34A;font-weight:700;">免費</td></tr>
+      <tr><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);text-align:left;">服務日前 5 個工作天 17:00 後</td><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);background:#FBF6E8;color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">NT$600</td><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">NT$300</td></tr>
+      <tr><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);text-align:left;">服務日前 4 個工作天 17:00 後</td><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);background:#FBF6E8;color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">NT$600</td><td style="padding:13px 14px;border-bottom:1px solid var(--gray-light);color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">NT$600</td></tr>
+      <tr><td style="padding:13px 14px;text-align:left;">服務日前 1 個工作天 17:00 後／服務當日</td><td style="padding:13px 14px;background:#FBF6E8;color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">NT$1,000</td><td style="padding:13px 14px;color:var(--red);font-weight:700;font-family:'Noto Serif TC',serif;">NT$1,000</td></tr>
+    </tbody>
+  </table>
+  <div style="margin-top:20px;">
+    <div style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:12px;"><svg style="width:18px;height:18px;color:var(--red);flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>範例試算（以服務日 7/30 週三 為例）</div>
+    <div style="font-size:12px;font-weight:700;color:#8a6d16;margin-bottom:6px;">早鳥方案</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+    <div style="background:#FBF6E8;border-radius:6px;padding:9px 14px;font-size:13px;color:#444;">7/15 提出改約／取消 <span style="color:#9A9690;">（距 5 個工作天以上）</span> → <strong style="color:var(--red);">NT$600</strong></div>
+    <div style="background:#FBF6E8;border-radius:6px;padding:9px 14px;font-size:13px;color:#444;">7/30 當日提出 → <strong style="color:var(--red);">NT$1,000</strong></div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:#1A2E45;margin:14px 0 6px;">標準方案</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+    <div style="background:#F0FDF4;border-radius:6px;padding:9px 14px;font-size:13px;color:#444;">7/23（週三）17:00 前提出 <span style="color:#9A9690;">（距 5 個工作天）</span> → <strong style="color:#16A34A;">免費</strong></div>
+    <div style="background:#F7F5F0;border-radius:6px;padding:9px 14px;font-size:13px;color:#444;">7/24（週四）17:00 前提出 <span style="color:#9A9690;">（距 4 個工作天）</span> → <strong style="color:var(--red);">NT$300</strong></div>
+    <div style="background:#F7F5F0;border-radius:6px;padding:9px 14px;font-size:13px;color:#444;">7/28（週一）提出 <span style="color:#9A9690;">（距 2 個工作天）</span> → <strong style="color:var(--red);">NT$600</strong></div>
+    <div style="background:#FEF2F2;border-radius:6px;padding:9px 14px;font-size:13px;color:#444;">7/29（週二）17:00 後 或 7/30 當日 → <strong style="color:var(--red);">NT$1,000</strong></div>
+    </div>
+  </div>
+  <div class="cancel-note">
+    <strong>注意事項：</strong>
+    <ul>
+      <li><strong>急件預約：</strong>預約三日內之服務，若取消或改約比照「服務當日」標準收費。</li>
+      <li>若服務人員在約定時間後 超過 30 分鐘後仍無法聯繫上您，亦比照「服務當日取消」標準收費。</li>
+    </ul>
+  </div>
+</div>
+<div data-qg="3" class="section">
+  <div class="section-title"><div class="dot"></div><h2>服務注意事項</h2><div class="line"></div></div>
+
+  <div class="note-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div><h4>高齡設備風險告知</h4><p>超過 5 年或外觀有老化跡象的設備，其塑膠外殼可能脆化，拆卸時仍有卡榫斷裂可能，此類因材質自然老化造成的耗損恕不列入保固。超過 10 年、長期處於硫磺／鹽害環境或整體狀況不佳的設備，因故障風險極高，恕不提供清洗服務。</p></div>
+  </div>
+  <div class="note-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    <div><h4>安裝位置限制</h4><p>為確保工具順利操作，室內機周邊需保有 10 公分以上距離。安裝高度 3.5 至 4 公尺加收高架作業費 NT$1,000 / 台；超過 4 公尺恕不提供服務。</p></div>
+  </div>
+  <div class="note-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+    <div><h4>到府後無法服務之收費標準</h4><ul>
+      <li>因我方技術問題（如特殊機型無法拆解），不收任何費用。</li>
+      <li>技師到府後發現設備已有故障，無法清洗，酌收車馬費 NT$600 元。</li>
+      <li>因現場環境所限、訂購規格不符、或事先未告知為餐飲店家／油煙環境，酌收車馬費 NT$600 元。</li>
+    </ul></div>
+  </div>
+  <div class="note-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+    <div><h4>社區施工規範</h4><p>住所位於社區大樓者，請在預約前向管理室確認施工規範（如假日可否施工、貨車進出規定），以確保服務能順利進行。</p></div>
+  </div>
+  <div class="note-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+    <div><h4>損壞申告與理賠</h4><p>服務過程中若技師不慎造成損壞，請於服務完成後 <strong>2 日內</strong>向客服申告，逾期恕不受理。賠償以「恢復原有功能」為原則，非「回復全新狀態」。物品價值難以評估時，參照財政部固定資產耐用年數表計算折舊後現值作為理賠上限。</p></div>
+  </div>
+  <div class="note-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div><h4>服務後驗收與退款</h4><p>服務完成後請務必當場檢視清潔成果與周遭環境，並於驗收單簽署確認。<br>本服務一旦開始執行便無法回復，服務開始後即無法受理退款申請。</p></div>
+  </div>
+  <div class="note-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+    <div><h4>不可抗力因素</h4><p>若因天災（颱風、地震）、戰爭、政府法令或其他不可抗力因素導致無法如期服務，本公司不負擔任何違約賠償責任，事件結束後將主動聯繫協商新的服務安排。</p></div>
+  </div>
+  <div class="note-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    <div><h4>訂購前請詳閱服務規範</h4><p>訂購前請詳閱本服務的服務內容與相關規範；完成訂購即視為已閱讀並同意本服務之各項規範與條款。</p></div>
+  </div>
+</div>
+<div data-qg="4" class="section section-white" data-qfaq="1"></div>
+<div data-qg="5" class="section section-dark" style="text-align:center;">
+  <div class="section-title">
+    <div class="line line-w"></div>
+    <div class="dot"></div>
+    <h2 style="color:var(--white);">還有疑問？歡迎聯繫我們</h2>
+    <div class="dot"></div>
+    <div class="line line-w"></div>
+  </div>
+  <p style="color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:32px;line-height:1.8;">若您對冷氣清洗服務有任何疑問，歡迎透過以下方式聯繫客服團隊</p>
+
+  <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:0;max-width:760px;margin:0 auto;text-align:left;border-radius:16px;overflow:hidden;box-shadow:0 12px 44px rgba(0,0,0,0.28);">
+    <!--左：LINE 綠色行動面板-->
+    <div style="background:#06C755;color:#fff;padding:40px 34px;display:flex;flex-direction:column;justify-content:center;">
+      <div style="display:inline-flex;align-items:center;gap:8px;font-size:13px;letter-spacing:2px;font-weight:700;margin-bottom:14px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596a.626.626 0 01-.199.031c-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595a.62.62 0 01.194-.033c.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+        <span>LINE 官方帳號</span>
+      </div>
+      <h3 style="font-family:'Noto Serif TC',serif;font-size:27px;font-weight:900;margin:0 0 8px;color:#fff;line-height:1.3;">加 LINE 立即諮詢</h3>
+      <p style="font-size:22px;font-weight:700;letter-spacing:1px;margin:0 0 10px;color:#fff;">@063kttbk</p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.9);margin:0 0 22px;line-height:1.7;">三菱重工原廠冷氣清洗服務<br>預約、報價、疑難雜症都可直接詢問</p>
+      <img loading="lazy" decoding="async" src="__B__img/lineqr.webp" alt="LINE QR Code 加入好友" style="width:118px;height:118px;background:#fff;padding:8px;border-radius:12px;margin:0 0 20px;display:block;" onerror="this.style.display='none'">
+      <a href="https://line.me/R/ti/p/@063kttbk" target="_blank" rel="noopener" style="display:inline-block;background:#fff;color:#04a144;padding:13px 40px;font-size:15px;font-weight:700;text-decoration:none;border-radius:30px;width:fit-content;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">加入好友</a>
+    </div>
+    <!--右：客服信箱 + 服務時間-->
+    <div style="background:var(--navy-mid);padding:40px 32px;display:flex;flex-direction:column;justify-content:center;gap:28px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,0.5);margin-bottom:10px;">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#E2C877" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+          <span>客服信箱</span>
+        </div>
+        <a href="mailto:homecare@upyoung.com.tw" style="font-family:'Noto Serif TC',serif;font-size:17px;color:var(--gold-light);font-weight:700;text-decoration:none;word-break:break-all;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">homecare@upyoung.com.tw</a>
+        <p style="font-size:12px;color:rgba(255,255,255,0.45);margin:8px 0 0;">來信將於 1 個工作天內回覆</p>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,0.1);"></div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,0.5);margin-bottom:10px;">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#E2C877" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>客服服務時間</span>
+        </div>
+        <p style="font-family:'Noto Serif TC',serif;font-size:19px;color:var(--white);font-weight:700;margin:0 0 6px;line-height:1.5;">週一至週五<br>09:00–12:00 · 13:00–18:00</p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.45);margin:0;">午間及國定例假日暫停服務</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script type="text/plain" id="qd-area-csv">縣市,可服務區域,偏遠地區(需加價$600元),未提供服務區域
+基隆市,仁愛區,,
+,信義區,,
+,中正區,,
+,中山區,,
+,安樂區,,
+,暖暖區,,
+,七堵區,,
+台北市,中正區,,陽明山國家公園
+,大同區,,
+,中山區,,
+,松山區,,
+,大安區,,
+,萬華區,,
+,信義區,,
+,士林區,,
+,北投區,,
+,內湖區,,
+,南港區,,
+,文山區,,
+新北市,板橋區,,萬里區
+,三重區,,金山區
+,中和區,,深坑區
+,永和區,,石碇區
+,新莊區,,瑞芳區
+,新店區,,平溪區
+,土城區,,雙溪區
+,蘆洲區,,貢寮區
+,樹林區,,坪林區
+,五股區,,烏來區
+,泰山區,,三芝區
+,淡水區,,
+,三峽區,,
+,八里區,,
+,鶯歌區,,
+,林口區,,
+,汐止區,,
+桃園市,桃園區,,復興區
+,中壢區,,大溪區
+,平鎮區,,
+,八德區,,
+,楊梅區,,
+,蘆竹區,,
+,龜山區,,
+,大園區,,
+,觀音區,,
+,新屋區,,
+,龍潭區,,
+新竹市,東區,,
+,北區,,
+,香山區,,
+新竹縣,竹北市,芎林鄉,尖石鄉
+,竹東鎮,北埔鄉,五峰鄉
+,新埔鎮,,峨眉鄉
+,湖口鄉,,橫山鄉
+,新豐鄉,,
+,寶山鄉,,
+,關西鎮,,
+苗栗縣/市,苗栗市,獅潭鄉,泰安鄉
+,頭份市,卓蘭鎮,南庄鄉
+,竹南鎮,大湖鄉,
+,後龍鎮,苑里鄉,
+,公館鄉,通宵鄉,
+,西湖鄉,,
+,頭屋鄉,,
+,三義鄉,,
+,銅鑼鄉,,
+,造橋鄉,,
+台中市,中區,東勢區,和平區
+,東區,石岡區,
+,西區,新社區,
+,南區,大安區,
+,北區,外埔區,
+,西屯區,大甲區,
+,南屯區,,
+,北屯區,,
+,豐原區,,
+,大里區,,
+,太平區,,
+,清水區,,
+,沙鹿區,,
+,梧棲區,,
+,烏日區,,
+,神岡區,,
+,大肚區,,
+,大雅區,,
+,后里區,,
+,霧峰區,,
+,潭子區,,
+,龍井區,,
+彰化縣/市,彰化市,,二水鄉
+,員林市,,溪州鄉
+,和美鎮,,大城鄉
+,鹿港鎮,,竹塘鄉
+,溪湖鎮,,
+,二林鎮,,
+,田中鎮,,
+,北斗鎮,,
+,花壇鄉,,
+,芬園鄉,,
+,大村鄉,,
+,永靖鄉,,
+,伸港鄉,,
+,線西鄉,,
+,福興鄉,,
+,秀水鄉,,
+,埔心鄉,,
+,埔鹽鄉,,
+,社頭鄉,,
+,芳苑鄉,,
+,埤頭鄉,,
+,田尾鄉,,
+南投縣,南投市,,仁愛鄉
+,草屯鎮,,信義鄉
+,名間鄉,,竹山鎮
+,,,集集鎮
+,,,中寮鄉
+,,,鹿谷鄉
+,,,魚池鄉
+,,,國姓鄉
+,,,埔里鎮
+,,,水里鄉
+雲林,斗六市,林內鄉,古坑鄉
+,斗南鎮,二崙鄉,北港鎮
+,虎尾鎮,崙背鄉,四湖鄉
+,西螺鎮,麥寮鄉,口湖鄉
+,莿桐鄉,土庫鎮,水林鄉
+,,大埤鄉,
+,,東勢鄉,
+,,褒忠鄉,
+,,臺西鄉,
+,,元長鄉,
+嘉義市,東區,,
+,西區,,
+嘉義縣,太保市,,梅山鄉
+,水上鄉,,竹崎鄉
+,民雄鄉,,阿里山鄉
+,大林鎮,,大埔鄉
+,朴子市,,番路鄉
+,溪口鄉,,東石鄉
+,新港鄉,,布袋鄉
+,六腳鄉,,義竹鄉
+,鹿草鄉,,中埔鄉
+台南,東區,,北門
+,南區,,楠西區
+,北區,,南化區
+,中西區,,將軍區
+,安平區,,左鎮區
+,安南區,,龍崎區
+,永康區,,大內區
+,歸仁區,,後壁區
+,新化區,,白河區
+,仁德區,,東山區
+,關廟區,,山上區
+,官田區,,新營區
+,麻豆區,,六甲區
+,佳里區,,柳營區
+,西港區,,北門區
+,七股區,,學甲區
+,下營區,,
+,鹽水區,,
+,善化區,,
+,新市區,,
+,安定區,,
+高雄,三民區,旗山區,六龜區
+,仁武區,梓官區,內門區
+,前金區,,杉林區
+,前鎮區,,甲仙區
+,苓雅區,,桃源區
+,岡山區,,那瑪夏區
+,林園區,,茂林區
+,阿蓮區,,田寮區
+,橋頭區,,美濃區
+,鳳山區,,
+,小港區,,
+,大寮區,,
+,鳥松區,,
+,大樹區,,
+,大社區,,
+,燕巢區,,
+,湖內區,,
+,路竹區,,
+,彌陀區,,
+,永安區,,
+,茄萣區,,
+,新興區,,
+,鼓山區,,
+,左營區,,
+,楠梓區,,
+,鹽埕區,,
+,旗津區,,
+屏東,屏東市,萬丹鄉,三地門
+,長治鄉,崁頂鄉,霧台鄉
+,麟洛鄉,潮州鎮,瑪家鄉
+,九如鄉,竹田鄉,泰武鄉
+,里港鄉,,來義鄉
+,鹽埔鄉,,枋寮鄉
+,高樹鄉,,枋山鄉
+,,,春日鄉
+,,,獅子鄉
+,,,牡丹鄉
+,,,恆春鎮
+,,,滿洲鄉
+,,,新園鄉
+,,,東港鎮
+,,,內埔鄉
+,,,南州鄉
+,,,林邊鄉
+,,,佳冬鄉
+,,,新埤鄉
+,,,萬巒鄉
+,,,獅子鄉
+,,,車城鄉
+,,,琉球鄉
+宜蘭,宜蘭市,,大同鄉
+,羅東鎮,,南澳鄉
+,蘇澳鎮,,
+,頭城鎮,,
+,礁溪鄉,,
+,壯圍鄉,,
+,員山鄉,,
+,五結鄉,,
+,冬山鄉,,
+,三星鄉,,</script>
