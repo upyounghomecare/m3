@@ -318,7 +318,7 @@ function _scrollTo(y){
     if(window.jQuery){
       window.jQuery('html, body').stop().animate({scrollTop:y},600);
     }else{
-      _scrollTo(y);
+      window.scrollTo(0,y);
     }
     /* 保險:若 600ms 後完全沒動(且本來就不在目標位置),直接硬跳 */
     setTimeout(function(){
@@ -328,6 +328,24 @@ function _scrollTo(y){
     },600);
   }catch(e){try{window.scrollTo(0,y);}catch(e2){}}
 }
+/* 2026-09-22 捲到某個區塊並「對準到穩定為止」。
+   原本只算一次位置就捲:途中上方的詳情圖片陸續載入、或折扣剛套上購物車重排,內容被往下推,
+   畫面就停在詳情頁中間(老闆回報「按完成有時不會跳到『目前已經選購』」)。
+   這裡先平滑捲過去,之後 4 秒內每 0.4 秒檢查一次,偏掉就直接再對準;客戶自己一滑就停手,不跟客戶搶畫面。 */
+function _scrollToStable(el,off){try{
+  var stop=false,n=0;
+  function user(){stop=true;}
+  ['wheel','touchstart','keydown'].forEach(function(ev){window.addEventListener(ev,user,{passive:true,once:true});});
+  function want(){return el.getBoundingClientRect().top+window.pageYOffset-off;}
+  _scrollTo(want());
+  setTimeout(function chk(){try{
+    if(stop)return;
+    var top=el.getBoundingClientRect().top;
+    if(Math.abs(top-off)>30){window.scrollTo(0,Math.max(0,Math.round(want())));}
+    if(++n<10)setTimeout(chk,400);
+    else ['wheel','touchstart','keydown'].forEach(function(ev){window.removeEventListener(ev,user);});
+  }catch(e){}},750);
+}catch(e){}}
 function sumKeys(ks){var s=0;ks.forEach(function(k){s+=qty[k]||0;});return s;}
 function hasBlow(){return (qty.cm||0)+(qty.cl||0)>0;}
 /* 商用/重油汙加價台數：室內機每台加價；室外機「隨室內機清洗」不加價，只有「單獨清洗室外機」時才每台加價 */
@@ -821,8 +839,7 @@ var api={
           var t=null,hs=document.querySelectorAll('h1');
           for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0){t=hs[k];break;}}
           if(!t)t=document.getElementById('cart-section');
-          if(t){var y=t.getBoundingClientRect().top+window.pageYOffset-70;
-            _scrollTo(y);}
+          if(t)_scrollToStable(t,70);
         }catch(e){}},420);
         return;
       }
