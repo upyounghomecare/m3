@@ -1756,7 +1756,9 @@ function addContinueBtn(){
 }
 function fillConsent(){
   try{
-    if(!window.__qsPlan)return;
+    /* 2026-09-22 欄位加回正式頁(8/16 刪掉後,除濕機期望配送日沒地方存、整個遺失)。
+       後台欄位名稱「同意存證（含除濕機配送日）」,非必填;這裡一律把整列藏起來(客戶結帳畫面看不到,後台訂單明細照常顯示)。
+       先找欄位、先藏,再判斷要不要寫 —— 上次被刪就是因為沒走精靈時沒藏,結帳頁冒出一個空白欄位。 */
     var cfs=document.querySelectorAll('[name^="cf-"]'),el=null,row=null;
     for(var i=0;i<cfs.length;i++){
       var r=cfs[i].closest('.form-group');
@@ -1768,18 +1770,21 @@ function fillConsent(){
       row.style.cssText+=';position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;border:0!important;white-space:nowrap!important;';
       row.setAttribute('data-qsc','1');
     }
+    var _hasDh=!!(window.__qsDhDelivery&&_cartArr().some(function(x){return (x.ProductName||'').indexOf('除濕機')>=0;}));
+    if(!window.__qsPlan&&!_hasDh)return;
     /* 存證:改為「內容有變才更新」(原本只寫一次會漏記後加的配送日/換方案/已閱讀)；保留第一次的時間戳、收斂後即不再寫，不抖動 */
     /* 這行會寫進訂單的「同意存證」欄位,客服對帳時會看。達標時折數要跟著換,
        否則存證寫 95 折、實收 92 折,存證就失去意義(它的用途正是證明客戶同意了什麼)。
        用 _whQualC()(看購物車):這裡是結帳當下,商品已經在車上了。 */
-    var planTxt=(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)'
+    var planTxt=!window.__qsPlan?'(未於結帳前選擇方案)'
+                :(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折)'
                 :(_whQualC()?'標準方案(兩週內到府・全戶加碼92折)':'標準方案(兩週內到府・95折)');
     var _cur=el.value||'';
     var _mt=_cur.match(/｜時間:([^｜]+)$/);var ts;
     if(_mt){ts=_mt[1];}else{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
-    var rec='【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+((window.__qsDhDelivery&&_cartArr().some(function(x){return (x.ProductName||'').indexOf('除濕機')>=0;}))?'｜除濕機期望配送:'+window.__qsDhDelivery:'')+'｜時間:'+ts;
+    var rec=(_hasDh?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+'｜時間:'+ts;
     if(_cur!==rec){
-      var st=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
+      var st=Object.getOwnPropertyDescriptor((el.tagName==='TEXTAREA'?window.HTMLTextAreaElement:window.HTMLInputElement).prototype,'value').set;
       st.call(el,rec);
       el.dispatchEvent(new Event('input',{bubbles:true}));
       el.dispatchEvent(new Event('change',{bubbles:true}));
