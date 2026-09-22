@@ -977,6 +977,12 @@ function _maskPrice(price,busy){try{if(!price)return;var sp=price.querySelector(
 var _dhGone=0;
 function _dhResetWatch(){try{
   if(window.__qsAdding){_dhGone=0;return;}
+  /* 2026-09-22 修:精靈裡選完配送日,除濕機要等最後一步「完成」才會放進購物車;
+     這段期間購物車沒有除濕機,原本 3 秒後就把配送日清掉 → 用精靈買的客戶配送日全部遺失。
+     精靈視窗(#qw-ovl)開著時不清;客戶中途關掉精靈沒買,視窗消失後照常清。
+     自己下單也一樣:勾完注意事項(記下已閱讀)→ 選配送日的這段時間,除濕機還沒進購物車,
+     所以注意事項視窗(#qw-terms)、配送日曆(#qw-dhcal)開著時也不清。 */
+  if(document.getElementById('qw-ovl')||document.getElementById('qw-terms')||document.getElementById('qw-dhcal')){_dhGone=0;return;}
   var has=_cartArr().some(function(x){return (x.ProductName||'').indexOf('三菱重工除濕機')>=0;});
   if(has){_dhGone=0;return;}
   if(window.__qsDhDelivery||window.__qsRead_dh){_dhGone++;if(_dhGone>=4){window.__qsDhDelivery='';window.__qsRead_dh='';_dhGone=0;}}
