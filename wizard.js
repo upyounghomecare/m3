@@ -781,8 +781,10 @@ var api={
     close();
     _showBackBtn();
     setTimeout(function(){
-      var t=null,ws=document.querySelectorAll('div');
-      for(var i=0;i<ws.length;i++){var im=ws[i].querySelectorAll('img');if(im.length>=8&&/img\.1shop\.tw/.test(im[0].src||'')){t=ws[i];break;}}
+      /* 2026-09-23:詳情改 HTML 版後原本 19 張圖被藏起來(位置是 0),先找新的目錄列/詳情區 */
+      var t=document.querySelector('.qd-toc')||document.querySelector('.qd-host'),ws;
+      if(!t){ws=document.querySelectorAll('div');
+      for(var i=0;i<ws.length;i++){var im=ws[i].querySelectorAll('img');if(im.length>=8&&/img\.1shop\.tw/.test(im[0].src||'')&&ws[i].offsetHeight>0){t=ws[i];break;}}}
       if(!t)t=document.querySelector('.product-row');
       if(t){_scrollTo(t.getBoundingClientRect().top+window.pageYOffset-60);}
     },180);
@@ -991,18 +993,20 @@ function _cpBusy(){var t=window.__qsCpBusy||0;return t>0&&(Date.now()-t)<8000;}
 function _maskPrice(price,busy){try{if(!price)return;var sp=price.querySelector('.qs-calc');
  if(busy){if(!sp){[].slice.call(price.children).forEach(function(c){c.style.display='none';});sp=document.createElement('span');sp.className='qs-calc';sp.textContent='計算中…';sp.style.cssText='color:#8a93a0;font-size:13px;font-weight:600;white-space:nowrap';price.appendChild(sp);}}
  else if(sp){if(sp.parentElement)sp.parentElement.removeChild(sp);[].slice.call(price.children).forEach(function(c){c.style.display='';});}}catch(e){}}
-var _dhGone=0;
+var _dhGone=0,_dhSeen=false;
 function _dhResetWatch(){try{
+  /* 用途:客戶把除濕機「從購物車移除」後,清掉舊的配送日/已閱讀,下次加購會重新詢問。
+     2026-09-23 改寫:只在「除濕機曾經進過購物車、後來不見了」才清。
+     舊寫法是「購物車沒有除濕機就清」,但除濕機要等精靈最後一步才進購物車 ——
+     選完配送日後,不論是在精靈裡、按「先看服務說明」把精靈暫時收起來、或在看日曆,
+     只要超過 3 秒就被清掉,配送日整個遺失(9/22~23 實測抓到兩次,補了兩次條件仍漏)。
+     改成看「有沒有進過購物車」,就不必去猜精靈現在是開著、收著還是暫停。 */
   if(window.__qsAdding){_dhGone=0;return;}
-  /* 2026-09-22 修:精靈裡選完配送日,除濕機要等最後一步「完成」才會放進購物車;
-     這段期間購物車沒有除濕機,原本 3 秒後就把配送日清掉 → 用精靈買的客戶配送日全部遺失。
-     精靈視窗(#qw-ovl)開著時不清;客戶中途關掉精靈沒買,視窗消失後照常清。
-     自己下單也一樣:勾完注意事項(記下已閱讀)→ 選配送日的這段時間,除濕機還沒進購物車,
-     所以注意事項視窗(#qw-terms)、配送日曆(#qw-dhcal)開著時也不清。 */
-  if(document.getElementById('qw-ovl')||document.getElementById('qw-terms')||document.getElementById('qw-dhcal')){_dhGone=0;return;}
   var has=_cartArr().some(function(x){return (x.ProductName||'').indexOf('三菱重工除濕機')>=0;});
-  if(has){_dhGone=0;return;}
-  if(window.__qsDhDelivery||window.__qsRead_dh){_dhGone++;if(_dhGone>=4){window.__qsDhDelivery='';window.__qsRead_dh='';_dhGone=0;}}
+  if(has){_dhGone=0;_dhSeen=true;return;}
+  if(!_dhSeen){_dhGone=0;return;}/* 還沒進過購物車 → 客戶還在挑,不動 */
+  if(window.__qsDhDelivery||window.__qsRead_dh){_dhGone++;if(_dhGone>=4){window.__qsDhDelivery='';window.__qsRead_dh='';_dhGone=0;_dhSeen=false;}}
+  else _dhSeen=false;
 }catch(e){}}
 /* 修:內文JS記住「已同意」(__qsAgreed)後,再按立即結帳會跳過方案選擇畫面,客戶想改早鳥/標準只能重新整理。
    作法:只要不在結帳畫面、也沒開著同意彈窗,就清掉旗標→下次按結帳會重新跳出方案選擇 */
