@@ -3,6 +3,33 @@
    兩份共用的防呆邏輯若要修,記得兩邊都改。 */
 (function(){
 try{
+/* ===== 2026-09-23 員工免輸入密碼連結 =====
+   員工用 https://upyoung.my1shop.com/rnhzk4#emp-k9x3q7 進來時,自動把密碼填好送出,不必打字。
+   ⚠️ 密碼不寫在這個檔案裡 —— 1SHOP 本來就把密碼放在頁面資料 window._pageData.ProtectedPW(原始碼看得到),
+      這裡直接讀那一個值,所以不會因為這支程式放在 GitHub 而多一個外流管道。
+   ⚠️ 這條連結等於鑰匙:轉傳出去別人也能進。要換「鑰匙」就改下面這組字,並重發新連結給員工。
+   沒帶這段後綴的人,照常看到密碼框。輸入過一次的裝置,1SHOP 會記 30 天。 */
+var EMP_KEY='emp-k9x3q7';
+(function autoUnlock(){try{
+  if(location.hash.indexOf(EMP_KEY)<0)return;
+  var n=0,t=setInterval(function(){try{
+    if(++n>25){clearInterval(t);return;}
+    var f=document.getElementById('ProtectedPW');
+    if(!f){if(n>3)clearInterval(t);return;}/* 已經解鎖過就沒有這個表單 */
+    var el=f.querySelector('[name="ProtectedPW"]');
+    if(!el||el.getAttribute('data-emp'))return;
+    var pw=(window._pageData||{}).ProtectedPW||'';
+    if(!pw)return;
+    el.setAttribute('data-emp','1');
+    var st=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
+    st.call(el,pw);
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+    var b=f.querySelector('button[type=submit]')||f.querySelector('button');
+    if(b)b.click();
+    clearInterval(t);
+  }catch(e){clearInterval(t);}},400);
+}catch(e){}})();
 var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
 function imj(t){return IB+t+'/600x.jpg';}
