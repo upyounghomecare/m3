@@ -138,7 +138,7 @@ var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.5
 +'#qw-ovl *{box-sizing:border-box}'
 +''
 +'#qw-ovl .qw{max-width:640px!important}'/* 內文CSS有一份舊的.qw(max-width:400px)排在後面會壓過來,故用#qw-ovl前綴+!important搶回;必須放在下面兩個@media之前,否則會反過來壓掉桌機規則 */
-+'@media (min-width:760px){#qw-ovl .qw{max-width:640px!important;padding:12px 14px 14px!important}}'+'@media (min-width:1100px){#qw-ovl .qw{max-width:720px!important}}'+'@media (min-width:760px){#qw-terms .qwt-m{max-width:520px!important}}'+'#qw-ovl .qw .wel-start{max-width:89%!important;margin-left:auto!important;margin-right:auto!important;display:block!important}'+'.qw .qsvc{margin-top:11px;border:1.5px dashed #B8860B;background:#fdf6e3;border-radius:11px;padding:12px 13px}'+'.qw .qsvc-t{font-size:12.5px;font-weight:900;color:#8a6410;line-height:1.55;margin-bottom:8px}'+'.qw .qsvc-r{display:flex;gap:7px}'+'.qw .qsvc-i{flex:1;min-width:0;border:1px solid #dbe3ec;border-radius:8px;padding:9px 10px;font-size:14px;letter-spacing:.06em;font-family:ui-monospace,Menlo,monospace;background:#fff;color:#16202b}'+'.qw .qsvc-b{border:none;background:#B8860B;color:#fff;border-radius:8px;padding:9px 15px;font-size:13.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap}'+'.qw .qsvc-b:active{transform:scale(.97)}'+'.qw .qsvc-m{font-size:12px;font-weight:800;margin-top:7px;line-height:1.5}'+'.qw .qsvc-m.bad{color:#c0392b}.qw .qsvc-m.ok{color:#1f7a52}'+'.qw .qsvc-ok{margin-top:11px;background:#e8f4ee;color:#1f7a52;border-radius:10px;padding:11px 13px;font-size:12.5px;font-weight:800;line-height:1.65}'+'.qw .qpnote{margin-top:9px;border-radius:11px;padding:9px 12px;font-size:12.5px;line-height:1.7}'+'.qw .qpn-info{background:#eaf2fb;border:1px solid #b9d3ee;color:#0C447C}'+'.qw .qpn-warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}'+'.qw .qdl{margin-top:9px;background:#fff;border:1.5px solid #dbe3ec;border-radius:12px;padding:10px 13px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(4,44,83,.06);cursor:pointer}'+'.qw .qdl:active{transform:scale(.99)}'+'.qw .qdl-ic{width:30px;height:30px;flex:0 0 auto;border-radius:9px;background:rgba(184,134,11,.09);display:flex;align-items:center;justify-content:center;font-size:17px}'+'.qw .qdl-tx{flex:1;min-width:0}.qw .qdl-t1{font-size:14px;font-weight:900;color:#042C53}.qw .qdl-t2{font-size:11.5px;color:#5f6b78;margin-top:2px}'+'.qw #qw-ovl .qcp{margin:12px 0 2px;text-align:left}#qw-ovl .qcp-r{display:flex;align-items:center;gap:8px}#qw-ovl .qcp-t{flex:none;font-size:13px;font-weight:800;color:#0C447C;white-space:nowrap}#qw-ovl .qcp-i{flex:1;min-width:0;box-sizing:border-box;border:1.5px solid #dbe3ec;border-radius:9px;padding:9px 11px;font-size:14.5px;font-family:inherit;letter-spacing:.06em;text-transform:uppercase}#qw-ovl .qcp-i:focus{outline:none;border-color:#0C447C;box-shadow:0 0 0 3px rgba(12,68,124,.12)}#qw-ovl .qcp-n{font-size:11px;color:#9aa7b4;margin:5px 0 0;line-height:1.5}/* 2026-09-23 底部兩顆按鈕是固定的,會蓋住上方內容(老闆抓到小字被切一半) → 讓優惠碼區塊自己留出空間 */#qw-ovl .qwfoot .qcp{border-top:1px dashed #cfdae6;padding:9px 0 0;margin-top:10px}#qw-ovl .qwfoot .nav{margin-top:11px}.qdl-ar{color:#B8860B;font-size:18px;font-weight:900}'+'#qw-ovl .qw .wel-h{font-size:clamp(17px,5.7vw,24px)!important;white-space:normal!important;text-wrap:balance!important;font-weight:900!important}'/* 同上:內文CSS有舊的.wel-h(24px+nowrap)會把標題切掉,強制蓋回 */
++'@media (min-width:760px){#qw-ovl .qw{max-width:640px!important;padding:12px 14px 14px!important}}'+'@media (min-width:1100px){#qw-ovl .qw{max-width:720px!important}}'+'@media (min-width:760px){#qw-terms .qwt-m{max-width:520px!important}}'+'#qw-ovl .qw .wel-start{max-width:89%!important;margin-left:auto!important;margin-right:auto!important;display:block!important}'+'.qw .qsvc{margin-top:11px;border:1.5px dashed #B8860B;background:#fdf6e3;border-radius:11px;padding:12px 13px}'+'.qw .qsvc-t{font-size:12.5px;font-weight:900;color:#8a6410;line-height:1.55;margin-bottom:8px}'+'.qw .qsvc-r{display:flex;gap:7px}'+'.qw .qsvc-i{flex:1;min-width:0;border:1px solid #dbe3ec;border-radius:8px;padding:9px 10px;font-size:14px;letter-spacing:.06em;font-family:ui-monospace,Menlo,monospace;background:#fff;color:#16202b}'+'.qw .qsvc-b{border:none;background:#B8860B;color:#fff;border-radius:8px;padding:9px 15px;font-size:13.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap}'+'.qw .qsvc-b:active{transform:scale(.97)}'+'.qw .qsvc-m{font-size:12px;font-weight:800;margin-top:7px;line-height:1.5}'+'.qw .qsvc-m.bad{color:#c0392b}.qw .qsvc-m.ok{color:#1f7a52}'+'.qw .qsvc-ok{margin-top:11px;background:#e8f4ee;color:#1f7a52;border-radius:10px;padding:11px 13px;font-size:12.5px;font-weight:800;line-height:1.65}'+'.qw .qpnote{margin-top:9px;border-radius:11px;padding:9px 12px;font-size:12.5px;line-height:1.7}'+'.qw .qpn-info{background:#eaf2fb;border:1px solid #b9d3ee;color:#0C447C}'+'.qw .qpn-warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}'+'.qw .qdl{margin-top:9px;background:#fff;border:1.5px solid #dbe3ec;border-radius:12px;padding:10px 13px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(4,44,83,.06);cursor:pointer}'+'.qw .qdl:active{transform:scale(.99)}'+'.qw .qdl-ic{width:30px;height:30px;flex:0 0 auto;border-radius:9px;background:rgba(184,134,11,.09);display:flex;align-items:center;justify-content:center;font-size:17px}'+'.qw .qdl-tx{flex:1;min-width:0}.qw .qdl-t1{font-size:14px;font-weight:900;color:#042C53}.qw .qdl-t2{font-size:11.5px;color:#5f6b78;margin-top:2px}'+'.qw #qw-ovl .qcp{margin:12px 0 2px;text-align:left}#qw-ovl .qcp-r{display:flex;align-items:center;gap:8px}#qw-ovl .qcp-t{flex:none;font-size:13px;font-weight:800;color:#0C447C;white-space:nowrap}#qw-ovl .qcp-i{flex:1;min-width:0;box-sizing:border-box;border:1.5px solid #dbe3ec;border-radius:9px;padding:9px 11px;font-size:14.5px;font-family:inherit;letter-spacing:.06em;text-transform:uppercase}#qw-ovl .qcp-i:focus{outline:none;border-color:#0C447C;box-shadow:0 0 0 3px rgba(12,68,124,.12)}#qw-ovl .qcp-n{font-size:11px;color:#9aa7b4;margin:5px 0 0;line-height:1.5}#qw-ovl .qcp-b{flex:none;border:none;background:#B8860B;color:#fff;border-radius:9px;padding:10px 15px;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}#qw-ovl .qcp-b:active{transform:scale(.97)}#qw-ovl .qcp-m{margin-top:7px;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:800;line-height:1.6}#qw-ovl .qcp-m.ok{background:#e8f4ee;border:1px solid #b5ddc8;color:#1f7a52}#qw-ovl .qcp-m.bad{background:#fdecea;border:1px solid #f0c0b8;color:#c0392b}#qw-ovl .qcp-m.warn{background:#fdf6e3;border:1px solid #e3c98a;color:#7a5c0d}#qw-ovl .qcp-m s{color:#8a93a0;font-weight:600}#qw-ovl .qcp-m b.big{font-size:15px}#qw-ovl .qcp-go{margin-top:6px;font-size:11.5px;color:#B8860B;font-weight:800;text-align:center}#qw-ovl .btn.pri.qwpulse{animation:qwpulse 1.4s infinite}@keyframes qwpulse{0%{box-shadow:0 0 0 0 rgba(184,134,11,.55)}70%{box-shadow:0 0 0 12px rgba(184,134,11,0)}100%{box-shadow:0 0 0 0 rgba(184,134,11,0)}}/* 2026-09-23 底部兩顆按鈕是固定的,會蓋住上方內容(老闆抓到小字被切一半) → 讓優惠碼區塊自己留出空間 */#qw-ovl .qwfoot .qcp{border-top:1px dashed #cfdae6;padding:9px 0 0;margin-top:10px}#qw-ovl .qwfoot .nav{margin-top:11px}.qdl-ar{color:#B8860B;font-size:18px;font-weight:900}'+'#qw-ovl .qw .wel-h{font-size:clamp(17px,5.7vw,24px)!important;white-space:normal!important;text-wrap:balance!important;font-weight:900!important}'/* 同上:內文CSS有舊的.wel-h(24px+nowrap)會把標題切掉,強制蓋回 */
 +'#qw-ovl .qw .callnote,#qw-ovl .qw .envnote,#qw-ovl .qw .optnote,#qw-ovl .qw .warnbox{font-size:13.5px!important;font-weight:800!important;line-height:1.6!important;padding:10px 13px!important}'+'#qw-ovl .qw .callnote b,#qw-ovl .qw .envnote b,#qw-ovl .qw .optnote b,#qw-ovl .qw .warnbox b{font-weight:900!important}'/* 說明類文字統一放大加粗:內文CSS內有舊的.qw重複樣式會壓過wizard.js,故用#qw-ovl前綴+!important強制生效 *//* ⚠️ 彈窗的三條修正已移到 ensureModalCss():這份 CSS 只有「開過精靈」才會注入,
    客戶直接從商品列表加入再按立即結帳時根本沒載到,修正等於不存在(老闆實測抓到) */
 +'.qw .on.qw-on-sm{font-size:12.5px;white-space:nowrap;letter-spacing:-.2px}'
@@ -350,6 +350,49 @@ function _scrollToStable(el,off){try{
    精靈階段購物車是空的,送了也不會生效,所以一律等商品加完才送。
    1SHOP 的 submitCouponNumber 會自動保留「折扣較多」的那一張,所以客戶的碼比方案券差時不會變貴;
    送完 3.5 秒看購物車實際掛著哪一張,再用 toast 告訴客戶結果(打錯字也看得懂要怎麼辦)。 */
+/* ═══ 2026-09-24 精靈內的「套用」試算(老闆要即時回饋) ═══
+   ⚠️ 這一步購物車還是空的(商品要按「完成」才進購物車),所以沒辦法真的問 1SHOP 這組碼有沒有效 ——
+   一人一組的專屬碼「是否已被用過」只有送出去才知道。這裡只能用折扣表試算,
+   真正的金額由「完成」之後購物車上方的綠色橫幅(_cpBanner)負責,兩邊不一致時以橫幅為準。 */
+function _estOff(code){
+  if(/^UPE/.test(code))return null;/* 員工碼只在員工專屬賣場可用,客戶頁認得反而會誤導 */
+  return _codeOff(code);
+}
+function _offText(off){var d=Math.round((1-off)*100);return (d%10===0?(d/10):d)+'折';}
+function _cpMsg(html,cls){try{
+  var box=document.getElementById('qw-cpmsg');if(!box)return;
+  box.innerHTML=html?('<div class="qcp-m '+cls+'">'+html+'</div>'+((cls==='ok'||cls==='warn')?'<div class="qcp-go">👇 最後一步：請按「完成，前往結帳」</div>':'')):'';
+  var pri=document.querySelector('#qw-ovl .btn.pri');
+  if(pri){if(cls==='ok'||cls==='warn')pri.classList.add('qwpulse');else pri.classList.remove('qwpulse');}
+  /* 訊息框讓黏底區變高,要等 _pad 重算完再捲,不然上面的內容會被蓋住一點 */
+  if(html){var c=document.querySelector('#qw-ovl .qw');if(c){setTimeout(function(){c.scrollTop=c.scrollHeight;},60);setTimeout(function(){c.scrollTop=c.scrollHeight;},400);}}
+}catch(e){}}
+/* ═══ 乙案:完成加入購物車後,在購物車上方放一條「真的算出來」的結果橫幅 ═══
+   原本只有一閃即逝的黑色小提示(toast),客戶常常沒看到。橫幅會一直留著,金額直接讀購物車。 */
+function _cpBanner(state,code){try{
+  var t=null,hs=document.querySelectorAll('h1');
+  for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0){t=hs[k];break;}}
+  if(!t)t=document.getElementById('cart-section');
+  if(!t||!t.parentNode)return;
+  var old=document.getElementById('qs-cpban');if(old&&old.parentNode)old.parentNode.removeChild(old);
+  var c=_cartArr(),sub=0,disc=0,title='';
+  for(var i=0;i<c.length;i++){
+    if(Number(c[i].ProductType)===99){disc+=Math.abs(Number(c[i].CouponPrice)||0);title=String(c[i].Title||'');}
+    else sub+=Number(c[i].LineTotal)||0;
+  }
+  var pay=sub-disc,d=document.createElement('div');
+  d.id='qs-cpban';
+  var ok=(state==='ok');
+  d.style.cssText='margin:14px 0;border-radius:12px;padding:13px 15px;font-family:inherit;box-shadow:0 2px 10px rgba(4,44,83,.08);'
+    +(ok?'background:#e8f4ee;border:1.5px solid #9ed3b8':'background:#fdf6e3;border:1.5px solid #e3c98a');
+  d.innerHTML=(ok
+     ?'<div style="font-size:14.5px;font-weight:900;color:#1f7a52;line-height:1.6">✅ 已套用您的優惠碼「'+title+'」</div>'
+     :'<div style="font-size:14.5px;font-weight:900;color:#7a5c0d;line-height:1.6">⚠️ 優惠碼「'+code+'」沒有套用成功</div>'
+      +'<div style="font-size:12.5px;color:#7a5c0d;margin-top:3px;line-height:1.6">可能是打錯字或這組碼已使用過。您目前使用的是'+(title?'「'+title+'」':'原價')+'，可在下方「使用優惠券」重新輸入。</div>')
+    +'<div style="font-size:13px;color:#1c2733;margin-top:5px;line-height:1.7">原價 <span style="color:#8a93a0;text-decoration:line-through">'+money(sub)+'</span>　→　<b style="font-size:17px;color:#B8860B">'+money(pay)+'</b>'
+    +(disc>0?'　<span style="color:#1f7a52;font-weight:800">為您省下 '+money(disc)+'</span>':'')+'</div>';
+  t.parentNode.insertBefore(d,t.nextSibling);
+}catch(e){}}
 function _applyUserCode(code,tries){try{
   if(!code)return;
   tries=tries||0;
@@ -374,6 +417,7 @@ function _applyUserCode(code,tries){try{
     var planName=(window.__qsPlan==='early')?'早鳥85折':'標準95折';
     if(t&&t.indexOf(planName)<0){
       toast('已套用您的優惠碼：'+t);
+      _cpBanner('ok',code);
       return;
     }
     /* 2026-09-24 線上實測抓到:方案券偶爾會在同一瞬間被送兩次,1SHOP 就卡在「已經有一張券」,
@@ -387,6 +431,7 @@ function _applyUserCode(code,tries){try{
     }
     if(t)toast('您的優惠碼未套用（可能打錯或折扣較少）<br>目前使用「'+t+'」，可在購物車下方重新輸入');
     else toast('優惠碼似乎無法使用，請在購物車下方重新輸入');
+    _cpBanner('bad',code);
   }catch(e){}},3500);
 }catch(e){}}
 function sumKeys(ks){var s=0;ks.forEach(function(k){s+=qty[k]||0;});return s;}
@@ -634,7 +679,7 @@ function render(){
          老闆 2026-09-10 的原話是「文字有一點點小」,解法是讓該大的大,不是全部一起大。 */
       var _whBadge=_whC?'<div style="margin:8px 6px 2px;background:#FFC400;color:#0C447C;font-weight:900;border-radius:999px;padding:6px 7px;text-align:center;line-height:1.35;box-shadow:0 1px 4px rgba(0,0,0,.18)"><div style="font-size:15px;letter-spacing:-.2px">\ud83c\udfe0 \u5168\u6236\u52a0\u78bc <b>92 \u6298</b></div><div style="font-size:10.5px;opacity:.78;margin-top:1px">\u4e00\u822c\u5bb6\u7528 3 \u53f0\u4ee5\u4e0a</div></div>':'';
       return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt="'+_alt+'">'+_whBadge+planPrice(k)+'<div class="qpn '+ncls+'">'+note+'</div></div>';}
-    w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案：<b>專人聯繫起 2 週內</b>到府清洗<br>📞 下單付款後由專人來電約時間</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案：<b>專人聯繫約時起 30 天後</b>到府清洗<br>📞 下單付款後由專人來電約時間</div>':'')+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="qcp"><div class="qcp-r"><span class="qcp-t">🎟️ 優惠碼</span><input id="qw-cp" class="qcp-i" type="text" inputmode="latin" autocomplete="off" spellcheck="false" value="'+_esc(_userCode)+'" oninput="__qw.setCode(this.value)"></div><div class="qcp-n">選填；完成後自動套用，系統會採用<b>折扣較多</b>的那一張</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
+    w='<div class="qw"><div class="laststep">最後一步</div><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案：<b>專人聯繫起 2 週內</b>到府清洗<br>📞 下單付款後由專人來電約時間</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案：<b>專人聯繫約時起 30 天後</b>到府清洗<br>📞 下單付款後由專人來電約時間</div>':'')+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="qcp"><div class="qcp-r"><span class="qcp-t">🎟️ 優惠碼</span><input id="qw-cp" class="qcp-i" type="text" inputmode="latin" autocomplete="off" spellcheck="false" value="'+_esc(_userCode)+'" oninput="__qw.setCode(this.value)" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();__qw.applyCode();}"><button type="button" class="qcp-b" onclick="__qw.applyCode()">套用</button></div><div id="qw-cpmsg"></div><div class="qcp-n">選填；完成後自動套用，系統會採用<b>折扣較多</b>的那一張</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
   }
   if(!ovl)return;/* 精靈已關閉就別動,避免崩潰 */
   ovl.innerHTML=w;
@@ -751,6 +796,32 @@ var api={
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
   /* 2026-09-23 精靈裡輸入優惠碼:只記下來,完成加入購物車後才真的送出(精靈階段購物車是空的,送了也無效) */
   setCode:function(v){_userCode=String(v||'').trim().toUpperCase();window.__qsUserCode=_userCode;},
+  applyCode:function(){try{
+    var i=document.getElementById('qw-cp');if(!i)return;
+    var code=String(i.value||'').trim().toUpperCase();
+    i.value=code;_userCode=code;window.__qsUserCode=code;
+    if(!code){_cpMsg('','');return;}
+    var off=_estOff(code);
+    if(off===null||off===undefined){
+      _cpMsg('❌ 查不到這組優惠碼，請確認是否輸入正確','bad');return;
+    }
+    /* 全戶券是「室內機 3 台以上」專用,不符資格時伺服器會直接拒絕(2026-09-24 正式頁實測) */
+    if(code==='UP92WH'&&!_whQualQ()){
+      _cpMsg('ℹ️ 這組是<b>全戶方案</b>專用優惠碼，需要室內機 3 台（含）以上<br>目前的台數還不符合，可回上一步增加台數','warn');return;
+    }
+    var sub=_qwSub(),prot=_qwProt(),base=Math.max(0,sub-prot);
+    var planOff=(plan==='early')?0.15:(_whQualQ()?WH_OFF:0.05);
+    if(sub<=0||base<=0){_cpMsg('✅ 已帶入 '+_offText(off)+'優惠碼，按「完成，前往結帳」就會為您套用','ok');return;}
+    var planPay=base-Math.ceil(base*planOff)+prot;
+    var codePay=base-Math.ceil(base*off)+prot;
+    if(off===planOff){
+      _cpMsg('ℹ️ 這組跟您目前的方案折扣一樣（'+_offText(off)+'），金額不變<br>這組碼建議留著下次使用','warn');
+    }else if(off<planOff){
+      _cpMsg('ℹ️ 這組是 '+_offText(off)+'，折扣少於您目前選的方案（'+_offText(planOff)+'）<br>系統會自動為您保留比較優惠的 <b>'+money(planPay)+'</b>','warn');
+    }else{
+      _cpMsg('✅ 已帶入 '+_offText(off)+'優惠碼<br><s>'+money(planPay)+'</s> → <b class="big">'+money(codePay)+'</b>　再省 '+money(planPay-codePay),'ok');
+    }
+  }catch(e){}},
   unlock:function(){
     var inp=document.getElementById('qsvc-in'), msg=document.getElementById('qsvc-msg');
     if(!inp)return;
