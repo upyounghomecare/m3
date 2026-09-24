@@ -350,16 +350,19 @@ function _scrollToStable(el,off){try{
    精靈階段購物車是空的,送了也不會生效,所以一律等商品加完才送。
    1SHOP 的 submitCouponNumber 會自動保留「折扣較多」的那一張,所以客戶的碼比方案券差時不會變貴;
    送完 3.5 秒看購物車實際掛著哪一張,再用 toast 告訴客戶結果(打錯字也看得懂要怎麼辦)。 */
-function _applyUserCode(code){try{
+function _applyUserCode(code,tries){try{
   if(!code)return;
+  tries=tries||0;
   var el=document.querySelector('[name="CouponNumber"]');
   var btn=document.querySelector('[onclick*="submitCouponNumber"]');
-  if(!el||!btn){setTimeout(function(){_applyUserCode(code);},1200);return;}
+  if(!el||!btn){setTimeout(function(){_applyUserCode(code,tries);},1200);return;}
   window.__qsUserCpAt=Date.now();/* 告訴自動補券機制:客戶正在用自己的碼,先別插手 */
   /* 2026-09-24 實測:碼打錯時 1SHOP 會先移除原本的券,總計會有約 1 秒跳回原價,
      客戶剛好在這時按結帳就會用原價成立訂單(多付錢) → 送碼期間鎖住結帳,等結果落地再解開。 */
-  window.__qsCpBusy=Date.now();_lockCheckout(true);
-  setTimeout(function(){window.__qsCpBusy=0;_lockCheckout(false);},6000);
+  var _cpStamp=Date.now();
+  window.__qsCpBusy=_cpStamp;_lockCheckout(true);
+  /* 只有「還是我這次上的鎖」才解開,否則重試時會被前一次的計時器提早解鎖 */
+  setTimeout(function(){if(window.__qsCpBusy===_cpStamp){window.__qsCpBusy=0;_lockCheckout(false);}},6000);
   var st=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
   st.call(el,code);
   el.dispatchEvent(new Event('input',{bubbles:true}));
@@ -371,11 +374,19 @@ function _applyUserCode(code){try{
     var planName=(window.__qsPlan==='early')?'早鳥85折':'標準95折';
     if(t&&t.indexOf(planName)<0){
       toast('已套用您的優惠碼：'+t);
-    }else if(t){
-      toast('您的優惠碼未套用（可能打錯或折扣較少）<br>目前使用「'+t+'」，可在購物車下方重新輸入');
-    }else{
-      toast('優惠碼似乎無法使用，請在購物車下方重新輸入');
+      return;
     }
+    /* 2026-09-24 線上實測抓到:方案券偶爾會在同一瞬間被送兩次,1SHOP 就卡在「已經有一張券」,
+       客戶自己的碼會被回「無法和其他優惠券並用」而套不上去。這是暫時狀態,隔幾秒重送就會成功,
+       所以這裡自動重試兩次(期間結帳仍然鎖著),真的打錯字才會走到提示。 */
+    if(tries<2){
+      window.__qsUserCpAt=Date.now();
+      window.__qsCpBusy=Date.now();_lockCheckout(true);
+      setTimeout(function(){_applyUserCode(code,tries+1);},2200);
+      return;
+    }
+    if(t)toast('您的優惠碼未套用（可能打錯或折扣較少）<br>目前使用「'+t+'」，可在購物車下方重新輸入');
+    else toast('優惠碼似乎無法使用，請在購物車下方重新輸入');
   }catch(e){}},3500);
 }catch(e){}}
 function sumKeys(ks){var s=0;ks.forEach(function(k){s+=qty[k]||0;});return s;}
@@ -885,7 +896,7 @@ var api={
       if(i>=jobs.length){
         window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
         if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
-        if(_userCode){window.__qsCpBusy=Date.now();_lockCheckout(true);setTimeout(function(){_applyUserCode(_userCode);},2600);}/* 先讓方案券落地,再送客戶自己的碼:1SHOP 會留折扣多的那張 */
+        if(_userCode){window.__qsUserCpAt=Date.now();window.__qsCpBusy=Date.now();_lockCheckout(true);setTimeout(function(){_applyUserCode(_userCode);},2600);}/* 先讓方案券落地,再送客戶自己的碼:1SHOP 會留折扣多的那張 */
         setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
         close();toast('已為您加入購物車，可再調整或結帳');
         /* 加完自動帶到「目前已經選購」購物車區,讓客戶馬上看到結果(不然精靈關掉後不知道發生什麼事) */

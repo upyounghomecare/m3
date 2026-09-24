@@ -650,15 +650,18 @@ function render(){
 var _qwResume=null;
 function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
-function _applyUserCode(code){try{
+function _applyUserCode(code,tries){try{
   if(!code)return;
+  tries=tries||0;
   var el=document.querySelector('[name="CouponNumber"]');
   var btn=document.querySelector('[onclick*="submitCouponNumber"]');
-  if(!el||!btn){setTimeout(function(){_applyUserCode(code);},1200);return;}
+  if(!el||!btn){setTimeout(function(){_applyUserCode(code,tries);},1200);return;}
   window.__qsUserCpAt=Date.now();
   /* 送碼期間鎖住結帳:1SHOP 會先移除舊券再套新券,中間有約 1 秒的原價空窗 */
-  window.__qsCpBusy=Date.now();_lockCheckout(true);
-  setTimeout(function(){window.__qsCpBusy=0;_lockCheckout(false);},6000);
+  var _cpStamp=Date.now();
+  window.__qsCpBusy=_cpStamp;_lockCheckout(true);
+  /* 只有「還是我這次上的鎖」才解開,否則重試時會被前一次的計時器提早解鎖 */
+  setTimeout(function(){if(window.__qsCpBusy===_cpStamp){window.__qsCpBusy=0;_lockCheckout(false);}},6000);
   var st=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
   st.call(el,code);
   el.dispatchEvent(new Event('input',{bubbles:true}));
@@ -666,8 +669,15 @@ function _applyUserCode(code){try{
   setTimeout(function(){try{
     var c=_cartArr(),cp=null;
     for(var i=0;i<c.length;i++){if(Number(c[i].ProductType)===99){cp=c[i];break;}}
-    if(cp)toast('已套用您的優惠碼：'+String(cp.Title||''));
-    else toast('優惠碼未套用（可能打錯或已使用過）<br>可在購物車下方重新輸入');
+    if(cp){toast('已套用您的優惠碼：'+String(cp.Title||''));return;}
+    /* 1SHOP 偶爾會卡在「已經有一張券」的暫時狀態,隔幾秒重送就會成功 → 自動重試兩次(期間結帳仍鎖著) */
+    if(tries<2){
+      window.__qsUserCpAt=Date.now();
+      window.__qsCpBusy=Date.now();_lockCheckout(true);
+      setTimeout(function(){_applyUserCode(code,tries+1);},2200);
+      return;
+    }
+    toast('優惠碼未套用（可能打錯或已使用過）<br>可在購物車下方重新輸入');
   }catch(e){}},3500);
 }catch(e){}}
 function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
@@ -883,7 +893,7 @@ var api={
     function next(){
       if(i>=jobs.length){
         window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
-        if(_userCode){window.__qsCpBusy=Date.now();_lockCheckout(true);setTimeout(function(){_applyUserCode(_userCode);},2600);}
+        if(_userCode){window.__qsUserCpAt=Date.now();window.__qsCpBusy=Date.now();_lockCheckout(true);setTimeout(function(){_applyUserCode(_userCode);},2600);}
         setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
         close();toast('已為您加入購物車，可再調整或結帳');
         /* 加完自動帶到「目前已經選購」購物車區,讓客戶馬上看到結果(不然精靈關掉後不知道發生什麼事) */
