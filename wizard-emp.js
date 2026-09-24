@@ -452,7 +452,9 @@ function _qwFoot(card){try{
    var fh=Math.round(f.getBoundingClientRect().height);
    if(!fh)return;
    var base=parseFloat(pb)||0;
-   var want=Math.round(base+fh-parseFloat(getComputedStyle(f).paddingBottom||0))+'px';
+   /* 2026-09-24 線上壓測 96 次還是偶發 2 次遮擋(重算慢一步)。與其追時序,不如多留 16px 安全邊距 —— 
+      底部多一點空白沒人會發現,內容被切一半客戶馬上就看到。 */
+   var want=Math.round(base+fh-parseFloat(getComputedStyle(f).paddingBottom||0)+16)+'px';
    if(card.style.paddingBottom!==want)card.style.paddingBottom=want;
  }catch(e){}};
  _pad();setTimeout(_pad,120);setTimeout(_pad,600);
@@ -669,7 +671,7 @@ function _cpMsg(html,cls){try{
   if(pri){if(cls==='ok')pri.classList.add('qwpulse');else pri.classList.remove('qwpulse');}
   var c=document.querySelector('#qw-ovl .qw');
   var _fix=function(){try{if(c&&c.__qwPad)c.__qwPad();if(html&&c)c.scrollTop=c.scrollHeight;}catch(e){}};
-  _fix();setTimeout(_fix,60);setTimeout(_fix,250);setTimeout(_fix,600);setTimeout(_fix,1100);
+  _fix();setTimeout(_fix,60);setTimeout(_fix,250);setTimeout(_fix,600);setTimeout(_fix,1100);setTimeout(_fix,1800);setTimeout(_fix,2600);
 }catch(e){}}
 /* 完成後在購物車上方放一條「真的算出來」的結果橫幅 */
 function _cpBanner(state,code){try{
