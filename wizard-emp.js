@@ -456,6 +456,9 @@ function _qwFoot(card){try{
    if(card.style.paddingBottom!==want)card.style.paddingBottom=want;
  }catch(e){}};
  _pad();setTimeout(_pad,120);setTimeout(_pad,600);
+ /* 2026-09-24 訊息框讓黏底區變高時,只靠 ResizeObserver 有時來不及重算,上面的內容就被蓋住(偶發)。
+    把重算函式掛在卡片上,顯示訊息時可以主動呼叫,不必等瀏覽器通知。 */
+ try{card.__qwPad=_pad;}catch(e){}
  try{if(window.ResizeObserver){new ResizeObserver(_pad).observe(f);}}catch(e){}
  if(head===nav)return;/* 沒有商品清單的步驟(地區/場域/方案)不加往下滑提示 */
  f.className='qwfoot qwfoot-l';
@@ -664,21 +667,49 @@ function _cpMsg(html,cls){try{
   box.innerHTML=html?('<div class="qcp-m '+cls+'">'+html+'</div>'+(cls==='ok'?'<div class="qcp-go">👇 最後一步：請按「完成，前往結帳」</div>':'')):'';
   var pri=document.querySelector('#qw-ovl .btn.pri');
   if(pri){if(cls==='ok')pri.classList.add('qwpulse');else pri.classList.remove('qwpulse');}
-  if(html){var c=document.querySelector('#qw-ovl .qw');if(c){setTimeout(function(){c.scrollTop=c.scrollHeight;},60);setTimeout(function(){c.scrollTop=c.scrollHeight;},400);}}
+  var c=document.querySelector('#qw-ovl .qw');
+  var _fix=function(){try{if(c&&c.__qwPad)c.__qwPad();if(html&&c)c.scrollTop=c.scrollHeight;}catch(e){}};
+  _fix();setTimeout(_fix,60);setTimeout(_fix,250);setTimeout(_fix,600);setTimeout(_fix,1100);
 }catch(e){}}
 /* 完成後在購物車上方放一條「真的算出來」的結果橫幅 */
 function _cpBanner(state,code){try{
+  window.__qsCpBan={state:state,code:code};
+  _cpBanPaint();
+  /* 2026-09-24 實測抓到:橫幅在送碼後 3.5 秒就畫好,但那時折扣可能還沒回到購物車,
+     結果橫幅寫「目前使用原價」而實際已經有 95 折 —— 會誤導客戶。
+     所以畫完之後再盯 14 秒,購物車一變動就重畫,並重新判斷成功/保留/失敗。 */
+  try{clearInterval(window.__qsCpBanT);}catch(e){}
+  var n=0;
+  window.__qsCpBanT=setInterval(function(){
+    if(++n>20){try{clearInterval(window.__qsCpBanT);}catch(e){}return;}
+    _cpBanPaint();
+  },700);
+}catch(e){}}
+function _cpBanPaint(){try{
+  var st=window.__qsCpBan;if(!st)return;
+  var code=st.code||'';
   var t=null,hs=document.querySelectorAll('h1');
   for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0){t=hs[k];break;}}
   if(!t)t=document.getElementById('cart-section');
   if(!t||!t.parentNode)return;
-  var old=document.getElementById('qs-cpban');if(old&&old.parentNode)old.parentNode.removeChild(old);
   var c=_cartArr(),sub=0,disc=0,title='';
   for(var i=0;i<c.length;i++){
     if(Number(c[i].ProductType)===99){disc+=Math.abs(Number(c[i].CouponPrice)||0);title=String(c[i].Title||'');}
     else sub+=Number(c[i].LineTotal)||0;
   }
-  var pay=sub-disc,d=document.createElement('div'),ok=(state==='ok'),same=(state==='same');
+  if(sub<=0)return;/* 購物車還沒長好,先別畫 */
+  var pay=sub-disc;
+  /* 狀態由「購物車現況」決定,不是由 3.5 秒前那個快照決定 */
+  var eo=_estOff(code),co=(sub>0?disc/sub:0),ok,same;
+  /* 2026-09-24 判定改用「送碼前後折扣有沒有變多」——
+     券名不可靠:KQ7X9ZP2 本身就是早鳥方案券的代碼,客戶輸入它明明成功了,
+     用券名判斷會誤判成「保留方案」。折扣率變多才是「客戶的碼真的生效了」。 */
+  var before=Number(window.__qsCpBefore||0);
+  if(co>before+0.005){ok=true;same=false;}
+  else if(disc>0&&eo!==null&&eo!==undefined&&eo<=co+0.005){ok=false;same=true;}
+  else {ok=false;same=false;}
+  var old=document.getElementById('qs-cpban');
+  var d=old||document.createElement('div');
   d.id='qs-cpban';
   d.style.cssText='margin:14px 0;border-radius:12px;padding:13px 15px;font-family:inherit;box-shadow:0 2px 10px rgba(4,44,83,.08);'
     +((ok||same)?'background:#e8f4ee;border:1.5px solid #9ed3b8':'background:#fdf6e3;border:1.5px solid #e3c98a');
@@ -688,10 +719,10 @@ function _cpBanner(state,code){try{
      ?'<div style="font-size:14.5px;font-weight:900;color:#1f7a52;line-height:1.6">✅ 已為您保留更優惠的「'+title+'」</div>'
       +'<div style="font-size:12.5px;color:#4a6b5c;margin-top:3px;line-height:1.6">您輸入的「'+code+'」折扣沒有比較多，這組碼請留著下次使用。</div>'
      :'<div style="font-size:14.5px;font-weight:900;color:#7a5c0d;line-height:1.6">⚠️ 優惠碼「'+code+'」沒有套用成功</div>'
-      +'<div style="font-size:12.5px;color:#7a5c0d;margin-top:3px;line-height:1.6">可能是打錯字或這組碼已使用過，可在下方「使用優惠券」重新輸入。</div>')
+      +'<div style="font-size:12.5px;color:#7a5c0d;margin-top:3px;line-height:1.6">可能是打錯字或這組碼已使用過。您目前使用的是'+(title?'「'+title+'」':'原價')+'，可在下方「使用優惠券」重新輸入。</div>')
     +'<div style="font-size:13px;color:#1c2733;margin-top:5px;line-height:1.7">原價 <span style="color:#8a93a0;text-decoration:line-through">'+money(sub)+'</span>　→　<b style="font-size:17px;color:#B8860B">'+money(pay)+'</b>'
     +(disc>0?'　<span style="color:#1f7a52;font-weight:800">為您省下 '+money(disc)+'</span>':'')+'</div>';
-  t.parentNode.insertBefore(d,t.nextSibling);
+  if(!old)t.parentNode.insertBefore(d,t.nextSibling);
 }catch(e){}}
 function _applyUserCode(code,tries){try{
   if(!code)return;
@@ -701,6 +732,7 @@ function _applyUserCode(code,tries){try{
   if(!el||!btn){setTimeout(function(){_applyUserCode(code,tries);},1200);return;}
   window.__qsUserCpAt=Date.now();
   /* 送碼期間鎖住結帳:1SHOP 會先移除舊券再套新券,中間有約 1 秒的原價空窗 */
+  if(!tries)window.__qsCpBefore=_cartOff();/* 記下送碼前的折扣,之後才分得出「客戶的碼有沒有讓折扣變多」 */
   var _cpStamp=Date.now();
   window.__qsCpBusy=_cpStamp;_lockCheckout(true);
   /* 只有「還是我這次上的鎖」才解開,否則重試時會被前一次的計時器提早解鎖 */
