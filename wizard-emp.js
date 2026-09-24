@@ -678,12 +678,15 @@ function _cpBanner(state,code){try{
     if(Number(c[i].ProductType)===99){disc+=Math.abs(Number(c[i].CouponPrice)||0);title=String(c[i].Title||'');}
     else sub+=Number(c[i].LineTotal)||0;
   }
-  var pay=sub-disc,d=document.createElement('div'),ok=(state==='ok');
+  var pay=sub-disc,d=document.createElement('div'),ok=(state==='ok'),same=(state==='same');
   d.id='qs-cpban';
   d.style.cssText='margin:14px 0;border-radius:12px;padding:13px 15px;font-family:inherit;box-shadow:0 2px 10px rgba(4,44,83,.08);'
-    +(ok?'background:#e8f4ee;border:1.5px solid #9ed3b8':'background:#fdf6e3;border:1.5px solid #e3c98a');
+    +((ok||same)?'background:#e8f4ee;border:1.5px solid #9ed3b8':'background:#fdf6e3;border:1.5px solid #e3c98a');
   d.innerHTML=(ok
      ?'<div style="font-size:14.5px;font-weight:900;color:#1f7a52;line-height:1.6">✅ 已套用您的優惠碼「'+title+'」</div>'
+     :same
+     ?'<div style="font-size:14.5px;font-weight:900;color:#1f7a52;line-height:1.6">✅ 已為您保留更優惠的「'+title+'」</div>'
+      +'<div style="font-size:12.5px;color:#4a6b5c;margin-top:3px;line-height:1.6">您輸入的「'+code+'」折扣沒有比較多，這組碼請留著下次使用。</div>'
      :'<div style="font-size:14.5px;font-weight:900;color:#7a5c0d;line-height:1.6">⚠️ 優惠碼「'+code+'」沒有套用成功</div>'
       +'<div style="font-size:12.5px;color:#7a5c0d;margin-top:3px;line-height:1.6">可能是打錯字或這組碼已使用過，可在下方「使用優惠券」重新輸入。</div>')
     +'<div style="font-size:13px;color:#1c2733;margin-top:5px;line-height:1.7">原價 <span style="color:#8a93a0;text-decoration:line-through">'+money(sub)+'</span>　→　<b style="font-size:17px;color:#B8860B">'+money(pay)+'</b>'
@@ -711,10 +714,20 @@ function _applyUserCode(code,tries){try{
     for(var i=0;i<c.length;i++){if(Number(c[i].ProductType)===99){cp=c[i];break;}}
     if(cp){toast('已套用您的優惠碼：'+String(cp.Title||''));_cpBanner('ok',code);return;}
     /* 1SHOP 偶爾會卡在「已經有一張券」的暫時狀態,隔幾秒重送就會成功 → 自動重試兩次(期間結帳仍鎖著) */
-    if(tries<2){
+    /* 2026-09-24 客戶頁實測:一直重試會讓結帳鎖住快 24 秒,客戶以為當掉。
+       已經有一樣好(或更好)的券在車上時就別再試了,直接解鎖。 */
+    var _eo=_estOff(code),_co=_cartOff();
+    var _hopeless=(_eo!==null&&_eo!==undefined&&_co>0&&_eo<=_co+0.0001);
+    if(!_hopeless&&tries<1){
       window.__qsUserCpAt=Date.now();
       window.__qsCpBusy=Date.now();_lockCheckout(true);
       setTimeout(function(){_applyUserCode(code,tries+1);},2200);
+      return;
+    }
+    window.__qsCpBusy=0;_lockCheckout(false);
+    if(_hopeless){
+      toast('這組優惠碼的折扣沒有比較多<br>已為您保留目前的優惠，這組碼請留著下次使用');
+      _cpBanner('same',code);
       return;
     }
     toast('優惠碼未套用（可能打錯或已使用過）<br>可在購物車下方重新輸入');
