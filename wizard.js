@@ -1744,6 +1744,22 @@ function _curPlan(){return (window.__qsPlan==='early')?'early':'std';}
    ⚠️ 這裡用 _whQualC()(看購物車)而不是 _whQualQ()(看精靈) ——
       彈窗是結帳當下的畫面,要跟真正會被收的錢一致。 */
 function _planInfo(k){var i=_PLANI[k];
+  /* 2026-09-29 老闆測試單抓到:客戶用了自己的碼(例 UP88VIP),結帳彈窗卻寫「標準方案 · 95折」,
+     付款前最後一個畫面跟前一秒看到的 88 折對不上。購物車上的券不是方案券、而且折得比方案多時,
+     改寫成實際折數,副標註明用了哪張券。方案本身(到府時間)不變,所以名稱仍是「標準/早鳥方案」。 */
+  try{
+    var c=_cartArr(),cp=null;for(var j=0;j<c.length;j++){if(Number(c[j].ProductType)===99){cp=c[j];break;}}
+    var t=cp?String(cp.Title||''):'';
+    var po=(k==='early')?0.15:(_whQualC()?WH_OFF:0.05),co=_cartOff();
+    if(t&&!/標準95折|早鳥85折|全戶92折/.test(t)&&co>po+0.005){
+      var d=Math.round((1-co)*100);var dt=(d%10===0?(d/10):d)+'折';
+      var base=(k==='early')?'早鳥方案':'標準方案';
+      var when=(k==='early')?'30 天後到府':'兩週內到府';
+      /* 小圖上印著「95折/85折」,跟改寫後的折數對不上 → 標記 custom,方案卡改放 🎟️
+         (img 保留,因為「變更方案」展開畫面若重新開放,那裡的卡片仍需要圖) */
+      return {img:i.img,custom:1,name:base+' · '+dt,sub:'已套用「'+t.replace(/\s*\(限[^)]*\)\s*$/,'')+'」・'+when,nc:i.nc,sc:i.sc};
+    }
+  }catch(e){}
   if(k!=='std'||!_whQualC())return i;
   return {img:i.img,name:'標準方案 · 92折',sub:'全戶加碼・兩週內到府',nc:i.nc,sc:i.sc};}
 /* ═══ 2026-08-31 緊急止血:暫停結帳彈窗裡的方案「變更」 ═══
@@ -1761,8 +1777,8 @@ function _renderPlanSum(wrap,collapsed){
     var info=_planInfo(p);
     wrap.innerHTML='<div style="font-size:11.5px;color:#8a6a1f;font-weight:700;letter-spacing:.3px;margin:0 0 6px">您選擇的方案</div>'
       +'<div style="display:flex;align-items:center;gap:9px;background:#faf6ea;border:1px solid #ecdcae;border-radius:11px;padding:9px 10px">'
-        +'<img src="'+_PLANB+info.img+'" style="width:72px;border-radius:7px;display:block;flex:0 0 auto">'
-        +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:900;color:'+info.nc+';white-space:nowrap">'+info.name+'</div><div style="font-size:11px;color:'+info.sc+';margin-top:2px;white-space:nowrap">'+info.sub+'</div></div>'
+        +((info.img&&!info.custom)?'<img src="'+_PLANB+info.img+'" style="width:72px;border-radius:7px;display:block;flex:0 0 auto">':'<div style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid #ecdcae;display:flex;align-items:center;justify-content:center;font-size:17px">🎟️</div>')
+        +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:900;color:'+info.nc+';white-space:nowrap">'+info.name+'</div><div style="font-size:11px;color:'+info.sc+';margin-top:2px;line-height:1.45">'+info.sub+'</div></div>'
         +(PLAN_CHG_OFF?'':'<button type="button" class="qsps-chg" style="flex:0 0 auto;border:1px solid #d9b24a;background:#fff;color:#8a6410;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 13px;cursor:pointer;white-space:nowrap">變更</button>')
       +'</div>'
       /* 2026-09-14 老闆要求移除底下那句提示。
