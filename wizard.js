@@ -430,6 +430,55 @@ function _cpBanPaint(){try{
     +(saved>0?'　<span style="color:#1f7a52;font-weight:800">為您省下 '+money(saved)+'</span>':'')+'</div>';
   if(!old)t.parentNode.insertBefore(d,t.nextSibling);
 }catch(e){}}
+/* ═══ 2026-09-29 客戶碼優先(老闆實機抓到 UP88VIP 套不上、停在 95 折多付 $280) ═══
+   舊做法:先放方案券 95 折 → 再「換」成客戶的碼。換券要先點掉舊券的刪除鈕,
+   但 1SHOP 購物車一重畫那顆鈕就常常不見 → 舊券拿不掉 → 客戶的碼被回「無法和其他優惠券並用」。
+   而且內文JS(每 1.5 秒自動補券)、精靈完成時、planCouponWatch 三個來源會同時放方案券(實測同一秒送兩次)。
+   新做法:客戶的碼「可能比方案好」時,從加購物車開始就用內文JS自己的暫停開關 __qsSwapBusy 擋住自動補券,
+   商品加完直接放客戶的碼 —— 購物車從頭到尾不需要「換券」。失敗才補放方案券。 */
+var _ufirst=false;
+function _planOffQ(){try{return (plan==='early')?0.15:(_whQualQ()?WH_OFF:0.05);}catch(e){return 0.05;}}
+function _userFirstApply(code){try{
+  var tok=window.__qsUserFirst;
+  var keep=function(){window.__qsCpBusy=Date.now();window.__qsUserCpAt=Date.now();try{_lockCheckout(true);}catch(e){}};
+  var released=false;
+  var release=function(){if(released)return;released=true;
+    if(window.__qsUserFirst===tok){window.__qsUserFirst=0;window.__qsSwapBusy=false;}
+    window.__qsCpBusy=0;try{_lockCheckout(false);}catch(e){}};
+  keep();
+  window.__qsCpBefore=_planOffQ();/* 橫幅判定用:折扣要比方案好才算客戶的碼生效 */
+  var hasCp=false,c=_cartArr();for(var i=0;i<c.length;i++){if(Number(c[i].ProductType)===99){hasCp=true;break;}}
+  /* 購物車上已經有券(例如上一輪留下的),只能走原本的換券路線 */
+  if(hasCp||!(window.jQuery&&window._gateway&&window._ShopID)){release();_applyUserCode(code);return;}
+  var n=0;
+  var fallback=function(){
+    keep();
+    window.__qsSwapBusy=false;/* 交還給內文JS:它會自己設、自己放 */
+    var done=false;
+    var fin=function(){if(done)return;done=true;
+      /* 等購物車上真的有券才解鎖;最多等 10 秒(內文JS 每 1.5 秒也會再補) */
+      var w=0,t=setInterval(function(){w++;var ok=_cartOff()>0.001;if(ok||w>=20){clearInterval(t);release();
+        toast('您的優惠碼未套用（可能打錯或已使用過）<br>已為您保留方案折扣，可在購物車下方重新輸入');
+        _cpBanner('bad',code);}},500);};
+    try{if(window.__qsApplyPlanCoupon){window.__qsApplyPlanCoupon(fin);setTimeout(fin,6000);}else fin();}catch(e){fin();}
+  };
+  var go=function(){
+    n++;keep();
+    jQuery.ajax({url:_gateway+'view/AddCouponToCart?ShopID='+_ShopID,type:'POST',data:JSON.stringify({CouponNumber:code})})
+      .done(function(a){try{
+        if(a&&0==a.success){
+          try{if(window.inputCart)inputCart('new',a.data);}catch(e){}
+          var r=_cartOff();if(r>0.001){try{_cpSave(code,r);}catch(e){}}/* 讓看門狗記住,之後購物車變動也會補回這組 */
+          release();toast('已套用您的優惠碼');_cpBanner('ok',code);return;
+        }
+        var msg=String((a&&a.msg)||'');
+        if(n<2&&/沒有此購物車/.test(msg)){setTimeout(go,1500);return;}/* 購物車剛建好、伺服器還沒同步 → 再試一次 */
+        fallback();
+      }catch(e){fallback();}})
+      .fail(function(){if(n<2){setTimeout(go,1500);return;}fallback();});
+  };
+  go();
+}catch(e){try{window.__qsUserFirst=0;window.__qsSwapBusy=false;window.__qsCpBusy=0;_lockCheckout(false);}catch(e2){}}}
 function _applyUserCode(code,tries){try{
   if(!code)return;
   tries=tries||0;
@@ -1027,8 +1076,21 @@ var api={
       }
       if(i>=jobs.length){
         window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
-        if(window.__qsApplyPlanCoupon)setTimeout(window.__qsApplyPlanCoupon,900);
-        if(_userCode){window.__qsUserCpAt=Date.now();window.__qsCpBusy=Date.now();_lockCheckout(true);setTimeout(function(){_applyUserCode(_userCode);},2600);}/* 先讓方案券落地,再送客戶自己的碼:1SHOP 會留折扣多的那張 */
+        if(window.__qsApplyPlanCoupon&&!_ufirst)setTimeout(window.__qsApplyPlanCoupon,900);
+        if(_userCode){window.__qsUserCpAt=Date.now();window.__qsCpBusy=Date.now();_lockCheckout(true);
+          if(_ufirst)setTimeout(function(){_userFirstApply(_userCode);},1500);
+          else{
+            /* 2026-09-29 已知「一樣好或更差」的碼:送出只會多一輪「拿掉方案券→再放回」(實測同一單換了 3 輪),
+               每一輪都得靠那顆不可靠的刪除鈕。結果本來就是保留方案,所以不送,直接告訴客戶。
+               結帳鎖到購物車上真的有券為止(方案券此刻可能正在拿掉/放回),最多 10 秒。 */
+            window.__qsCpBefore=_planOffQ();
+            var _uc=_userCode,_st=Date.now(),_w=0;
+            var _tm=setInterval(function(){_w++;window.__qsCpBusy=_st;
+              if((_cartOff()>0.001&&!window.__qsSwapBusy&&_w>=4)||_w>=20){clearInterval(_tm);
+                window.__qsCpBusy=0;try{_lockCheckout(false);}catch(e){}
+                toast('您輸入的優惠碼折扣沒有比較多<br>已為您保留更優惠的方案折扣，這組碼請留著下次使用');
+                _cpBanner('same',_uc);}},500);
+          }}/* 先讓方案券落地,再送客戶自己的碼:1SHOP 會留折扣多的那張 */
         setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
         close();toast('已為您加入購物車，可再調整或結帳');
         /* 加完自動帶到「目前已經選購」購物車區,讓客戶馬上看到結果(不然精靈關掉後不知道發生什麼事) */
@@ -1048,9 +1110,21 @@ var api={
       try{if(window.viewProduct)window.viewProduct(job.btn||null,job.pid);}catch(e){}
       setTimeout(next,550);
     }
+    _ufirst=false;
+    if(_userCode){
+      var _eo=_estOff(_userCode);
+      /* 已知「一樣好或更差」的碼就不必搶先,照舊放方案券(防呆層會擋下並顯示「已為您保留更優惠的」) */
+      if(!(_eo!==null&&_eo!==undefined&&_eo<=_planOffQ()+0.0001)){
+        _ufirst=true;var _tk=Date.now();
+        window.__qsUserFirst=_tk;window.__qsSwapBusy=true;/* 暫停內文JS的自動補券 */
+        window.__qsUserCpAt=_tk;window.__qsCpBusy=_tk;try{_lockCheckout(true);}catch(e){}
+        /* 保險:60 秒後無論如何交還自動補券,絕不讓購物車永遠沒有折扣 */
+        setTimeout(function(){if(window.__qsUserFirst===_tk){window.__qsUserFirst=0;window.__qsSwapBusy=false;window.__qsCpBusy=0;try{_lockCheckout(false);}catch(e){}}},60000);
+      }
+    }
     window.__qsAdding=true;
     next();
-    }catch(e){_finishing=false;window.__qsAdding=false;}
+    }catch(e){_finishing=false;window.__qsAdding=false;if(window.__qsUserFirst){window.__qsUserFirst=0;window.__qsSwapBusy=false;}}
   }
 };
 window.__qw=api;
@@ -1418,6 +1492,7 @@ function svcPassNote(){try{
       「客戶可以自己換成比較差的碼」打架(客戶換過的話折扣>0,這裡直接不管)。 */
 var _plcTry=0,_plcAt=0,_plcKey='';
 function planCouponWatch(){try{
+  if(window.__qsUserFirst)return;/* 客戶碼優先進行中,別放方案券 */
   if(window.__qsAdding||_corrBusy()||_cpBusy())return;
   if(((new Date()).getTime()-(window.__qsUserCpAt||0))<12000)return;/* 客戶正在自己換碼,別插手 */
   if(window.__qsPlan!=='std'&&window.__qsPlan!=='early')return;
@@ -3147,6 +3222,7 @@ function bindCouponGuard(){try{
    一次補三種情況:①打錯字被清掉 ②重新整理後記憶歸零 ③客戶回頭改方案,方案券蓋掉自己的專屬券。 */
 function couponRestoreWatch(){try{
   if(!window.__qsBindWrapped)return;
+  if(window.__qsUserFirst)return;/* 客戶碼優先進行中,別補舊記憶 */
   /* 記住客戶自己輸入成功的碼。
      這裡直接看「購物車的折扣率是不是等於剛送出那組碼的折扣」,不靠 1SHOP 的提示文字 ——
      舊版是包 notificationMsg 來聽「使用成功」,但 bindCouponGuard 先把旗標設起來才去包,
