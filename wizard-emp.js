@@ -473,6 +473,9 @@ function _qwFoot(card){try{
   var top=f.getBoundingClientRect().top,n=0,cs=card.querySelectorAll('.opt');
   for(var i=0;i<cs.length;i++){if(cs[i].getBoundingClientRect().top>=top-6)n++;}
   if(n>0){sp.textContent='\u25bc \u5f80\u4e0b\u6ed1\u52d5\u9084\u6709 '+n+' '+unit;m.className='qwmore';}
+  /* 2026-09-29 沒有商品清單的步驟(最後一步)也要提示:iPhone SE 這種小手機內容比螢幕高 171px,
+     原本不顯示提示,客戶不知道下面還有「先看服務說明」等內容。還沒捲到底就顯示「往下滑看更多」。 */
+  else if(!cs.length&&(card.scrollHeight-card.clientHeight-card.scrollTop)>40){sp.textContent='\u25bc \u5f80\u4e0b\u6ed1\u770b\u66f4\u591a';m.className='qwmore';}
   else m.className='qwmore off';
  }catch(e){}}
  card.addEventListener('scroll',upd);
@@ -694,15 +697,21 @@ function _cpBanPaint(){try{
   for(var k=0;k<hs.length;k++){if((hs[k].textContent||'').trim().indexOf('目前已經選購')===0){t=hs[k];break;}}
   if(!t)t=document.getElementById('cart-section');
   if(!t||!t.parentNode)return;
-  var c=_cartArr(),sub=0,disc=0,title='';
+  var c=_cartArr(),sub=0,disc=0,corr=0,title='';
   for(var i=0;i<c.length;i++){
     if(Number(c[i].ProductType)===99){disc+=Math.abs(Number(c[i].CouponPrice)||0);title=String(c[i].Title||'');}
+    else if(String(c[i].ProductName||c[i].Title||'').indexOf('價差調整')>=0)corr+=Number(c[i].LineTotal)||0;
     else sub+=Number(c[i].LineTotal)||0;
   }
   if(sub<=0)return;/* 購物車還沒長好,先別畫 */
-  var pay=sub-disc;
+  /* 2026-09-29 實測抓到:加購除濕機/AIRMON 時購物車裡有「價差調整」$1 小項目(讓加購品不被打折的機制),
+     原本把它算進原價 → 橫幅寫「原價 $33,705 省下 $4,045」,實際原價 $30,500、只省 $840,把優惠誇大快 5 倍。
+     原價只算真正的商品;實付 = 商品＋價差調整－折扣(就是購物車總計);省下 = 原價－實付。 */
+  var pay=sub+corr-disc;
+  var saved=Math.max(0,sub-pay);
+  var co0=(sub+corr)>0?disc/(sub+corr):0;
   /* 狀態由「購物車現況」決定,不是由 3.5 秒前那個快照決定 */
-  var eo=_estOff(code),co=(sub>0?disc/sub:0),ok,same;
+  var eo=_estOff(code),co=co0,ok,same;
   /* 2026-09-24 判定改用「送碼前後折扣有沒有變多」——
      券名不可靠:KQ7X9ZP2 本身就是早鳥方案券的代碼,客戶輸入它明明成功了,
      用券名判斷會誤判成「保留方案」。折扣率變多才是「客戶的碼真的生效了」。 */
@@ -723,7 +732,7 @@ function _cpBanPaint(){try{
      :'<div style="font-size:14.5px;font-weight:900;color:#7a5c0d;line-height:1.6">⚠️ 優惠碼「'+code+'」沒有套用成功</div>'
       +'<div style="font-size:12.5px;color:#7a5c0d;margin-top:3px;line-height:1.6">可能是打錯字或這組碼已使用過。您目前使用的是'+(title?'「'+title+'」':'原價')+'，可在下方「使用優惠券」重新輸入。</div>')
     +'<div style="font-size:13px;color:#1c2733;margin-top:5px;line-height:1.7">原價 <span style="color:#8a93a0;text-decoration:line-through">'+money(sub)+'</span>　→　<b style="font-size:17px;color:#B8860B">'+money(pay)+'</b>'
-    +(disc>0?'　<span style="color:#1f7a52;font-weight:800">為您省下 '+money(disc)+'</span>':'')+'</div>';
+    +(saved>0?'　<span style="color:#1f7a52;font-weight:800">為您省下 '+money(saved)+'</span>':'')+'</div>';
   if(!old)t.parentNode.insertBefore(d,t.nextSibling);
 }catch(e){}}
 function _applyUserCode(code,tries){try{
