@@ -13,6 +13,15 @@ var IMG_AREA_OK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34
 var IMG_AREA_RM='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/gold.jpg';
 var IMG_AREA_NO='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/red.jpg';
 var LINE_CS='https://line.me/R/ti/p/@063kttbk';
+/* 2026-10-02 從 LINE（LIFF）打開時，精靈改成鋪滿畫面（老闆要求：不能影響一般 1SHOP 的顯示）。
+   判斷方式：LIFF 網址帶 ?src=liff，或 LINE 的 LIFF 瀏覽器（UA 含 LIFF）；記在 sessionStorage，
+   客人在同一個視窗裡換頁（例如結帳後回來）也維持。只在 <html> 加 class，樣式全部掛在 html.qw-liff 底下。 */
+var IS_LIFF=(function(){try{var on=/[?&]src=liff(&|$)/.test(location.search)||/\bLIFF\b/.test(navigator.userAgent||'');
+  try{if(on)sessionStorage.setItem('qw_liff','1');else on=sessionStorage.getItem('qw_liff')==='1';}catch(e){}
+  if(on)document.documentElement.classList.add('qw-liff');return on;}catch(e){return false;}})();
+var LIFF_CSS='html.qw-liff #qw-ovl{padding:0!important;background:#fff!important;align-items:stretch!important;justify-content:stretch!important}'
+ +'html.qw-liff #qw-ovl .qw{max-width:none!important;width:100%!important;max-height:none!important;height:100%!important;border-radius:0!important;box-shadow:none!important;padding:16px 16px calc(14px + env(safe-area-inset-bottom,0px))!important}'
+ +'html.qw-liff #qw-ovl .qw.wel{display:flex!important;flex-direction:column!important;justify-content:center!important}';
 var TW={
 '基隆市':['仁愛區','信義區','中正區','中山區','安樂區','暖暖區','七堵區'],
 '台北市':['中正區','大同區','中山區','松山區','大安區','萬華區','信義區','士林區','北投區','內湖區','南港區','文山區'],
@@ -803,7 +812,7 @@ function render(){
 var _userCode='';
 function _esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 var _qwResume=null;
-function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
+function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}if(IS_LIFF&&!document.getElementById('qw-liff-style')){var ls=document.createElement('style');ls.id='qw-liff-style';ls.textContent=LIFF_CSS;document.head.appendChild(ls);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
 function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
 /* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
