@@ -21,7 +21,18 @@ var IS_LIFF=(function(){try{var on=/[?&]src=liff(&|$)/.test(location.search)||/\
   if(on)document.documentElement.classList.add('qw-liff');return on;}catch(e){return false;}})();
 var LIFF_CSS='html.qw-liff #qw-ovl{padding:0!important;background:#fff!important;align-items:stretch!important;justify-content:stretch!important}'
  +'html.qw-liff #qw-ovl .qw{max-width:none!important;width:100%!important;max-height:none!important;height:100%!important;border-radius:0!important;box-shadow:none!important;padding:16px 16px calc(14px + env(safe-area-inset-bottom,0px))!important}'
- +'html.qw-liff #qw-ovl .qw.wel{display:flex!important;flex-direction:column!important;justify-content:center!important}';
+ /* 2026-10-02 老闆實機：內容短的步驟（環境/室外機/加購）按鈕停在中間、下面空一大塊 → 內容靠上、按鈕列推到最底 */
+ +'html.qw-liff #qw-ovl .qw{display:flex!important;flex-direction:column!important}'
+ +'html.qw-liff #qw-ovl .qw>*{flex-shrink:0}'
+ +'html.qw-liff #qw-ovl .qw>.qwfoot{margin-top:auto!important}'
+ +'html.qw-liff #qw-ovl .qw.wel{justify-content:center!important}'
+ /* 開場頁放大置中（老闆 2026-10-02 選「乙」）：字與開始圖放大，留白平均分在上下 */
+ +'html.qw-liff #qw-ovl .qw .wel-brand{font-size:13px!important;margin-bottom:14px!important}'
+ +'html.qw-liff #qw-ovl .qw .wel-h{font-size:24px!important;margin-bottom:12px!important}'
+ +'html.qw-liff #qw-ovl .qw .wel-p{font-size:15px!important;margin-bottom:10px!important}'
+ +'html.qw-liff #qw-ovl .qw .wel-steps{margin:12px 0 34px!important}'
+ +'html.qw-liff #qw-ovl .qw .wel-start{max-width:100%!important}'
+ +'html.qw-liff #qw-ovl .qw .wel-skip{font-size:15px!important;margin-top:22px!important}';
 var TW={
 '基隆市':['仁愛區','信義區','中正區','中山區','安樂區','暖暖區','七堵區'],
 '台北市':['中正區','大同區','中山區','松山區','大安區','萬華區','信義區','士林區','北投區','內湖區','南港區','文山區'],
