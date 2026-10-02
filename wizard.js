@@ -32,7 +32,18 @@ var LIFF_CSS='html.qw-liff #qw-ovl{padding:0!important;background:#fff!important
  +'html.qw-liff #qw-ovl .qw .wel-p{font-size:15px!important;margin-bottom:10px!important}'
  +'html.qw-liff #qw-ovl .qw .wel-steps{margin:12px 0 34px!important}'
  +'html.qw-liff #qw-ovl .qw .wel-start{max-width:100%!important}'
- +'html.qw-liff #qw-ovl .qw .wel-skip{font-size:15px!important;margin-top:22px!important}';
+ +'html.qw-liff #qw-ovl .qw .wel-skip{font-size:15px!important;margin-top:22px!important}'
+ /* 2026-10-02 老闆同意：LINE 視窗較窄，右下 ↑↓ 圓鈕會蓋住購物車金額與立即結帳鈕 → LINE 裡收起（頂部有分頁列可跳轉）。
+    只收這兩顆，同一組裡 1SHOP 原生的「直接購買」鈕不動。 */
+ +'html.qw-liff .chat #qs-godown,html.qw-liff .chat .goTopBtn{display:none!important}'
+ /* 老闆選的兩項精靈微調：①進度列與 × 固定在上方（長清單往下滑也看得到第幾步）②數量 −/+ 從 28 加大到 36 */
+ +'html.qw-liff #qw-ovl .qw>.qwbar{position:sticky;top:-16px;z-index:6;background:#fff;margin:-16px -16px 2px!important;padding:16px 52px 10px 16px!important;box-shadow:0 6px 10px -8px rgba(4,44,83,.18)}'
+ +'html.qw-liff #qw-ovl .qw-x{position:fixed!important;top:10px!important;right:10px!important;z-index:8}'
+ +'html.qw-liff #qw-ovl .qw .step-ctl button{width:36px!important;height:36px!important;font-size:18px!important}'
+ +'html.qw-liff #qw-ovl .qw .step-ctl .q{min-width:22px!important;font-size:16px!important}';
+/* 頁面一開就載入（原本只在精靈打開時載入：客人重新整理、精靈沒跳出時就不會套用） */
+/* 2026-10-02 RWD：電腦版 LINE 會用電腦瀏覽器打開，網址同樣帶 src=liff → 只在手機寬度(<760)套用，電腦/平板維持原本的浮動卡片 */
+if(IS_LIFF){try{var _ls=document.createElement('style');_ls.id='qw-liff-style';_ls.textContent='@media (max-width:759px){'+LIFF_CSS+'}';(document.head||document.documentElement).appendChild(_ls);}catch(e){}}
 var TW={
 '基隆市':['仁愛區','信義區','中正區','中山區','安樂區','暖暖區','七堵區'],
 '台北市':['中正區','大同區','中山區','松山區','大安區','萬華區','信義區','士林區','北投區','內湖區','南港區','文山區'],
@@ -823,7 +834,7 @@ function render(){
 var _userCode='';
 function _esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 var _qwResume=null;
-function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}if(IS_LIFF&&!document.getElementById('qw-liff-style')){var ls=document.createElement('style');ls.id='qw-liff-style';ls.textContent=LIFF_CSS;document.head.appendChild(ls);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
+function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}if(IS_LIFF&&!document.getElementById('qw-liff-style')){var ls=document.createElement('style');ls.id='qw-liff-style';ls.textContent='@media (max-width:759px){'+LIFF_CSS+'}';document.head.appendChild(ls);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
 function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
 /* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
@@ -3083,7 +3094,9 @@ function updateFab(){
     var wizardOpen=!!document.getElementById('qw-ovl');
     var cartBtnVis=[].slice.call(document.querySelectorAll('button,a')).some(function(b){if(b.closest('#qs-fab')||b.classList.contains('btn-cart'))return false;if((b.textContent||'').replace(/\s+/g,'').indexOf('立即結帳')<0)return false;var r=b.getBoundingClientRect();return r.height>20&&r.top<window.innerHeight-40&&r.bottom>0;});
     var fab=document.getElementById('qs-fab');
-    if(!(hasProd&&!inCheckout&&!wizardOpen&&!cartBtnVis)){if(fab)fab.style.display='none';document.body.style.paddingBottom='';return;}
+    /* 2026-10-02 老闆同意：LINE（LIFF）裡底部結帳條一律顯示，不因看得到購物車的立即結帳鈕而收起；精靈開著/結帳表單/空購物車仍收起 */
+    var _liffKeep=document.documentElement.classList.contains('qw-liff')&&window.innerWidth<760;
+    if(!(hasProd&&!inCheckout&&!wizardOpen&&(_liffKeep||!cartBtnVis))){if(fab)fab.style.display='none';document.body.style.paddingBottom='';return;}
     if(!fab){
       fab=document.createElement('div');fab.id='qs-fab';
       fab.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9998;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid rgba(4,44,83,.12);box-shadow:0 -6px 22px rgba(4,44,83,.1);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));font-family:\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif';
