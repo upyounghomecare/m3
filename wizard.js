@@ -13,73 +13,6 @@ var IMG_AREA_OK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34
 var IMG_AREA_RM='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/gold.jpg';
 var IMG_AREA_NO='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/red.jpg';
 var LINE_CS='https://line.me/R/ti/p/@063kttbk';
-/* 2026-10-02 從 LINE（LIFF）打開時，精靈改成鋪滿畫面（老闆要求：不能影響一般 1SHOP 的顯示）。
-   判斷方式：LIFF 網址帶 ?src=liff，或 LINE 的 LIFF 瀏覽器（UA 含 LIFF）；記在 sessionStorage，
-   客人在同一個視窗裡換頁（例如結帳後回來）也維持。只在 <html> 加 class，樣式全部掛在 html.qw-liff 底下。 */
-var IS_LIFF=(function(){try{var on=/[?&]src=liff(&|$)/.test(location.search)||/\bLIFF\b/.test(navigator.userAgent||'');
-  try{if(on)sessionStorage.setItem('qw_liff','1');else on=sessionStorage.getItem('qw_liff')==='1';}catch(e){}
-  if(on)document.documentElement.classList.add('qw-liff');return on;}catch(e){return false;}})();
-var LIFF_CSS='html.qw-liff #qw-ovl{padding:0!important;background:#fff!important;align-items:stretch!important;justify-content:stretch!important}'
- +'html.qw-liff #qw-ovl .qw{max-width:none!important;width:100%!important;max-height:none!important;height:100%!important;border-radius:0!important;box-shadow:none!important;padding:16px 16px calc(14px + env(safe-area-inset-bottom,0px))!important}'
- /* 2026-10-02 老闆實機：內容短的步驟（環境/室外機/加購）按鈕停在中間、下面空一大塊 → 內容靠上、按鈕列推到最底 */
- +'html.qw-liff #qw-ovl .qw{display:flex!important;flex-direction:column!important}'
- +'html.qw-liff #qw-ovl .qw>*{flex-shrink:0}'
- +'html.qw-liff #qw-ovl .qw>.qwfoot{margin-top:auto!important}'
- +'html.qw-liff #qw-ovl .qw.wel{justify-content:center!important}'
- /* 開場頁放大置中（老闆 2026-10-02 選「乙」）：字與開始圖放大，留白平均分在上下 */
- +'html.qw-liff #qw-ovl .qw .wel-brand{font-size:13px!important;margin-bottom:14px!important}'
- +'html.qw-liff #qw-ovl .qw .wel-h{font-size:24px!important;margin-bottom:12px!important}'
- +'html.qw-liff #qw-ovl .qw .wel-p{font-size:15px!important;margin-bottom:10px!important}'
- +'html.qw-liff #qw-ovl .qw .wel-steps{margin:12px 0 34px!important}'
- +'html.qw-liff #qw-ovl .qw .wel-start{max-width:100%!important}'
- +'html.qw-liff #qw-ovl .qw .wel-skip{font-size:15px!important;margin-top:22px!important}'
- /* 2026-10-02 老闆同意：LINE 視窗較窄，右下 ↑↓ 圓鈕會蓋住購物車金額與立即結帳鈕 → LINE 裡收起（頂部有分頁列可跳轉）。
-    只收這兩顆，同一組裡 1SHOP 原生的「直接購買」鈕不動。 */
- +'html.qw-liff .chat #qs-godown,html.qw-liff .chat .goTopBtn{display:none!important}'
- /* 老闆選的兩項精靈微調：①進度列與 × 固定在上方（長清單往下滑也看得到第幾步）②數量 −/+ 從 28 加大到 36 */
- +'html.qw-liff #qw-ovl .qw>.qwbar{position:sticky;top:-16px;z-index:6;background:#fff;margin:-16px -16px 2px!important;padding:16px 52px 10px 16px!important;box-shadow:0 6px 10px -8px rgba(4,44,83,.18)}'
- +'html.qw-liff #qw-ovl .qw-x{position:fixed!important;top:10px!important;right:10px!important;z-index:8}'
- +'html.qw-liff #qw-ovl .qw .step-ctl button{width:36px!important;height:36px!important;font-size:18px!important}'
- +'html.qw-liff #qw-ovl .qw .step-ctl .q{min-width:22px!important;font-size:16px!important}'
- /* 2026-10-02 老闆：內容少的步驟像 Uber 一樣字放大。_liffRoomy() 量過「放大後仍不用捲動」才加 .qw-roomy */
- +'html.qw-liff #qw-ovl .qw.qw-roomy h2{font-size:27px!important;line-height:1.3!important;margin:20px 0 8px!important;-webkit-text-stroke:0!important}'
- +'html.qw-liff #qw-ovl .qw.qw-roomy .sub{font-size:16px!important;margin-bottom:14px!important}'
- +'html.qw-liff #qw-ovl .qw.qw-roomy .flbl{font-size:16px!important;margin:18px 0 8px!important}'
- +'html.qw-liff #qw-ovl .qw.qw-roomy .qsel{height:58px!important;font-size:19px!important;border-radius:14px!important;padding:0 18px!important}'
- +'html.qw-liff #qw-ovl .qw.qw-roomy .envnote{font-size:16px!important;line-height:1.6!important;padding:14px 16px!important}'
- +'html.qw-liff #qw-ovl .qw.qw-roomy .btn{padding:18px!important;font-size:18px!important}'
- +'html.qw-liff #qw-ovl .qw.qw-roomy .skip{font-size:15.5px!important}'
- +'html.qw-liff #qw-ovl .qw.qw-roomy .qwdot{width:28px!important;height:28px!important;font-size:14px!important}';
-function _liffMob(){return IS_LIFF&&window.innerWidth<760;}
-/* 2026-10-02 老闆：開場頁在 LINE 裡上下空太多 → 量出剩餘高度，從 1.5 倍往下試，字與間距放大到剛好填滿。
-   上限 1.65 倍（大手機 1.5 倍只填到 66%）。標題放大後固定斷在「您的」後面（不讓瀏覽器斷在「冷／氣」中間）。開始圖載入後高度會變，載入完再算一次。
-   ⚠️ 原本的開場樣式都帶 !important，這裡要用 setProperty(...,'important') 才蓋得過 */
-function _liffWelFill(q){try{if(!_liffMob()||!q||!q.classList.contains('wel'))return;
-  var g=function(s){return q.querySelector(s);};
-  var set=function(s,o){var e=g(s);if(!e)return;for(var k in o)if(o.hasOwnProperty(k))e.style.setProperty(k,o[k],'important');};
-  var h=g('.wel-h'),orig=h?(h.textContent||''):'';
-  var apply=function(k){var px=function(v,c){return (v*Math.min(k,c||9)).toFixed(1)+'px';};
-    if(h)h.innerHTML=(k>1.12&&orig.indexOf('您的')>0)?_esc(orig).replace('您的','您的<br>'):_esc(orig);
-    set('.wel-brand',{'font-size':px(13,1.3),'margin-bottom':px(16)});
-    set('.wel-bar',{'margin':'0 auto '+px(20)});
-    set('.wel-h',{'font-size':px(24),'line-height':'1.3','margin-bottom':px(14),'white-space':'normal'});
-    set('.wel-p',{'font-size':px(15,1.2),'margin-bottom':px(14),'white-space':'nowrap'});
-    var st=g('.wel-steps');if(st){st.style.zoom=1;st.style.setProperty('margin','0 0 '+px(30)+' 0','important');st.style.zoom=Math.min(k,(q.clientWidth-36)/st.scrollWidth);}
-    set('.wel-skip',{'font-size':px(15,1.15),'margin-top':px(22)});};
-  var fits=function(){var ks=[].slice.call(q.children).filter(function(e){return e.offsetHeight&&!e.classList.contains('qw-x');});
-    if(!ks.length)return true;var cs=getComputedStyle(q);
-    var used=ks[ks.length-1].getBoundingClientRect().bottom-ks[0].getBoundingClientRect().top;
-    return used<=q.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-24;};
-  var run=function(){try{if(!q.isConnected)return;var k=1.65;apply(k);while(k>1.001&&!fits()){k-=0.05;apply(k);}if(!fits())apply(1);}catch(e){}};
-  run();var im=q.querySelector('.wel-start img');if(im&&!im.complete)im.addEventListener('load',run);setTimeout(run,800);
-}catch(e){}}
-/* 先加大字再量：放得下就留著，放不下（或圖片載入後變高）就拿掉。新的一步會重建卡片，所以每一步各自判斷 */
-function _liffRoomy(c){try{if(!_liffMob()||!c||c.classList.contains('wel'))return;
-  var chk=function(){try{if(!c.isConnected)return;c.classList.add('qw-roomy');if(c.scrollHeight>c.clientHeight+1)c.classList.remove('qw-roomy');}catch(e){}};
-  chk();setTimeout(chk,400);setTimeout(chk,1500);}catch(e){}}
-/* 頁面一開就載入（原本只在精靈打開時載入：客人重新整理、精靈沒跳出時就不會套用） */
-/* 2026-10-02 RWD：電腦版 LINE 會用電腦瀏覽器打開，網址同樣帶 src=liff → 只在手機寬度(<760)套用，電腦/平板維持原本的浮動卡片 */
-if(IS_LIFF){try{var _ls=document.createElement('style');_ls.id='qw-liff-style';_ls.textContent='@media (max-width:759px){'+LIFF_CSS+'}';(document.head||document.documentElement).appendChild(_ls);}catch(e){}}
 var TW={
 '基隆市':['仁愛區','信義區','中正區','中山區','安樂區','暖暖區','七堵區'],
 '台北市':['中正區','大同區','中山區','松山區','大安區','萬華區','信義區','士林區','北投區','內湖區','南港區','文山區'],
@@ -865,13 +798,12 @@ function render(){
   if(!ovl)return;/* 精靈已關閉就別動,避免崩潰 */
   ovl.innerHTML=w;
   var _card=ovl.querySelector('.qw');
-  if(_card){_qwFoot(_card);var _x=document.createElement('button');_x.type='button';_x.className='qw-x';_x.setAttribute('aria-label','關閉');_x.innerHTML='×';_x.onclick=function(e){e.stopPropagation();_qwResume=step;close();};_card.appendChild(_x);_liffRoomy(_card);_liffWelFill(_card);}
-  /* 2026-10-02 老闆同意（所有客人）：不小心按 × 關掉，按「回到引導精靈」要回到原本那一步，不是回開場頁 */
+  if(_card){_qwFoot(_card);var _x=document.createElement('button');_x.type='button';_x.className='qw-x';_x.setAttribute('aria-label','關閉');_x.innerHTML='×';_x.onclick=function(e){e.stopPropagation();close();};_card.appendChild(_x);}
 }
 var _userCode='';
 function _esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 var _qwResume=null;
-function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}if(IS_LIFF&&!document.getElementById('qw-liff-style')){var ls=document.createElement('style');ls.id='qw-liff-style';ls.textContent='@media (max-width:759px){'+LIFF_CSS+'}';document.head.appendChild(ls);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
+function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
 function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
 /* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
@@ -1396,8 +1328,6 @@ function _showBackBtn(){try{
   b.textContent='↩ 回到引導精靈';
   b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:99990;background:linear-gradient(135deg,#C9962A,#B8860B);color:#fff;border:none;border-radius:99px;padding:15px 30px;font-size:15.5px;font-weight:900;letter-spacing:.02em;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 30px rgba(184,134,11,.5);white-space:nowrap;animation:qwbk .34s cubic-bezier(.2,1.4,.4,1)';
   b.onclick=function(){_hideBackBtn();open();};
-  /* 2026-10-02 老闆：LINE 裡不小心關掉精靈要「超級明顯」能回去 → 貼底整條、文字講清楚 */
-  if(_liffMob()){b.textContent='↩ 回到引導精靈，繼續選購';var st=b.style;st.left='0';st.right='0';st.bottom='0';st.transform='none';st.animation='none';st.borderRadius='0';st.width='100%';st.padding='18px 16px calc(18px + env(safe-area-inset-bottom,0px))';st.fontSize='17px';st.boxShadow='0 -6px 22px rgba(184,134,11,.35)';}
   document.body.appendChild(b);
   return b;
 }catch(e){return null;}}
@@ -3140,22 +3070,12 @@ function updateFab(){
     var wizardOpen=!!document.getElementById('qw-ovl');
     var cartBtnVis=[].slice.call(document.querySelectorAll('button,a')).some(function(b){if(b.closest('#qs-fab')||b.classList.contains('btn-cart'))return false;if((b.textContent||'').replace(/\s+/g,'').indexOf('立即結帳')<0)return false;var r=b.getBoundingClientRect();return r.height>20&&r.top<window.innerHeight-40&&r.bottom>0;});
     var fab=document.getElementById('qs-fab');
-    /* 2026-10-02 老闆同意：LINE（LIFF）裡底部結帳條一律顯示，不因看得到購物車的立即結帳鈕而收起；精靈開著/結帳表單/空購物車仍收起 */
-    var _liffKeep=document.documentElement.classList.contains('qw-liff')&&window.innerWidth<760;
-    if(_liffKeep&&document.getElementById('qw-back'))hasProd=false;/* 貼底的「回到引導精靈」在時讓位，兩條不重疊 */
-    if(!(hasProd&&!inCheckout&&!wizardOpen&&(_liffKeep||!cartBtnVis))){if(fab)fab.style.display='none';document.body.style.paddingBottom='';return;}
+    if(!(hasProd&&!inCheckout&&!wizardOpen&&!cartBtnVis)){if(fab)fab.style.display='none';document.body.style.paddingBottom='';return;}
     if(!fab){
       fab=document.createElement('div');fab.id='qs-fab';
       fab.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9998;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid rgba(4,44,83,.12);box-shadow:0 -6px 22px rgba(4,44,83,.1);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));font-family:\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif';
       fab.innerHTML='<div style=\"width:100%;max-width:640px;margin:0 auto;display:flex;align-items:center;gap:14px\"><div style=\"flex:1;min-width:0;font-size:14.5px;color:#1c2733;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">共 <b id=\"qs-fab-n\" style=\"color:#042C53\">0</b> 件 · <span id=\"qs-fab-p\" style=\"font-size:17px;font-weight:900;color:#B8860B\"></span></div><button id=\"qs-fab-btn\" type=\"button\" style=\"flex:0 0 auto;border:none;border-radius:999px;background:#042C53;color:#fff;font-size:15px;font-weight:800;padding:14px 46px;font-family:inherit;cursor:pointer;white-space:nowrap\">立即結帳</button></div>';
       document.body.appendChild(fab);
-      /* 2026-10-02 老闆：LINE 裡結帳條加「🪄 用精靈重選」「查看明細 ›」，立即結帳加箭頭（按了就直接結帳，不用捲到底） */
-      if(_liffKeep){try{var _lf=fab.firstElementChild.firstElementChild;_lf.style.whiteSpace='normal';
-        var _lk=document.createElement('div');_lk.id='qs-fab-links';_lk.style.cssText='margin-top:4px;display:flex;gap:14px;font-size:12.5px;font-weight:800';
-        _lk.innerHTML='<span id="qs-fab-redo" style="color:#B8860B;cursor:pointer">🪄 用精靈重選</span><span id="qs-fab-cart" style="color:#0C447C;cursor:pointer">查看明細 ›</span>';_lf.appendChild(_lk);
-        _lk.querySelector('#qs-fab-redo').onclick=function(){var a=document.getElementById('qs-rewiz');if(a)a.click();};
-        _lk.querySelector('#qs-fab-cart').onclick=function(){var h=_cartHead();if(h)_scrollTo(h.getBoundingClientRect().top+window.pageYOffset-70);};
-        var _fb=fab.querySelector('#qs-fab-btn');if(_fb)_fb.innerHTML=_fb.innerHTML.replace(/立即結帳(?! ›)/,'立即結帳 ›');}catch(e){}}
       fab.querySelector('#qs-fab-btn').onclick=function(){var co=[].slice.call(document.querySelectorAll('button')).filter(function(b){return (b.textContent||'').trim()==='立即結帳'&&!b.closest('#qs-fab');})[0];if(co)co.click();};
       if(window.visualViewport){var vv=window.visualViewport;var repos=function(){var f=document.getElementById('qs-fab');if(!f)return;var lvh=document.documentElement.clientHeight;var gap=lvh-vv.height-vv.offsetTop;f.style.bottom=(gap>0?gap:0)+'px';};vv.addEventListener('resize',repos);vv.addEventListener('scroll',repos);window.addEventListener('scroll',repos,{passive:true});repos();}
     }
@@ -3189,6 +3109,7 @@ function _codeOff(code){
   if(/^UPE80/.test(code))return 0.20;/* 員工價 8折(2026-08-25 新增,比任何券都優惠) */
   if(/^UPR88/.test(code))return 0.12;/* 維修客戶專屬88折(2026-09-16,500組) */
   if(/^UPA88/.test(code))return 0.12;/* 美學客戶專屬88折(2026-09-16,500組) */
+  if(/^UPWB/.test(code))return 0.15;/* 年度保養提醒 85折(2026-10-08,1002組,每批效期40天) */
   var v=_PUB_OFF[code];return v===undefined?null:v;/* null = 不認得,不擋 */
 }
 /* 購物車現在實際生效的折扣率(折扣列 ProductType=99、金額在 CouponPrice) */
