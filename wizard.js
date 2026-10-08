@@ -423,7 +423,7 @@ function _cpBanPaint(){try{
      ?'<div style="font-size:14.5px;font-weight:900;color:#1f7a52;line-height:1.6">✅ 已套用您的優惠碼「'+title+'」</div>'
      :same
      ?'<div style="font-size:14.5px;font-weight:900;color:#1f7a52;line-height:1.6">✅ 已為您保留更優惠的「'+title+'」</div>'
-      +'<div style="font-size:12.5px;color:#4a6b5c;margin-top:3px;line-height:1.6">您輸入的「'+code+'」折扣沒有比較多，這組碼請留著下次使用。</div>'
+      +'<div style="font-size:12.5px;color:#4a6b5c;margin-top:3px;line-height:1.6">'+(_stdOnlyCode(code)?'您輸入的「'+code+'」僅適用標準方案，目前為您保留早鳥方案的折扣。':'您輸入的「'+code+'」折扣沒有比較多，這組碼請留著下次使用。')+'</div>'
      :'<div style="font-size:14.5px;font-weight:900;color:#7a5c0d;line-height:1.6">⚠️ 優惠碼「'+code+'」沒有套用成功</div>'
       +'<div style="font-size:12.5px;color:#7a5c0d;margin-top:3px;line-height:1.6">可能是打錯字或這組碼已使用過。您目前使用的是'+(title?'「'+title+'」':'原價')+'，可在下方「使用優惠券」重新輸入。</div>')
     +'<div style="font-size:13px;color:#1c2733;margin-top:5px;line-height:1.7">原價 <span style="color:#8a93a0;text-decoration:line-through">'+money(sub)+'</span>　→　<b style="font-size:17px;color:#B8860B">'+money(pay)+'</b>'
@@ -908,6 +908,7 @@ var api={
   zoom:function(src){if(document.getElementById('qw-zoom'))return;var z=document.createElement('div');z.id='qw-zoom';z.innerHTML='<img src="'+src+'" alt="">';z.onclick=function(){if(z.parentNode)z.parentNode.removeChild(z);};document.body.appendChild(z);},
   chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK)+sumKeys(['o1','om']);if(v>mx)v=mx;}qty[k]=v;render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
+  toStd:function(){plan='std';window.__qsPlan='std';render();setTimeout(function(){try{var i=document.getElementById('qw-cp');if(i&&_userCode)i.value=_userCode;__qw.applyCode();}catch(e){}},60);},
   /* 2026-09-23 精靈裡輸入優惠碼:只記下來,完成加入購物車後才真的送出(精靈階段購物車是空的,送了也無效) */
   setCode:function(v){_userCode=String(v||'').trim().toUpperCase();window.__qsUserCode=_userCode;},
   applyCode:function(){try{
@@ -928,6 +929,12 @@ var api={
     if(sub<=0||base<=0){_cpMsg('✅ 已帶入 '+_offText(off)+'優惠碼，按「完成，前往結帳」就會為您套用','ok');return;}
     var planPay=base-Math.ceil(base*planOff)+prot;
     var codePay=base-Math.ceil(base*off)+prot;
+    /* 2026-10-09 老闆：限標準方案的碼(年度保養85折、VIP85)在早鳥時,不是「留著下次用」,
+       而是告訴客戶改選標準方案一樣的折扣、2 週內就到府,並給一鍵切換 */
+    if(plan==='early'&&_stdOnlyCode(code)&&off>=0.15){
+      _cpMsg('ℹ️ 這組 '+_offText(off)+'優惠碼<b>僅適用標準方案</b><br>改選標準方案一樣 '+_offText(off)+'，<b>2 週內就到府</b>（早鳥要等 30 天）'
+        +'<br><button type="button" onclick="__qw.toStd()" style="margin-top:7px;border:none;background:#0C447C;color:#fff;border-radius:9px;padding:8px 14px;font-size:13.5px;font-weight:900;font-family:inherit;cursor:pointer">改選標準方案並套用 →</button>','warn');return;
+    }
     if(off===planOff){
       _cpMsg('ℹ️ 這組跟您目前的方案折扣一樣（'+_offText(off)+'），金額不變<br>這組碼建議留著下次使用','warn');
     }else if(off<planOff){
@@ -2172,7 +2179,8 @@ var VIP85_CODE='UP85VIP';/* VIP 85折,限標準方案(見 bindCouponGuard 的擋
    ⚠️ UPR88 跟老客戶回購禮 UPR85 只差第 5 碼,判斷時整段前綴一起比,不要只比 UPR。
    ⚠️ 早鳥85折本來就比88折更優惠,擋下來同時要告訴客戶「留著下次用」,
       否則他會以為系統故障,或白白把一次性的碼燒掉。 */
-function _stdOnlyCode(c){c=String(c||'').toUpperCase();return c===VIP85_CODE||/^UPR88/.test(c)||/^UPA88/.test(c);}
+/* 2026-10-09 老闆：年度保養碼 UPWB(85折) 也是限標準方案,跟 VIP85 同一種情況 */
+function _stdOnlyCode(c){c=String(c||'').toUpperCase();return c===VIP85_CODE||/^UPR88/.test(c)||/^UPA88/.test(c)||/^UPWB/.test(c);}
 var WH_OFF=0.08;
 /* ═══ 全戶方案的「差一台」提示(2026-09-09 老闆選 A4 + B3) ═══
    放在精靈第1步(選室內機)的品項列表下方 —— 客戶決定台數就在這一秒,
@@ -3232,6 +3240,8 @@ function bindCouponGuard(){try{
       if(_stdOnlyCode(code)&&_curPlan()==='early'){
         var _sm=(code===VIP85_CODE)
           ?'VIP 85 折<b>僅適用標準方案</b>（兩週內到府）<br>您已選擇早鳥方案，本來就是 85 折，不需使用此券'
+          :/^UPWB/.test(code)
+          ?'年度保養 85 折優惠碼<b>僅適用標準方案</b>（兩週內到府）<br>您目前選擇的是早鳥方案（85 折，30 天後到府）<br>想 2 週內到府，請改選標準方案再輸入'
           :'這組 88 折優惠碼<b>僅適用標準方案</b>（兩週內到府）<br>您目前選擇的是早鳥方案（85 折，30 天後到府），比 88 折更優惠<br>請留著這組碼下次使用';
         try{toast(_sm);}catch(e6){}
         if(inp){inp.value='';try{inp.dispatchEvent(new Event('input',{bubbles:true}));}catch(e7){}}
