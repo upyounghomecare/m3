@@ -881,6 +881,69 @@ function showDeliveryPicker(onDone){
  ov.querySelector('#qwdh-ok').onclick=function(){if(!selDate||!selSlot)return;window.__qsDhDelivery=_dhFmt(selDate)+'（'+selSlot+'）';if(ov.parentNode)ov.parentNode.removeChild(ov);if(onDone)onDone();};
  render();sum();
 }
+/* ===== 期望清洗日期（2026-10-12 老闆定案）=====
+   標準方案：下單隔天算第 1 天，可選第 3～14 天；早鳥方案：第 30～90 天。
+   時段：上午／下午／晚上。只有春節不能選（依人事行政總處公告，每年要補）。可按「先不指定」跳過。
+   選的結果記在 window.__qsCleanDate，由 fillConsent() 寫進訂單的「同意存證」欄位。 */
+var _CNY_OFF=["20270204","20270205","20270206","20270207","20270208","20270209","20270210"];/* 116年春節連假 2/4～2/10（行政院核定 116 年辦公日曆表） */
+var _CNYS={};_CNY_OFF.forEach(function(d){_CNYS[d]=1;});
+function showCleanDatePicker(pl,onDone){
+ if(document.getElementById('qw-cdcal'))return;
+ var a=(pl==='early')?30:3, z=(pl==='early')?90:14;
+ var MIN=new Date();MIN.setHours(0,0,0,0);MIN.setDate(MIN.getDate()+a);
+ var MAX=new Date();MAX.setHours(23,59,59,999);MAX.setDate(MAX.getDate()+z);
+ var minMonth=new Date(MIN.getFullYear(),MIN.getMonth(),1),maxMonth=new Date(MAX.getFullYear(),MAX.getMonth(),1),view=new Date(minMonth);
+ var selDate=null,selSlot=null;
+ var pn=(pl==='early')?'早鳥方案':'標準方案';
+ var ov=document.createElement('div');ov.id='qw-cdcal';
+ ov.style.cssText='position:fixed;inset:0;z-index:100002;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
+ var sb='border:1.5px solid #d3ddea;border-radius:12px;padding:12px 6px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer;font-family:inherit';
+ ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.35)">'
+ +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative"><div style="font-size:11px;font-weight:800;opacity:.85">🗓️ '+pn+' · 最後一步</div><div style="font-size:16.5px;font-weight:900;margin-top:3px;padding-right:34px">選擇期望清洗日期與時段</div><button id="qwcd-x" type="button" aria-label="關閉" style="position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:17px;cursor:pointer">×</button></div>'
+ +'<div style="padding:15px 18px 18px">'
+ +'<div style="font-size:12px;font-weight:800;color:#042C53;margin-bottom:8px">1. 期望清洗日期<span style="color:#7c8998;font-weight:600">（'+pn+'可選 '+_dhFmt(MIN).slice(5)+'～'+_dhFmt(MAX).slice(5)+'）</span></div>'
+ +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><button data-nav="-1" type="button" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">‹</button><b id="qwcd-ml" style="font-size:14px"></b><button data-nav="1" type="button" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">›</button></div>'
+ +'<div id="qwcd-wd" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px"></div>'
+ +'<div id="qwcd-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>'
+ +'<div style="font-size:12px;font-weight:800;color:#042C53;margin:16px 0 8px">2. 時段</div>'
+ +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><button type="button" data-slot="上午" class="qwcd-slot" style="'+sb+'">上午</button><button type="button" data-slot="下午" class="qwcd-slot" style="'+sb+'">下午</button><button type="button" data-slot="晚上" class="qwcd-slot" style="'+sb+'">晚上</button></div>'
+ +'<div style="font-size:11.5px;color:#0C447C;background:#eaf2fb;border:1px solid #b9d3ee;border-radius:10px;padding:10px 12px;line-height:1.65;margin-top:15px">ℹ️ 如期望時間為技師空班，則會直接發送<b>預約確認通知</b>；如期望時間衝突，約時人員會<b>主動去電聯繫約定</b>。</div>'
+ +'<div id="qwcd-sum" style="font-size:12.5px;color:#042C53;font-weight:800;text-align:center;margin-top:13px;min-height:17px"></div>'
+ +'<button id="qwcd-ok" type="button" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed;font-family:inherit">確認日期，前往結帳</button>'
+ +'<button id="qwcd-skip" type="button" style="width:100%;border:1.5px solid #dbe3ec;background:#fff;color:#5f6b78;border-radius:12px;padding:12px;font-size:13.5px;font-weight:800;margin-top:10px;cursor:pointer;font-family:inherit">先不指定，由約時人員安排</button>'
+ +'</div></div>';
+ document.body.appendChild(ov);
+ var wd=['日','一','二','三','四','五','六'];
+ ov.querySelector('#qwcd-wd').innerHTML=wd.map(function(n,i){return '<div style="text-align:center;font-size:11px;font-weight:800;color:'+((i===0||i===6)?'#c0392b':'#7c8998')+';padding:2px 0">'+n+'</div>';}).join('');
+ function blocked(dt){return !!_CNYS[_dhKey(dt)];}
+ function draw(){
+  ov.querySelector('#qwcd-ml').textContent=view.getFullYear()+' 年 '+(view.getMonth()+1)+' 月';
+  var pad=new Date(view.getFullYear(),view.getMonth(),1).getDay(),dim=new Date(view.getFullYear(),view.getMonth()+1,0).getDate(),h='';
+  for(var i=0;i<pad;i++)h+='<div></div>';
+  for(var d=1;d<=dim;d++){var dt=new Date(view.getFullYear(),view.getMonth(),d);var cny=blocked(dt);var dis=(dt<MIN)||(dt>MAX)||cny;var sel=selDate&&_dhKey(selDate)===_dhKey(dt);
+   var st='aspect-ratio:1/1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;';
+   if(sel)st+='background:#042C53;color:#fff;';else if(dis)st+='background:#f0f3f7;color:#7c8998;opacity:.45;cursor:not-allowed;';else st+='background:#fff;border:1.5px solid #d3ddea;color:#16202b;cursor:pointer;';
+   h+='<div '+(dis?'':'data-d="'+d+'"')+' style="'+st+'">'+d+(cny?'<span style="font-size:8px;font-weight:800;color:#c0392b;line-height:1;margin-top:1px">春節</span>':'')+'</div>';}
+  ov.querySelector('#qwcd-days').innerHTML=h;
+  var pv=ov.querySelector('[data-nav="-1"]'),nx=ov.querySelector('[data-nav="1"]');
+  pv.disabled=(view<=minMonth);pv.style.opacity=pv.disabled?'.35':'1';nx.disabled=(view>=maxMonth);nx.style.opacity=nx.disabled?'.35':'1';
+ }
+ function sum(){var el=ov.querySelector('#qwcd-sum'),ok=ov.querySelector('#qwcd-ok');
+  if(selDate&&selSlot){el.textContent='已選：'+_dhFmt(selDate)+'（'+selSlot+'）';ok.disabled=false;ok.style.background='#042C53';ok.style.cursor='pointer';}
+  else{el.textContent=selDate?'請再選時段':'請選擇日期與時段';ok.disabled=true;ok.style.background='#b7c2cf';ok.style.cursor='not-allowed';}}
+ ov.addEventListener('click',function(e){
+  var nav=e.target.closest('[data-nav]');if(nav){var nv=new Date(view.getFullYear(),view.getMonth()+(+nav.getAttribute('data-nav')),1);if(nv>=minMonth&&nv<=maxMonth){view=nv;draw();}return;}
+  var day=e.target.closest('[data-d]');if(day){selDate=new Date(view.getFullYear(),view.getMonth(),+day.getAttribute('data-d'));draw();sum();return;}
+  var sl=e.target.closest('.qwcd-slot');if(sl){selSlot=sl.getAttribute('data-slot');[].slice.call(ov.querySelectorAll('.qwcd-slot')).forEach(function(x){x.style.borderColor='#d3ddea';x.style.background='#fff';x.style.color='#16202b';});sl.style.borderColor='#042C53';sl.style.background='#E6F1FB';sl.style.color='#042C53';sum();return;}
+ });
+ function shut(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
+ /* × 與點灰底：回到精靈最後一步（不放進購物車），客人可以改方案或再按一次完成 */
+ ov.querySelector('#qwcd-x').onclick=shut;
+ ov.onclick=function(e){if(e.target===ov)shut();};
+ ov.querySelector('#qwcd-ok').onclick=function(){if(!selDate||!selSlot)return;window.__qsCleanDate=_dhFmt(selDate)+'（'+selSlot+'）';shut();if(onDone)onDone();};
+ ov.querySelector('#qwcd-skip').onclick=function(){window.__qsCleanDate='未指定';shut();if(onDone)onDone();};
+ draw();sum();
+}
 function showTerms(k,mode,onConfirm){
  var t=_TERMS[k];if(!t||document.getElementById('qw-terms'))return;
  var gate=(mode==='gate');
@@ -1026,7 +1089,9 @@ var api={
     document.body.appendChild(ov);
     function kill(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
     ov.querySelector('#qw-pc-alt').onclick=function(){kill();api.pickPlan(D.other);};
-    ov.querySelector('#qw-pc-ok').onclick=function(e){var b=this;if(b.disabled)return;b.disabled=true;b.textContent='處理中…';kill();api.finish();};
+    ov.querySelector('#qw-pc-ok').onclick=function(e){var b=this;if(b.disabled)return;b.disabled=true;b.textContent='處理中…';kill();
+      /* 2026-10-12 老闆：確認方案後多一步「選擇期望清洗日期」(做法同除濕機配送日)，選好或按「先不指定」才放進購物車 */
+      showCleanDatePicker(plan,function(){api.finish();});};
     ov.addEventListener('click',function(e){if(e.target===ov)kill();});
   },
   /* 先看服務說明/規範完整圖文介紹:關精靈→捲到詳情圖區→浮出「回到引導精靈」(選擇都保留,回來時停在原本那一步) */
@@ -2027,7 +2092,7 @@ function addContinueBtn(){
         function _done(){
           if(_fin)return;_fin=true;
           qty={};plan=null;env=null;areaCity=null;areaDist=null;areaCls=null;opened={};
-          window.__qsPlan=null;window.__qsDhDelivery='';window.__qsRead_dh='';window.__qsRead_air='';
+          window.__qsPlan=null;window.__qsDhDelivery='';window.__qsCleanDate='';window.__qsRead_dh='';window.__qsRead_air='';
           /* 這幾個全域若不一起清掉會變成幽靈設定:
              __qsEnv 殘留 'biz' → 客戶改用「自己選」時系統仍自動加收商用加價 $1,000/台,並壓掉車馬費判斷
              __qsAreaCity/Dist  → 結帳表單被自動填入上一次的舊地址,連帶算錯偏遠加價
@@ -2113,7 +2178,7 @@ function fillConsent(){
     var _cur=el.value||'';
     var _mt=_cur.match(/｜時間:([^｜]+)$/);var ts;
     if(_mt){ts=_mt[1];}else{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
-    var rec=(_hasDh?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+'｜時間:'+ts;
+    var rec=(window.__qsCleanDate?'【期望清洗日:'+window.__qsCleanDate+'】':'')+(_hasDh?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+'｜時間:'+ts;
     if(_cur!==rec){
       var st=Object.getOwnPropertyDescriptor((el.tagName==='TEXTAREA'?window.HTMLTextAreaElement:window.HTMLInputElement).prototype,'value').set;
       st.call(el,rec);
