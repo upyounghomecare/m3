@@ -134,7 +134,14 @@ function _surveyOf(){return SURVEY[(env==='biz')?'biz':'home'];}
 var ICO_GUIDE='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3"/></svg>';
 var ICO_LIST='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.4"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.4"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.4"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.4"/></svg>';
 
-var CSS='#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
+/* 2026-10-12 選期望到府時間面板(質感升級版)的樣式 */
+/* 2026-10-15 老闆:先只把「選方案」這一頁換成質感升級外觀(其他頁之後再處理)。只作用在 .qw-step-plan */
+var CSS='#qw-ovl .qw.qw-step-plan{padding:0 16px 16px;border-radius:18px;box-shadow:0 14px 44px rgba(0,0,0,.35)}@media (min-width:760px){#qw-ovl .qw.qw-step-plan{padding:0 22px 20px!important}#qw-ovl .qw.qw-step-plan>h2,#qw-ovl .qw.qw-step-plan>.sub{margin-left:-22px!important;margin-right:-22px!important;padding-left:22px!important;padding-right:22px!important}}#qw-ovl .qw.qw-step-plan>h2,#qw-ovl .qw.qw-step-plan>.sub{background:#06335F;margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}#qw-ovl .qw.qw-step-plan>h2{color:#fff!important;-webkit-text-stroke:0!important;font-size:19px;letter-spacing:.02em;margin-top:0;margin-bottom:0;padding-top:16px;padding-bottom:2px;padding-right:56px;line-height:1.35;background:linear-gradient(180deg,#042C53,#06335F)}#qw-ovl .qw.qw-step-plan>.sub{color:rgba(255,255,255,.78);font-size:12.5px;margin-top:0;margin-bottom:10px;padding-bottom:12px;line-height:1.5}#qw-ovl .qw.qw-step-plan .qw-x{top:11px;right:11px;background:rgba(255,255,255,.14);color:#fff;font-size:20px;line-height:30px;z-index:7}#qw-ovl .qw.qw-step-plan .qplans{gap:12px}#qw-ovl .qw.qw-step-plan .qplan{border-radius:18px;border:2px solid transparent;box-shadow:0 4px 14px rgba(4,44,83,.12)}#qw-ovl .qw.qw-step-plan .qplan.sel{border-color:#042C53;box-shadow:0 0 0 2px #B8860B,0 10px 22px rgba(4,44,83,.2)}#qw-ovl .qw.qw-step-plan .qp-money{background:#042C53}#qw-ovl .qw.qw-step-plan .qp-money b{font-variant-numeric:tabular-nums}#qw-ovl .qw.qw-step-plan .qpnote{border-radius:12px;border:1px solid #DCE8F4;background:#F3F7FB;color:#1E3550}#qw-ovl .qw.qw-step-plan .qpn-warn{border-color:#F0DDB0;background:#FFF8E8;color:#7A5C0D}#qw-ovl .qw.qw-step-plan .qdl{border-radius:16px;border:1px solid #E3EAF2;box-shadow:0 1px 3px rgba(4,44,83,.05)}#qw-ovl .qw.qw-step-plan .qdl-ic{background:#FFF8E8;border-radius:11px;width:34px;height:34px}#qw-ovl .qw.qw-step-plan .qcp-i{border-radius:12px;border:1.5px solid #DCE4EE}#qw-ovl .qw.qw-step-plan .qcp-b{border-radius:12px;background:linear-gradient(135deg,#C9971C,#B8860B)}#qw-ovl .qw.qw-step-plan .qw-need{border-radius:12px;background:linear-gradient(135deg,#C9971C,#B8860B);box-shadow:0 6px 14px rgba(184,134,11,.3)}#qw-ovl .qw.qw-step-plan .qwfoot{box-shadow:0 -10px 20px -12px rgba(4,44,83,.25);border-top:1px solid #EEF2F6}#qw-ovl .qw.qw-step-plan .nav{gap:10px;margin-top:10px}#qw-ovl .qw.qw-step-plan .btn{border-radius:14px;padding:12px 10px;font-size:14.5px;font-weight:800}#qw-ovl .qw.qw-step-plan .btn.gho{flex:0 0 32%;border:1.5px solid #DCE4EE;color:#42546A;background:#fff}#qw-ovl .qw.qw-step-plan .btn.pri{background:linear-gradient(135deg,#0C447C,#042C53);box-shadow:0 6px 16px rgba(4,44,83,.25)}#qw-ovl .qw.qw-step-plan .btn.pri:disabled{background:#C6D0DB;box-shadow:none}#qw-ovl .qw.qw-step-plan .btn.pri.qw-needbtn{background:linear-gradient(135deg,#C9971C,#B8860B)!important}#qw-cdcal{position:fixed;inset:0;z-index:100002;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;-webkit-text-size-adjust:100%}#qw-cdcal *{box-sizing:border-box}#qw-cdcal .qwcd-sheet{background:#fff;width:100%;max-width:420px;max-height:92vh;max-height:92dvh;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35);animation:qwcdUp .22s ease-out}@keyframes qwcdUp{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}#qw-cdcal .qwcd-hd{background:linear-gradient(160deg,#042C53 0%,#0C447C 100%);color:#fff;padding:16px 16px 14px;position:relative;flex:none}#qw-cdcal .qwcd-grab{display:none}#qw-cdcal .qwcd-ttl{font-size:17px;font-weight:900;letter-spacing:.02em;padding-right:36px}#qw-cdcal .qwcd-x{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,.14);color:#fff;font-size:17px;line-height:1;cursor:pointer;font-family:inherit}#qw-cdcal .qwcd-st{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:12px;font-size:12px;font-weight:900;color:#F3D58A;letter-spacing:.04em}#qw-cdcal .qwcd-st span{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:0}#qw-cdcal .qwcd-seg{display:grid;grid-template-columns:4fr 1fr;gap:4px;background:rgba(255,255,255,.12);border-radius:14px;padding:4px;margin-top:6px}#qw-cdcal .qwcd-ck{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#B8860B;color:#fff;font-size:10.5px;margin-right:5px;vertical-align:1px}#qw-cdcal .qwcd-sg{border:none;border-radius:11px;padding:8px 6px 7px;background:transparent;color:rgba(255,255,255,.88);font-family:inherit;cursor:pointer;text-align:center;position:relative;line-height:1.25}#qw-cdcal .qwcd-sg b{display:block;font-size:13.5px;font-weight:900}#qw-cdcal .qwcd-sg small{display:block;font-size:11px;opacity:.85;margin-top:2px;font-variant-numeric:tabular-nums}#qw-cdcal .qwcd-sg.on{background:#fff;color:#042C53;box-shadow:0 0 0 2px #B8860B,0 2px 8px rgba(0,0,0,.18);cursor:default}#qw-cdcal .qwcd-sg.on small{color:#6B7A8A;opacity:1}#qw-cdcal .qwcd-off{display:inline-block;font-size:11px;font-weight:900;color:#B8860B;margin-left:3px}#qw-cdcal .qwcd-sg:not(.on) .qwcd-off{color:#F3D58A}#qw-cdcal .qwcd-tg{position:absolute;top:-7px;right:6px;background:#B8860B;color:#fff;font-size:10px;font-weight:900;border-radius:99px;padding:1px 7px;box-shadow:0 2px 6px rgba(0,0,0,.2)}#qw-cdcal .qwcd-ex{font-size:11.5px;color:rgba(255,255,255,.82);margin-top:9px;line-height:1.55}#qw-cdcal .qwcd-ex b{color:#fff}#qw-cdcal .qwcd-bd{overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 6px;flex:1;min-height:0}#qw-cdcal .qwcd-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}#qw-cdcal .qwcd-k{font-size:13.5px;font-weight:900;color:#042C53}#qw-cdcal .qwcd-rg{font-size:11.5px;font-weight:800;color:#0C447C;background:#EEF4FA;border-radius:99px;padding:2px 9px;font-variant-numeric:tabular-nums;white-space:nowrap}#qw-cdcal .qwcd-mn{display:flex;align-items:center;justify-content:center;gap:18px;margin:2px 0 6px}#qw-cdcal .qwcd-mn b{font-size:14px;color:#16202B;min-width:100px;text-align:center;font-variant-numeric:tabular-nums}#qw-cdcal .qwcd-mn button{width:30px;height:30px;border-radius:50%;border:none;background:#EEF4FA;color:#042C53;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit}#qw-cdcal .qwcd-mn button:disabled{opacity:.3;cursor:default}#qw-cdcal .qwcd-wd,#qw-cdcal .qwcd-dg{display:grid;grid-template-columns:repeat(7,1fr);row-gap:4px}#qw-cdcal .qwcd-wd div{text-align:center;font-size:11px;font-weight:800;color:#6B7A8A;padding:3px 0}#qw-cdcal .qwcd-wd div:first-child,#qw-cdcal .qwcd-wd div:last-child{color:#C0392B}#qw-cdcal .qwcd-dc{display:flex;justify-content:center}#qw-cdcal .qwcd-d{width:38px;height:38px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-variant-numeric:tabular-nums;color:#B9C3CE;line-height:1.1;-webkit-tap-highlight-color:transparent}#qw-cdcal .qwcd-d.av{color:#042C53;font-weight:800;background:#EEF4FA;cursor:pointer}#qw-cdcal .qwcd-d.av:hover{background:#DCE9F6}#qw-cdcal .qwcd-d.sel{background:#042C53;color:#fff;font-weight:800;box-shadow:0 0 0 3px #fff,0 0 0 5px #B8860B}#qw-cdcal .qwcd-d i{font-style:normal;font-size:8px;color:#C0392B;font-weight:800;line-height:1}#qw-cdcal .qwcd-sl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#qw-cdcal .qwcd-slot{border:1.5px solid #E1E8F0;border-radius:14px;background:#fff;padding:9px 4px 8px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#16202B}#qw-cdcal .qwcd-slot span{font-size:19px;line-height:1}#qw-cdcal .qwcd-slot b{font-size:13.5px}#qw-cdcal .qwcd-slot.on{border-color:#042C53;background:#042C53;color:#fff}#qw-cdcal .qwcd-nt{display:flex;gap:7px;font-size:11.5px;color:#6B7A8A;line-height:1.6;margin:14px 0 4px}#qw-cdcal .qwcd-nt b{color:#16202B}#qw-cdcal .qwcd-ft{flex:none;border-top:1px solid #E1E8F0;padding:10px 16px 12px;background:#fff}#qw-cdcal .qwcd-pk{font-size:12.5px;color:#6B7A8A;margin-bottom:8px;min-height:18px}#qw-cdcal .qwcd-pk b{color:#042C53;font-size:14px;font-variant-numeric:tabular-nums;margin-left:4px}#qw-cdcal .qwcd-go{width:100%;border:none;border-radius:14px;padding:13px;font-size:15px;font-weight:900;font-family:inherit;background:#C6D0DB;color:#fff;cursor:not-allowed}#qw-cdcal .qwcd-go.on{background:linear-gradient(135deg,#C9971C,#B8860B);cursor:pointer;box-shadow:0 6px 16px rgba(184,134,11,.35)}#qw-cdcal .qwcd-sk{display:block;width:100%;margin:8px 0 0;border:1.5px solid #DCE4EE;background:#fff;color:#42546A;border-radius:14px;padding:11px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit}#qw-cdcal .qwcd-sk:active{background:#F3F7FB}#qw-cdcal button:focus-visible,#qw-cdcal .qwcd-d:focus-visible{outline:2px solid #B8860B;outline-offset:2px}@media (prefers-reduced-motion:reduce){#qw-cdcal .qwcd-sheet{animation:none}}#qw-cdcal .qwcd-sg.on{text-align:left;padding:8px 12px 7px}#qw-cdcal .qwcd-sg.on b{font-size:15.5px}#qw-cdcal .qwcd-sg.on small{font-size:11.5px;margin-top:2px}#qw-cdcal .qwcd-swb{padding:6px 2px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:1px dashed rgba(255,255,255,.35)}#qw-cdcal .qwcd-swb .qwcd-k2{font-size:10px;font-weight:800;color:#F3D58A}#qw-cdcal .qwcd-swb b{font-size:11.5px;line-height:1.2}#qw-cdcal .qwcd-swb .qwcd-o2{font-size:10.5px;font-weight:900;color:#F3D58A}#qw-cdcal .qwcd-swb .qwcd-tg{right:50%;transform:translateX(50%);top:-9px;white-space:nowrap}#qw-cdcal .qwcd-swb:active{background:rgba(255,255,255,.1)}#qw-cdcal .qwcd-ed{margin-top:5px;background:#fff;color:#042C53;border-radius:11px;padding:8px 12px;font-size:15px;font-weight:900;box-shadow:0 0 0 2px #B8860B}#qw-cdcal .qwcd-hd{padding:12px 16px 10px}#qw-cdcal .qwcd-ttl{font-size:16px}#qw-cdcal .qwcd-x{top:9px;width:28px;height:28px}#qw-cdcal .qwcd-st{margin-top:8px}#qw-cdcal .qwcd-seg{margin-top:5px}#qw-cdcal .qwcd-sg{padding:6px 6px 5px}#qw-cdcal .qwcd-sg small{margin-top:1px}#qw-cdcal .qwcd-ex{font-size:11px;line-height:1.45;margin-top:6px}#qw-cdcal .qwcd-bd{padding:10px 16px 4px}#qw-cdcal .qwcd-row{margin-bottom:4px}#qw-cdcal .qwcd-mn{margin:0 0 2px}#qw-cdcal .qwcd-mn button{width:26px;height:26px;font-size:14px}#qw-cdcal .qwcd-wd div{padding:1px 0}#qw-cdcal .qwcd-dg{row-gap:2px}#qw-cdcal .qwcd-d{width:34px;height:34px;font-size:13.5px}#qw-cdcal .qwcd-slot{flex-direction:row;justify-content:center;gap:5px;padding:9px 4px}#qw-cdcal .qwcd-slot span{font-size:16px}#qw-cdcal .qwcd-nt{font-size:11px;line-height:1.5;margin:10px 0 2px}#qw-cdcal .qwcd-slt{margin-top:10px}#qw-cdcal .qwcd-ft{padding:8px 16px 10px}#qw-cdcal .qwcd-pk{margin-bottom:6px}#qw-cdcal .qwcd-go{padding:12px}#qw-cdcal .qwcd-sk{padding:9px;margin-top:6px}@media (max-height:760px){#qw-cdcal{padding:8px 14px}#qw-cdcal .qwcd-sheet{max-height:96vh;max-height:96dvh}#qw-cdcal .qwcd-hd{padding:10px 14px 8px}#qw-cdcal .qwcd-st{margin-top:6px}#qw-cdcal .qwcd-bd{padding:8px 14px 2px}#qw-cdcal .qwcd-d{width:31px;height:31px;font-size:13px}#qw-cdcal .qwcd-dg{row-gap:1px}#qw-cdcal .qwcd-slot{padding:7px 4px}#qw-cdcal .qwcd-nt{margin:8px 0 0}#qw-cdcal .qwcd-slt{margin-top:6px}#qw-cdcal .qwcd-ft{padding:6px 14px 8px}#qw-cdcal .qwcd-pk{margin-bottom:4px}#qw-cdcal .qwcd-go{padding:10px}#qw-cdcal .qwcd-sk{padding:7px;margin-top:5px}}@media (max-height:700px){#qw-cdcal .qwcd-d{width:29px;height:29px;font-size:12.5px}#qw-cdcal .qwcd-ex{margin-top:4px}#qw-cdcal .qwcd-mn button{width:24px;height:24px}}#qw-ovl .qw .callnote.qw-call{margin-top:10px;background:#fff!important;border:1.5px solid #0C447C!important;border-radius:14px!important;padding:11px 13px!important;display:flex;align-items:center;gap:11px;box-shadow:0 4px 14px rgba(4,44,83,.1)}#qw-ovl .qw .qw-call-ic{flex:none;width:40px;height:40px;border-radius:12px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:21px}#qw-ovl .qw .qw-call-ic span{display:inline-block;animation:qwRing 2.4s ease-in-out infinite}@keyframes qwRing{0%,100%{transform:rotate(0)}10%,30%{transform:rotate(-14deg)}20%,40%{transform:rotate(14deg)}50%{transform:rotate(0)}}#qw-ovl .qw .qw-call-t1{font-size:15.5px;font-weight:900;color:#042C53;line-height:1.35}#qw-ovl .qw .qw-call-t2{font-size:12.5px;font-weight:700;color:#42546A;margin-top:2px;line-height:1.5}@media (prefers-reduced-motion:reduce){#qw-ovl .qw .qw-call-ic span{animation:none}}@keyframes qwTap{0%,100%{transform:translateY(-3px)}50%{transform:translateY(5px)}}@keyframes qwBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}@keyframes qwGold{0%,100%{box-shadow:0 0 0 0 rgba(184,134,11,.6)}50%{box-shadow:0 0 0 9px rgba(184,134,11,0)}}@keyframes qwShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}'
++'#qw-ovl .qw .qw-need{display:flex;align-items:center;justify-content:center;gap:8px;background:#B8860B;color:#fff;font-weight:900;font-size:14.5px;border-radius:10px;padding:9px 10px;margin:4px 0 10px}#qw-ovl .qw .qw-need i{font-style:normal;font-size:20px;display:inline-block;animation:qwTap .9s infinite}'
++'#qw-ovl .qw .qplans.qw-bob .qplan:nth-child(1){animation:qwBob 1.2s infinite}#qw-ovl .qw .qplans.qw-bob .qplan:nth-child(2){animation:qwBob 1.2s .2s infinite}#qw-ovl .qw .qplans.qw-shake{animation:qwShake .45s}'
++'#qw-ovl .qw .btn.pri.qw-needbtn{background:#B8860B!important;animation:qwGold 1.4s infinite}'
++'@media (prefers-reduced-motion:reduce){#qw-ovl .qw .qw-need i,#qw-ovl .qw .qplans.qw-bob .qplan,#qw-ovl .qw .btn.pri.qw-needbtn,#qw-ovl .qw .qplans.qw-shake{animation:none}}'
++'#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
 +'#qw-ovl *{box-sizing:border-box}'
 +''
 +'#qw-ovl .qw{max-width:640px!important}'/* 內文CSS有一份舊的.qw(max-width:400px)排在後面會壓過來,故用#qw-ovl前綴+!important搶回;必須放在下面兩個@media之前,否則會反過來壓掉桌機規則 */
@@ -361,7 +368,7 @@ function _estOff(code){
 function _offText(off){var d=Math.round((1-off)*100);return (d%10===0?(d/10):d)+'折';}
 function _cpMsg(html,cls){try{
   var box=document.getElementById('qw-cpmsg');if(!box)return;
-  box.innerHTML=html?('<div class="qcp-m '+cls+'">'+html+'</div>'+((cls==='ok'||cls==='warn')?'<div class="qcp-go">👇 最後一步：請按「完成，前往結帳」</div>':'')):'';
+  box.innerHTML=html?('<div class="qcp-m '+cls+'">'+html+'</div>'+((cls==='ok'||cls==='warn')?'<div class="qcp-go">👇 下一步：請按下方按鈕選擇期望到府服務時間</div>':'')):'';
   var pri=document.querySelector('#qw-ovl .btn.pri');
   if(pri){if(cls==='ok'||cls==='warn')pri.classList.add('qwpulse');else pri.classList.remove('qwpulse');}
   /* 訊息框讓黏底區變高,要等 _pad 重算完再捲,不然上面的內容會被蓋住一點 */
@@ -793,7 +800,7 @@ function render(){
          老闆 2026-09-10 的原話是「文字有一點點小」,解法是讓該大的大,不是全部一起大。 */
       var _whBadge=_whC?'<div style="margin:8px 6px 2px;background:#FFC400;color:#0C447C;font-weight:900;border-radius:999px;padding:6px 7px;text-align:center;line-height:1.35;box-shadow:0 1px 4px rgba(0,0,0,.18)"><div style="font-size:15px;letter-spacing:-.2px">\ud83c\udfe0 \u5168\u6236\u52a0\u78bc <b>92 \u6298</b></div><div style="font-size:10.5px;opacity:.78;margin-top:1px">\u4e00\u822c\u5bb6\u7528 3 \u53f0\u4ee5\u4e0a</div></div>':'';
       return '<div class="qplan '+(sel?'sel':'')+'" onclick="__qw.pickPlan(&quot;'+k+'&quot;)"><img src="'+img+'" alt="'+_alt+'">'+_whBadge+planPrice(k)+'<div class="qpn '+ncls+'">'+note+'</div></div>';}
-    w='<div class="qw"><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub"><span class="laststep">最後一步</span> 越有彈性、折扣越多，二選一</p><div class="qplans">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote">📞 下單付款後，將由專人來電與您約定實際到府時間</div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="qcp"><div class="qcp-r"><span class="qcp-t">🎟️ 優惠碼</span><input id="qw-cp" class="qcp-i" type="text" inputmode="latin" autocomplete="off" spellcheck="false" value="'+_esc(_userCode)+'" oninput="__qw.setCode(this.value)" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();__qw.applyCode();}"><button type="button" class="qcp-b" onclick="__qw.applyCode()">套用</button></div><div id="qw-cpmsg"></div><div class="qcp-n">選填；完成後自動套用，系統會採用<b>折扣較多</b>的那一張</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri" '+(plan?'':'disabled')+' onclick="__qw.confirmPlan()">完成，前往結帳</button></div></div>';
+    w='<div class="qw qw-step-plan"><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub">越有彈性、折扣越多，二選一</p>'+(plan?'':'<div class="qw-need"><i>👇</i>請先點選一個方案（必選）</div>')+'<div class="qplans'+(plan?'':' qw-bob')+'">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+/* 老闆 2026-10-13 選 C:同一句拆成大小兩行、前半句放大,電話圖示輕晃(像來電) */'<div class="callnote qw-call"><div class="qw-call-ic"><span>📞</span></div><div><div class="qw-call-t1">下單付款後，將由專人來電</div><div class="qw-call-t2">與您約定實際到府時間</div></div></div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="qcp"><div class="qcp-r"><span class="qcp-t">🎟️ 優惠碼</span><input id="qw-cp" class="qcp-i" type="text" inputmode="latin" autocomplete="off" spellcheck="false" value="'+_esc(_userCode)+'" oninput="__qw.setCode(this.value)" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();__qw.applyCode();}"><button type="button" class="qcp-b" onclick="__qw.applyCode()">套用</button></div><div id="qw-cpmsg"></div><div class="qcp-n">選填；完成後自動套用，系統會採用<b>折扣較多</b>的那一張</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri'+(plan?'':' qw-needbtn')+'" onclick="__qw.confirmPlan()">'+(plan?'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.8;line-height:1.3">下一步</span><span style="display:block;line-height:1.35">選擇期望到府時間</span>':'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">還沒選方案</span><span style="display:block;line-height:1.35">👆 請先點上方方案</span>')+'</button></div></div>';
   }
   if(!ovl)return;/* 精靈已關閉就別動,避免崩潰 */
   ovl.innerHTML=w;
@@ -831,13 +838,15 @@ function _dhKey(dt){var m=dt.getMonth()+1,d=dt.getDate();return dt.getFullYear()
 function _dhBlocked(dt){if(_DHHOL[_dhKey(dt)])return true;var w=dt.getDay();if(w===0)return true;if(w===6){var m=dt.getMonth()+1;return !(m>=4&&m<=9);}return false;}
 function _dhMin(){var d=new Date();d.setHours(12,0,0,0);var n=0;while(n<2){d.setDate(d.getDate()+1);if(!_dhBlocked(d))n++;}return d;}
 function _dhFmt(dt){var m=dt.getMonth()+1,d=dt.getDate();return dt.getFullYear()+'/'+(m<10?'0':'')+m+'/'+(d<10?'0':'')+d;}
-function showDeliveryPicker(onDone){
+function showDeliveryPicker(onDone,opt){
+ opt=opt||{};var ED=!!opt.edit;
  if(document.getElementById('qw-dhcal'))return;
  var MIN=_dhMin();var MAX=new Date();MAX.setHours(23,59,59,999);MAX.setDate(MAX.getDate()+9);/* 只開放 D+2(工作天)~D+9 */var minMonth=new Date(MIN.getFullYear(),MIN.getMonth(),1);var maxMonth=new Date(MAX.getFullYear(),MAX.getMonth(),1);var view=new Date(minMonth);var selDate=null,selSlot=null;
+ if(ED){var _pc=_whenParse(opt.cur);if(_pc){if(_pc.d>=MIN&&_pc.d<=MAX&&!_dhBlocked(_pc.d)){selDate=_pc.d;view=new Date(_pc.d.getFullYear(),_pc.d.getMonth(),1);}selSlot=_pc.slot;}}
  var ov=document.createElement('div');ov.id='qw-dhcal';
  ov.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.35)">'
- +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative"><div style="font-size:11px;font-weight:800;opacity:.85">📦 三菱重工除濕機 · 另行宅配</div><div style="font-size:16.5px;font-weight:900;margin-top:3px;padding-right:34px">選擇除濕機期望配送日期與時段</div><button id="qwdh-x" type="button" aria-label="關閉" style="position:absolute;top:10px;right:12px;width:30px;height:30px;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:19px;line-height:1;border-radius:50%;cursor:pointer">×</button></div>'
+ +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative"><div style="font-size:11px;font-weight:800;opacity:.85">📦 三菱重工除濕機 · 另行宅配</div><div style="font-size:16.5px;font-weight:900;margin-top:3px;padding-right:34px">'+(ED?'變更除濕機期望配送日期與時段':'選擇除濕機期望配送日期與時段')+'</div><button id="qwdh-x" type="button" aria-label="關閉" style="position:absolute;top:10px;right:12px;width:30px;height:30px;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:19px;line-height:1;border-radius:50%;cursor:pointer">×</button></div>'
  +'<div style="padding:15px 18px 18px">'
  +'<div style="font-size:12px;font-weight:800;color:#042C53;margin-bottom:8px">1. 期望配送日期<span style="color:#7c8998;font-weight:600">（僅可選 '+_dhFmt(MIN).slice(5)+'～'+_dhFmt(MAX).slice(5)+'，週日/國定假日不可選）</span></div>'
  +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><button data-nav="-1" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">‹</button><b id="qwdh-ml" style="font-size:14px"></b><button data-nav="1" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">›</button></div>'
@@ -847,8 +856,8 @@ function showDeliveryPicker(onDone){
  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-slot="上午" class="qwdh-slot" style="border:1.5px solid #d3ddea;border-radius:12px;padding:12px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer">上午<span style="display:block;font-size:11px;font-weight:600;color:#7c8998;margin-top:2px">約 09:00–12:00</span></button><button data-slot="下午" class="qwdh-slot" style="border:1.5px solid #d3ddea;border-radius:12px;padding:12px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer">下午<span style="display:block;font-size:11px;font-weight:600;color:#7c8998;margin-top:2px">約 13:00–18:00</span></button></div>'
  +'<div style="font-size:11.5px;color:#8a6410;background:rgba(184,134,11,.09);border:1px solid rgba(184,134,11,.25);border-radius:10px;padding:10px 12px;line-height:1.65;margin-top:15px">⚠️ 此為<b>期望配送時間</b>，實際仍需依物流量能為準，司機將於配送前<b>去電聯繫</b>確認。</div>'
  +'<div id="qwdh-sum" style="font-size:12.5px;color:#042C53;font-weight:800;text-align:center;margin-top:13px;min-height:17px"></div>'
- +'<button id="qwdh-ok" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed">確認加購除濕機</button>'
- +'<button id="qwdh-cancel" style="width:100%;border:none;background:none;color:#7c8998;font-size:12.5px;margin-top:10px;cursor:pointer;text-decoration:underline">取消，不加購除濕機</button>'
+ +'<button id="qwdh-ok" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed">'+(ED?'確認變更':'確認加購除濕機')+'</button>'
+ +'<button id="qwdh-cancel" style="width:100%;border:none;background:none;color:#7c8998;font-size:12.5px;margin-top:10px;cursor:pointer;text-decoration:underline">'+(ED?'不變更':'取消，不加購除濕機')+'</button>'
  +'</div></div>';
  document.body.appendChild(ov);
  var wd=['日','一','二','三','四','五','六'];
@@ -880,6 +889,7 @@ function showDeliveryPicker(onDone){
  ov.onclick=function(e){if(e.target===ov)_dhCl();};
  ov.querySelector('#qwdh-ok').onclick=function(){if(!selDate||!selSlot)return;window.__qsDhDelivery=_dhFmt(selDate)+'（'+selSlot+'）';if(ov.parentNode)ov.parentNode.removeChild(ov);if(onDone)onDone();};
  render();sum();
+ if(ED&&selSlot){[].slice.call(ov.querySelectorAll('.qwdh-slot')).forEach(function(x){if(x.getAttribute('data-slot')===selSlot){x.style.borderColor='#042C53';x.style.background='#E6F1FB';x.style.color='#042C53';}});}
 }
 /* ===== 期望清洗日期（2026-10-12 老闆定案）=====
    標準方案：下單隔天算第 1 天，可選第 3～14 天；早鳥方案：第 30～90 天。
@@ -887,61 +897,78 @@ function showDeliveryPicker(onDone){
    選的結果記在 window.__qsCleanDate，由 fillConsent() 寫進訂單的「同意存證」欄位。 */
 var _CNY_OFF=["20270204","20270205","20270206","20270207","20270208","20270209","20270210"];/* 116年春節連假 2/4～2/10（行政院核定 116 年辦公日曆表） */
 var _CNYS={};_CNY_OFF.forEach(function(d){_CNYS[d]=1;});
-function showCleanDatePicker(pl,onDone){
+function showCleanDatePicker(pl,onDone,opt){
+ /* 2026-10-12 老闆選「質感升級」版：跟原本精靈視窗一樣大小、置中(老闆:要跟目前一樣大小)；頂端二選一切換方案；
+    圓形日期；時段加圖示；確認鈕固定在底部；「先不指定」改文字連結。樣式在 CSS 的 #qw-cdcal 區塊。
+    老闆 2026-10-12：「先不指定」維持按鈕樣式(不要文字連結)。 */
+ opt=opt||{};
  if(document.getElementById('qw-cdcal'))return;
- var a=(pl==='early')?30:3, z=(pl==='early')?90:14;
+ var RG={std:[3,14],early:[30,90]},PN={std:'標準方案',early:'早鳥方案'};
+ var a=RG[pl][0], z=RG[pl][1];
  var MIN=new Date();MIN.setHours(0,0,0,0);MIN.setDate(MIN.getDate()+a);
  var MAX=new Date();MAX.setHours(23,59,59,999);MAX.setDate(MAX.getDate()+z);
  var minMonth=new Date(MIN.getFullYear(),MIN.getMonth(),1),maxMonth=new Date(MAX.getFullYear(),MAX.getMonth(),1),view=new Date(minMonth);
- var selDate=null,selSlot=null;
- var pn=(pl==='early')?'早鳥方案':'標準方案';
+ var selDate=null,selSlot=null,WD='日一二三四五六';
+ var ED=!!opt.edit;/* 結帳確認畫面的「修改」:只改日期時段、不能換方案、底部是確認變更／不變更 */
+ if(ED){var _pc=_whenParse(opt.cur);if(_pc){if(_pc.d>=MIN&&_pc.d<=MAX){selDate=_pc.d;view=new Date(_pc.d.getFullYear(),_pc.d.getMonth(),1);}selSlot=_pc.slot;}}
+ var off=opt.off||{std:'95折',early:'85折'},tag=opt.tag||{};
+ function from(k){var d=new Date();d.setDate(d.getDate()+RG[k][0]);return _dhFmt(d).slice(5);}
+ /* 老闆 2026-10-12：左邊 4/5 清楚寫出客人選的方案，右邊 1/5 是小小的「改選」按鈕 */
+ var other=(pl==='std')?'early':'std';
+ function segOn(){return '<button type="button" class="qwcd-sg on" aria-pressed="true"><b><i class="qwcd-ck">✓</i>'+PN[pl]+'<span class="qwcd-off">'+off[pl]+'</span></b><small>您選擇的方案・'+from(pl)+' 起可約</small></button>';}
+ function segSw(){return '<button type="button" class="qwcd-sg qwcd-swb" data-sw="'+other+'" aria-label="改選'+PN[other]+' '+off[other]+'">'
+   +(tag[other]?'<span class="qwcd-tg">'+tag[other]+'</span>':'')+'<span class="qwcd-k2">改選</span><b>'+PN[other].slice(0,2)+'</b><span class="qwcd-o2">'+off[other]+'</span></button>';}
+ if(ED){opt.wh=false;}
+ var ex=(pl==='early')?'到府安排在<b>專人去電聯繫約時起 30 天後</b>，實際日期由約時人員去電與您確認'
+   :((opt.wh?'🏠 已加碼全戶優惠・':'')+'到府安排在<b>專人去電聯繫起 2 週內</b>，實際日期由約時人員去電與您確認');
  var ov=document.createElement('div');ov.id='qw-cdcal';
- ov.style.cssText='position:fixed;inset:0;z-index:100002;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
- var sb='border:1.5px solid #d3ddea;border-radius:12px;padding:12px 6px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer;font-family:inherit';
- ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.35)">'
- +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative"><div style="font-size:11px;font-weight:800;opacity:.85">🗓️ '+pn+' · 最後一步</div><div style="font-size:16.5px;font-weight:900;margin-top:3px;padding-right:34px">選擇期望清洗日期與時段</div><button id="qwcd-x" type="button" aria-label="關閉" style="position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:17px;cursor:pointer">×</button></div>'
- +'<div style="padding:15px 18px 18px">'
- +'<div style="font-size:12px;font-weight:800;color:#042C53;margin-bottom:8px">1. 期望清洗日期<span style="color:#7c8998;font-weight:600">（'+pn+'可選 '+_dhFmt(MIN).slice(5)+'～'+_dhFmt(MAX).slice(5)+'）</span></div>'
- +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><button data-nav="-1" type="button" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">‹</button><b id="qwcd-ml" style="font-size:14px"></b><button data-nav="1" type="button" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #d3ddea;background:#fff;color:#042C53;font-size:15px;font-weight:800;cursor:pointer">›</button></div>'
- +'<div id="qwcd-wd" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px"></div>'
- +'<div id="qwcd-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>'
- +'<div style="font-size:12px;font-weight:800;color:#042C53;margin:16px 0 8px">2. 時段</div>'
- +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><button type="button" data-slot="上午" class="qwcd-slot" style="'+sb+'">上午</button><button type="button" data-slot="下午" class="qwcd-slot" style="'+sb+'">下午</button><button type="button" data-slot="晚上" class="qwcd-slot" style="'+sb+'">晚上</button></div>'
- +'<div style="font-size:11.5px;color:#0C447C;background:#eaf2fb;border:1px solid #b9d3ee;border-radius:10px;padding:10px 12px;line-height:1.65;margin-top:15px">ℹ️ 如期望時間為技師空班，則會直接發送<b>預約確認通知</b>；如期望時間衝突，約時人員會<b>主動去電聯繫約定</b>。</div>'
- +'<div id="qwcd-sum" style="font-size:12.5px;color:#042C53;font-weight:800;text-align:center;margin-top:13px;min-height:17px"></div>'
- +'<button id="qwcd-ok" type="button" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed;font-family:inherit">確認日期，前往結帳</button>'
- +'<button id="qwcd-skip" type="button" style="width:100%;border:1.5px solid #dbe3ec;background:#fff;color:#5f6b78;border-radius:12px;padding:12px;font-size:13.5px;font-weight:800;margin-top:10px;cursor:pointer;font-family:inherit">先不指定，由約時人員安排</button>'
- +'</div></div>';
+ ov.innerHTML='<div class="qwcd-sheet" role="dialog" aria-label="選擇期望到府服務時間">'
+  +'<div class="qwcd-hd"><div class="qwcd-grab"></div><div class="qwcd-ttl">'+(ED?'變更期望到府服務時間':'選擇期望到府服務時間')+'</div><button id="qwcd-x" type="button" class="qwcd-x" aria-label="關閉">×</button>'
+  +(ED?'<div class="qwcd-st">您選擇的方案<span>只能改日期與時段，方案不變</span></div><div class="qwcd-ed"><i class="qwcd-ck">✓</i>'+PN[pl]+'</div>'
+      :'<div class="qwcd-st">您選擇的方案<span>右邊可以改選</span></div><div class="qwcd-seg">'+segOn()+segSw()+'</div>')
+  +'<div id="qwcd-plan" class="qwcd-ex">'+ex+'</div></div>'
+  +'<div class="qwcd-bd">'
+  +'<div class="qwcd-row"><span class="qwcd-k">期望到府日期</span><span class="qwcd-rg">'+PN[pl]+'可選 '+_dhFmt(MIN).slice(5)+'～'+_dhFmt(MAX).slice(5)+'</span></div>'
+  +'<div class="qwcd-mn"><button data-nav="-1" type="button" aria-label="上個月">‹</button><b id="qwcd-ml"></b><button data-nav="1" type="button" aria-label="下個月">›</button></div>'
+  +'<div class="qwcd-wd">'+WD.split('').map(function(n){return '<div>'+n+'</div>';}).join('')+'</div>'
+  +'<div id="qwcd-days" class="qwcd-dg"></div>'
+  +'<div class="qwcd-row qwcd-slt"><span class="qwcd-k">時段</span></div>'
+  +'<div class="qwcd-sl">'+[['上午','☀️'],['下午','🌤️'],['晚上','🌙']].map(function(t){return '<button type="button" data-slot="'+t[0]+'" class="qwcd-slot'+(selSlot===t[0]?' on':'')+'"><span>'+t[1]+'</span><b>'+t[0]+'</b></button>';}).join('')+'</div>'
+  +'<div class="qwcd-nt"><span>ℹ️</span><div>如期望時間為技師空班，則會直接發送<b>預約確認通知</b>；如期望時間衝突，約時人員會<b>主動去電聯繫約定</b>。</div></div>'
+  +'</div>'
+  +'<div class="qwcd-ft"><div id="qwcd-sum" class="qwcd-pk"></div>'
+  +'<button id="qwcd-ok" type="button" class="qwcd-go" disabled>'+(ED?'確認變更':'確認日期，前往結帳')+'</button>'
+  +'<button id="qwcd-skip" type="button" class="qwcd-sk">'+(ED?'不變更':'先不指定，由約時人員安排')+'</button></div>'
+  +'</div>';
  document.body.appendChild(ov);
- var wd=['日','一','二','三','四','五','六'];
- ov.querySelector('#qwcd-wd').innerHTML=wd.map(function(n,i){return '<div style="text-align:center;font-size:11px;font-weight:800;color:'+((i===0||i===6)?'#c0392b':'#7c8998')+';padding:2px 0">'+n+'</div>';}).join('');
  function blocked(dt){return !!_CNYS[_dhKey(dt)];}
  function draw(){
   ov.querySelector('#qwcd-ml').textContent=view.getFullYear()+' 年 '+(view.getMonth()+1)+' 月';
   var pad=new Date(view.getFullYear(),view.getMonth(),1).getDay(),dim=new Date(view.getFullYear(),view.getMonth()+1,0).getDate(),h='';
   for(var i=0;i<pad;i++)h+='<div></div>';
   for(var d=1;d<=dim;d++){var dt=new Date(view.getFullYear(),view.getMonth(),d);var cny=blocked(dt);var dis=(dt<MIN)||(dt>MAX)||cny;var sel=selDate&&_dhKey(selDate)===_dhKey(dt);
-   var st='aspect-ratio:1/1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;';
-   if(sel)st+='background:#042C53;color:#fff;';else if(dis)st+='background:#f0f3f7;color:#7c8998;opacity:.45;cursor:not-allowed;';else st+='background:#fff;border:1.5px solid #d3ddea;color:#16202b;cursor:pointer;';
-   h+='<div '+(dis?'':'data-d="'+d+'"')+' style="'+st+'">'+d+(cny?'<span style="font-size:8px;font-weight:800;color:#c0392b;line-height:1;margin-top:1px">春節</span>':'')+'</div>';}
+   h+='<div class="qwcd-dc"><span '+(dis?'':'data-d="'+d+'" role="button" tabindex="0" ')+'class="qwcd-d'+(sel?' sel':(dis?'':' av'))+'">'+d+(cny?'<i>春節</i>':'')+'</span></div>';}
   ov.querySelector('#qwcd-days').innerHTML=h;
   var pv=ov.querySelector('[data-nav="-1"]'),nx=ov.querySelector('[data-nav="1"]');
-  pv.disabled=(view<=minMonth);pv.style.opacity=pv.disabled?'.35':'1';nx.disabled=(view>=maxMonth);nx.style.opacity=nx.disabled?'.35':'1';
+  pv.disabled=(view<=minMonth);nx.disabled=(view>=maxMonth);
  }
  function sum(){var el=ov.querySelector('#qwcd-sum'),ok=ov.querySelector('#qwcd-ok');
-  if(selDate&&selSlot){el.textContent='已選：'+_dhFmt(selDate)+'（'+selSlot+'）';ok.disabled=false;ok.style.background='#042C53';ok.style.cursor='pointer';}
-  else{el.textContent=selDate?'請再選時段':'請選擇日期與時段';ok.disabled=true;ok.style.background='#b7c2cf';ok.style.cursor='not-allowed';}}
+  var dd=selDate?(_dhFmt(selDate).slice(5)+'（'+WD.charAt(selDate.getDay())+'）'):'';
+  if(selDate&&selSlot){el.innerHTML='已選<b>'+dd+selSlot+'</b>';ok.disabled=false;ok.className='qwcd-go on';}
+  else{el.innerHTML=selDate?('已選<b>'+dd+'</b>・請再選時段'):'請選擇日期與時段';ok.disabled=true;ok.className='qwcd-go';}}
+ function shut(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
  ov.addEventListener('click',function(e){
+  var swb=e.target.closest('[data-sw]');if(swb&&opt.onSwitch){var k=swb.getAttribute('data-sw');shut();opt.onSwitch(k);return;}
   var nav=e.target.closest('[data-nav]');if(nav){var nv=new Date(view.getFullYear(),view.getMonth()+(+nav.getAttribute('data-nav')),1);if(nv>=minMonth&&nv<=maxMonth){view=nv;draw();}return;}
   var day=e.target.closest('[data-d]');if(day){selDate=new Date(view.getFullYear(),view.getMonth(),+day.getAttribute('data-d'));draw();sum();return;}
-  var sl=e.target.closest('.qwcd-slot');if(sl){selSlot=sl.getAttribute('data-slot');[].slice.call(ov.querySelectorAll('.qwcd-slot')).forEach(function(x){x.style.borderColor='#d3ddea';x.style.background='#fff';x.style.color='#16202b';});sl.style.borderColor='#042C53';sl.style.background='#E6F1FB';sl.style.color='#042C53';sum();return;}
+  var sl=e.target.closest('.qwcd-slot');if(sl){selSlot=sl.getAttribute('data-slot');[].slice.call(ov.querySelectorAll('.qwcd-slot')).forEach(function(x){x.className='qwcd-slot'+(x===sl?' on':'');});sum();return;}
  });
- function shut(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
- /* × 與點灰底：回到精靈最後一步（不放進購物車），客人可以改方案或再按一次完成 */
+ ov.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.getAttribute&&e.target.getAttribute('data-d')){e.preventDefault();e.target.click();}});
+ /* × 與點灰底：回到精靈最後一步（不放進購物車），客人可以改方案或再按一次 */
  ov.querySelector('#qwcd-x').onclick=shut;
  ov.onclick=function(e){if(e.target===ov)shut();};
  ov.querySelector('#qwcd-ok').onclick=function(){if(!selDate||!selSlot)return;window.__qsCleanDate=_dhFmt(selDate)+'（'+selSlot+'）';shut();if(onDone)onDone();};
- ov.querySelector('#qwcd-skip').onclick=function(){window.__qsCleanDate='未指定';shut();if(onDone)onDone();};
+ ov.querySelector('#qwcd-skip').onclick=function(){if(ED){shut();return;}window.__qsCleanDate='未指定';shut();if(onDone)onDone();};
  draw();sum();
 }
 function showTerms(k,mode,onConfirm){
@@ -989,7 +1016,7 @@ var api={
     }
     var sub=_qwSub(),prot=_qwProt(),base=Math.max(0,sub-prot);
     var planOff=(plan==='early')?0.15:(_whQualQ()?WH_OFF:0.05);
-    if(sub<=0||base<=0){_cpMsg('✅ 已帶入 '+_offText(off)+'優惠碼，按「完成，前往結帳」就會為您套用','ok');return;}
+    if(sub<=0||base<=0){_cpMsg('✅ 已帶入 '+_offText(off)+'優惠碼，完成後就會為您套用','ok');return;}
     var planPay=base-Math.ceil(base*planOff)+prot;
     var codePay=base-Math.ceil(base*off)+prot;
     /* 2026-10-09 老闆：限標準方案的碼(年度保養85折、VIP85)在早鳥時,不是「留著下次用」,
@@ -1055,7 +1082,9 @@ var api={
   go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){alert('請至少選擇一台室內機或室外機清洗喔！\n可回上一步（室內機／室外機）選擇台數。');return;}}step=n;render();},
   /* 方案確認彈窗:按「完成，前往結帳」時先跳一次確認(兩種方案各自內容),確認後才真的加入購物車 */
   confirmPlan:function(){
-    if(!plan||window.__qsAdding)return;/* 加購進行中不再跳確認窗 */
+    /* 2026-10-12 老闆選 D＋E：沒選方案時按鈕可以按，按了把方案卡捲進畫面並搖一下，不再是灰色按了沒反應 */
+    if(!plan){try{var _pl=document.querySelector('#qw-ovl .qplans');if(_pl){var _c=_pl.closest('.qw');if(_c)_c.scrollTop=Math.max(0,_pl.offsetTop-90);_pl.classList.remove('qw-shake');void _pl.offsetWidth;_pl.classList.add('qw-shake');}}catch(e){}return;}
+    if(window.__qsAdding)return;/* 加購進行中不再跳確認窗 */
     if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
     /* ⚠️ 達標時這裡的字一定要跟著換。2026-09-09 實測抓到:方案卡已經寫 92 折、算 8,280,
        確認彈窗卻還寫「標準方案 95 折」—— 客戶按下確認前最後看到的就是這一句,
@@ -1075,24 +1104,26 @@ var api={
         li:['到府服務將安排在<b>專人去電聯繫約時起 30 天後</b>','實際到府日期，由約時人員<b>去電與您確認</b>','如需盡快服務，請改選「標準方案」（兩週內到府）'],
         alt:'改選標準方案',ok:'我了解，確認早鳥方案',other:'std'}}[plan];
     if(!D)return;
-    var old=document.getElementById('qw-pc');if(old&&old.parentNode)old.parentNode.removeChild(old);
-    var ov=document.createElement('div');ov.id='qw-pc';
-    ov.style.cssText='position:fixed;inset:0;z-index:100002;background:rgba(4,20,40,.6);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
-    ov.innerHTML='<div style="background:#fff;border-radius:17px;max-width:500px;width:100%;margin:auto;box-shadow:0 14px 44px rgba(0,0,0,.35);overflow:hidden">'
-      +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:16px 20px;text-align:center;font-size:17px;font-weight:900">'+D.t+'</div>'
-      +'<div style="padding:18px 20px"><div style="font-size:15px;font-weight:900;text-align:center;color:#B8860B;margin-bottom:13px">'+D.lead+'</div>'
-      +'<ul style="list-style:none;margin:0;padding:0">'+D.li.map(function(x){return '<li style="font-size:13.5px;line-height:1.7;color:#17212c;padding-left:17px;position:relative;margin-bottom:9px"><span style="position:absolute;left:0;color:#B8860B;font-weight:900">・</span>'+x+'</li>';}).join('')+'</ul></div>'
-      +'<div style="padding:0 20px 20px;display:flex;gap:10px">'
-      +'<button type="button" id="qw-pc-alt" style="flex:1;border:1.5px solid #dbe3ec;background:transparent;color:#5f6b78;border-radius:12px;padding:13px 10px;font-size:13.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap">'+D.alt+'</button>'
-      +'<button type="button" id="qw-pc-ok" style="flex:1;border:none;background:#042C53;color:#fff;border-radius:12px;padding:13px 10px;font-size:13.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap">'+D.ok+'</button>'
-      +'</div></div>';
-    document.body.appendChild(ov);
-    function kill(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
-    ov.querySelector('#qw-pc-alt').onclick=function(){kill();api.pickPlan(D.other);};
-    ov.querySelector('#qw-pc-ok').onclick=function(e){var b=this;if(b.disabled)return;b.disabled=true;b.textContent='處理中…';kill();
-      /* 2026-10-12 老闆：確認方案後多一步「選擇期望清洗日期」(做法同除濕機配送日)，選好或按「先不指定」才放進購物車 */
-      showCleanDatePicker(plan,function(){api.finish();});};
-    ov.addEventListener('click',function(e){if(e.target===ov)kill();});
+    /* 2026-10-12 老闆定案三項：①「確認您的方案」不再另開視窗，說明縮成一小塊放在選日期視窗最上面（少按一次）；
+       ②選日期時可直接改方案（早鳥→標準：想更早到府；標準→早鳥：時間有彈性省更多），按了就換方案、月曆範圍跟著更新；
+       ③小標題「期望清洗日期」改「期望到府日期」。
+       ⚠️ 全戶達標時說明與改選按鈕都要寫 92 折，不能說一套收一套(見上方 2026-09-09 註記) */
+    var _uOff=0;try{_uOff=_userCode?(+_estOff(_userCode)||0):0;}catch(e){}
+    var _stdOff=_whQ?WH_OFF:0.05;
+    /* 客人輸入的是限標準方案的碼(年度保養85折等)，改選標準方案會套那張碼，按鈕要寫那張碼的折數 */
+    var _uStd=_userCode&&_stdOnlyCode(_userCode);
+    if(_uStd&&_uOff>_stdOff)_stdOff=_uOff;
+    /* 2026-10-12 老闆選「質感升級」版：方案說明＋改方案合成頂端的二選一切換鈕(segment)。
+       另一邊掛金色小標:現在是早鳥→標準掛「更快到府」;現在是標準→早鳥掛「更優惠」
+       (客人已有限標準方案的 85 折碼時不掛,改早鳥不會更便宜,只會更晚到府)。 */
+    showCleanDatePicker(plan,function(){api.finish();},{
+      off:{std:_offText(_stdOff),early:'85折'},
+      tag:{std:'更快到府',early:(_uStd&&_uOff>=0.15)?'':'更優惠'},
+      wh:_whQ,
+      onSwitch:function(k){
+        if(k==='std')api.toStd();else{plan=k;window.__qsPlan=k;render();setTimeout(function(){try{var i=document.getElementById('qw-cp');if(i&&_userCode){i.value=_userCode;api.applyCode();}}catch(e){}},60);}
+        setTimeout(function(){api.confirmPlan();},140);
+      }});
   },
   /* 先看服務說明/規範完整圖文介紹:關精靈→捲到詳情圖區→浮出「回到引導精靈」(選擇都保留,回來時停在原本那一步) */
   seeDetail:function(){
@@ -1285,20 +1316,90 @@ function styleHeads(){
     }
   }catch(e){}
 }
+/* 2026-10-13 老闆選 A「對照卡」:原本一行字＋標章圖,客人分不出能不能服務。
+   改成 ✅ 可以服務(三菱重工標誌) / ❌ 無法服務(三菱電機及其他品牌) 左右對照,下面教客人看面板字樣。
+   標誌直接從原本的 mhi-badge.png 裁切顯示(背景圖定位),不用另外上傳圖片。 */
+var _MHI_BADGE='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/mhi-badge.png';
 function addBrandBadge(){
   try{
     var ov=document.getElementById('qs-ovl');
     if(!ov||(ov.textContent||'').indexOf('結帳前請確認')<0)return;
     var lis=ov.querySelectorAll('li'),li=null;
     for(var i=0;i<lis.length;i++){if((lis[i].textContent||'').indexOf('本服務僅適用')>=0){li=lis[i];break;}}
-    if(!li||li.querySelector('.qs-mhi'))return;
-    var img=document.createElement('img');img.className='qs-mhi';
-    img.src='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/mhi-badge.png';
-    img.alt='認明三菱重工 MITSUBISHI HEAVY INDUSTRIES';
-    img.style.cssText='width:100%;max-width:200px;border-radius:11px;display:block;margin:9px auto 2px;border:1px solid #e2e8f1';
-    li.appendChild(img);
+    if(!li||li.getAttribute('data-qsbr'))return;
+    li.setAttribute('data-qsbr','1');
+    var ul=li.parentNode,pl=0;try{pl=parseFloat(getComputedStyle(ul).paddingLeft)||0;}catch(e){}
+    li.style.listStyle='none';li.style.marginLeft=(-pl)+'px';
+    var logo='<div role="img" aria-label="三菱重工 MITSUBISHI HEAVY INDUSTRIES" style="width:128px;height:25px;margin:0 auto 2px;background:url('+_MHI_BADGE+') no-repeat -103px -12px/258px auto;filter:brightness(1.12);mix-blend-mode:multiply"></div>';
+    li.innerHTML='<div class="qs-bc" style="background:#fff;border:1.5px solid #E1E8F0;border-radius:14px;padding:8px 10px;margin:0 0 4px;text-align:left">'
+      +'<div style="font-size:14px;font-weight:900;color:#042C53;margin-bottom:6px">⚠️ 本服務只適用「三菱重工」冷氣</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<div style="background:#EAF6EF;border:1px solid #B5DDC8;border-radius:11px;padding:6px 5px;text-align:center"><div style="font-size:12.5px;font-weight:900;color:#1f7a52;margin-bottom:4px">✅ 可以服務</div>'+logo+'<div style="font-size:12px;font-weight:800;color:#16263A">三菱重工</div></div>'
+      +'<div style="background:#FDECEA;border:1px solid #F0C0B8;border-radius:11px;padding:6px 5px;text-align:center"><div style="font-size:12.5px;font-weight:900;color:#c0392b;margin-bottom:4px">❌ 無法服務</div><div style="font-size:12.5px;font-weight:900;color:#16263A;line-height:1.35">三菱電機</div><div style="font-size:9.5px;font-weight:700;color:#5B6B7D;white-space:nowrap;line-height:1.4">MITSUBISHI ELECTRIC</div><div style="font-size:12px;font-weight:800;color:#16263A;margin-top:1px">及其他品牌</div></div>'
+      +'</div><div class="qs-btip" style="font-size:11.5px;color:#42546A;line-height:1.5;margin-top:6px">👀 看室內機面板上的字：有「<b>HEAVY INDUSTRIES</b>」才是三菱重工</div></div>';
   }catch(e){}
 }
+/* 2026-10-13 老闆選「乙」＋小手:勾選列變醒目框(淡金底金框、勾選框放大發光)，旁邊一隻 👉 一直指著勾選框；
+   勾了變綠色、小手消失。沒勾就按「同意並繼續結帳」(按鈕是 disabled,本身收不到點擊)→
+   用一層透明的「接手層」蓋在按鈕上,點了讓勾選列搖一下並捲到眼前。 */
+function enhanceAgree(){try{
+  var ov=document.getElementById('qs-ovl');if(!ov||getComputedStyle(ov).display==='none')return;
+  var ag=document.getElementById('qs-agree'),go=document.getElementById('qs-go');if(!ag||!go)return;
+  var row=(ag.closest&&ag.closest('label'))||ag.parentNode;if(!row)return;
+  if(!document.getElementById('qs-agree-css')){var st=document.createElement('style');st.id='qs-agree-css';
+    st.textContent='@keyframes qsAgGlow{0%,100%{box-shadow:0 0 0 0 rgba(184,134,11,.55)}50%{box-shadow:0 0 0 6px rgba(184,134,11,0)}}'
+     +'@keyframes qsAgShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}'
+     +'@keyframes qsAgPoint{0%,100%{transform:translateX(-3px)}50%{transform:translateX(4px)}}'
+     +'.qs-ag-hand{display:inline-block;font-size:20px;line-height:1;margin-right:4px;animation:qsAgPoint .8s ease-in-out infinite;flex:none}'
+     +'@media (prefers-reduced-motion:reduce){.qs-ag-hand,label[data-qsag]{animation:none!important}}'
+     /* 老闆 2026-10-13:確認畫面不要捲動 → 收緊內文彈窗的留白(只改間距與行高,文字不動) */
+     +'#qs-ovl{padding-top:10px!important;padding-bottom:10px!important}'
+     +'#qs-ovl h3{margin-top:4px!important;margin-bottom:4px!important;font-size:18px!important}'
+     +'#qs-ovl h3+p,#qs-ovl h3+div{margin-top:0!important;margin-bottom:6px!important;line-height:1.55!important;font-size:14px!important}'
+     +'#qs-ovl li{margin-bottom:1px!important;line-height:1.55!important}'
+     +'#qs-ovl ul{margin-top:2px!important;margin-bottom:2px!important}'
+     +'.qs-ag-tx{flex:1;min-width:0;line-height:1.5;white-space:normal!important}label[data-qsag]{white-space:normal!important}'
+     /* 小螢幕(iPhone SE 等)再收緊:期望時間改一行、標題與清單字小一點 */
+     +'@media (max-height:740px){#qs-ovl{padding-top:6px!important;padding-bottom:6px!important}'
+     +'#qs-ovl h3{font-size:16.5px!important;margin-top:2px!important;margin-bottom:2px!important}'
+     +'#qs-ovl h3+p,#qs-ovl h3+div{font-size:13px!important;line-height:1.5!important;margin-bottom:4px!important}'
+     +'#qs-ovl li{line-height:1.45!important;font-size:13.5px!important}'
+     +'#qs-when .qs-wr{padding:3px 0!important}#qs-when .qs-wr>span{width:24px!important;height:24px!important;font-size:13px!important}'
+     +'#qs-when .qs-wb{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}#qs-when .qs-wb>div:last-child{font-size:13.5px!important}'
+     +'#qs-plansum-wrap img{width:40px!important}'
+     +'.qs-bc{padding:6px 9px!important}.qs-btip{margin-top:4px!important;font-size:11px!important}'
+     +'label[data-qsag]{padding:5px 9px!important}}';
+    document.head.appendChild(st);}
+  if(!row.getAttribute('data-qsag')){
+    row.setAttribute('data-qsag','1');row.id=row.id||'qs-agree-row';
+    var hd=document.createElement('span');hd.className='qs-ag-hand';hd.setAttribute('aria-hidden','true');hd.textContent='👉';
+    /* 文字＋連結包成一塊,才會在框內換行(老闆抓到:直排改橫排後字跑出框外) */
+    var tx=document.createElement('span');tx.className='qs-ag-tx';
+    [].slice.call(row.childNodes).forEach(function(n){if(n!==ag&&!(n.nodeType===1&&n.querySelector&&n.querySelector('#qs-agree')))tx.appendChild(n);});
+    row.appendChild(tx);
+    row.insertBefore(hd,row.firstChild);
+    ag.addEventListener('change',function(){_agSync(true);});
+    var p=go.parentNode;try{if(getComputedStyle(p).position==='static')p.style.position='relative';}catch(e){}
+    var c=document.createElement('div');c.id='qs-go-catch';c.style.cssText='position:absolute;z-index:3;cursor:pointer;background:transparent';
+    c.onclick=function(){row.style.animation='none';void row.offsetWidth;row.style.animation='qsAgShake .45s';try{row.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}};
+    p.appendChild(c);
+  }
+  _agSync(false);
+}catch(e){}}
+function _agSync(force){try{
+  var ag=document.getElementById('qs-agree'),go=document.getElementById('qs-go'),row=ag&&((ag.closest&&ag.closest('label'))||ag.parentNode);if(!row)return;
+  var on=!!ag.checked,state=on?'1':'0';
+  var c=document.getElementById('qs-go-catch');
+  if(c){if(on){c.style.display='none';}else{c.style.display='block';c.style.left=go.offsetLeft+'px';c.style.top=go.offsetTop+'px';c.style.width=go.offsetWidth+'px';c.style.height=go.offsetHeight+'px';}}
+  if(!force&&row.getAttribute('data-qsag-on')===state)return;
+  row.setAttribute('data-qsag-on',state);
+  row.style.display='flex';row.style.alignItems='center';row.style.gap='8px';
+  row.style.background=on?'#EAF6EF':'#FFF8E8';row.style.border='1.5px solid '+(on?'#B5DDC8':'#E3C98A');
+  row.style.borderRadius='12px';row.style.padding='7px 10px';row.style.marginTop='6px';row.style.boxSizing='border-box';row.style.width='100%';
+  row.style.animation=on?'none':'qsAgGlow 1.6s infinite';
+  ag.style.width='22px';ag.style.height='22px';ag.style.flex='none';ag.style.accentColor='#1f7a52';
+  var hd=row.querySelector('.qs-ag-hand');if(hd)hd.style.display=on?'none':'inline-block';
+}catch(e){}}
 /* 人氣加購＋配送標籤＋注意事項連結 — 貼在 AIRMON 智慧遠端控制器、三菱重工除濕機 的商品卡 */
 function addPopularBadge(){
   try{
@@ -1843,13 +1944,41 @@ function _planInfo(k){var i=_PLANI[k];
    因此止血方式是:拿掉結帳彈窗的變更入口,想換方案就重走精靈。
    ⚠️ 等 1SHOP 修好(購物車 API 穩定回傳 id)後,把 PLAN_CHG_OFF 改回 0 即可恢復。 */
 var PLAN_CHG_OFF=1;
+/* ═══ 2026-10-13 老闆:結帳確認畫面在「您選擇的方案」下面顯示「您的期望時間」(到府清洗＋除濕機配送),可「修改」 ═══
+   樣式:老闆選第 3 種排版(圓形圖示、名稱小字在上)＋第 1 種淡藍底色。
+   ⚠️ 修改只能改日期與時段,不能改方案(結帳畫面換方案會碰到 1SHOP 換券失敗、少收 10% 的洞,見 PLAN_CHG_OFF)。
+   ⚠️ 除濕機的修改不可以動購物車(原本的配送視窗是「選好就加購」),所以用 edit 模式,只改 __qsDhDelivery。
+   改完 fillConsent() 會自動把新日期寫進訂單的同意存證欄位(它是「內容有變才更新」)。 */
+function _whenTxt(v){var m=String(v||'').match(/^(\d{4})\/(\d\d)\/(\d\d)（(.+)）$/);if(!m)return null;var d=new Date(+m[1],+m[2]-1,+m[3]);return m[1]+'/'+m[2]+'/'+m[3]+'（'+'日一二三四五六'.charAt(d.getDay())+'）'+m[4];}
+function _whenParse(v){var m=String(v||'').match(/^(\d{4})\/(\d\d)\/(\d\d)（(.+)）$/);return m?{d:new Date(+m[1],+m[2]-1,+m[3]),slot:m[4]}:null;}
+function _qwCss(){try{if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}}catch(e){}}
+function _renderWhen(){try{
+  var el=document.getElementById('qs-when');if(!el)return;
+  var cd=window.__qsCleanDate||'';
+  var hasDh=!!(window.__qsDhDelivery&&_cartArr().some(function(x){return (x.ProductName||'').indexOf('除濕機')>=0;}));
+  if(!cd&&!hasDh){el.innerHTML='';return;}/* 沒走精靈就沒有日期:整塊不顯示 */
+  var rows=[];
+  if(cd){var t=_whenTxt(cd);rows.push({k:'c',ic:'🏠',n:'到府清洗',v:t||'未指定，由約時人員去電安排',mute:!t});}
+  if(hasDh){var t2=_whenTxt(window.__qsDhDelivery);rows.push({k:'d',ic:'📦',n:'除濕機配送',v:t2||window.__qsDhDelivery,mute:false});}
+  el.innerHTML='<div style="font-size:11.5px;color:#8a6a1f;font-weight:700;letter-spacing:.3px;margin:8px 0 4px">您的期望時間</div>'
+   +'<div style="background:#F3F7FB;border:1px solid #DCE8F4;border-radius:14px;padding:2px 11px">'
+   +rows.map(function(x,i){return (i?'<div style="height:1px;background:#DCE8F4"></div>':'')
+     +'<div class="qs-wr" style="display:flex;align-items:center;gap:9px;padding:5px 0">'
+     +'<span style="flex:none;width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #DCE8F4;display:flex;align-items:center;justify-content:center;font-size:15px">'+x.ic+'</span>'
+     +'<div class="qs-wb" style="flex:1;min-width:0"><div class="qs-wn" style="font-size:11px;color:#7A8796;font-weight:700">'+x.n+'</div><div style="font-size:14px;font-weight:900;color:'+(x.mute?'#7A8796':'#042C53')+';line-height:1.3">'+x.v+'</div></div>'
+     +'<button type="button" data-qs-edit="'+x.k+'" style="flex:none;border:1.5px solid #C9D7E6;background:#fff;color:#0C447C;font-size:12px;font-weight:800;border-radius:999px;padding:4px 11px;cursor:pointer;font-family:inherit">修改</button></div>';}).join('')
+   +'</div>';
+  [].slice.call(el.querySelectorAll('[data-qs-edit]')).forEach(function(b){b.onclick=function(e){e.preventDefault();e.stopPropagation();_qwCss();
+    if(b.getAttribute('data-qs-edit')==='c'){var pl=(window.__qsPlan==='early')?'early':'std';showCleanDatePicker(pl,function(){_renderWhen();},{edit:true,cur:window.__qsCleanDate});}
+    else{showDeliveryPicker(function(){_renderWhen();},{edit:true,cur:window.__qsDhDelivery});}};});
+}catch(e){}}
 function _renderPlanSum(wrap,collapsed){
   var p=_curPlan();
   if(collapsed){
     var info=_planInfo(p);
-    wrap.innerHTML='<div style="font-size:11.5px;color:#8a6a1f;font-weight:700;letter-spacing:.3px;margin:0 0 6px">您選擇的方案</div>'
-      +'<div style="display:flex;align-items:center;gap:9px;background:#faf6ea;border:1px solid #ecdcae;border-radius:11px;padding:9px 10px">'
-        +((info.img&&!info.custom)?'<img src="'+_PLANB+info.img+'" style="width:72px;border-radius:7px;display:block;flex:0 0 auto">':'<div style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid #ecdcae;display:flex;align-items:center;justify-content:center;font-size:17px">🎟️</div>')
+    wrap.innerHTML='<div style="font-size:11.5px;color:#8a6a1f;font-weight:700;letter-spacing:.3px;margin:0 0 4px">您選擇的方案</div>'
+      +'<div style="display:flex;align-items:center;gap:9px;background:#faf6ea;border:1px solid #ecdcae;border-radius:11px;padding:6px 10px">'
+        +((info.img&&!info.custom)?'<img src="'+_PLANB+info.img+'" style="width:50px;border-radius:7px;display:block;flex:0 0 auto">':'<div style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid #ecdcae;display:flex;align-items:center;justify-content:center;font-size:17px">🎟️</div>')
         +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:900;color:'+info.nc+';white-space:nowrap">'+info.name+'</div><div style="font-size:11px;color:'+info.sc+';margin-top:2px;line-height:1.45">'+info.sub+'</div></div>'
         +(PLAN_CHG_OFF?'':'<button type="button" class="qsps-chg" style="flex:0 0 auto;border:1px solid #d9b24a;background:#fff;color:#8a6410;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 13px;cursor:pointer;white-space:nowrap">變更</button>')
       +'</div>'
@@ -1857,7 +1986,9 @@ function _renderPlanSum(wrap,collapsed){
          原本 PLAN_CHG_OFF=1 時會寫「想換方案？請關掉此視窗，用上方的引導精靈重新挑選」——
          那是 08-31 停用「變更」鈕時補的說明,老闆看實機後認為多餘。
          ⚠️ PLAN_CHG_OFF 改回 0(恢復變更鈕)時,下面那句「選錯了?點變更」要一起回來。 */
-      +(PLAN_CHG_OFF?'':'<div style="font-size:11px;color:#9aa7b4;margin-top:5px;padding-left:2px">選錯了?點「變更」可調整方案</div>');
+      +(PLAN_CHG_OFF?'':'<div style="font-size:11px;color:#9aa7b4;margin-top:5px;padding-left:2px">選錯了?點「變更」可調整方案</div>')
+      +'<div id="qs-when"></div>';
+    _renderWhen();
     var c=wrap.querySelector('.qsps-chg');if(c)c.onclick=function(){_renderPlanSum(wrap,false);};
   }else{
     var card=function(k){var info=_planInfo(k);var sel=(k===p);return '<div class="qsps-pick" data-p="'+k+'" style="flex:1;border:'+(sel?'2.5px solid #B8860B':'2px solid #d3dde9')+';border-radius:11px;overflow:hidden;cursor:pointer;position:relative;box-shadow:0 2px 6px rgba(4,44,83,.08)"><img src="'+_PLANB+info.img+'" style="width:100%;display:block">'+(sel?'<div style="position:absolute;top:6px;right:6px;background:#B8860B;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 9px">已選</div>':'')+'</div>';};
@@ -2061,7 +2192,7 @@ function addPlanSummary(){
     var h3=null,hs=modal.querySelectorAll('h3');
     for(var i=0;i<hs.length;i++){if((hs[i].textContent||'').indexOf('結帳前請確認')>=0){h3=hs[i];break;}}
     if(!h3)return;
-    var wrap=document.createElement('div');wrap.id='qs-plansum-wrap';wrap.style.cssText='margin:0 0 14px';
+    var wrap=document.createElement('div');wrap.id='qs-plansum-wrap';wrap.style.cssText='margin:0 0 8px';
     h3.parentNode.insertBefore(wrap,h3);
     _renderPlanSum(wrap,true);
   }catch(e){}
@@ -3520,7 +3651,7 @@ function hookCartRender(){try{
     return r;
   };
 }catch(e){}}
-setInterval(function(){hookCartRender();repairCartIds();fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();addrFocusOnBlock();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();planMoneyGuard();whCartNote();whCouponGuard();},700);
+setInterval(function(){enhanceAgree();hookCartRender();repairCartIds();fillConsent();fillEnv();fillAddr();_agePlaceholder();_hiPlaceholder();addTerms();hidePlanForSurvey();capCouponForSurvey();addAddrHint();addrFocusOnBlock();fixCards();updateFab();styleHeads();addBrandBadge();addPlanSummary();addContinueBtn();addPopularBadge();hideTravelCard();autoFeeNotes();surveyMixNote();styleCorrLine();maskCalc();addGoBottomBtn();liftCornerBtns();bindCouponGuard();couponRestoreWatch();_dhResetWatch();resetAgreeGate();addPlanOnlyBtn();backBtnWatch();fixReceiptDefault();svHintWatch();guardSurveyExclusive();ensureModalCss();planMemoryWatch();svcPassNote();planCouponWatch();planMoneyGuard();whCartNote();whCouponGuard();},700);
 var tries=0;
 var boot=setInterval(function(){
   tries++;
