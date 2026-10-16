@@ -101,6 +101,9 @@ var INDOOR=[
  {k:'m4',n:'迷你四方吹清洗保養',d:'嵌入式小型機',grp:'四方吹式'},
  {k:'f4',n:'四方吹清洗保養',d:'嵌入式標準機',grp:'四方吹式'}
 ];
+var GRP_SHORT={'家用壁掛式':'壁掛式','吊隱式':'吊隱式','四方吹式':'四方吹'};
+/* 分類鈕的照片只取冷氣本體那一塊(商品圖是整面牆,縮小後三張看起來都一樣) */
+var GRP_POS={'家用壁掛式':'22% 32%','吊隱式':'50% 14%','四方吹式':'88% 12%'};
 var LK={wall:'家用壁掛',cs:'吊隱式小',cm:'吊隱式大',cl:'吊隱式全',m4:'迷你四方吹',f4:'四方吹'};
 var OUTLIST=[
  {k:'o1',n:'1對1室外機清洗',d:'一對一分離式'},
@@ -303,6 +306,13 @@ var CSS='#qw-ovl .qw .qw-need{display:flex;align-items:center;justify-content:ce
 +'.qw .qsr.big b{font-size:19px;color:#B8860B}'
 +'.qw .qsok{background:#e7f3ec;color:#1d6b45;border-radius:9px;padding:10px 12px;font-size:12.5px;font-weight:800;line-height:1.65;margin-top:10px}'
 +'.qw .qswarn{background:#fff6e0;color:#8a6410;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;line-height:1.6;margin-top:7px}';
+/* 2026-10-16 老闆選 UX 盤點 02/03/06/07/08:
+   02 輸入框與選單 16px(iPhone 低於 16px 點下去會自動放大畫面)
+   03 每一步換成質感版外觀(10-12 老闆看過的那套)。⚠️ 全部加了 :not(.qw-step-plan),選方案頁維持現在正式頁的樣子不受影響
+   06 室內機上方加分類鈕(壁掛/吊隱/四方吹),點了跳到那一類;老闆指定「還是要能往下捲看到全部」,所以只是捷徑不是篩選
+   07 加購頁「風鼓清洗」下面加型號查詢(資料=賣場圖 11b 吊隱風鼓加洗對照,58 款)
+   08 進度條圓點下面加上步驟名稱 */
+var CSS_UX="#qw-ovl{background:rgba(4,20,40,.55)}\n#qw-ovl .qw:not(.qw-step-plan){padding:0 16px 16px;border-radius:18px;box-shadow:0 14px 44px rgba(0,0,0,.35);scrollbar-width:thin}\n@media (min-width:760px){#qw-ovl .qw:not(.qw-step-plan){padding:0 22px 20px!important}}\n#qw-ovl .qw:not(.qw-step-plan):not(.wel)>.qwbar,#qw-ovl .qw:not(.qw-step-plan):not(.wel)>h2,#qw-ovl .qw:not(.qw-step-plan):not(.wel)>.sub{background:#06335F;margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}\n@media (min-width:760px){#qw-ovl .qw:not(.qw-step-plan):not(.wel)>.qwbar,#qw-ovl .qw:not(.qw-step-plan):not(.wel)>h2,#qw-ovl .qw:not(.qw-step-plan):not(.wel)>.sub{margin-left:-22px;margin-right:-22px;padding-left:22px;padding-right:22px}}\n#qw-ovl .qw:not(.qw-step-plan):not(.wel)>.qwbar{padding-top:14px;padding-bottom:4px;margin-top:0;margin-bottom:0;padding-right:56px!important;background:linear-gradient(180deg,#042C53,#06335F)}\n#qw-ovl .qw:not(.qw-step-plan):not(.wel)>h2{color:#fff!important;-webkit-text-stroke:0!important;font-size:19px;letter-spacing:.02em;margin-top:0;margin-bottom:0;padding-top:9px;padding-bottom:2px;line-height:1.35}\n#qw-ovl .qw:not(.qw-step-plan):not(.wel)>h2:first-child{padding-top:16px;padding-right:56px;background:linear-gradient(180deg,#042C53,#06335F)}\n#qw-ovl .qw:not(.qw-step-plan):not(.wel)>.sub{color:rgba(255,255,255,.78);font-size:12.5px;margin-top:0;margin-bottom:10px;padding-bottom:12px;line-height:1.5}\n#qw-ovl .qw:not(.qw-step-plan) .qw-x{top:11px;right:11px;background:rgba(255,255,255,.14);color:#fff;font-size:20px;line-height:30px;z-index:7}\n#qw-ovl .qw:not(.qw-step-plan).wel .qw-x{background:#EEF4FA;color:#6B7A8A}\n#qw-ovl .qw:not(.qw-step-plan) .qw-x:active{background:rgba(255,255,255,.26)}\n#qw-ovl .qw:not(.qw-step-plan) .qwbar{gap:5px}\n#qw-ovl .qw:not(.qw-step-plan) .qwdot{width:22px;height:22px;font-size:11.5px;font-weight:800;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6)}\n#qw-ovl .qw:not(.qw-step-plan) .qwdot.on{background:#fff;color:#042C53;box-shadow:0 0 0 3px rgba(255,255,255,.18)}\n#qw-ovl .qw:not(.qw-step-plan) .qwdot.done{background:#B8860B;color:#fff}\n#qw-ovl .qw:not(.qw-step-plan) .qwln{height:2px;border-radius:2px;background:rgba(255,255,255,.18)}\n#qw-ovl .qw:not(.qw-step-plan) .qwln.done{background:#B8860B}\n#qw-ovl .qw:not(.qw-step-plan) .qwbar .ws{color:rgba(255,255,255,.85)}\n#qw-ovl .qw:not(.qw-step-plan) .qwbar .wsn{border-color:rgba(255,255,255,.5);color:#fff}\n#qw-ovl .qw:not(.qw-step-plan) .qwbar .wsa{color:rgba(255,255,255,.45)}\n#qw-ovl .qw:not(.qw-step-plan) .flbl{font-size:12.5px;font-weight:900;color:#042C53;margin:6px 0 5px}\n#qw-ovl .qw:not(.qw-step-plan) .qsel{border:1.5px solid #DCE4EE;border-radius:14px;padding:11px 36px 11px 14px;font-size:16px;color:#16202B;transition:border-color .15s,box-shadow .15s}\n#qw-ovl .qw:not(.qw-step-plan) .qsel:focus{outline:none;border-color:#0C447C;box-shadow:0 0 0 3px rgba(12,68,124,.12)}\n#qw-ovl .qw:not(.qw-step-plan) .area-res{border-radius:16px;margin:8px 0 2px;box-shadow:0 4px 14px rgba(4,44,83,.12)}\n#qw-ovl .qw:not(.qw-step-plan) .env-g{gap:12px;margin-top:4px}\n#qw-ovl .qw:not(.qw-step-plan) .env-o{border:1.5px solid #E1E8F0;border-radius:18px;box-shadow:0 4px 14px rgba(4,44,83,.08);transition:transform .12s,box-shadow .15s}\n#qw-ovl .qw:not(.qw-step-plan) .env-o.sel{border-color:#042C53;box-shadow:0 0 0 2px #042C53,0 8px 20px rgba(4,44,83,.18)}\n#qw-ovl .qw:not(.qw-step-plan) .env-o.sel::after{background:#B8860B;width:26px;height:26px;top:8px;right:8px;box-shadow:0 2px 6px rgba(0,0,0,.25)}\n#qw-ovl .qw:not(.qw-step-plan) .callnote,#qw-ovl .qw:not(.qw-step-plan) .envnote,#qw-ovl .qw:not(.qw-step-plan) .optnote{background:#F3F7FB!important;border:1px solid #DCE8F4!important;border-radius:12px!important;color:#1E3550!important;font-size:13px!important;font-weight:700!important;padding:10px 12px!important;margin:8px 0!important}\n#qw-ovl .qw:not(.qw-step-plan) .warnbox{background:#FFF8E8!important;border:1px solid #F0DDB0!important;border-radius:12px!important;color:#7A5C0D!important;font-size:13px!important;font-weight:700!important;padding:10px 12px!important}\n#qw-ovl .qw:not(.qw-step-plan) .grp-lbl{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:900;color:#0C447C;letter-spacing:.04em;margin:12px 0 6px}\n#qw-ovl .qw:not(.qw-step-plan) .opt{border:1px solid #E3EAF2;border-radius:16px;padding:10px 12px;margin-bottom:9px;background:#fff;box-shadow:0 1px 3px rgba(4,44,83,.05);transition:box-shadow .15s,border-color .15s}\n#qw-ovl .qw:not(.qw-step-plan) .opt.sel{border-color:#0C447C;background:#F5F9FD;box-shadow:0 0 0 1px #0C447C,0 6px 16px rgba(4,44,83,.10)}\n#qw-ovl .opt img{width:66px!important;height:66px!important;border-radius:12px!important;border:none!important;background:#F4F7FA}\n#qw-ovl .qw:not(.qw-step-plan) .oi .on{font-size:15px;font-weight:800;color:#0F2440;line-height:1.4}\n#qw-ovl .qw:not(.qw-step-plan) .od{font-size:12px;color:#7A8796;margin-top:2px}\n#qw-ovl .qw:not(.qw-step-plan) .op-wrap{border-top:1px solid #EEF2F6;margin-top:9px;padding-top:9px}\n#qw-ovl .qw:not(.qw-step-plan) .op{color:#042C53;font-size:16.5px;font-weight:900;font-variant-numeric:tabular-nums}\n#qw-ovl .qw:not(.qw-step-plan) .op-o{color:#A9B4C0}\n#qw-ovl .qw:not(.qw-step-plan) .qw-add{background:linear-gradient(135deg,#0C447C,#042C53);padding:8px 16px;font-size:13px;box-shadow:0 3px 8px rgba(4,44,83,.22)}\n#qw-ovl .qw:not(.qw-step-plan) .step-ctl{background:#EEF4FA;gap:6px;padding:4px}\n#qw-ovl .qw:not(.qw-step-plan) .step-ctl button{width:30px;height:30px;box-shadow:0 1px 3px rgba(4,44,83,.15);font-size:16px}\n#qw-ovl .qw:not(.qw-step-plan) .step-ctl .q{font-size:15px;font-weight:900;min-width:20px}\n#qw-ovl .qw:not(.qw-step-plan) .det-body{background:#F6F9FC;border-radius:12px;color:#3A4A5C;font-size:12.5px;line-height:1.75;padding:10px 12px}\n#qw-ovl .qw:not(.qw-step-plan) .qw-terms{color:#0C447C}\n#qw-ovl .qw:not(.qw-step-plan) .qsv{border-radius:18px;border:1px solid #D9E4EF;background:linear-gradient(135deg,#F5F9FD,#FFF8E8);box-shadow:0 4px 14px rgba(4,44,83,.07)}\n#qw-ovl .qw:not(.qw-step-plan) .qsv-go{background:linear-gradient(135deg,#0C447C,#042C53)}\n#qw-ovl .qw:not(.qw-step-plan) .qwfoot{box-shadow:0 -10px 20px -12px rgba(4,44,83,.25);border-top:1px solid #EEF2F6}\n#qw-ovl .qw:not(.qw-step-plan) .qwmore span{border:none;box-shadow:0 4px 14px rgba(4,44,83,.22);color:#042C53}\n#qw-ovl .qw:not(.qw-step-plan) .nav{gap:10px;margin-top:10px}\n#qw-ovl .qw:not(.qw-step-plan) .btn{border-radius:14px;padding:12px 10px;font-size:14.5px;font-weight:800}\n#qw-ovl .qw:not(.qw-step-plan) .btn.gho{flex:0 0 32%;border:1.5px solid #DCE4EE;color:#42546A;background:#fff}\n#qw-ovl .qw:not(.qw-step-plan) .btn.pri{background:linear-gradient(135deg,#0C447C,#042C53);box-shadow:0 6px 16px rgba(4,44,83,.25)}\n#qw-ovl .qw:not(.qw-step-plan) .btn.pri:disabled{background:#C6D0DB;box-shadow:none}\n#qw-ovl .qw:not(.qw-step-plan) .btn.pri.qw-needbtn{background:linear-gradient(135deg,#C9971C,#B8860B)!important}\n#qw-ovl .qw:not(.qw-step-plan) .skip{font-size:12.5px;color:#8A97A5;text-underline-offset:3px;margin-top:10px}\n#qw-ovl .qw:not(.qw-step-plan).wel{padding-top:20px}\n#qw-ovl .qw:not(.qw-step-plan) .wel-brand{color:#0C447C;letter-spacing:.14em}\n#qw-ovl .qw:not(.qw-step-plan) .wel-start{border-radius:18px;box-shadow:0 10px 24px rgba(4,44,83,.22)}\n#qw-ovl .qw:not(.qw-step-plan) .wel-steps .wsn{border-color:#B8860B;color:#B8860B}\n#qw-ovl .qw:not(.qw-step-plan) .qsum{border-radius:16px;border:1px solid #E3EAF2}\n#qw-ovl .qw:not(.qw-step-plan) .qsok{border-radius:12px}\n#qw-ovl .qw:not(.qw-step-plan) .qswarn{border-radius:12px}\n#qw-terms .qwt-hd{background:linear-gradient(160deg,#042C53,#0C447C);padding:18px 18px 16px}\n#qw-terms .qwt-ok{border-radius:14px;padding:13px;font-size:15px;font-weight:900;background:linear-gradient(135deg,#C9971C,#B8860B);box-shadow:0 6px 16px rgba(184,134,11,.3)}\n#qw-terms .qwt-ok:disabled{background:#C6D0DB;box-shadow:none}\n#qw-ovl .qw:not(.qw-step-plan) .oi .on{overflow-wrap:anywhere}\n#qw-ovl .qw:not(.qw-step-plan):has(.qsum) .nav .btn.gho{flex:1}\n#qw-terms .qwt-note{border-left:none;border:1px solid #F0DDB0;border-radius:10px}\n#qw-ovl .qw:not(.qw-step-plan) .qsvh{background:#042C53;color:#fff;box-shadow:0 8px 20px rgba(4,44,83,.3);border-radius:14px}\n#qw-ovl .qw:not(.qw-step-plan) .qsvh b,#qw-ovl .qw:not(.qw-step-plan) .qsvh-a{color:#F3D58A}\n#qw-ovl .qw:not(.qw-step-plan) .oi .on,#qw-ovl .qw:not(.qw-step-plan) .oi .on.qw-on-sm{white-space:normal}\n#qw-ovl .qw .qsel,#qw-ovl .qw .qsvc-i,#qw-ovl .qw .qcp-i,#qw-ovl .qw .qw-fan-i{font-size:16px!important}\n#qw-ovl .qw .qwbar{align-items:flex-start}\n#qw-ovl .qw .qwbar .qwln{margin-top:10px}\n#qw-ovl .qw .qwst{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto;min-width:30px}\n#qw-ovl .qw .qwdl{font-size:11.5px;font-weight:800;line-height:1;color:rgba(255,255,255,.6);white-space:nowrap;letter-spacing:.04em}\n#qw-ovl .qw .qwst.on .qwdl{color:#fff}\n#qw-ovl .qw .qwst.done .qwdl{color:#E9C877}\n#qw-ovl .qw .qwbar{padding-bottom:8px!important}\n#qw-ovl .qw .qw-gtabs{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#fff;margin:0 -2px 2px;padding:10px 2px 8px}\n#qw-ovl .qw .qw-gtabs::after{content:\"\";position:absolute;left:0;right:0;bottom:-8px;height:8px;background:linear-gradient(#fff,rgba(255,255,255,0));pointer-events:none}\n#qw-ovl .qw .qw-gt{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;border:1.5px solid #DCE4EE;background:#fff;border-radius:14px;padding:5px 5px 6px;font-family:inherit;cursor:pointer;color:#42546A;transition:border-color .15s,box-shadow .15s}\n#qw-ovl .qw .qw-gt .qw-gtp{display:block;width:100%;height:54px;border-radius:9px;background-color:#F4F7FA;background-size:230% auto;background-repeat:no-repeat}\n#qw-ovl .qw .qw-gt span{font-size:13.5px;font-weight:900;line-height:1.2}\n#qw-ovl .qw .qw-gt em{position:absolute;top:-7px;right:-5px;font-style:normal;background:#B8860B;color:#fff;font-size:11.5px;font-weight:900;border-radius:99px;padding:2px 7px;line-height:1.3;box-shadow:0 2px 5px rgba(0,0,0,.2)}\n#qw-ovl .qw .qw-gt.on{border-color:#042C53;background:#F5F9FD;color:#042C53;box-shadow:0 0 0 1px #042C53}\n#qw-ovl .qw .qw-gtip{font-size:12.5px;color:#5B6B7D;text-align:center;margin:0 0 2px}\n#qw-ovl .qw .grp-lbl{scroll-margin-top:96px}\n#qw-ovl .qw .qw-fan{border:1.5px solid #E7D6A6;background:#FFFBF0;border-radius:16px;padding:12px;margin:-2px 0 10px}\n#qw-ovl .qw .qw-fan-t{font-size:14px;font-weight:900;color:#5C430A}\n#qw-ovl .qw .qw-fan-s{font-size:12.5px;color:#7A6330;margin-top:3px;line-height:1.55}\n#qw-ovl .qw .qw-fan-r{display:flex;gap:8px;margin-top:9px}\n#qw-ovl .qw .qw-fan-i{flex:1;min-width:0;border:1.5px solid #E2D2A4;border-radius:12px;padding:9px 11px;font-family:ui-monospace,Menlo,monospace;letter-spacing:.04em;text-transform:uppercase;background:#fff;color:#16202B}\n#qw-ovl .qw .qw-fan-b{flex:0 0 auto;border:none;border-radius:12px;padding:0 16px;font-size:14.5px;font-weight:900;color:#fff;background-color:#B8860B;background-image:linear-gradient(135deg,#C9971C,#B8860B)!important;font-family:inherit;cursor:pointer}\n#qw-ovl .qw .qw-fan-res:empty{display:none}\n#qw-ovl .qw .qw-fan-res{margin-top:10px;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.6;font-weight:700}\n#qw-ovl .qw .qw-fan-res.ok{background:#E9F5EE;color:#1D6B45}\n#qw-ovl .qw .qw-fan-res.add{background:#FFF1DC;color:#7A4A05}\n#qw-ovl .qw .qw-fan-res.no{background:#F3F5F8;color:#42546A}\n#qw-ovl .qw .qw-fan-res b{font-weight:900}\n#qw-ovl .qw .qw-fan-res code{font-family:ui-monospace,Menlo,monospace;font-weight:900}\n#qw-ovl .qw .qw-fan-go{display:block;width:100%;margin-top:8px;border:none;border-radius:12px;padding:10px;font-size:14.5px;font-weight:900;color:#fff;background-color:#042C53;background-image:linear-gradient(135deg,#0C447C,#042C53)!important;font-family:inherit;cursor:pointer}\n#qw-ovl .qw .qw-fan-go:disabled{background-image:none!important;background-color:#9FB0C2;cursor:default}\n#qw-ovl .qw .qw-fan-res a{color:#0C447C;font-weight:900}";CSS+=CSS_UX;
 
 var qty={},opened={},step=0,plan=null,env=null,ovl=null,_finishing=false;
 var areaCity=null,areaDist=null,areaCls=null;
@@ -653,7 +663,8 @@ function _qwBar(){
   return '<div class="qwbar-sum"><div class="qwb-l">已選 '+n+' 台'+ex+'</div><div class="qwb-r">'+money(s)+'</div></div>';
 }
 function curPos(){return step==='area'?1:(step==='env'?2:(step===1?3:(step===2?3:(step===3?4:5))));}
-function stepBar(){var pos=curPos();function d(n){return '<div class="qwdot '+(pos>n?'done':pos===n?'on':'')+'">'+(pos>n?'✓':n)+'</div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+'</div>';}
+var STEP_LB=['地區','環境','機型','加購','方案'];
+function stepBar(){var pos=curPos();function d(n){var c=(pos>n?'done':pos===n?'on':'');return '<div class="qwst '+c+'"><div class="qwdot '+c+'">'+(pos>n?'✓':n)+'</div><span class="qwdl">'+STEP_LB[n-1]+'</span></div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}return '<div class="qwbar">'+d(1)+l(1)+d(2)+l(2)+d(3)+l(3)+d(4)+l(4)+d(5)+'</div>';}
 function render(){
   var w='';
   if(env==='biz')qty.bz=bzQty();qty.tf=tfQty();
@@ -690,7 +701,14 @@ function render(){
     +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri" '+(env?'':'disabled')+' onclick="__qw.go(1)">下一步：室內機</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===1){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
-    var body='';Object.keys(groups).forEach(function(g){body+='<div class="grp-lbl">'+g+'機型適用</div>'+groups[g].map(optRow).join('');});
+    var body='',_gk=Object.keys(groups),_gt='';
+    /* 06 分類捷徑:點了只是捲到那一類,三類全部照樣列在下面(老闆:還是要能捲動看到所有室內機) */
+    _gk.forEach(function(g,i){var ks=groups[g].map(function(x){return x.k;}),n=sumKeys(ks),im=(P[ks[0]]||{}).img||'';
+      _gt+='<button type="button" class="qw-gt" data-g="'+i+'" onclick="__qw.jumpGrp('+i+')"><i class="qw-gtp" style="background-image:url('+im+');background-position:'+(GRP_POS[g]||'50% 30%')+'"></i><span>'+(GRP_SHORT[g]||g)+'</span>'+(n>0?'<em>'+n+' 台</em>':'')+'</button>';
+      body+='<div class="grp-lbl" data-g="'+i+'">'+g+'機型適用</div>'+groups[g].map(function(x){var h=optRow(x);
+        /* 07 老闆:風鼓查詢也要放在吊隱大/全保養這裡(客人選的當下最需要知道);兩個都選就放在後面那張下方 */
+        if(x.k===_fanAt()&&_fanOk())h+=_fanBox();return h;}).join('');});
+    body='<div class="qw-gtabs">'+_gt+'</div>'+body;
     var inLbl=sumKeys(['wall','cs','cm','cl','m4','f4'])>0?'下一步：室外機':'只洗室外機，下一步';
     /* 「我不知道要洗哪些」是客戶在這一步最常卡住的地方,給他一條出路:先請人來看。
        ⚠️ 曾經在這裡擋過「購物車有東西就不給入口」,想藉空購物車避開優惠券。
@@ -762,7 +780,7 @@ function render(){
     /* 只顯示銷售頁上真的買得到的加購品:後台把商品從銷售頁移除,精靈就自動不再提供(加回來也會自動出現),
        不必改程式。__qsBtnMap 還沒建好時不過濾,避免開場瞬間全部消失。 */
     var _bmReady=Object.keys(window.__qsBtnMap||{}).length>0;
-    var body='';ADDON.forEach(function(x){if(_bmReady&&!_resolveBtn(x.n))return;if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機每台 +$1,000；室外機隨室內機清洗不加價，僅單洗室外機時每台 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5–4M 高處的機器台數（最多 '+(sumKeys(INK)+sumKeys(['o1','om']))+' 台）</div>';}});
+    var body='';ADDON.forEach(function(x){if(_bmReady&&!_resolveBtn(x.n))return;if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機每台 +$1,000；室外機隨室內機清洗不加價，僅單洗室外機時每台 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='fan')body+=_fanBox();if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 僅適用三菱重工家用壁掛室內機，請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5–4M 高處的機器台數（最多 '+(sumKeys(INK)+sumKeys(['o1','om']))+' 台）</div>';}});
     if(!hasBlow()){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
     var nextLbl=sumKeys(ADDON.map(function(a){return a.k;}))>0?'下一步：選到府方案':'不加購，下一步';
     w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
@@ -800,10 +818,66 @@ function render(){
     w='<div class="qw qw-step-plan"><h2 class="qh4">你想要多快安排到府清洗？</h2><p class="sub"><span class="laststep">最後一步</span> 越有彈性、折扣越多，二選一</p>'+(plan?'':'<div class="qw-need"><i>👇</i>請先點選一個方案（必選）</div>')+'<div class="qplans'+(plan?'':' qw-bob')+'">'+planCard('std',PLAN_STD,'安排兩週內到府服務','qpn-std')+planCard('early',PLAN_EARLY,'安排30天後到府服務','qpn-early')+'</div>'+(plan==='std'?'<div class="qpnote qpn-info">🗓️ 標準方案將安排在<b>專人去電聯繫起 2 週內</b>到府清洗。<br>實際到府日期，由約時人員去電與您確認。</div>':'')+(plan==='early'?'<div class="qpnote qpn-warn">⏰ 早鳥方案將安排在<b>專人去電聯繫約時起 30 天後</b>到府清洗。<br>若希望盡快清洗，請改選「標準方案」（2 週內到府）。</div>':'')+'<div class="callnote qw-call"><div class="qw-call-ic"><span>📞</span></div><div><div class="qw-call-t1">下單付款後，將由專人來電</div><div class="qw-call-t2">與您約定實際到府時間</div></div></div>'+'<div class="qdl" onclick="__qw.seeDetail()"><div class="qdl-ic">📖</div><div class="qdl-tx"><div class="qdl-t1">先看服務說明/規範完整圖文介紹</div><div class="qdl-t2">服務內容、清洗流程、施工實例</div></div><div class="qdl-ar">›</div></div>'+'<div class="qcp"><div class="qcp-r"><span class="qcp-t">🎟️ 優惠碼</span><input id="qw-cp" class="qcp-i" type="text" inputmode="latin" autocomplete="off" spellcheck="false" value="'+_esc(_userCode)+'" oninput="__qw.setCode(this.value)" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();__qw.applyCode();}"><button type="button" class="qcp-b" onclick="__qw.applyCode()">套用</button></div><div id="qw-cpmsg"></div><div class="qcp-n">選填；完成後自動套用，系統會採用<b>折扣較多</b>的那一張</div></div>'+'<div class="nav"><button class="btn gho" onclick="__qw.go(3)">上一步</button><button class="btn pri'+(plan?'':' qw-needbtn')+'" onclick="__qw.confirmPlan()">'+(plan?'完成，前往結帳':'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">還沒選方案</span><span style="display:block;line-height:1.35">👆 請先點上方方案</span>')+'</button></div></div>';
   }
   if(!ovl)return;/* 精靈已關閉就別動,避免崩潰 */
+  /* 同一頁重畫(按加入、＋/－、查風鼓)時留在原本捲到的位置。
+     以前每按一次就跳回最上面:客戶捲到四方吹按加入,畫面卻跑回壁掛式(2026-10-16 加分類鈕時發現)。換頁才回到頂端。 */
+  var _oc=ovl.querySelector('.qw'),_keepY=(_oc&&_rStep===step)?_oc.scrollTop:0;_rStep=step;
   ovl.innerHTML=w;
   var _card=ovl.querySelector('.qw');
-  if(_card){_qwFoot(_card);var _x=document.createElement('button');_x.type='button';_x.className='qw-x';_x.setAttribute('aria-label','關閉');_x.innerHTML='×';_x.onclick=function(e){e.stopPropagation();close();};_card.appendChild(_x);}
+  if(_card){_qwFoot(_card);var _x=document.createElement('button');_x.type='button';_x.className='qw-x';_x.setAttribute('aria-label','關閉');_x.innerHTML='×';_x.onclick=function(e){e.stopPropagation();close();};_card.appendChild(_x);if(_keepY)_card.scrollTop=_keepY;if(step===1)_gtSync(_card);}
 }
+var _rStep=null;
+function _gtSync(card){try{
+  var tabs=card.querySelector('.qw-gtabs');if(!tabs)return;
+  var lbls=[].slice.call(card.querySelectorAll('.grp-lbl[data-g]')),bts=[].slice.call(tabs.querySelectorAll('.qw-gt'));
+  function upd(){var y=card.scrollTop+tabs.offsetHeight+30,k=0;
+    lbls.forEach(function(l,i){if(l.offsetTop<=y)k=i;});
+    if(card.scrollHeight-card.clientHeight-card.scrollTop<4)k=lbls.length-1;   /* 捲到底:最後一類 */
+    if(card.scrollTop<8)k=0;
+    bts.forEach(function(b,i){b.classList.toggle('on',i===k);});}
+  card.addEventListener('scroll',upd,{passive:true});upd();
+}catch(e){}}
+/* ===== 07 吊隱式風鼓加洗查詢 =====
+   資料來源:賣場圖 11b「吊隱式風鼓加洗對照」(2026-08)。大保養/全保養基本含 2 個風鼓,3 個以上每多 1 個 +$500。
+   ⚠️ 型號表要跟賣場那張圖一起改,不然客戶查的跟圖上看的會不一樣。
+   比對:去空白、去「-」、轉大寫;完全相同優先;不完整時,只要符合的型號全部是同一級才回答,否則請客戶輸入完整型號。 */
+var FAN_TBL={
+ 0:'FDUM22KXE6T3 FDUM22KXZE3T-W FDUM28KXE6T3 FDUM28KXZE3T-W FDUM36KXE6T3 FDUM36KXZE3T-W FDUM45KXE6T3 FDUM45KXZE3T-W FDUM56KXE6T3 FDUM56KXZE3T-W FDUM71KXE6T3 FDUM71KXZE3T-W FDUM71VHT FDUM90KXE6T3 FDUM90KXZE3T-W FDUH22KXE6T3 FDUH28KXE6T3 FDUH36KXE6T3 DXR25ZST-W DXR35ZST-W FDUM50VHT FDUM60VHT FDUT22KXE6FTX FDUT22KXZE3T-W FDUT28KXE6FTX FDUT28KXZE3T-W FDUT36KXE6FTX FDUT36KXZE3T-W FDU71KXE6FTX FDU90KXE6FTX',
+ 1:'FDUM100VHT FDUM112KXE6T3 FDUM112KXZE3T-W FDUM125VHT FDUM140KXE6T3 FDUM140KXZE3T-W FDUM140VHT FDUM160KXE6T3 FDUM160KXZE3T-W DXR41ZST-W DXR50ZST-W DXR60ZST-W FDUT45KXE6FTX FDUT45KXZE3T-W FDUT56KXE6FTX FDUT56KXZE3T-W FDU100VHT FDU112KXE6FTX FDU125VHT FDU140KXE6FTX FDU140VHT FDU160KXE6FTX FDU224KXZE1T3 FDU250VHT FDU280KXZE1T3',
+ 2:'DXR71ZST-W FDUT71KXE6FTX FDUT71KXZE3T-W'};
+var _fanQ='',_fanRes=null;
+function _fanNorm(x){return String(x||'').replace(/[\uFF01-\uFF5E]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);}).toUpperCase().replace(/[\s\-_－—]/g,'');}
+function _fanFind(q){
+  var n=_fanNorm(q);if(n.length<4)return {t:'short'};
+  var all=[];Object.keys(FAN_TBL).forEach(function(k){FAN_TBL[k].split(' ').forEach(function(m){all.push({m:m,n:_fanNorm(m),x:+k});});});
+  var hit=all.filter(function(a){return a.n===n;});
+  if(!hit.length)hit=all.filter(function(a){return n.indexOf(a.n)>=0;});          /* 客戶多打了字(例如連序號一起打) */
+  if(!hit.length){hit=all.filter(function(a){return a.n.indexOf(n)===0;});  /* 只打了前半段 */
+    if(hit.length&&n.length<6)return {t:'more',q:n};}                      /* 太短(例如 FDUM1)不要猜 */
+  if(!hit.length)return {t:'none',q:n};
+  var xs={};hit.forEach(function(a){xs[a.x]=1;});
+  if(Object.keys(xs).length>1)return {t:'many',q:n};
+  return {t:'hit',x:hit[0].x,m:hit.length===1?hit[0].m:null,q:n};
+}
+function _fanResHtml(){var r=_fanRes;if(!r)return '';
+  if(r.t==='short')return '請輸入完整型號（至少 4 個字）';
+  if(r.t==='none')return '查不到「<code>'+_esc(r.q)+'</code>」。可能是打錯字，或不是吊隱式機型。<br>把型號傳給 <a href="'+LINE_CS+'" target="_blank" rel="noopener">LINE 客服</a>，我們幫您確認。';
+  if(r.t==='more')return '請輸入<b>完整型號</b>（室內機標籤上的英數字，例如 FDUM112KXE6T3）';
+  if(r.t==='many')return '「<code>'+_esc(r.q)+'</code>」對到好幾款，加洗數量不一樣，請輸入<b>完整型號</b>。';
+  var nm=r.m?'<code>'+r.m+'</code>':'您的機型';
+  if(r.x===0)return '✅ '+nm+'：風鼓 1～2 個<br><b>大保養／全保養已經包含，不用加洗</b>';
+  var cost=r.x*500,cur=qty.fan||0;
+  return '➕ '+nm+'：風鼓 '+(r.x+2)+' 個<br>需要<b>加洗 '+r.x+' 個（+NT$'+cost.toLocaleString('en-US')+'）</b>'
+    +(r.added?'<button type="button" class="qw-fan-go" disabled>✓ 已加入（目前風鼓清洗 × '+cur+'）</button>'+(step===1?'<div style="font-size:12px;margin-top:6px;opacity:.85">到「加購」那一步可以再調整數量</div>':'')
+             :'<button type="button" class="qw-fan-go" onclick="__qw.fanAdd()">幫我加入 '+r.x+' 個風鼓清洗</button>');
+}
+function _fanAt(){return (qty.cl||0)>0?'cl':((qty.cm||0)>0?'cm':null);}
+/* 銷售頁上買不到風鼓清洗(後台下架)時就不顯示查詢,跟加購頁的規則一樣 */
+function _fanOk(){return !(Object.keys(window.__qsBtnMap||{}).length>0&&!_resolveBtn('風鼓清洗'));}
+function _fanBox(){var r=_fanRes,cls=!r?'':(r.t==='hit'?(r.x===0?'ok':'add'):'no');
+  return '<div class="qw-fan"><div class="qw-fan-t">🔍 要不要加洗風鼓？輸入型號查一下</div>'
+   +'<div class="qw-fan-s">型號在室內機機身或維修孔內側的標籤上。有好幾台吊隱機就每台各查一次。</div>'
+   +'<div class="qw-fan-r"><input id="qw-fan-in" class="qw-fan-i" type="text" inputmode="latin" autocomplete="off" spellcheck="false" placeholder="例：FDUM112KXE6T3" value="'+_esc(_fanQ)+'" oninput="__qw.fanQ(this.value)" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();__qw.fanLook();}"><button type="button" class="qw-fan-b" onclick="__qw.fanLook()">查詢</button></div>'
+   +'<div id="qw-fan-res" class="qw-fan-res '+cls+'">'+_fanResHtml()+'</div></div>';}
 var _userCode='';
 function _esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 var _qwResume=null;
@@ -903,6 +977,14 @@ function showTerms(k,mode,onConfirm){
 
 var api={
   start:function(){step='area';render();},
+  jumpGrp:function(i){try{var c=ovl.querySelector('.qw'),l=c.querySelector('.grp-lbl[data-g="'+i+'"]'),t=c.querySelector('.qw-gtabs');if(!l)return;
+    var y=Math.max(0,l.offsetTop-(t?t.offsetHeight:0)-6);
+    try{c.scrollTo({top:y,behavior:'smooth'});}catch(e){c.scrollTop=y;}
+    setTimeout(function(){try{if(Math.abs(c.scrollTop-y)>8&&c.scrollHeight-c.clientHeight-c.scrollTop>4)c.scrollTop=y;}catch(e){}},600);}catch(e){}},
+  fanQ:function(v){_fanQ=v||'';},
+  fanLook:function(){_fanRes=_fanFind(_fanQ);var el=document.getElementById('qw-fan-res');if(!el){render();return;}
+    var r=_fanRes;el.className='qw-fan-res '+(r.t==='hit'?(r.x===0?'ok':'add'):'no');el.innerHTML=_fanResHtml();},
+  fanAdd:function(){var r=_fanRes;if(!r||r.t!=='hit'||!r.x||r.added)return;qty.fan=(qty.fan||0)+r.x;r.added=true;render();},
   skip:function(){close();},
   pickCity:function(v){areaCity=v||null;areaDist=null;areaCls=null;qty.rm=0;render();},
   pickDist:function(v){areaDist=v||null;areaCls=classify(areaCity,areaDist);qty.rm=(areaCls==='remote')?1:0;render();},
