@@ -1163,6 +1163,7 @@ var api={
        清洗服務還沒落地時控制器會被「默默拒絕」→ 客戶選了控制器、購物車卻沒有(測試 9 次漏 4 次,永遠是控制器)。
        ①加購品先等購物車裡確定有清洗服務(最多等 8 秒) ②全部加完再核對控制器/除濕機數量,少了補加一次。
        其他加購(挑高/商用/偏遠/車馬費/風鼓)各有 reconcile 自動補回,不在此核對。 */
+    function _cartQtyAll(){var n=0;_cartArr().forEach(function(it){if(Number(it.ProductType)!==99)n+=Number(it.Quantity)||0;});return n;}
     function _cq(nm){var c=_cartArr(),n=0;c.forEach(function(it){if((it.ProductName||'').indexOf(nm)===0)n+=Number(it.Quantity)||0;});return n;}
     function next(){
       /* 2026-09-21 再修:同一款清洗選 2 台以上時,兩次「加入」只隔 0.55 秒,1SHOP 偶爾吞掉第二次
@@ -1181,6 +1182,7 @@ var api={
       }
       if(i>=jobs.length){
         window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
+        if(!_ufirst&&window.__qsSwapBusy===_addTk)window.__qsSwapBusy=false;/* 商品都加完了,交還自動補券 */
         if(window.__qsApplyPlanCoupon&&!_ufirst)setTimeout(window.__qsApplyPlanCoupon,900);
         if(_userCode){window.__qsUserCpAt=Date.now();window.__qsCpBusy=Date.now();_lockCheckout(true);
           if(_ufirst)setTimeout(function(){_userFirstApply(_userCode);},1500);
@@ -1212,8 +1214,12 @@ var api={
       /* 補加前再核一次:原本那次只是慢、此刻已落地 → 跳過,絕不多加(多加一台除濕機=多收 $21,900) */
       if(job.chk&&_cq(job.chk)>=job.want){i++;setTimeout(next,50);return;}
       i++;
+      /* 2026-10-16 實測抓到:兩次「加入」只隔 0.55 秒、前一次的回應還沒回來時,1SHOP 會開出「第二台購物車」——
+         兩台各有一半商品(例:一台只有壁掛、一台只有室外機),後面的核對再補加又補到別台,最後少一台或多一台(多收/少收錢)。
+         新客人第一次加入時最容易發生(購物車還沒建立)。改成:等這次加入真的回到購物車(件數變多)才加下一項,最多等 4 秒。 */
+      var _q0=_cartQtyAll(),_t0=Date.now();
       try{if(window.viewProduct)window.viewProduct(job.btn||null,job.pid);}catch(e){}
-      setTimeout(next,550);
+      (function _wt(){if(_cartQtyAll()>_q0||Date.now()-_t0>4000){setTimeout(next,250);}else setTimeout(_wt,150);})();
     }
     _ufirst=false;
     if(_userCode){
@@ -1228,6 +1234,10 @@ var api={
       }
     }
     window.__qsAdding=true;
+    /* 2026-10-16:加入商品期間暫停內文JS的自動補券(__qsSwapBusy)。改成逐項等回覆後,兩次加入之間有空檔,
+       自動補券會插進來;下一次「加入」的回應不帶那張券,畫面就變回原價。全部加完才放方案券。 */
+    var _addTk=_ufirst?null:('add'+Date.now());
+    if(!_ufirst){window.__qsSwapBusy=_addTk;setTimeout(function(){if(window.__qsSwapBusy===_addTk)window.__qsSwapBusy=false;},60000);}
     next();
     }catch(e){_finishing=false;window.__qsAdding=false;if(window.__qsUserFirst){window.__qsUserFirst=0;window.__qsSwapBusy=false;}}
   }
