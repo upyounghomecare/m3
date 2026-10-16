@@ -465,7 +465,7 @@ function _userFirstApply(code){try{
   window.__qsCpBefore=_planOffQ();/* 橫幅判定用:折扣要比方案好才算客戶的碼生效 */
   var hasCp=false,c=_cartArr();for(var i=0;i<c.length;i++){if(Number(c[i].ProductType)===99){hasCp=true;break;}}
   /* 購物車上已經有券(例如上一輪留下的),只能走原本的換券路線 */
-  if(hasCp||!(window.jQuery&&window._gateway&&window._ShopID)){release();_applyUserCode(code);return;}
+  if(hasCp||!(window.jQuery&&(window._api||window._gateway)&&window._ShopID)){release();_applyUserCode(code);return;}
   var n=0;
   var fallback=function(){
     keep();
@@ -480,7 +480,8 @@ function _userFirstApply(code){try{
   };
   var go=function(){
     n++;keep();
-    jQuery.ajax({url:_gateway+'view/AddCouponToCart?ShopID='+_ShopID,type:'POST',data:JSON.stringify({CouponNumber:code})})
+    /* 2026-10-16 1SHOP 前台改走同網域 _api('/api/'),直接打 _gateway 會回「沒有此頁面」(券套不上)。跟 1SHOP 自己的「使用優惠券」一樣走 _api */
+    jQuery.ajax({url:(window._api||_gateway)+'view/AddCouponToCart?ShopID='+_ShopID,type:'POST',data:JSON.stringify({CouponNumber:code})})
       .done(function(a){try{
         if(a&&0==a.success){
           try{if(window.inputCart)inputCart('new',a.data);}catch(e){}
