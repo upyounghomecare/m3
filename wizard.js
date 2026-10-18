@@ -3777,3 +3777,349 @@ function buildDetailToc(){try{
 var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30)clearInterval(_qdT);},500);
 }catch(e){}
 })();
+
+;/* ===== 2026-10-18 app 化試用（只在測試頁 ub3ibm 啟動；正式頁、員工頁完全不受影響） ===== */
+if(/ub3ibm/.test(location.pathname)){
+window.__APP_LV=3;
+try{window.__QWT=localStorage.getItem('qwt_try')||'v1';}catch(e){window.__QWT='v1';}
+/* 2026-10-18 預覽用：讓引導精靈在手機上像 app（只在預覽時接在 wizard.js 後面，不上正式頁）
+   window.__APP_LV = 1 / 2 / 3：做到第幾批（後面的批次包含前面的）
+   第一批：手機滿版、進度列固定在上方、開場不閃（品牌開場畫面）
+   第二批：手機「返回」回上一步、換頁滑動、按鈕放大＋按下有反應
+   第三批：記住進度，下次打開問「要繼續上次的選擇嗎？」 */
+(function(){
+function boot(){
+if(!/(^|\.)my1shop\.com$/.test(location.hostname))return;/* 只在 1SHOP 銷售頁作用 */
+var LV=window.__APP_LV||1;
+var MOB='(max-width:759px)';
+function mob(){return window.innerWidth<760;}
+var css='';
+/* ===== 第一批 ===== */
+css+='@media '+MOB+'{'
+ +'#qw-ovl{padding:0!important;background:#fff!important;align-items:stretch!important;justify-content:stretch!important}'
+ +'#qw-ovl .qw{max-width:none!important;width:100%!important;max-height:none!important;height:100%!important;border-radius:0!important;box-shadow:none!important;display:flex!important;flex-direction:column!important;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))!important}'
+ +'#qw-ovl .qw>*{flex-shrink:0}'
+ +'#qw-ovl .qw>.qwfoot{margin-top:auto!important}'
+ +'#qw-ovl .qw.wel{justify-content:center!important}'
+ +'#qw-ovl .qw.wel .wel-h{font-size:24px!important}'
+ +'#qw-ovl .qw.wel .wel-start{max-width:100%!important}'
+ +'#qw-ovl .qw-x{position:fixed!important;top:10px!important;right:10px!important;z-index:9}'
+ +'}';
+/* 開場畫面（打開頁面到精靈出現之間，蓋住底下的銷售頁） */
+css+='#qw-splash{position:fixed;inset:0;z-index:2147483600;background:linear-gradient(160deg,#0C2D57 0%,#042C53 60%,#021B36 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;transition:opacity .35s}'
+ +'#qw-splash .sp-b{font-size:14px;letter-spacing:.18em;color:#E8C77A;font-weight:700}'
+ +'#qw-splash .sp-l{width:46px;height:2px;background:#C9A24A}'
+ +'#qw-splash .sp-h{font-size:24px;font-weight:900;letter-spacing:.06em}'
+ +'#qw-splash .sp-s{font-size:13px;color:#BFD0E4;margin-top:6px}'
+ +'#qw-splash .sp-r{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:#E8C77A;animation:qwsp 0.9s linear infinite;margin-top:18px}'
+ +'@keyframes qwsp{to{transform:rotate(360deg)}}'
+ +'#qw-splash.out{opacity:0;pointer-events:none}';
+/* ===== 第二批 ===== */
+if(LV>=2){
+ css+='@keyframes qwInR{from{transform:translateX(34px);opacity:0}to{transform:none;opacity:1}}'
+  +'@keyframes qwInL{from{transform:translateX(-34px);opacity:0}to{transform:none;opacity:1}}'
+  +'#qw-ovl .qw.qw-in-r>:not(.qwfoot):not(.qwbar):not(.qw-x),#qw-ovl .qw.qw-in-r .qw-stick~*{animation:qwInR .28s ease-out both}'
+  +'#qw-ovl .qw.qw-in-l>:not(.qwfoot):not(.qwbar):not(.qw-x),#qw-ovl .qw.qw-in-l .qw-stick~*{animation:qwInL .28s ease-out both}'
+  +'#qw-ovl .qw.qw-in-r>.qw-stick,#qw-ovl .qw.qw-in-l>.qw-stick{animation:none!important}'
+  +'#qw-ovl button,#qw-ovl .opt,#qw-ovl .qplan,#qw-ovl .wel-skip,#qw-ovl .skip{transition:transform .08s ease}'
+  +'#qw-ovl button:active,#qw-ovl .opt:active,#qw-ovl .qplan:active{transform:scale(.97)}'
+  +'@media '+MOB+'{'
+  +'#qw-ovl .qw .step-ctl button{width:38px!important;height:38px!important;font-size:19px!important}'
+  +'#qw-ovl .qw .step-ctl .q{min-width:24px!important;font-size:16px!important}'
+  +'#qw-ovl .qw .qw-add{min-height:42px!important;padding:0 18px!important;font-size:15px!important}'
+  +'#qw-ovl .qw .skip,#qw-ovl .qw .wel-skip{padding:10px 0!important}'
+  +'#qw-ovl .qw .qw-gtabs button,#qw-ovl .qw .qw-gtabs>*{min-height:38px}'
+  +'}';
+}
+/* ===== 第三批 ===== */
+if(LV>=3){
+ css+='#qw-resume{background:#F3F7FB;border:1px solid #CFE0F1;border-radius:14px;padding:12px 14px;margin:0 0 14px;text-align:left;width:100%;box-sizing:border-box}'
+  +'#qw-resume .rs-t{font-size:13px;color:#42546A;font-weight:700;margin-bottom:4px}'
+  +'#qw-resume .rs-s{font-size:15px;color:#0C2D57;font-weight:800;line-height:1.5}'
+  +'#qw-resume .rs-a{font-size:12.5px;color:#5B6B7D;margin-top:2px}'
+  +'#qw-resume .rs-b{display:flex;gap:8px;margin-top:10px}'
+  +'#qw-resume .rs-b button{flex:1;height:44px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;border:none}'
+  +'#qw-resume .rs-go{background-color:#0C447C;background-image:linear-gradient(135deg,#0C447C,#042C53)!important;color:#fff}'
+  +'#qw-resume .rs-new{background:#fff!important;color:#0C447C;border:1.5px solid #CFE0F1!important}';
+}
+var st=document.createElement('style');st.id='qw-app-preview';st.textContent=css;(document.head||document.documentElement).appendChild(st);
+
+/* 開場畫面：頁面一開就蓋上，精靈出現後淡出（最多 8 秒） */
+function splash(){
+ if(!mob()||document.getElementById('qw-splash')||document.getElementById('qw-ovl'))return;
+ var d=document.createElement('div');d.id='qw-splash';
+ d.innerHTML='<div class="sp-b">三菱重工 · 原廠空調清洗</div><div class="sp-l"></div><div class="sp-h">官方賣場</div><div class="sp-s">正在為您準備選購精靈…</div><div class="sp-r"></div>';
+ (document.body||document.documentElement).appendChild(d);
+ var t0=Date.now();
+ var iv=setInterval(function(){
+  var o=document.getElementById('qw-ovl');
+  if((o&&o.querySelector('.qw'))||Date.now()-t0>8000){clearInterval(iv);setTimeout(function(){d.classList.add('out');setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},400);},150);}
+ },80);
+}
+window.__qwAppSplash=splash;
+if(!window.__qwSplashEarly)splash();
+
+/* 第一批：每一步的深藍標題列（進度＋標題＋說明）都固定在上方。沿用室內機頁現成的 .qw-stick 樣式，只是把它們包起來 */
+function stickHead(){
+ if(!mob())return;var o=document.getElementById('qw-ovl');if(!o)return;var q=o.querySelector('.qw');
+ if(!q||q.classList.contains('wel')||q.classList.contains('qw-step-plan')||q.querySelector(':scope>.qw-stick'))return;
+ var hs=[],c=q.firstElementChild;
+ while(c&&(c.classList.contains('qwbar')||c.tagName==='H2'||(c.tagName==='P'&&c.classList.contains('sub')))){hs.push(c);c=c.nextElementSibling;}
+ if(hs.length<2)return;
+ var w=document.createElement('div');w.className='qw-stick';q.insertBefore(w,hs[0]);hs.forEach(function(e){w.appendChild(e);});
+}
+new MutationObserver(stickHead).observe(document.documentElement,{childList:true,subtree:true});
+
+/* 目前在哪一步：用進度圓點＋標題當識別 */
+function sig(){var o=document.getElementById('qw-ovl');if(!o)return null;var q=o.querySelector('.qw');if(!q)return null;
+ if(q.classList.contains('wel'))return '0';var on=q.querySelector('.qwdot.on');var h=q.querySelector('h2');
+ return (on?on.textContent:'?')+'|'+(h?h.textContent:'');}
+function pos(s){if(!s)return -1;if(s==='0')return 0;var n=parseInt(s,10);return isNaN(n)?0:n;}
+
+if(LV>=2){
+ var last=null,goingBack=false,depth=0;
+ var mo=new MutationObserver(function(){
+  var s=sig();if(s===last)return;
+  var o=document.getElementById('qw-ovl'),q=o&&o.querySelector('.qw');
+  if(q&&last!==null&&s!==null){
+   var back=goingBack||pos(s)<pos(last);
+   q.classList.remove('qw-in-r','qw-in-l');void q.offsetWidth;q.classList.add(back?'qw-in-l':'qw-in-r');
+  }
+  if(s!==null&&last!==null&&!goingBack&&pos(s)>pos(last)){try{history.pushState({qw:s},'');depth++;}catch(e){}}
+  if(goingBack&&depth>0)depth--;
+  goingBack=false;last=s;
+ });
+ mo.observe(document.documentElement,{childList:true,subtree:true});
+ /* 手機返回鍵：精靈開著就回上一步，不離開賣場 */
+ window.addEventListener('popstate',function(){
+  var o=document.getElementById('qw-ovl');if(!o)return;
+  var prev=[].slice.call(o.querySelectorAll('.qwfoot button,.nav button,button')).filter(function(b){return /上一步/.test(b.textContent||'');})[0];
+  goingBack=true;
+  if(prev){prev.click();}else if(window.__qw){/* 地區頁沒有上一步鈕 → 回開場 */try{window.__qw.go(0);}catch(e){goingBack=false;}}
+ });
+}
+
+if(LV>=3){
+ var KEY='qw_app_resume';
+ function load(){try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){return null;}}
+ function save(v){try{localStorage.setItem(KEY,JSON.stringify(v));}catch(e){}}
+ var replaying=false;
+ function wrap(){
+  var a=window.__qw;if(!a||a.__wrapped)return !!a;a.__wrapped=true;
+  ['start','pickCity','pickDist','pickEnv','pick','chg','go','pickPlan','fanQ','fanAdd'].forEach(function(k){var f=a[k];if(typeof f!=='function')return;
+   a[k]=function(){var r=f.apply(this,arguments);
+    if(!replaying){var v=load()||{log:[]};if(k==='start')v={log:[]};v.log.push([k,[].slice.call(arguments)]);
+     var sum=document.querySelector('#qw-ovl .qwbar-sum');if(sum)v.sum=(sum.innerText||'').replace(/\s+/g,' ').trim();
+     var on=document.querySelector('#qw-ovl .qwdot.on');if(on)v.step=on.textContent;
+     v.t=Date.now();save(v);}
+    return r;};});
+  var cp=a.confirmPlan;if(typeof cp==='function')a.confirmPlan=function(){var r=cp.apply(this,arguments);return r;};
+  return true;
+ }
+ var wi=setInterval(function(){if(wrap())clearInterval(wi);},100);
+ function area(v){var c=null,d=null;(v.log||[]).forEach(function(x){if(x[0]==='pickCity')c=x[1][0];if(x[0]==='pickDist')d=x[1][0];});return (c||'')+(d?' '+d:'');}
+ function card(){
+  var o=document.getElementById('qw-ovl');if(!o)return;var q=o.querySelector('.qw.wel');if(!q||q.querySelector('#qw-resume'))return;
+  var v=load();if(!v||!v.log||v.log.length<4||!v.sum)return;
+  var el=document.createElement('div');el.id='qw-resume';
+  var ago=Math.max(1,Math.round((Date.now()-(v.t||Date.now()))/86400000));
+  el.innerHTML='<div class="rs-t">👋 歡迎回來！您上次選到一半</div><div class="rs-s">'+v.sum.replace(/已選/,'已選 ')+'</div><div class="rs-a">服務地區：'+(area(v)||'—')+'</div>'
+   +'<div class="rs-b"><button type="button" class="rs-new">重新開始</button><button type="button" class="rs-go">繼續上次的選擇 ›</button></div>';
+  var steps=q.querySelector('.wel-steps');q.insertBefore(el,steps?steps.nextSibling:q.firstChild);
+  el.querySelector('.rs-new').onclick=function(){try{localStorage.removeItem(KEY);}catch(e){}window.__qw.start();};
+  el.querySelector('.rs-go').onclick=function(){replay(v);};
+ }
+ function replay(v){
+  replaying=true;var L=v.log.slice(),i=0;
+  (function nx(){if(i>=L.length){replaying=false;return;}var x=L[i++];try{window.__qw[x[0]].apply(null,x[1]);}catch(e){}setTimeout(nx,60);})();
+ }
+ window.__qwAppReplay=replay;
+ new MutationObserver(card).observe(document.documentElement,{childList:true,subtree:true});
+}
+}
+if(document.documentElement)boot();else{var m0=new MutationObserver(function(){if(document.documentElement){m0.disconnect();boot();}});m0.observe(document,{childList:true});}
+})();
+
+/* 2026-10-18 精靈 app 化：5 種風格預覽（接在 app_preview.js 第一批之後）。window.__QWT = 'v1'～'v5'。只在手機寬度生效。 */
+(function(){
+function boot(){
+if(!/(^|\.)my1shop\.com$/.test(location.hostname))return;
+var T=window.__QWT||'v1';document.documentElement.setAttribute('data-qwt',T);
+var M='@media (max-width:759px){';
+var H='html[data-qwt='+T+'] #qw-ovl#qw-ovl';/* 重複 id 拉高優先權，蓋過精靈原本的 !important */
+var HS=H+' .qw:not(.qw-step-plan):not(.wel) .qw-stick';
+var c='';
+function r(sel,body){return sel.split(',').map(function(s){return H+' '+s.trim();}).join(',')+'{'+body+'}';}
+if(T==='v2'){ /* ===== iPhone 原生 ===== */
+ c+=r('.qw','background:#F2F2F7!important;font-family:-apple-system,"PingFang TC",sans-serif!important')
+ +HS+'{background:rgba(242,242,247,.94)!important;-webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);border-bottom:.5px solid rgba(60,60,67,.18)}'
+ +HS+'>.qwbar,'+HS+'>h2,'+HS+'>.sub,'+HS+'>h2:first-child{background:transparent!important;background-image:none!important}'
+ +HS+'>h2{color:#000!important;font-size:28px!important;font-weight:800!important;letter-spacing:.01em!important;padding-top:4px!important}'
+ +HS+'>.sub{color:#6C6C70!important;font-size:14px!important}'
+ +r('.qwdot','width:22px!important;height:22px!important;font-size:11px!important;background:#E5E5EA!important;color:#8E8E93!important;border:none!important;box-shadow:none!important')
+ +r('.qwdot.on','background:#0C447C!important;color:#fff!important')+r('.qwdot.done','background:#0C447C!important;color:#fff!important;opacity:.55')
+ +r('.qwdl','color:#8E8E93!important;font-size:11px!important')+r('.qwst.on .qwdl','color:#0C447C!important;font-weight:700!important')
+ +r('.qwln','background:#D1D1D6!important;height:2px!important')+r('.qwln.done','background:#0C447C!important;opacity:.55')
+ +r('.opt','background:#fff!important;border:none!important;border-radius:14px!important;box-shadow:none!important')
+ +r('.opt.sel','box-shadow:0 0 0 2px #0C447C!important')
+ +r('.grp-lbl','color:#6C6C70!important;font-size:13px!important;text-transform:none;letter-spacing:.02em;margin-left:4px')
+ +r('.qw-gtabs>*','background:#fff!important;border:none!important;box-shadow:none!important;border-radius:12px!important')
+ +r('.qwfoot','background:rgba(249,249,251,.94)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-top:.5px solid rgba(60,60,67,.2)!important;box-shadow:none!important')
+ +r('.qwbar-sum','background:transparent!important;background-image:none!important;color:#000!important;box-shadow:none!important;padding:4px 4px 8px!important;border:none!important')
+ +r('.qwbar-sum .qwb-l','color:#3C3C43!important')+r('.qwbar-sum .qwb-r','color:#000!important')
+ +r('.nav .btn.pri','background-color:#0C447C!important;background-image:none!important;border-radius:14px!important;box-shadow:none!important')
+ +r('.nav .btn.gho','background:transparent!important;border:none!important;color:#0C447C!important;box-shadow:none!important')
+ +r('.skip','color:#0C447C!important')
+ +r('.qw.wel','background:#F2F2F7!important')+r('.wel-h','color:#000!important;font-size:30px!important;font-weight:800!important')
+ +r('.qw-step-plan .qh4','color:#000!important;font-size:24px!important')
+ +r('.qcp-i','background:#fff!important;border:none!important;border-radius:10px!important')
+ +r('.qw.wel','background:#F2F2F7!important;background-image:none!important')+r('.wel-start img','border-radius:18px!important')
+ +r('.qw-step-plan .qh4','background:transparent!important;background-image:none!important;color:#000!important;font-weight:800!important')
+ +r('.qw-step-plan>.sub','background:transparent!important;color:#6C6C70!important')
+ +r('.qw-step-plan .callnote,.qw-step-plan .qdl,.qw-step-plan .qpnote','border-radius:12px!important')
+ +H+'{background:#F2F2F7!important}';
+}
+if(T==='v3'){ /* ===== 外送 app ===== */
+ c+=r('.qw','background:#fff!important')
+ +HS+'{background:#fff!important;padding-top:6px!important}'
+ +HS+'>.qwbar,'+HS+'>h2,'+HS+'>.sub,'+HS+'>h2:first-child{background:transparent!important;background-image:none!important}'
+ +HS+'>.qwbar{height:4px!important;padding:0!important;margin:6px 0 14px!important;border-radius:4px;background:#EEF0F3!important;position:relative;overflow:hidden}'
+ +HS+'>.qwbar>*{display:none!important}'
+ +HS+'>.qwbar::after{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--qwp,0.2)*100%);background:#C9A24A;border-radius:4px;transition:width .3s}'
+ +HS+'>h2{color:#111!important;font-size:27px!important;font-weight:900!important;line-height:1.25!important;padding:34px 16px 4px!important}'
+ +HS+'>.sub{color:#6B7280!important;font-size:14.5px!important;padding-bottom:10px!important}'
+ +r('.qwt-step','position:absolute;left:58px;top:23px;font-size:13px;color:#6B7280;font-weight:700')
+ +r('.qwt-back','position:absolute;left:0;top:14px;width:40px;height:40px;border-radius:50%;border:none;background:#F3F4F6;color:#111;font-size:22px;line-height:40px;cursor:pointer;z-index:3')
+ +r('.qw-x','background:#F3F4F6!important;color:#111!important;border:none!important')
+ +r('.opt','border:1.5px solid #EEF0F3!important;border-radius:16px!important;box-shadow:none!important')
+ +r('.opt.sel','border-color:#111!important;box-shadow:none!important')
+ +r('.qw-gtabs>*','border-radius:999px!important;box-shadow:none!important')
+ +r('.qwfoot','display:flex!important;flex-wrap:wrap;align-items:center;gap:10px;background:#fff!important;border-top:1px solid #EEF0F3!important;box-shadow:0 -8px 24px -12px rgba(0,0,0,.18)!important')
+ +r('.qwfoot>.qwmore','flex-basis:100%')
+ +r('.qwfoot>.qwbar-sum','flex:0 0 auto;display:flex!important;flex-direction:column;align-items:flex-start;background:transparent!important;background-image:none!important;color:#111!important;box-shadow:none!important;padding:0 2px!important;margin:0!important;border:none!important;min-width:96px')
+ +r('.qwbar-sum .qwb-l','color:#6B7280!important;font-size:12.5px!important')+r('.qwbar-sum .qwb-r','color:#111!important;font-size:19px!important;font-weight:900!important')
+ +r('.qwfoot>.nav','flex:1;margin:0!important')+r('.qwfoot>.qcp','flex-basis:100%')
+ +r('.nav .btn.gho','display:none!important')
+ +r('.nav .btn.pri','width:100%!important;background-color:#111!important;background-image:none!important;border-radius:999px!important;box-shadow:none!important;font-size:16px!important;padding:15px!important')
+ +r('.skip','display:none!important')
+ +r('.wel-h','font-size:29px!important;font-weight:900!important;color:#111!important')
+ +r('.qw-step-plan .qh4','font-size:24px!important;font-weight:900!important;color:#111!important')
+ +r('.qw.wel','align-items:flex-start!important;text-align:left!important')+r('.wel-brand,.wel-p','text-align:left!important')+r('.wel-bar','margin-left:0!important')
+ +r('.wel-h','text-align:left!important;font-size:32px!important;line-height:1.25!important')+r('.wel-steps','justify-content:flex-start!important')+r('.wel-skip','text-align:left!important;color:#6B7280!important')
+ +r('.qw-step-plan .qh4','background:transparent!important;background-image:none!important;color:#111!important;font-weight:900!important;padding-top:18px!important')
+ +r('.qw-step-plan>.sub','background:transparent!important;color:#6B7280!important')
+ +H+'{background:#fff!important}';
+}
+if(T==='v4'){ /* ===== 深色尊榮 ===== */
+ var G='#E8C77A';
+ c+=r('.qw','background:linear-gradient(170deg,#0B2A4F 0%,#061C36 55%,#03122A 100%)!important;color:#F2F5F9!important')
+ +HS+'{background:rgba(6,28,54,.92)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid rgba(232,199,122,.18)}'
+ +HS+'>.qwbar,'+HS+'>h2,'+HS+'>.sub,'+HS+'>h2:first-child{background:transparent!important;background-image:none!important}'
+ +HS+'>h2{color:#fff!important;font-size:22px!important}'+HS+'>.sub{color:#B9C7D8!important}'
+ +r('.qwdot','background:transparent!important;border:1.5px solid rgba(232,199,122,.45)!important;color:'+G+'!important;box-shadow:none!important')
+ +r('.qwdot.on','background:'+G+'!important;color:#0B2A4F!important;border-color:'+G+'!important')+r('.qwdot.done','background:rgba(232,199,122,.25)!important;color:'+G+'!important')
+ +r('.qwdl','color:#B9C7D8!important')+r('.qwst.on .qwdl','color:'+G+'!important')+r('.qwln','background:rgba(232,199,122,.25)!important')+r('.qwln.done','background:'+G+'!important')
+ +r('.opt','background:rgba(255,255,255,.06)!important;border:1px solid rgba(232,199,122,.22)!important;box-shadow:none!important;color:#F2F5F9!important')
+ +r('.opt.sel','border-color:'+G+'!important;background:rgba(232,199,122,.08)!important')
+ +r('.on,.opt .on,.oname','color:#fff!important')+r('.od,.opt .od','color:#B9C7D8!important')+r('.op','color:'+G+'!important')+r('.op-o','color:#7F90A6!important')
+ +r('.opt .op-wrap','border-top-color:rgba(232,199,122,.18)!important')+r('.opt li,.opt .dl,.opt .det,.opt ol','color:#D5DEE9!important')
+ +r('.grp-lbl','color:'+G+'!important')+r('.qw-gtabs>*','background:rgba(255,255,255,.06)!important;border:1px solid rgba(232,199,122,.22)!important;color:#fff!important')
+ +r('.qw-add','background-color:'+G+'!important;background-image:linear-gradient(135deg,#F1D79A,#C9A24A)!important;color:#0B2A4F!important')
+ +r('.step-ctl','background:rgba(255,255,255,.1)!important')+r('.step-ctl .q','color:#fff!important')
+ +r('.qwfoot','background:rgba(3,18,42,.96)!important;border-top:1px solid rgba(232,199,122,.2)!important;box-shadow:none!important')
+ +r('.qwbar-sum','background:transparent!important;background-image:none!important;border:1px solid rgba(232,199,122,.3)!important;box-shadow:none!important')
+ +r('.qwbar-sum .qwb-r','color:'+G+'!important')
+ +r('.nav .btn.pri','background-color:#C9A24A!important;background-image:linear-gradient(135deg,#F1D79A,#C9A24A)!important;color:#0B2A4F!important;box-shadow:none!important')
+ +r('.nav .btn.gho','background:transparent!important;border:1px solid rgba(232,199,122,.45)!important;color:'+G+'!important')
+ +r('.skip','color:#B9C7D8!important')+r('.qwmore span','background:#0B2A4F!important;color:'+G+'!important;border:1px solid rgba(232,199,122,.4)')
+ +r('.qw.wel','background:linear-gradient(170deg,#0B2A4F 0%,#03122A 100%)!important')
+ +r('.wel-brand','color:'+G+'!important')+r('.wel-h','color:#fff!important')+r('.wel-p','color:#B9C7D8!important')+r('.ws','color:#D5DEE9!important')+r('.wsn','border-color:'+G+'!important;color:'+G+'!important')+r('.wel-skip','color:#B9C7D8!important')
+ +r('.qw-x','background:rgba(255,255,255,.1)!important;color:#fff!important')
+ +r('.qw-step-plan .qh4','color:#fff!important')+r('.qw-step-plan .sub','color:#B9C7D8!important')
+ +r('.qpnote,.callnote,.qdl','background:rgba(255,255,255,.06)!important;border-color:rgba(232,199,122,.25)!important;color:#E6ECF3!important')
+ +r('.qw-call-t1,.qdl-t1','color:#fff!important')+r('.qw-call-t2,.qdl-t2','color:#B9C7D8!important')
+ +r('.qcp-t','color:#fff!important')+r('.qcp-n','color:#B9C7D8!important')+r('.qcp-i','background:rgba(255,255,255,.08)!important;color:#fff!important;border-color:rgba(232,199,122,.35)!important')
+ +r('.qw.wel','background:linear-gradient(170deg,#0B2A4F 0%,#03122A 100%)!important;background-image:linear-gradient(170deg,#0B2A4F 0%,#03122A 100%)!important')
+ +r('.qw-add,.qw-add *','color:#0B2A4F!important;font-weight:800!important')
+ +r('.qw-step-plan .callnote,.qw-step-plan .qw-call,.qw-step-plan .qdl,.qw-step-plan .qpnote','background:rgba(255,255,255,.07)!important;border:1px solid rgba(232,199,122,.28)!important')
+ +r('.qw-step-plan .qw-call-t1,.qw-step-plan .qdl-t1','color:#fff!important')+r('.qw-step-plan .qw-call-t2,.qw-step-plan .qdl-t2,.qw-step-plan .qpnote','color:#D5DEE9!important')
+ +r('.qw-step-plan .qpnote b','color:#E8C77A!important')+r('.qw-call-ic','background:rgba(232,199,122,.15)!important')
+ +r('.opt .dt,.opt .det,.opt [class*=list],.opt .qw-items','background:rgba(255,255,255,.05)!important;color:#D5DEE9!important')
+ +r('.qw-step-plan .qh4','background:transparent!important;background-image:none!important')+r('.qw-step-plan>.sub','background:transparent!important')
+ +H+'{background:linear-gradient(170deg,#0B2A4F 0%,#061C36 55%,#03122A 100%)!important}'
+ +r('.qw-terms,.qw-terms *','color:#E8C77A!important')+r('.optnote','background:rgba(255,255,255,.08)!important;color:#E6ECF3!important;border-color:rgba(232,199,122,.25)!important');
+}
+if(T==='v5'){ /* ===== 銀行步驟式 ===== */
+ c+=r('.qw','background:#F4F6F9!important')
+ +HS+'>.qwbar{display:block!important;padding:16px 56px 10px 16px!important}'
+ +HS+'>.qwbar>.qwst,'+HS+'>.qwbar>.qwln{display:none!important}'
+ +r('.qwt-seg','display:flex;gap:5px;margin-top:9px')+r('.qwt-seg i','flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.22)')+r('.qwt-seg i.on','background:#E8C77A')
+ +r('.qwt-lbl','color:#fff;font-size:13.5px;font-weight:700;letter-spacing:.04em')+r('.qwt-lbl b','color:#E8C77A;font-size:15px;margin-right:2px')
+ +r('.opt','background:#fff!important;border:1px solid #E1E6EE!important;border-radius:12px!important;box-shadow:0 1px 2px rgba(16,24,40,.05)!important;position:relative')
+ +r('.opt.sel','border-color:#0C447C!important;box-shadow:0 0 0 1px #0C447C!important')
+ +r('.opt::after','content:"";position:absolute;right:14px;top:14px;width:20px;height:20px;border-radius:50%;border:2px solid #C5CDD8;background:#fff')
+ +r('.opt.sel::after','border-color:#0C447C;background:#0C447C radial-gradient(circle,#fff 0 3px,transparent 3.5px)')
+ +r('.grp-lbl','color:#42546A!important;font-weight:700')
+ +r('.qwfoot','background:#fff!important;border-top:1px solid #E1E6EE!important')
+ +r('.qwbar-sum','background:#F4F6F9!important;background-image:none!important;color:#0C2D57!important;box-shadow:none!important;border:1px solid #E1E6EE!important')
+ +r('.qwbar-sum .qwb-l','color:#42546A!important')+r('.qwbar-sum .qwb-r','color:#0C2D57!important')
+ +r('.nav','display:flex!important;align-items:center')+r('.nav .btn.gho','flex:0 0 auto!important;width:auto!important;background:transparent!important;border:none!important;color:#42546A!important;box-shadow:none!important;padding:12px 10px!important')
+ +r('.nav .btn.pri','flex:1!important;background-color:#0C447C!important;background-image:none!important;border-radius:10px!important;box-shadow:none!important')
+ +r('.qw.wel','background:#F4F6F9!important')
+ +r('.opt .on','padding-right:30px!important;display:block')
+ +r('.qw.wel','background:#F4F6F9!important;background-image:none!important')+r('.wel-brand','color:#0C447C!important')
+ +H+'{background:#F4F6F9!important}';
+}
+if(c){var s=document.createElement('style');s.id='qwt-style';s.textContent=M+c+'}';(document.head||document.documentElement).appendChild(s);}
+
+/* 外送版：細進度條＋左上「‹」返回；銀行版：「步驟 3／5 · 機型」＋分段條 */
+function deco(){
+ if(window.innerWidth>=760)return;var o=document.getElementById('qw-ovl');if(!o)return;var q=o.querySelector('.qw');if(!q)return;
+ var st=q.querySelector(':scope>.qw-stick');var bar=st&&st.querySelector(':scope>.qwbar');if(!bar)return;
+ var on=bar.querySelector('.qwdot.on');var n=on?parseInt(on.textContent,10):0;if(!n){var d=bar.querySelectorAll('.qwdot.done').length;n=d+1;}
+ var lb=bar.querySelector('.qwst.on .qwdl');var name=lb?lb.textContent:'';
+ if(T==='v3'){bar.style.setProperty('--qwp',(n/5).toFixed(2));
+  if(!st.querySelector('.qwt-back')){var g=[].slice.call(q.querySelectorAll('.nav .btn.gho'))[0];
+   var bk=document.createElement('button');bk.type='button';bk.className='qwt-back';bk.textContent='‹';bk.onclick=function(){var gg=q.querySelector('.nav .btn.gho');if(gg)gg.click();};st.style.position='sticky';st.insertBefore(bk,st.firstChild);
+   var sp=document.createElement('div');sp.className='qwt-step';sp.textContent='第 '+n+' 步，共 5 步';st.insertBefore(sp,st.firstChild);}
+ }
+ if(T==='v5'&&!bar.querySelector('.qwt-lbl')){
+  var l=document.createElement('div');l.className='qwt-lbl';l.innerHTML='<b>步驟 '+n+'</b>／5　'+name;
+  var sg=document.createElement('div');sg.className='qwt-seg';sg.innerHTML=[1,2,3,4,5].map(function(i){return '<i class="'+(i<=n?'on':'')+'"></i>';}).join('');
+  bar.appendChild(l);bar.appendChild(sg);
+ }
+}
+new MutationObserver(deco).observe(document.documentElement,{childList:true,subtree:true});
+}
+if(document.documentElement)boot();else{var m0=new MutationObserver(function(){if(document.documentElement){m0.disconnect();boot();}});m0.observe(document,{childList:true});}
+})();
+
+/* 2026-10-18 測試頁試用：左側「風格」小按鈕，五種 app 風格切換（選了存在這支手機，重新整理後套用）。只在測試頁手機寬度出現。 */
+(function(){
+function boot(){
+ if(window.innerWidth>=760||document.getElementById('qwt-try'))return;
+ var NAMES={v1:'① 品牌延伸',v2:'② iPhone 原生',v3:'③ 外送 app',v4:'④ 深色尊榮',v5:'⑤ 銀行步驟'};
+ var cur=window.__QWT||'v1';
+ var st=document.createElement('style');
+ st.textContent='#qwt-try{position:fixed;left:0;top:46%;z-index:2147483000;background:#C9A24A;color:#0B2A4F;border:none;border-radius:0 12px 12px 0;padding:10px 7px;font:800 13px/1.25 "PingFang TC",sans-serif;writing-mode:vertical-rl;letter-spacing:.12em;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer}'
+  +'#qwt-sheet{position:fixed;inset:0;z-index:2147483001;background:rgba(4,20,40,.55);display:flex;align-items:flex-end}'
+  +'#qwt-sheet .in{background:#fff;width:100%;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));font-family:"PingFang TC",sans-serif}'
+  +'#qwt-sheet h4{margin:0 0 4px;font-size:17px;color:#0C2D57}#qwt-sheet p{margin:0 0 12px;font-size:13px;color:#5B6B7D}'
+  +'#qwt-sheet button.o{display:block;width:100%;text-align:left;margin:0 0 8px;padding:13px 14px;border-radius:12px;border:1.5px solid #D8E0E8;background:#fff;font:700 16px "PingFang TC",sans-serif;color:#16202B}'
+  +'#qwt-sheet button.o.on{border-color:#0C447C;background:#EAF1F9;color:#0C447C}#qwt-sheet button.x{width:100%;margin-top:4px;padding:12px;border:none;background:none;color:#5B6B7D;font:600 15px "PingFang TC",sans-serif}';
+ document.head.appendChild(st);
+ var b=document.createElement('button');b.id='qwt-try';b.type='button';b.textContent='風格 '+NAMES[cur].slice(0,1);
+ b.onclick=function(){
+  var s=document.createElement('div');s.id='qwt-sheet';
+  s.innerHTML='<div class="in"><h4>試用 app 風格（只在測試頁）</h4><p>點一種會重新整理頁面套用；選的會記在這支手機。</p>'
+   +Object.keys(NAMES).map(function(k){return '<button type="button" class="o'+(k===cur?' on':'')+'" data-k="'+k+'">'+NAMES[k]+(k===cur?'　✓ 目前':'')+'</button>';}).join('')
+   +'<button type="button" class="x">關閉</button></div>';
+  s.onclick=function(e){var t=e.target;if(t===s||t.classList.contains('x')){s.remove();return;}var k=t.getAttribute&&t.getAttribute('data-k');if(k){try{localStorage.setItem('qwt_try',k);}catch(_){}location.reload();}};
+  document.body.appendChild(s);
+ };
+ document.body.appendChild(b);
+}
+if(document.body)boot();else document.addEventListener('DOMContentLoaded',boot);
+})();
+
+}
