@@ -4002,6 +4002,31 @@ css+='@media '+MOB+'{'
  +'#qw-ovl .qw.wel .wel-start{max-width:100%!important}'
  +'#qw-ovl .qw-x{position:fixed!important;top:10px!important;right:10px!important;z-index:9}'
  +'}';
+/* 2026-10-18 老闆選「甲」：手機上選期望到府時間改成精靈的下一頁（整頁、從右滑入、左上 ‹ 返回），不再是彈出視窗 */
+css+='@keyframes qwcdIn{from{transform:translateX(44px);opacity:0}to{transform:none;opacity:1}}'
+ +'@media '+MOB+'{'
+ +'#qw-cdcal#qw-cdcal{padding:0!important;background:#fff!important;align-items:stretch!important;justify-content:stretch!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-sheet{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;animation:qwcdIn .3s ease-out both!important;display:flex!important;flex-direction:column!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-ttl{padding-left:40px!important;line-height:30px}'
+ +'#qw-cdcal#qw-cdcal .qwcd-x{left:10px!important;right:auto!important;font-size:21px!important}'
+ +'}'
+ /* 放大只在夠高的手機（小手機維持原本的緊湊尺寸，避免要捲動） */
+ +'@media '+MOB.replace(')','')+') and (min-height:760px){'
+ +'#qw-cdcal#qw-cdcal .qwcd-hd{padding:14px 16px 12px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-ttl{font-size:18px!important;padding:0 0 0 42px!important;line-height:32px}'
+ +'#qw-cdcal#qw-cdcal .qwcd-x{left:12px!important;right:auto!important;top:12px!important;width:32px!important;height:32px!important;font-size:22px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-bd{padding:14px 16px 6px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-d{width:40px!important;height:40px!important;font-size:15px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-dg{row-gap:6px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-mn button{width:32px!important;height:32px!important;font-size:16px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-mn b{font-size:15.5px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-slot{padding:12px 4px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-slot b{font-size:15px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-nt{font-size:12px!important;margin:12px 0 2px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-ft{padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px))!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-go{padding:14px!important;font-size:16px!important}'
+ +'#qw-cdcal#qw-cdcal .qwcd-sk{padding:11px!important;margin-top:8px!important}'
+ +'}';
 /* 開場畫面（打開頁面到精靈出現之間，蓋住底下的銷售頁） */
 css+='#qw-splash{position:fixed;inset:0;z-index:2147483600;background:linear-gradient(160deg,#0C2D57 0%,#042C53 60%,#021B36 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;transition:opacity .35s}'
  +'#qw-splash .sp-b{font-size:14px;letter-spacing:.18em;color:#E8C77A;font-weight:700}'
@@ -4053,6 +4078,8 @@ function splash(){
   if((o&&o.querySelector('.qw'))||Date.now()-t0>8000){clearInterval(iv);setTimeout(function(){d.classList.add('out');setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},400);},150);}
  },80);
 }
+/* 選日期整頁：× 換成 ‹ 返回 */
+new MutationObserver(function(){if(!mob())return;var x=document.querySelector('#qw-cdcal .qwcd-x');if(x&&x.textContent!=='‹'){x.textContent='‹';x.setAttribute('aria-label','回到選方案');}}).observe(document.documentElement,{childList:true,subtree:true});
 window.__qwAppSplash=splash;
 if(!window.__qwSplashEarly)splash();
 
@@ -4088,7 +4115,15 @@ if(LV>=2){
  });
  mo.observe(document.documentElement,{childList:true,subtree:true});
  /* 手機返回鍵：精靈開著就回上一步，不離開賣場 */
+ /* 選日期整頁也算一頁：打開時多記一筆歷史，按返回就關掉回選方案；用 ‹ 或選完日期關掉時，把那筆歷史退掉（不觸發回上一步） */
+ var cdOpen=false,skipPop=false;
+ new MutationObserver(function(){var c=!!document.getElementById('qw-cdcal');
+  if(c&&!cdOpen){cdOpen=true;try{history.pushState({qwcd:1},'');}catch(e){}}
+  else if(!c&&cdOpen){cdOpen=false;if(history.state&&history.state.qwcd){skipPop=true;try{history.back();}catch(e){skipPop=false;}}}
+ }).observe(document.documentElement,{childList:true,subtree:true});
  window.addEventListener('popstate',function(){
+  if(skipPop){skipPop=false;return;}
+  var cd=document.getElementById('qw-cdcal');if(cd){cdOpen=false;var xb=cd.querySelector('.qwcd-x');if(xb)xb.click();else cd.remove();return;}
   var o=document.getElementById('qw-ovl');if(!o)return;
   var prev=[].slice.call(o.querySelectorAll('.qwfoot button,.nav button,button')).filter(function(b){return /上一步/.test(b.textContent||'');})[0];
   goingBack=true;
@@ -4298,7 +4333,7 @@ function boot(){
  var NAMES={v1:'① 品牌延伸',v2:'② iPhone 原生',v3:'③ 外送 app',v4:'④ 深色尊榮',v5:'⑤ 銀行步驟'};
  var cur=window.__QWT||'v1';
  var st=document.createElement('style');
- st.textContent='#qwt-try{position:fixed;left:0;top:46%;z-index:2147483000;background:#C9A24A;color:#0B2A4F;border:none;border-radius:0 12px 12px 0;padding:10px 7px;font:800 13px/1.25 "PingFang TC",sans-serif;writing-mode:vertical-rl;letter-spacing:.12em;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer}'
+ st.textContent='body:has(#qw-cdcal) #qwt-try,body:has(#qdx-sheet) #qwt-try{display:none}#qwt-try{position:fixed;left:0;top:46%;z-index:2147483000;background:#C9A24A;color:#0B2A4F;border:none;border-radius:0 12px 12px 0;padding:10px 7px;font:800 13px/1.25 "PingFang TC",sans-serif;writing-mode:vertical-rl;letter-spacing:.12em;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer}'
   +'#qwt-sheet{position:fixed;inset:0;z-index:2147483001;background:rgba(4,20,40,.55);display:flex;align-items:flex-end}'
   +'#qwt-sheet .in{background:#fff;width:100%;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));font-family:"PingFang TC",sans-serif}'
   +'#qwt-sheet h4{margin:0 0 4px;font-size:17px;color:#0C2D57}#qwt-sheet p{margin:0 0 12px;font-size:13px;color:#5B6B7D}'
@@ -4379,7 +4414,9 @@ function deco(){
  var o=document.getElementById('qw-ovl');if(!o)return;var q=o.querySelector('.qw');if(!q)return;
  if(/D/.test(V)&&!q.classList.contains('wel')&&!document.querySelector('.qdx-i')){var ib=document.createElement('button');ib.type='button';ib.className='qdx-i';ib.textContent='ⓘ 說明';ib.onclick=function(){openSheet(0);};document.body.appendChild(ib);}
  if(q.classList.contains('wel')){var oi=document.querySelector('.qdx-i');if(oi)oi.remove();}
- if(!q.classList.contains('qw-step-plan')||q.querySelector('.qdx-hl,.qdx-faq,.qdx-mini'))return;
+ if(!q.classList.contains('qw-step-plan')||q.getAttribute('data-qdx'))return;
+ /* 每個畫面只處理一次（2026-10-18：小手機連一行都放不下時，拿掉→又被放回→無限循環把畫面卡死） */
+ q.setAttribute('data-qdx','1');
  var dl=q.querySelector('.qdl');if(!dl)return;
  var h='';if(/B/.test(V))h=hlHTML();if(/C/.test(V))h=faqHTML();
  if(!h)return;
