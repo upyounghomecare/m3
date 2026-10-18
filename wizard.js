@@ -4083,8 +4083,24 @@ function splash(){
   if((o&&o.querySelector('.qw'))||Date.now()-t0>8000){clearInterval(iv);setTimeout(function(){d.classList.add('out');setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},400);},150);}
  },80);
 }
-/* 選日期整頁：× 換成 ‹ 返回 */
-new MutationObserver(function(){if(!mob())return;var x=document.querySelector('#qw-cdcal .qwcd-x');if(x&&x.textContent!=='‹'){x.textContent='‹';x.setAttribute('aria-label','回到選方案');}}).observe(document.documentElement,{childList:true,subtree:true});
+/* 選日期：× 換成 ‹ 返回（手機、電腦都一樣） */
+new MutationObserver(function(){var x=document.querySelector('#qw-cdcal .qwcd-x');if(x&&x.textContent!=='‹'){x.textContent='‹';x.setAttribute('aria-label','回到選方案');}}).observe(document.documentElement,{childList:true,subtree:true});
+/* 2026-10-18 老闆：電腦／攤開 Z Fold（寬螢幕、精靈是卡片）選日期也要像「下一頁」——
+   不再疊一層彈出視窗，改成蓋在精靈卡片的同一個位置、同樣大小、從右滑入 */
+function cdOnCard(){
+ if(mob())return;var cd=document.getElementById('qw-cdcal'),card=document.querySelector('#qw-ovl .qw');if(!cd||!card)return;
+ var sh=cd.querySelector('.qwcd-sheet');if(!sh)return;var r=card.getBoundingClientRect();if(r.width<200)return;
+ cd.style.setProperty('background','transparent','important');cd.style.setProperty('padding','0','important');
+ var h=Math.max(r.height,Math.min(window.innerHeight-24,560));var top=Math.max(12,Math.min(r.top,window.innerHeight-12-h));
+ var st={position:'fixed',left:r.left+'px',top:top+'px',width:r.width+'px',height:h+'px',maxWidth:'none',maxHeight:'none',margin:'0',borderRadius:getComputedStyle(card).borderRadius,display:'flex',flexDirection:'column'};
+ for(var k in st)sh.style.setProperty(k.replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();}),st[k],'important');
+ if(!sh.getAttribute('data-oncard')){sh.setAttribute('data-oncard','1');sh.style.setProperty('animation','qwcdIn .3s ease-out both','important');card.style.visibility='hidden';
+  var mo2=new MutationObserver(function(){if(!document.getElementById('qw-cdcal')){var c2=document.querySelector('#qw-ovl .qw');if(c2)c2.style.visibility='';mo2.disconnect();}});mo2.observe(document.body,{childList:true});}
+}
+new MutationObserver(cdOnCard).observe(document.documentElement,{childList:true});
+new MutationObserver(function(){if(document.getElementById('qw-cdcal'))cdOnCard();}).observe(document.documentElement,{childList:true,subtree:false});
+window.addEventListener('resize',cdOnCard);
+setInterval(function(){var cd=document.getElementById('qw-cdcal');if(cd&&!mob()){var sh=cd.querySelector('.qwcd-sheet');if(sh&&!sh.getAttribute('data-oncard'))cdOnCard();}},150);
 window.__qwAppSplash=splash;
 if(!window.__qwSplashEarly)splash();
 
