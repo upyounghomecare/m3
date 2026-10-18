@@ -1025,7 +1025,7 @@ function showCleanDatePicker(pl,onDone,opt){
     老闆 2026-10-12：「先不指定」維持按鈕樣式(不要文字連結)。 */
  opt=opt||{};
  if(document.getElementById('qw-cdcal'))return;
- var RG={std:[3,14],early:[30,90]},PN={std:'標準方案',early:'早鳥方案'};
+ var RG={std:[3,90],early:[30,90]}/* 2026-10-18 老闆：標準方案可約 D+3～D+90（原 3～14） */,PN={std:'標準方案',early:'早鳥方案'};
  var a=RG[pl][0], z=RG[pl][1];
  var MIN=new Date();MIN.setHours(0,0,0,0);MIN.setDate(MIN.getDate()+a);
  var MAX=new Date();MAX.setHours(23,59,59,999);MAX.setDate(MAX.getDate()+z);
@@ -1046,7 +1046,7 @@ function showCleanDatePicker(pl,onDone,opt){
    +(tag[other]?'<span class="qwcd-tg">'+tag[other]+'</span>':'')+'<span class="qwcd-k2">改選</span><b>'+PN[other].slice(0,2)+'</b><span class="qwcd-o2">'+off[other]+'</span></button>';}
  if(ED){opt.wh=false;}
  var ex=(pl==='early')?'到府安排在<b>專人去電聯繫約時起 30 天後</b>，實際日期由約時人員去電與您確認'
-   :((opt.wh?'🏠 已加碼全戶優惠・':'')+'到府安排在<b>專人去電聯繫起 2 週內</b>，實際日期由約時人員去電與您確認');
+   :((opt.wh?'🏠 已加碼全戶優惠・':'')+'最快 <b>2 週內</b>可到府；想晚一點，<b>90 天內</b>都能選，實際日期由約時人員去電與您確認');
  var ov=document.createElement('div');ov.id='qw-cdcal';
  ov.innerHTML='<div class="qwcd-sheet" role="dialog" aria-label="選擇期望到府服務時間">'
   +'<div class="qwcd-hd"><div class="qwcd-grab"></div><div class="qwcd-ttl">'+(ED?'變更期望到府服務時間':'選擇期望到府服務時間')+'</div><button id="qwcd-x" type="button" class="qwcd-x" aria-label="關閉">×</button>'
@@ -1060,7 +1060,11 @@ function showCleanDatePicker(pl,onDone,opt){
   +'<div id="qwcd-days" class="qwcd-dg"></div>'
   +'<div class="qwcd-row qwcd-slt"><span class="qwcd-k">時段</span></div>'
   +'<div class="qwcd-sl">'+[['上午','☀️'],['下午','🌤️'],['晚上','🌙']].map(function(t){return '<button type="button" data-slot="'+t[0]+'" class="qwcd-slot'+(selSlot===t[0]?' on':'')+'"><span>'+t[1]+'</span><b>'+t[0]+'</b></button>';}).join('')+'</div>'
-  +((pl==='early'&&_earlyCny())?(function(){var c=_earlyCny();return '<div class="qwcd-nt qwcd-cny" style="border:1.5px solid #E9C46A;background:#FFFBEF;color:#6B4E00;border-radius:12px;padding:9px 11px;margin-bottom:8px"><span>🧧</span><div><b>春節前三週（'+_md(c.s)+'～'+_md(c.e)+'）不安排早鳥到府</b>，這幾天已反灰不能選；想在這段期間到府，請改選標準方案。</div></div>';})():'')+'<div class="qwcd-nt"><span>ℹ️</span><div>如期望時間為技師空班，則會直接發送<b>預約確認通知</b>；如期望時間衝突，約時人員會<b>主動去電聯繫約定</b>。</div></div>'
+  +((pl==='early'&&_earlyCny())?(function(){var c=_earlyCny();return '<div class="qwcd-nt qwcd-cny" style="border:1.5px solid #E9C46A;background:#FFFBEF;color:#6B4E00;border-radius:12px;padding:9px 11px;margin-bottom:8px"><span>🧧</span><div><b>春節前三週（'+_md(c.s)+'～'+_md(c.e)+'）不安排早鳥到府</b>，這幾天已反灰不能選；想在這段期間到府，請改選標準方案。</div></div>';})():'')+'<div class="qwcd-nt2" style="margin:10px 0 2px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:1.45;color:#16202B">'
+   /* 2026-10-18 老闆選樣式 2（綠／橘兩色卡），並改文字：空班→去電告知預約成功＋Email／LINE 確認（老闆嫌長、選短版）；衝突→約時人員主動去電改約到府時間（老闆選短版 A，避免折行） */
+   +'<div style="display:flex;gap:9px;align-items:center;background:#EAF7EF;border-radius:11px;padding:7px 10px"><span style="flex:0 0 24px;height:24px;border-radius:50%;background:#1B7F3B;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">✓</span><div><b>技師空班</b> → 去電告知<b style="color:#1B7F3B">預約成功</b>＋<b style="color:#1B7F3B">Email／LINE 確認</b></div></div>'
+   +'<div style="display:flex;gap:9px;align-items:center;background:#FFF4E5;border-radius:11px;padding:7px 10px"><span style="flex:0 0 24px;height:24px;border-radius:50%;background:#C66A00;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">📞</span><div><b>時間衝突</b> → 約時人員<b style="color:#C66A00">主動去電改約到府時間</b></div></div>'
+   +'</div>'
   +'</div>'
   +'<div class="qwcd-ft"><div id="qwcd-sum" class="qwcd-pk"></div>'
   +'<button id="qwcd-ok" type="button" class="qwcd-go" disabled>'+(ED?'確認變更':'確認日期，前往結帳')+'</button>'
@@ -4032,6 +4036,8 @@ css+='@keyframes qwcdIn{from{transform:translateX(44px);opacity:0}to{transform:n
  +'#qw-cdcal#qw-cdcal .qwcd-go{padding:14px!important;font-size:16px!important}'
  +'#qw-cdcal#qw-cdcal .qwcd-sk{padding:11px!important;margin-top:8px!important}'
  +'}';
+/* 矮螢幕（小手機）選日期的兩行提醒收緊 */
+css+='@media (max-height:700px){#qw-cdcal .qwcd-nt2{margin:6px 0 0!important;gap:4px!important;font-size:12px!important}#qw-cdcal .qwcd-nt2>div{padding:5px 9px!important}#qw-cdcal .qwcd-nt2>div>span{flex-basis:20px!important;height:20px!important;font-size:11px!important}}';
 /* 開場畫面（打開頁面到精靈出現之間，蓋住底下的銷售頁） */
 css+='#qw-splash{position:fixed;inset:0;z-index:2147483600;background:linear-gradient(160deg,#0C2D57 0%,#042C53 60%,#021B36 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;transition:opacity .35s}'
  +'#qw-splash .sp-b{font-size:14px;letter-spacing:.18em;color:#E8C77A;font-weight:700}'
@@ -4094,13 +4100,15 @@ function cdOnCard(){
  var h=Math.max(r.height,Math.min(window.innerHeight-24,560));var top=Math.max(12,Math.min(r.top,window.innerHeight-12-h));
  var st={position:'fixed',left:r.left+'px',top:top+'px',width:r.width+'px',height:h+'px',maxWidth:'none',maxHeight:'none',margin:'0',borderRadius:getComputedStyle(card).borderRadius,display:'flex',flexDirection:'column'};
  for(var k in st)sh.style.setProperty(k.replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();}),st[k],'important');
+ /* 內容比卡片高就把這一頁拉高（不超過螢幕），避免要捲動（10-18：兩行提醒變長後筆電要捲 64） */
+ var bd=sh.querySelector('.qwcd-bd');if(bd){var need=bd.scrollHeight-bd.clientHeight;if(need>0){var h2=Math.min(window.innerHeight-24,h+need+2);var t2=Math.max(12,Math.min(top,window.innerHeight-12-h2));sh.style.setProperty('height',h2+'px','important');sh.style.setProperty('top',t2+'px','important');}}
  if(!sh.getAttribute('data-oncard')){sh.setAttribute('data-oncard','1');sh.style.setProperty('animation','qwcdIn .3s ease-out both','important');card.style.visibility='hidden';
   var mo2=new MutationObserver(function(){if(!document.getElementById('qw-cdcal')){var c2=document.querySelector('#qw-ovl .qw');if(c2)c2.style.visibility='';mo2.disconnect();}});mo2.observe(document.body,{childList:true});}
 }
 new MutationObserver(cdOnCard).observe(document.documentElement,{childList:true});
 new MutationObserver(function(){if(document.getElementById('qw-cdcal'))cdOnCard();}).observe(document.documentElement,{childList:true,subtree:false});
 window.addEventListener('resize',cdOnCard);
-setInterval(function(){var cd=document.getElementById('qw-cdcal');if(cd&&!mob()){var sh=cd.querySelector('.qwcd-sheet');if(sh&&!sh.getAttribute('data-oncard'))cdOnCard();}},150);
+setInterval(function(){var cd=document.getElementById('qw-cdcal');if(cd&&!mob())cdOnCard();},150);/* 選了日期後底部多一行「已選…」，持續重算高度 */
 window.__qwAppSplash=splash;
 if(!window.__qwSplashEarly)splash();
 
