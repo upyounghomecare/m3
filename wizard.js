@@ -1034,7 +1034,11 @@ function showCleanDatePicker(pl,onDone,opt){
  var ED=!!opt.edit;/* 結帳確認畫面的「修改」:只改日期時段、不能換方案、底部是確認變更／不變更 */
  if(ED){var _pc=_whenParse(opt.cur);if(_pc){if(_pc.d>=MIN&&_pc.d<=MAX){selDate=_pc.d;view=new Date(_pc.d.getFullYear(),_pc.d.getMonth(),1);}selSlot=_pc.slot;}}
  var off=opt.off||{std:'95折',early:'85折'},tag=opt.tag||{};
- function from(k){var d=new Date();d.setDate(d.getDate()+RG[k][0]);return _dhFmt(d).slice(5);}
+ /* 2026-10-18 老闆抓到：早鳥可選範圍寫 11/17～01/16，但 1/15、1/16 是春節前三週已反灰 → 範圍文字要扣掉不能選的日子 */
+ var _F=new Date(MIN),_L=new Date(MAX);_L.setHours(0,0,0,0);
+ while(_F<=_L&&blocked(_F))_F.setDate(_F.getDate()+1);
+ while(_L>=_F&&blocked(_L))_L.setDate(_L.getDate()-1);
+ function from(k){if(k===pl)return _dhFmt(_F).slice(5);var d=new Date();d.setDate(d.getDate()+RG[k][0]);return _dhFmt(d).slice(5);}
  /* 老闆 2026-10-12：左邊 4/5 清楚寫出客人選的方案，右邊 1/5 是小小的「改選」按鈕 */
  var other=(pl==='std')?'early':'std';
  function segOn(){return '<button type="button" class="qwcd-sg on" aria-pressed="true"><b><i class="qwcd-ck">✓</i>'+PN[pl]+'<span class="qwcd-off">'+off[pl]+'</span></b><small>您選擇的方案・'+from(pl)+' 起可約</small></button>';}
@@ -1050,7 +1054,7 @@ function showCleanDatePicker(pl,onDone,opt){
       :'<div class="qwcd-st">您選擇的方案<span>右邊可以改選</span></div><div class="qwcd-seg">'+segOn()+segSw()+'</div>')
   +'<div id="qwcd-plan" class="qwcd-ex">'+ex+'</div></div>'
   +'<div class="qwcd-bd">'
-  +'<div class="qwcd-row"><span class="qwcd-k">期望到府日期</span><span class="qwcd-rg">'+PN[pl]+'可選 '+_dhFmt(MIN).slice(5)+'～'+_dhFmt(MAX).slice(5)+'</span></div>'
+  +'<div class="qwcd-row"><span class="qwcd-k">期望到府日期</span><span class="qwcd-rg">'+PN[pl]+'可選 '+_dhFmt(_F).slice(5)+'～'+_dhFmt(_L).slice(5)+'</span></div>'
   +'<div class="qwcd-mn"><button data-nav="-1" type="button" aria-label="上個月">‹</button><b id="qwcd-ml"></b><button data-nav="1" type="button" aria-label="下個月">›</button></div>'
   +'<div class="qwcd-wd">'+WD.split('').map(function(n){return '<div>'+n+'</div>';}).join('')+'</div>'
   +'<div id="qwcd-days" class="qwcd-dg"></div>'
