@@ -4128,6 +4128,13 @@ st.textContent+='#qw-ovl .qw.qw-step-plan.qwp-tight2 .qpn,#qw-ovl .qw.qw-step-pl
  +'#qw-ovl .qw.qw-step-plan.qwp-tight3 .qplan img{width:84%!important;margin:0 auto!important;display:block}';/* 第三級：方案卡圖片縮一點（文字都不拿掉） */
 /* 持續檢查（方案卡圖片晚載入會把版面撐高，只檢查一次會漏：10-19 小手機早鳥要捲 30）；客人展開問答時不動 */
 setInterval(function(){var q=document.querySelector('#qw-ovl .qw.qw-step-plan');if(!q||q.querySelector('.qdx-faq details[open]'))return;if(q.scrollHeight-q.clientHeight>1){if(!q.classList.contains('qwp-tight'))q.classList.add('qwp-tight');else if(!q.classList.contains('qwp-tight2'))q.classList.add('qwp-tight2');else if(!q.classList.contains('qwp-tight3'))q.classList.add('qwp-tight3');}},150);
+/* 2026-10-19 老闆：第 5→6 步畫面會彈一下 → 原因是尺寸／位置在畫面出現「之後」才調（手機日期格縮一下、電腦先置中再移到卡片位置又改高度）。
+   改成選日期一加進頁面就（在畫面畫出來之前）一次算好：手機先試大格子、放不下就收；電腦先放到卡片位置、再逐級收緊並重算高度 */
+function cdPrepare(){var cd=document.getElementById('qw-cdcal');if(!cd||cd.getAttribute('data-fit'))return;var bd=cd.querySelector('.qwcd-bd');if(!bd)return;cd.setAttribute('data-fit','1');
+ var ov=function(){return bd.scrollHeight-bd.clientHeight>1;};
+ if(mob()){cd.classList.add('qwcd-roomy');if(ov())cd.classList.remove('qwcd-roomy');}else cdOnCard();
+ var lv=['qwcd-tight','qwcd-tight2'];for(var i=0;i<lv.length&&ov();i++){cd.classList.add(lv[i]);if(!mob())cdOnCard();}}
+(function(){var obs=function(){new MutationObserver(cdPrepare).observe(document.body,{childList:true});};if(document.body)obs();else document.addEventListener('DOMContentLoaded',obs);})();
 function cdFit(){var cd=document.getElementById('qw-cdcal');if(!cd||cd.getAttribute('data-fit'))return;var bd=cd.querySelector('.qwcd-bd');if(!bd)return;cd.setAttribute('data-fit','1');
  var ov=function(){return bd.scrollHeight-bd.clientHeight>1;};
  if(mob()){cd.classList.add('qwcd-roomy');if(ov())cd.classList.remove('qwcd-roomy');}
@@ -4518,7 +4525,9 @@ function fit(q,dl,blk){
  var mi=q.querySelector('.qdx-mini');if(mi&&over(q))mi.remove();
 }
 new MutationObserver(deco).observe(document.documentElement,{childList:true,subtree:true});
-if(hasA){var iv=setInterval(function(){var a=window.__qw;if(!a)return;clearInterval(iv);a.seeDetail=function(){openSheet(0);};},100);}
+if(hasA){var iv=setInterval(function(){var a=window.__qw;if(!a)return;clearInterval(iv);var orig=a.seeDetail;
+ /* 說明內容（詳情頁）偶爾會下載失敗 → 沒有內容就退回原本的做法（跳到銷售頁的說明區），不要按了沒反應（10-19 驗證抓到） */
+ a.seeDetail=function(){if(document.querySelector('.qd-host'))openSheet(0);else if(orig)orig.apply(this,arguments);};},100);}
 }
 if(document.documentElement)boot();else{var m0=new MutationObserver(function(){if(document.documentElement){m0.disconnect();boot();}});m0.observe(document,{childList:true});}
 })();
