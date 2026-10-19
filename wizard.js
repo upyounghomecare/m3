@@ -1047,14 +1047,15 @@ function showCleanDatePicker(pl,onDone,opt){
    +(tag[other]?'<span class="qwcd-tg">'+tag[other]+'</span>':'')+'<span class="qwcd-k2">改選</span><b>'+PN[other].slice(0,2)+'</b><span class="qwcd-o2">'+off[other]+'</span></button>';}
  if(ED){opt.wh=false;}
  /* 2026-10-19 老闆：改成「將以您選擇的日期優先安排，實際到府時間以專人來電約定為準」（早鳥 30 天後、標準 90 天內等資訊已在上方方案鈕與可選範圍） */
-  var ex=(opt.wh&&pl!=='early'?'🏠 已加碼全戶優惠・':'')+'將以您選擇的日期<b>優先安排</b>，實際到府時間以<b>專人來電約定</b>為準';
+  /* 2026-10-19 老闆選說明框（4 標題＋5 編號）放到兩張小卡下面 → 上方這行只留全戶優惠，避免重複 */
+  var ex=(opt.wh&&pl!=='early')?'🏠 已加碼全戶優惠':'';
  var ov=document.createElement('div');ov.id='qw-cdcal';
  ov.innerHTML='<div class="qwcd-sheet" role="dialog" aria-label="選擇期望到府服務時間">'
   +'<div class="qwcd-hd"><div class="qwcd-grab"></div><div class="qwcd-ttl">'+(ED?'變更期望到府服務時間':'選擇期望到府服務時間')+'</div><button id="qwcd-x" type="button" class="qwcd-x" aria-label="關閉">×</button>'
    +(ED?'':stepBar(6))
   +(ED?'<div class="qwcd-st">您選擇的方案<span>只能改日期與時段，方案不變</span></div><div class="qwcd-ed"><i class="qwcd-ck">✓</i>'+PN[pl]+'</div>'
       :'<div class="qwcd-st">您選擇的方案<span>右邊可以改選</span></div><div class="qwcd-seg">'+segOn()+segSw()+'</div>')
-  +'<div id="qwcd-plan" class="qwcd-ex">'+ex+'</div></div>'
+  +(ex?'<div id="qwcd-plan" class="qwcd-ex">'+ex+'</div>':'')+'</div>'
   +'<div class="qwcd-bd">'
   +'<div class="qwcd-row"><span class="qwcd-k">期望到府日期</span><span class="qwcd-rg">'+PN[pl]+'可選 '+_dhFmt(_F).slice(5)+'～'+_dhFmt(_L).slice(5)+'</span></div>'
   +'<div class="qwcd-mn"><button data-nav="-1" type="button" aria-label="上個月">‹</button><b id="qwcd-ml"></b><button data-nav="1" type="button" aria-label="下個月">›</button></div>'
@@ -1067,6 +1068,13 @@ function showCleanDatePicker(pl,onDone,opt){
    +'<div style="display:flex;gap:9px;align-items:center;background:#EAF7EF;border-radius:11px;padding:7px 10px"><span style="flex:0 0 24px;height:24px;border-radius:50%;background:#1B7F3B;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">✓</span><div><b>技師空班</b> → 去電告知<b style="color:#1B7F3B">預約成功</b>＋<b style="color:#1B7F3B">Email／LINE 確認</b></div></div>'
    +'<div style="display:flex;gap:9px;align-items:center;background:#FFF4E5;border-radius:11px;padding:7px 10px"><span style="flex:0 0 24px;height:24px;border-radius:50%;background:#C66A00;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">📞</span><div><b>時間衝突</b> → 約時人員<b style="color:#C66A00">主動去電改約到府時間</b></div></div>'
    +'</div>'
+   /* 2026-10-19 老闆選：4 的標題＋5 的編號 */
+   +'<div class="qwcd-ct" style="margin:10px 0 2px;background:#EEF4FA;border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.55;color:#2A3A4C">'
+   +'<div style="font-weight:800;color:#0C447C;font-size:13px;margin-bottom:6px">📞 下單後會怎麼安排？</div>'
+   +'<div style="display:grid;grid-template-columns:20px 1fr;gap:6px 8px;align-items:start">'
+   +'<span style="width:20px;height:20px;border-radius:50%;background:#0C447C;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">1</span><div>約時人員將在 <b>0.5～1 個工作天內</b>（不含假日）與您聯繫。</div>'
+   +'<span style="width:20px;height:20px;border-radius:50%;background:#0C447C;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">2</span><div>會以您選擇的日期<b>優先安排</b>，實際服務時間待與您聯繫後約定為主。</div>'
+   +'</div></div>'
   +'</div>'
   +'<div class="qwcd-ft"><div id="qwcd-sum" class="qwcd-pk"></div>'
   +(ED?'':'<div class="qwcd-nav"><button id="qwcd-back" type="button" class="qwcd-bk">上一步</button>')+'<button id="qwcd-ok" type="button" class="qwcd-go" disabled>'+(ED?'確認變更':'確認日期，前往結帳')+'</button>'+(ED?'':'</div>')
@@ -4058,7 +4066,7 @@ css+='#qw-ovl#qw-ovl .qw.qw-step-plan>.qwbar{padding-top:14px!important;padding-
  +'#qw-ovl#qw-ovl .qw.qw-step-plan>h2.qh4{padding-top:9px!important;font-size:19px!important;line-height:1.35!important;background:#06335F!important;background-image:none!important}'
  +'#qw-ovl#qw-ovl .qw.qw-step-plan>.sub{background:#06335F!important}';
 /* 第二級（小手機仍放不下）：進度列只留圓點、藏說明行 */
-css+='#qw-cdcal.qwcd-tight2 .qwbar .qwdl{display:none!important}#qw-cdcal.qwcd-tight2 .qwcd-pk{min-height:0!important;margin-bottom:3px!important}#qw-cdcal.qwcd-tight2 .qwcd-st{display:none!important}#qw-cdcal.qwcd-tight2 .qwcd-seg{margin-top:4px!important}';
+css+='#qw-cdcal.qwcd-tight2 .qwbar .qwdl{display:none!important}#qw-cdcal.qwcd-tight2 .qwcd-pk{min-height:0!important;margin-bottom:3px!important}#qw-cdcal.qwcd-tight2 .qwcd-st{display:none!important}#qw-cdcal.qwcd-tight .qwcd-ct{margin-top:6px!important;padding:7px 10px!important;font-size:11.5px!important;line-height:1.45!important}#qw-cdcal.qwcd-tight .qwcd-ct>div:first-child{margin-bottom:3px!important;font-size:12px!important}#qw-cdcal.qwcd-tight2 .qwcd-seg{margin-top:4px!important}';
 /* 2026-10-19：小手機（矮螢幕）每一步的進度列一起縮小一點，保持一致又省空間 */
 css+='@media (max-width:759px) and (max-height:700px){#qw-ovl#qw-ovl .qw .qwbar{padding-top:10px!important;padding-bottom:6px!important}#qw-ovl#qw-ovl .qw .qwdot{width:20px!important;height:20px!important;font-size:10.5px!important}#qw-ovl#qw-ovl .qw .qwbar .qwln{margin-top:9px!important}#qw-ovl#qw-ovl .qw .qwdl{font-size:10.5px!important}#qw-ovl#qw-ovl .qw .qwst{gap:3px!important}#qw-ovl#qw-ovl .qw .qw-stick>h2,#qw-ovl#qw-ovl .qw.qw-step-plan>h2.qh4{padding-top:6px!important;font-size:17.5px!important}}';
 /* 開場畫面（打開頁面到精靈出現之間，蓋住底下的銷售頁） */
@@ -4116,14 +4124,19 @@ function splash(){
 new MutationObserver(function(){var x=document.querySelector('#qw-cdcal .qwcd-x');if(x&&x.textContent!=='‹'){x.textContent='‹';x.setAttribute('aria-label','回到選方案');}}).observe(document.documentElement,{childList:true,subtree:true});
 /* 2026-10-19：方案頁加了跟其他頁一樣高的進度列後，小手機選早鳥（多兩行春節提醒）要捲 14 → 放不下時收緊底下提醒卡的留白 */
 st.textContent+='#qw-ovl .qw.qw-step-plan.qwp-tight .qpnote{padding:4px 9px!important;margin-top:4px!important;line-height:1.4!important}#qw-ovl .qw.qw-step-plan.qwp-tight .callnote,#qw-ovl .qw.qw-step-plan.qwp-tight .qw-call{margin-top:5px!important;padding-top:5px!important;padding-bottom:5px!important}#qw-ovl .qw.qw-step-plan.qwp-tight .qdl{margin-top:5px!important;padding-top:4px!important;padding-bottom:4px!important}#qw-ovl .qw.qw-step-plan.qwp-tight>.sub{padding-bottom:6px!important}#qw-ovl .qw.qw-step-plan.qwp-tight .qplans{margin-top:6px!important}';
-st.textContent+='#qw-ovl .qw.qw-step-plan.qwp-tight2 .qpn,#qw-ovl .qw.qw-step-plan.qwp-tight2 .qp-save{padding-top:3px!important;padding-bottom:3px!important;line-height:1.25!important}#qw-ovl .qw.qw-step-plan.qwp-tight2 .qp-money{padding-top:3px!important;padding-bottom:3px!important}#qw-ovl .qw.qw-step-plan.qwp-tight2 .qcp-n{margin-top:2px!important}#qw-ovl .qw.qw-step-plan.qwp-tight2 .qwfoot{padding-top:6px!important}';
-setInterval(function(){var q=document.querySelector('#qw-ovl .qw.qw-step-plan');if(!q||q.getAttribute('data-pfit'))return;q.setAttribute('data-pfit','1');var ov=function(){return q.scrollHeight-q.clientHeight>1;};if(ov())q.classList.add('qwp-tight');if(ov())q.classList.add('qwp-tight2');},150);
+st.textContent+='#qw-ovl .qw.qw-step-plan.qwp-tight2 .qpn,#qw-ovl .qw.qw-step-plan.qwp-tight2 .qp-save{padding-top:3px!important;padding-bottom:3px!important;line-height:1.25!important}#qw-ovl .qw.qw-step-plan.qwp-tight2 .qp-money{padding-top:3px!important;padding-bottom:3px!important}#qw-ovl .qw.qw-step-plan.qwp-tight2 .qcp-n{margin-top:2px!important}#qw-ovl .qw.qw-step-plan.qwp-tight2 .qwfoot{padding-top:6px!important}'
+ +'#qw-ovl .qw.qw-step-plan.qwp-tight3 .qplan img{width:84%!important;margin:0 auto!important;display:block}';/* 第三級：方案卡圖片縮一點（文字都不拿掉） */
+/* 持續檢查（方案卡圖片晚載入會把版面撐高，只檢查一次會漏：10-19 小手機早鳥要捲 30）；客人展開問答時不動 */
+setInterval(function(){var q=document.querySelector('#qw-ovl .qw.qw-step-plan');if(!q||q.querySelector('.qdx-faq details[open]'))return;if(q.scrollHeight-q.clientHeight>1){if(!q.classList.contains('qwp-tight'))q.classList.add('qwp-tight');else if(!q.classList.contains('qwp-tight2'))q.classList.add('qwp-tight2');else if(!q.classList.contains('qwp-tight3'))q.classList.add('qwp-tight3');}},150);
 function cdFit(){var cd=document.getElementById('qw-cdcal');if(!cd||cd.getAttribute('data-fit'))return;var bd=cd.querySelector('.qwcd-bd');if(!bd)return;cd.setAttribute('data-fit','1');
  var ov=function(){return bd.scrollHeight-bd.clientHeight>1;};
  if(mob()){cd.classList.add('qwcd-roomy');if(ov())cd.classList.remove('qwcd-roomy');}
  if(ov())cd.classList.add('qwcd-tight');
  if(ov())cd.classList.add('qwcd-tight2');}
 setInterval(function(){var cd=document.getElementById('qw-cdcal');if(cd&&!cd.getAttribute('data-fit')){if(!mob())cdOnCard();cdFit();}},120);
+/* 選了日期後底部多一行「已選…」，內容可能又放不下 → 持續檢查，逐級收緊（不再放大回去） */
+setInterval(function(){var cd=document.getElementById('qw-cdcal');if(!cd||!cd.getAttribute('data-fit'))return;var bd=cd.querySelector('.qwcd-bd');if(!bd||bd.scrollHeight-bd.clientHeight<=1)return;
+ if(cd.classList.contains('qwcd-roomy'))cd.classList.remove('qwcd-roomy');else if(!cd.classList.contains('qwcd-tight'))cd.classList.add('qwcd-tight');else if(!cd.classList.contains('qwcd-tight2'))cd.classList.add('qwcd-tight2');},200);
 /* 2026-10-18 老闆：電腦／攤開 Z Fold（寬螢幕、精靈是卡片）選日期也要像「下一頁」——
    不再疊一層彈出視窗，改成蓋在精靈卡片的同一個位置、同樣大小、從右滑入 */
 function cdOnCard(){
