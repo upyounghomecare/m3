@@ -1,4 +1,4 @@
-/* 2026-10-18 測試頁完整版＝正式頁 b423c83a 最新狀態＋測試中功能（期望清洗日期、期望時間確認、結帳對照卡、早鳥春節三週日期反灰）＋app 化試用＋服務說明 A＋C＋開場頁三菱重工空調商標（甲）。⚠️ 只給測試頁 ub3ibm 用，不要換到正式頁。 */
+/* 2026-10-18 測試頁完整版＝正式頁 b423c83a 最新狀態＋測試中功能（期望清洗日期、期望時間確認、結帳對照卡、早鳥春節三週日期反灰）＋app 化試用＋服務說明 A＋C＋開場頁三菱重工空調商標（甲）＋開場頁點按小手（B2）。⚠️ 只給測試頁 ub3ibm 用，不要換到正式頁。 */
 /* ===== M3 引導精靈（正式版）===== */
 (function(){
 try{
@@ -3986,7 +3986,8 @@ var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30
 ;/* ===== 2026-10-18 測試頁專用（只在 ub3ibm 啟動；正式頁、員工頁完全不受影響）=====
    ① app 化試用：五種風格＋左側切換鈕＋返回鍵＋換頁滑動＋按鈕放大＋記住進度
    ② 「先看服務說明」A＋C（老闆 10-18 選）：說明改成底部抽屜（不離開精靈）＋選方案頁放付款前常見問題
-   ③ 開場頁三菱重工空調商標「甲」置中（老闆 10-18 選），開場深藍畫面用白字商標 */
+   ③ 開場頁三菱重工空調商標「甲」置中（老闆 10-18 選），開場深藍畫面用白字商標
+   ④ 開場頁「開始快速選購」點按小手 B2（放大小手＋漣漪＋「點我開始」對話框，老闆 10-19 選） */
 if(/ub3ibm/.test(location.pathname)){
 window.__APP_LV=3;
 try{window.__QWT=localStorage.getItem('qwt_try')||'v1';}catch(e){window.__QWT='v1';}
@@ -4536,6 +4537,50 @@ function deco(){
  else {el.className='qwl-c';el.innerHTML='<img src="'+src+'" alt="三菱重工空調"><span>原廠空調清洗 官方賣場</span>';if(br)br.replaceWith(el);else q.insertBefore(el,q.firstChild);if(bar)bar.style.display='none';}
 }
 new MutationObserver(deco).observe(document.documentElement,{childList:true,subtree:true});deco();
+}
+if(document.documentElement)boot();else{var m0=new MutationObserver(function(){if(document.documentElement){m0.disconnect();boot();}});m0.observe(document,{childList:true});}
+})();
+
+window.__HINTV='B2';
+/* 2026-10-19 預覽：開場頁「開始快速選購」點按提示。window.__HINTV = 'A'(光澤) | 'B'(小手) | 'C'(呼吸) | 'D'(金色標籤) | 'AD'
+   客人手機設定「減少動態效果」時，動畫一律關掉 */
+(function(){
+function boot(){
+if(!/(^|\.)my1shop\.com$/.test(location.hostname))return;
+var V=window.__HINTV||'A';
+var css='#qw-ovl .qw.wel .wel-start{position:relative;overflow:hidden;border-radius:22px}'
++'@keyframes qwhShine{0%{transform:translateX(-130%) skewX(-18deg)}35%,100%{transform:translateX(230%) skewX(-18deg)}}'
++'@keyframes qwhTap{0%,55%,100%{transform:translate(0,0) scale(1)}8%,24%{transform:translate(-3px,-3px) scale(.86)}16%,32%{transform:translate(0,0) scale(1)}}'
++'@keyframes qwhRing{0%,55%,100%{opacity:0;transform:scale(.4)}10%,26%{opacity:.55;transform:scale(1)}20%,36%{opacity:0;transform:scale(1.5)}}'
++'@keyframes qwhBreath{0%,100%{transform:scale(1);box-shadow:0 10px 24px -10px rgba(4,44,83,.35)}50%{transform:scale(1.03);box-shadow:0 16px 34px -10px rgba(4,44,83,.5)}}'
++'#qw-ovl .qw.wel .wel-start.qwh-a::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:qwhShine 3.6s ease-in-out infinite;pointer-events:none}'
++'#qw-ovl .qw.wel .wel-start.qwh-c{animation:qwhBreath 2.6s ease-in-out infinite}'
++'#qw-ovl .qw.wel .qwh-hand{position:absolute;left:47%;bottom:6%;font-size:34px;line-height:1;animation:qwhTap 2.4s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));z-index:2}'
++'#qw-ovl .qw.wel .qwh-ring{position:absolute;left:calc(47% - 2px);bottom:calc(6% + 22px);width:30px;height:30px;border-radius:50%;border:3px solid #fff;animation:qwhRing 2.4s ease-out infinite;pointer-events:none;z-index:1}'
++'#qw-ovl .qw.wel .qwh-pill{display:inline-flex;align-items:center;gap:6px;margin:12px auto 0;background-color:#B8892E;background-image:linear-gradient(135deg,#D4A947,#B8892E)!important;color:#fff;font:800 14.5px "PingFang TC",sans-serif;border:none;border-radius:999px;padding:9px 18px;box-shadow:0 6px 14px -6px rgba(184,137,46,.6);cursor:pointer}'
++'#qw-ovl .qw.wel .qwh-wrap{text-align:center}'
++'@keyframes qwhTap2{0%,50%,100%{transform:translate(0,0) scale(1)}8%,26%{transform:translate(-5px,-6px) scale(.8)}17%,35%{transform:translate(0,0) scale(1)}}'
++'@keyframes qwhRing2{0%,50%,100%{opacity:0;transform:scale(.3)}9%,27%{opacity:.9;transform:scale(1)}19%,37%{opacity:0;transform:scale(1.8)}}'
++'#qw-ovl .qw.wel .qwh-hand.big{font-size:46px;left:45%;bottom:4%;animation:qwhTap2 2.2s ease-in-out infinite;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff) drop-shadow(0 4px 6px rgba(0,0,0,.45))}'
++'#qw-ovl .qw.wel .qwh-ring.big{width:40px;height:40px;border-width:4px;left:calc(45% - 3px);bottom:calc(4% + 30px);box-shadow:0 0 0 2px rgba(255,255,255,.35);animation:qwhRing2 2.2s ease-out infinite}'
++'#qw-ovl .qw.wel .qwh-tip{position:absolute;left:calc(45% + 44px);bottom:calc(4% + 30px);background:#fff;color:#0C2D57;font:800 13px "PingFang TC",sans-serif;padding:5px 10px;border-radius:999px;box-shadow:0 4px 10px rgba(0,0,0,.25);white-space:nowrap;z-index:3;animation:qwhTip 2.2s ease-in-out infinite}'
++'#qw-ovl .qw.wel .qwh-tip::before{content:"";position:absolute;left:-5px;top:50%;margin-top:-5px;border:5px solid transparent;border-right-color:#fff;border-left:0}'
++'@keyframes qwhTip{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}'
++'#qw-ovl .qw.wel .qwh-badge{position:absolute;left:44%;bottom:7%;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.95);box-shadow:0 6px 16px rgba(4,44,83,.45);display:flex;align-items:center;justify-content:center;font-size:30px;z-index:2;animation:qwhTap2 2.2s ease-in-out infinite}'
++'#qw-ovl .qw.wel .qwh-badge-ring{position:absolute;left:44%;bottom:7%;width:54px;height:54px;border-radius:50%;border:3px solid #fff;z-index:1;animation:qwhRing2 2.2s ease-out infinite}'
++'@media (prefers-reduced-motion:reduce){#qw-ovl .qw.wel .wel-start.qwh-a::after,#qw-ovl .qw.wel .wel-start.qwh-c,#qw-ovl .qw.wel .qwh-hand,#qw-ovl .qw.wel .qwh-ring{animation:none!important}#qw-ovl .qw.wel .wel-start.qwh-a::after,#qw-ovl .qw.wel .qwh-ring{display:none}}';
+var st=document.createElement('style');st.textContent=css;(document.head||document.documentElement).appendChild(st);
+function deco(){
+ var q=document.querySelector('#qw-ovl .qw.wel');if(!q||q.getAttribute('data-hint'))return;var b=q.querySelector('.wel-start');if(!b)return;q.setAttribute('data-hint','1');
+ if(/A/.test(V))b.classList.add('qwh-a');
+ if(/C/.test(V))b.classList.add('qwh-c');
+ if(V==='B'||V==='AB'||V==='BD'){var h=document.createElement('span');h.className='qwh-hand';h.textContent='👆';var r=document.createElement('span');r.className='qwh-ring';b.appendChild(r);b.appendChild(h);}
+ if(V==='B1'||V==='B2'){var r1=document.createElement('span');r1.className='qwh-ring big';var h1=document.createElement('span');h1.className='qwh-hand big';h1.textContent='👆';b.appendChild(r1);b.appendChild(h1);
+  if(V==='B2'){var tp=document.createElement('span');tp.className='qwh-tip';tp.textContent='點我開始';b.appendChild(tp);}}
+ if(V==='B3'){var br=document.createElement('span');br.className='qwh-badge-ring';var bg=document.createElement('span');bg.className='qwh-badge';bg.textContent='👆';b.appendChild(br);b.appendChild(bg);}
+ if(/D/.test(V)){var w=document.createElement('div');w.className='qwh-wrap';w.innerHTML='<button type="button" class="qwh-pill">👉 點我開始，6 步完成 ›</button>';w.firstChild.onclick=function(){if(window.__qw)window.__qw.start();};b.parentNode.insertBefore(w,b.nextSibling);}
+}
+new MutationObserver(deco).observe(document.documentElement,{childList:true,subtree:true});
 }
 if(document.documentElement)boot();else{var m0=new MutationObserver(function(){if(document.documentElement){m0.disconnect();boot();}});m0.observe(document,{childList:true});}
 })();
