@@ -1,4 +1,4 @@
-/* 2026-10-18 測試頁完整版＝正式頁 b423c83a 最新狀態＋測試中功能（期望清洗日期、期望時間確認、結帳對照卡、早鳥春節三週日期反灰）＋app 化試用＋服務說明 A＋C＋開場頁三菱重工空調商標（甲）＋開場頁點按小手（B2）。⚠️ 只給測試頁 ub3ibm 用，不要換到正式頁。 */
+/* 2026-10-18 測試頁完整版＝正式頁 b423c83a 最新狀態＋測試中功能（期望清洗日期、期望時間確認、結帳對照卡、早鳥春節三週日期反灰）＋app 化（風格①）＋服務說明 A＋C＋開場頁三菱重工空調商標（甲）＋開場頁點按小手（B2）。⚠️ 只給測試頁 ub3ibm 用，不要換到正式頁。 */
 /* ===== M3 引導精靈（正式版）===== */
 (function(){
 try{
@@ -3998,13 +3998,13 @@ var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30
 })();
 
 ;/* ===== 2026-10-18 測試頁專用（只在 ub3ibm 啟動；正式頁、員工頁完全不受影響）=====
-   ① app 化試用：五種風格＋左側切換鈕＋返回鍵＋換頁滑動＋按鈕放大＋記住進度
+   ① app 化：風格固定「① 品牌延伸」（老闆 10-20 選，不讓客人自己選；拿掉「試用其他風格」鈕）＋返回鍵＋換頁滑動＋按鈕放大＋記住進度
    ② 「先看服務說明」A＋C（老闆 10-18 選）：說明改成底部抽屜（不離開精靈）＋選方案頁放付款前常見問題
    ③ 開場頁三菱重工空調商標「甲」置中（老闆 10-18 選），開場深藍畫面用白字商標
    ④ 開場頁「開始快速選購」點按小手 B2（放大小手＋漣漪＋「點我開始」對話框，老闆 10-19 選） */
 if(/ub3ibm/.test(location.pathname)){
 window.__APP_LV=3;
-try{window.__QWT=localStorage.getItem('qwt_try')||'v1';}catch(e){window.__QWT='v1';}
+window.__QWT='v1';/* 2026-10-20 老闆：風格固定 ①，不給客人切換 */
 /* 2026-10-18 預覽用：讓引導精靈在手機上像 app（只在預覽時接在 wizard.js 後面，不上正式頁）
    window.__APP_LV = 1 / 2 / 3：做到第幾批（後面的批次包含前面的）
    第一批：手機滿版、進度列固定在上方、開場不閃（品牌開場畫面）
@@ -4408,36 +4408,6 @@ function deco(){
 new MutationObserver(deco).observe(document.documentElement,{childList:true,subtree:true});
 }
 if(document.documentElement)boot();else{var m0=new MutationObserver(function(){if(document.documentElement){m0.disconnect();boot();}});m0.observe(document,{childList:true});}
-})();
-
-/* 2026-10-18 測試頁試用：左側「風格」小按鈕，五種 app 風格切換（選了存在這支手機，重新整理後套用）。只在測試頁手機寬度出現。 */
-(function(){
-function boot(){
- if(window.innerWidth>=760||document.getElementById('qwt-try'))return;
- var NAMES={v1:'① 品牌延伸',v2:'② iPhone 原生',v3:'③ 外送 app',v4:'④ 深色尊榮',v5:'⑤ 銀行步驟'};
- var cur=window.__QWT||'v1';
- var st=document.createElement('style');
- st.textContent='body:has(#qw-cdcal) #qwt-try,body:has(#qdx-sheet) #qwt-try{display:none}#qwt-try{display:block;margin:14px auto 0;background:#FFF8E8;color:#8A6A1F;border:1.5px dashed #D4A947;border-radius:999px;padding:7px 14px;font:700 13px "PingFang TC",sans-serif;cursor:pointer}'
-  +'#qwt-sheet{position:fixed;inset:0;z-index:2147483001;background:rgba(4,20,40,.55);display:flex;align-items:flex-end}'
-  +'#qwt-sheet .in{background:#fff;width:100%;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));font-family:"PingFang TC",sans-serif}'
-  +'#qwt-sheet h4{margin:0 0 4px;font-size:17px;color:#0C2D57}#qwt-sheet p{margin:0 0 12px;font-size:13px;color:#5B6B7D}'
-  +'#qwt-sheet button.o{display:block;width:100%;text-align:left;margin:0 0 8px;padding:13px 14px;border-radius:12px;border:1.5px solid #D8E0E8;background:#fff;font:700 16px "PingFang TC",sans-serif;color:#16202B}'
-  +'#qwt-sheet button.o.on{border-color:#0C447C;background:#EAF1F9;color:#0C447C}#qwt-sheet button.x{width:100%;margin-top:4px;padding:12px;border:none;background:none;color:#5B6B7D;font:600 15px "PingFang TC",sans-serif}';
- document.head.appendChild(st);
- /* 2026-10-19 老闆：左側浮動「風格」鈕壓到開場頁的「① 地區」→ 改成開場頁最下面的一顆按鈕（在內容裡，不浮動；切換本來就會重新整理回開場頁） */
- function open(){
-  var s=document.createElement('div');s.id='qwt-sheet';
-  s.innerHTML='<div class="in"><h4>試用 app 風格（只在測試頁）</h4><p>點一種會重新整理頁面套用；選的會記在這支手機。</p>'
-   +Object.keys(NAMES).map(function(k){return '<button type="button" class="o'+(k===cur?' on':'')+'" data-k="'+k+'">'+NAMES[k]+(k===cur?'　✓ 目前':'')+'</button>';}).join('')
-   +'<button type="button" class="x">關閉</button></div>';
-  s.onclick=function(e){var t=e.target;if(t===s||t.classList.contains('x')){s.remove();return;}var k=t.getAttribute&&t.getAttribute('data-k');if(k){try{localStorage.setItem('qwt_try',k);}catch(_){}location.reload();}};
-  document.body.appendChild(s);
- }
- function put(){var q=document.querySelector('#qw-ovl .qw.wel');if(!q||q.querySelector('#qwt-try'))return;
-  var b=document.createElement('button');b.id='qwt-try';b.type='button';b.textContent='🎨 試用其他風格（目前 '+NAMES[cur].slice(0,1)+'）';b.onclick=open;q.appendChild(b);}
- new MutationObserver(put).observe(document.body,{childList:true,subtree:true});put();
-}
-if(document.body)boot();else document.addEventListener('DOMContentLoaded',boot);
 })();
 
 window.__QDV='AC';
