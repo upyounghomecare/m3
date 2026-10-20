@@ -3997,6 +3997,30 @@ var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30
 }catch(e){}
 })();
 
+/* ===== 2026-10-20 老闆抓到兩個「客戶看不到下面」的問題 =====
+   ① 選期望到府時間：內容比畫面高時（矮螢幕、早鳥多兩行春節提醒），只剩一條細捲軸，客戶不知道下面還有「下單後會怎麼安排」
+      → 底部加「▼ 往下滑看更多」，樣式、行為跟機型頁的 qwmore 一樣：捲到底自動淡出，點一下捲到底
+   ② 結帳表單第 3 步（1SHOP 自己的表單）：電腦上表單比螢幕高，「總計＋送出」那條固定在「表單底」而不是「螢幕底」，跑到畫面外
+      → 只在電腦（寬 760 以上）把表單高度限制在螢幕內、內容在表單裡捲，送出那條就一直看得到（手機本來就正常）；備註欄 5 行縮成約 3 行 */
+(function(){try{
+ var st=document.createElement('style');
+ st.textContent='#qw-cdcal .qwcd-more{position:absolute;left:0;right:0;top:-17px;text-align:center;pointer-events:none;transition:opacity .18s;z-index:3}'
+  +'#qw-cdcal .qwcd-more span{display:inline-block;background:#fff;color:#0C447C;font-size:12px;font-weight:800;border-radius:999px;padding:6px 14px;box-shadow:0 2px 12px rgba(4,44,83,.26);pointer-events:auto;cursor:pointer;border:1px solid #dfe8f2}'
+  +'#qw-cdcal .qwcd-more.off{opacity:0}#qw-cdcal .qwcd-more.off span{pointer-events:none}'
+  +'@media (min-width:760px){.modal.show .modal-dialog:has(.checkout-step-wrap) .modal-content{max-height:calc(100vh - 20px)}'
+  +'.modal.show .modal-dialog:has(.checkout-step-wrap){margin-top:10px!important;margin-bottom:10px!important}'
+  +'.modal.show .modal-dialog:has(.checkout-step-wrap) .content-scroll{min-height:0;flex:1 1 auto}}'
+  +'.checkout-step-wrap~.form .step.step3 textarea[name=Note]{height:68px!important;min-height:0!important}';
+ (document.head||document.documentElement).appendChild(st);
+ function hook(){var cd=document.getElementById('qw-cdcal');if(!cd)return;var bd=cd.querySelector('.qwcd-bd'),ft=cd.querySelector('.qwcd-ft');if(!bd||!ft||ft.querySelector('.qwcd-more'))return;
+  if(getComputedStyle(ft).position==='static')ft.style.position='relative';
+  var m=document.createElement('div');m.className='qwcd-more off';m.innerHTML='<span>▼ 往下滑看更多</span>';ft.insertBefore(m,ft.firstChild);
+  function upd(){var left=bd.scrollHeight-bd.clientHeight-bd.scrollTop;m.className='qwcd-more'+(left>8?'':' off');}
+  bd.addEventListener('scroll',upd);m.firstChild.onclick=function(){try{bd.scrollTo({top:bd.scrollHeight,behavior:'smooth'});}catch(e){bd.scrollTop=bd.scrollHeight;}};
+  upd();var n=0,iv=setInterval(function(){if(!document.body.contains(bd)){clearInterval(iv);return;}upd();if(++n>40)clearInterval(iv);},250);}
+ new MutationObserver(hook).observe(document.documentElement,{childList:true,subtree:true});
+}catch(e){}})();
+
 ;/* ===== 2026-10-18 測試頁專用（只在 ub3ibm 啟動；正式頁、員工頁完全不受影響）=====
    ① app 化：風格固定「① 品牌延伸」（老闆 10-20 選，不讓客人自己選；拿掉「試用其他風格」鈕）＋返回鍵＋換頁滑動＋按鈕放大＋記住進度
    ② 「先看服務說明」A＋C（老闆 10-18 選）：說明改成底部抽屜（不離開精靈）＋選方案頁放付款前常見問題
