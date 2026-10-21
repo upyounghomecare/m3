@@ -4037,7 +4037,8 @@ var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30
    ① app 化：風格固定「① 品牌延伸」（老闆 10-20 選，不讓客人自己選；拿掉「試用其他風格」鈕）＋返回鍵＋換頁滑動＋按鈕放大＋記住進度
    ② 「先看服務說明」A＋C（老闆 10-18 選）：說明改成底部抽屜（不離開精靈）＋選方案頁放付款前常見問題
    ③ 開場頁三菱重工空調商標「甲」置中（老闆 10-18 選），開場深藍畫面用白字商標
-   ④ 開場頁「開始快速選購」點按小手 B2（放大小手＋漣漪＋「點我開始」對話框，老闆 10-19 選） */
+   ④ 開場頁「開始快速選購」點按小手 B2（放大小手＋漣漪＋「點我開始」對話框，老闆 10-19 選）
+   ⑤ 購物車 G「品牌金藍尊榮」（老闆 10-21 選）：金色外觀＋淡金摘要框，應付金額讀 1SHOP 小計 */
 if(/ub3ibm/.test(location.pathname)){
 window.__APP_LV=3;
 window.__QWT='v1';/* 2026-10-20 老闆：風格固定 ①，不給客人切換 */
@@ -4630,6 +4631,71 @@ function deco(){
 new MutationObserver(deco).observe(document.documentElement,{childList:true,subtree:true});
 }
 if(document.documentElement)boot();else{var m0=new MutationObserver(function(){if(document.documentElement){m0.disconnect();boot();}});m0.observe(document,{childList:true});}
+})();
+
+/* ===== 2026-10-21 購物車 G「品牌金藍尊榮」（老闆 10-21 選，先上測試頁）=====
+   ・只改外觀：（老闆 10-21：不要金色頂邊/側邊條，改細淡金框）金色加減鈕、「使用優惠券」改成按鈕、金色結帳鈕
+   ・方案折扣列（.cart-item.coupon）用 CSS 藏起來，改在下方淡金摘要框裡顯示「✦ 早鳥85折 －NT$600」
+     ⚠️ 只是藏起來（display:none），元素還在；精靈換券、讀方案名稱、刪券都照舊運作
+   ・應付金額一律讀 1SHOP 自己的「小計」(.row.total .amount)，不自己算 → 畫面數字＝實際結帳金額
+     原價－折扣 ≠ 小計 時，多一列「其他調整」把差額列出來，不會對不起來
+   ・摘要框放在 .cart-total「外面」，不改 .cart-total 的文字（別的程式用正規式讀「小計」） */
+(function(){
+var CSS=''
++'#cart-section .cart-item.coupon,#cart-section .cart-total .row.total{display:none!important}'
++'#cart-section{border:1px solid #EFE4C8!important;border-radius:18px!important;box-shadow:0 10px 26px -14px rgba(184,137,46,.4)!important;overflow:hidden}'
++'#cart-section .cart-item:not(.coupon){border-bottom:1px solid #F2EAD8!important}'
++'#cart-section .cart-item h4{font-size:16px!important;font-weight:800!important;color:#0C2D57!important}'
++'#cart-section .cart-item:not(.coupon) .price{font-weight:900!important;color:#0C2D57!important}'
++'#cart-section .cart-item .item-img img,#cart-section .cart-item .item-img a{border-radius:12px!important;overflow:hidden}'
++'#cart-section .cart-item .item-img{border:none!important}'
++'#cart-section .cart-item .item-tool .btn-circle{background:transparent!important;border:1.5px solid #EADBB5!important;color:#B8892E!important;width:32px!important;height:32px!important}'
++'#cart-section .cart-item .detail button{border-radius:999px!important;width:36px!important;height:36px!important;border:1.5px solid #E5C468!important;background:#fff!important;color:#8A5A00!important;font-weight:900!important}'
++'#cart-section .cart-item .detail input{border:none!important;background:transparent!important;font-weight:900!important}'
++'#cart-section .cart-apply-text .a-link{border:1.5px solid #C9D6E4!important;border-radius:999px!important;padding:6px 14px!important;color:#0C447C!important;font-size:13px!important;font-weight:700!important;background:#fff!important}'
++'#qs-cartg{position:relative;background:#FFFAEE;border:1px solid #F0DFB3;border-radius:16px;padding:16px 16px 14px;margin:6px 12px 12px;overflow:hidden;font-variant-numeric:tabular-nums}'
++'#qs-cartg.has-rib{padding-top:40px}'
++'#qs-cartg .rib{position:absolute;top:0;right:16px;background:linear-gradient(135deg,#D4A947,#B8892E);color:#fff;font-weight:900;font-size:13.5px;padding:6px 14px 8px;border-radius:0 0 12px 12px;box-shadow:0 6px 12px -6px rgba(184,137,46,.8)}'
++'#qs-cartg .r{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;color:#5B4A20;padding:3px 0}'
++'#qs-cartg .r.g{color:#8A5A00;font-weight:800}'
++'#qs-cartg .t{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;padding-top:10px;border-top:1px solid #F0DFB3}'
++'#qs-cartg .t span{font-weight:900;color:#0C2D57;font-size:15px}#qs-cartg .t b{font-size:26px;font-weight:900;color:#0C2D57}'
++'body .cart-checkout .btn.btn-primary{border-radius:999px!important;min-height:54px!important;font-size:17px!important;font-weight:900!important;color:#fff!important;background:linear-gradient(135deg,#D4A947,#B8892E)!important;border:none!important;box-shadow:0 10px 20px -8px rgba(184,137,46,.75)!important}'
++'body .cart-checkout .btn.btn-primary:disabled,body .cart-checkout .btn.btn-primary.disabled{opacity:.55!important}';
+var st=document.createElement('style');st.id='qs-cartg-st';st.textContent=CSS;(document.head||document.documentElement).appendChild(st);
+function amt(e){var n=Number(e&&e.getAttribute('data-amount'));return isFinite(n)?n:0;}
+function f(n){return 'NT$ '+Math.round(n).toLocaleString('en-US');}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var _sig='';
+function draw(){try{
+  var sec=document.getElementById('cart-section');if(!sec)return;
+  var tot=sec.querySelector('.cart-total');var totAmt=sec.querySelector('.cart-total .row.total .amount');
+  var items=sec.querySelectorAll('.cart-item:not(.coupon) .price .amount');
+  var box=document.getElementById('qs-cartg');
+  if(!tot||!totAmt||!items.length){if(box)box.parentNode.removeChild(box);_sig='';return;}
+  var orig=0;for(var i=0;i<items.length;i++)orig+=amt(items[i]);
+  var cps=[],disc=0,cs=sec.querySelectorAll('.cart-item.coupon');
+  for(var j=0;j<cs.length;j++){var a=Math.abs(amt(cs[j].querySelector('.price .amount')));var h=cs[j].querySelector('h4');
+    cps.push({n:((h&&h.textContent)||'折扣').replace(/[（(][^）)]*[）)]/g,'').trim(),a:a});disc+=a;}
+  var pay=amt(totAmt);var adj=pay-(orig-disc);
+  var sig=[orig,pay,JSON.stringify(cps)].join('|');
+  if(box&&sig===_sig&&box.previousElementSibling===tot)return;
+  _sig=sig;
+  var save=orig-pay;
+  var h2='';
+  if(save>0)h2+='<div class="rib">省 '+f(save)+'</div>';
+  h2+='<div class="r"><span>清洗項目原價</span><span>'+f(orig)+'</span></div>';
+  for(var k=0;k<cps.length;k++)h2+='<div class="r g"><span>✦ '+esc(cps[k].n)+'</span><span>－'+f(cps[k].a)+'</span></div>';
+  if(Math.abs(adj)>=1)h2+='<div class="r"><span>其他調整</span><span>'+(adj<0?'－':'＋')+f(Math.abs(adj))+'</span></div>';
+  h2+='<div class="t"><span>應付金額</span><b>'+f(pay)+'</b></div>';
+  if(!box){box=document.createElement('div');box.id='qs-cartg';}
+  box.className=save>0?'has-rib':'';box.innerHTML=h2;
+  if(box.previousElementSibling!==tot)tot.parentNode.insertBefore(box,tot.nextSibling);
+}catch(e){}}
+var _t=null;function soon(){clearTimeout(_t);_t=setTimeout(draw,120);}
+function hook(){var sec=document.getElementById('cart-section');if(!sec){setTimeout(hook,500);return;}
+  draw();new MutationObserver(soon).observe(sec,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-amount']});}
+hook();
 })();
 
 }
