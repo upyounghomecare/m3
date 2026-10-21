@@ -795,8 +795,9 @@ function render(){
     var resImg=areaCls==='normal'?'<img class="area-res" src="'+IMG_AREA_OK+'" alt="可正常服務">':(areaCls==='remote'?'<img class="area-res" src="'+IMG_AREA_RM+'" alt="偏遠加價">':(areaCls==='nosvc'?'<img class="area-res" src="'+IMG_AREA_NO+'" alt="尚未服務">':''));
     var canNext=(areaCls==='normal'||areaCls==='remote');
     w='<div class="qw">'+stepBar()+'<h2>您的服務地區在哪裡？</h2><p class="sub">先確認是否在服務範圍</p>'
-     +'<div class="flbl">縣市</div><select class="qsel" onchange="__qw.pickCity(this.value)">'+cityOpts+'</select>'
-     +'<div class="flbl">鄉鎮市區</div><select class="qsel" onchange="__qw.pickDist(this.value)">'+distOpts+'</select>'
+     /* 2026-10-22 原生 <select> 在手機上跳出的是瀏覽器自己畫的清單（Z Fold 7 實測：超出精靈、分隔線半截、灰底，網頁改不了）→ 改精靈自製清單 */
+     +'<div class="flbl">縣市</div>'+_qbHtml(0,'請選擇縣市',areaCity,Object.keys(TW),'pickCity',true)
+     +'<div class="flbl">鄉鎮市區</div>'+_qbHtml(1,areaCity?'請選擇鄉鎮市區':'請先選擇縣市',areaDist,(areaCity&&TW[areaCity])?TW[areaCity]:[],'pickDist',false)
      +resImg
      +(areaCls==='nosvc'?'<a class="cslink" href="'+LINE_CS+'" target="_blank" rel="noopener">聯繫客服 →</a>'
         +'<div class="qsvc"><div class="qsvc-t">🔑 已經和客服確認可以服務？<br>請輸入客服提供的通行碼</div>'
@@ -805,7 +806,7 @@ function render(){
         +'<div id="qsvc-msg" class="qsvc-m"></div></div>':'')
      /* 客服核准後 classify() 已經回 'remote',所以這裡看到的是偏遠畫面。加一條說明讓客戶知道為什麼 */
      +((areaCls==='remote'&&_svcUnlocked(areaCity+areaDist))?'<div class="qsvc-ok">✅ 客服已確認此地址可安排服務<br>因路程較遠，每張訂單加收偏遠地區加價 <b>$600</b>（僅收一次）</div>':'')
-     +'<div class="nav"><button class="btn gho" onclick="__qw.go(0)">上一步</button>'+(canNext?'<button class="btn pri" onclick="__qw.go(&quot;env&quot;)">下一步</button>':(areaCls==='nosvc'?'<button class="btn pri" disabled>下一步</button>':'<button class="btn pri qw-needbtn" onclick="__qw.needPick(&quot;.qsel&quot;)">'+'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">還沒選地區</span><span style="display:block;line-height:1.35">👆 請先選縣市和鄉鎮市區</span>'+'</button>'))+'</div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+     +'<div class="nav"><button class="btn gho" onclick="__qw.go(0)">上一步</button>'+(canNext?'<button class="btn pri" onclick="__qw.go(&quot;env&quot;)">下一步</button>':(areaCls==='nosvc'?'<button class="btn pri" disabled>下一步</button>':'<button class="btn pri qw-needbtn" onclick="__qw.needPick(&quot;.qb-btn&quot;)">'+'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">還沒選地區</span><span style="display:block;line-height:1.35">👆 請先選縣市和鄉鎮市區</span>'+'</button>'))+'</div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step==='env'){
     w='<div class="qw">'+stepBar()+'<h2>冷氣的使用環境為？</h2><p class="sub">先確認環境，幫你算好正確價格</p>'
     +'<div class="env-g"><button type="button" class="env-o '+(env==='home'?'sel':'')+'" onclick="__qw.pickEnv(&quot;home&quot;)"><img src="'+IMG_HOME+'" alt="一般家用"></button>'
@@ -1034,6 +1035,25 @@ function _cnyBox(c){if(!c)return '';
 var _userCode='';
 function _esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 var _qwResume=null;
+/* 2026-10-22 地區選單乙：精靈自己畫的下拉清單。_qbOpen：-1 都收起、0 縣市清單開著、1 鄉鎮清單開著 */
+var _qbOpen=-1;
+var _QB_RG={'基隆市':'北部','台北市':'北部','臺北市':'北部','新北市':'北部','桃園市':'北部','新竹市':'北部','新竹縣':'北部','宜蘭縣':'北部',
+ '苗栗縣':'中部','台中市':'中部','臺中市':'中部','彰化縣':'中部','南投縣':'中部','雲林縣':'中部',
+ '嘉義市':'南部','嘉義縣':'南部','台南市':'南部','臺南市':'南部','高雄市':'南部','屏東縣':'南部',
+ '花蓮縣':'東部','台東縣':'東部','臺東縣':'東部','澎湖縣':'離島','金門縣':'離島','連江縣':'離島'};
+function _qbShow(){setTimeout(function(){try{
+  var c=ovl&&ovl.querySelector('.qw'),l=c&&c.querySelector('.qb-list');if(!l)return;
+  var f=c.querySelector('.qwfoot'),lim=f?f.getBoundingClientRect().top:c.getBoundingClientRect().bottom;
+  var st=c.querySelector('.qw-stick'),top=st?st.getBoundingClientRect().bottom:c.getBoundingClientRect().top;
+  var lr=l.getBoundingClientRect(),br=l.parentNode.querySelector('.qb-btn').getBoundingClientRect();
+  var d=lr.bottom-lim+8;if(d>0){d=Math.min(d,br.top-top-6);if(d>0)c.scrollTop+=d;}
+}catch(e){}},30);}
+function _qbHtml(i,ph,val,list,fn,rg){
+  var open=(_qbOpen===i);
+  var h='<div class="qb-w'+(open?' open':'')+'" data-i="'+i+'"><button type="button" class="qb-btn'+(val?' has':'')+'" data-empty="'+(val?'':'1')+'" aria-expanded="'+(open?'true':'false')+'" onclick="__qw.qbToggle('+i+')"><span>'+_esc(val||ph)+'</span><i>⌄</i></button>';
+  if(open){h+='<div class="qb-list" role="listbox">'+list.map(function(v){var on=(v===val),r=rg?(_QB_RG[v]||''):'';
+    return '<button type="button" role="option" class="qb-it'+(on?' sel':'')+'" onclick="__qw.'+fn+'(&quot;'+_esc(v)+'&quot;)"><span>'+_esc(v)+'</span>'+(r&&!on?'<em>'+r+'</em>':'')+'</button>';}).join('')+'</div>';}
+  return h+'</div>';}
 function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
 function close(){if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
 function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
@@ -1238,9 +1258,9 @@ function showTerms(k,mode,onConfirm){
 }
 
 var api={
-  start:function(){step='area';render();},
+  start:function(){step='area';_qbOpen=-1;render();},
   /* 沒選就按「下一步」:把還沒選的那一塊捲進畫面並搖一下(地區頁搖第一個還沒選的選單) */
-  needPick:function(sel){try{var c=ovl.querySelector('.qw'),els=[].slice.call(c.querySelectorAll(sel)),el=els.filter(function(e){return e.tagName==='SELECT'&&!e.value;})[0]||els[0];if(!el)return;
+  needPick:function(sel){try{var c=ovl.querySelector('.qw'),els=[].slice.call(c.querySelectorAll(sel)),el=els.filter(function(e){return (e.tagName==='SELECT'&&!e.value)||e.getAttribute('data-empty')==='1';})[0]||els[0];if(!el)return;
     var y=Math.max(0,el.offsetTop-90);if(c.scrollTop>y)c.scrollTop=y;el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');if(el.tagName==='SELECT')el.focus();}catch(e){}},
   jumpGrp:function(i){try{var c=ovl.querySelector('.qw'),l=c.querySelector('.grp-lbl[data-g="'+i+'"]'),t=c.querySelector('.qw-gtabs');if(!l)return;
     var st=c.querySelector('.qw-stick');var y=Math.max(0,l.offsetTop-(st?st.offsetHeight:(t?t.offsetHeight:0))-6);
@@ -1251,8 +1271,9 @@ var api={
     var r=_fanRes;el.className='qw-fan-res '+(r.t==='hit'?(r.x===0?'ok':'add'):'no');el.innerHTML=_fanResHtml();},
   fanAdd:function(){var r=_fanRes;if(!r||r.t!=='hit'||!r.x||r.added)return;qty.fan=(qty.fan||0)+r.x;r.added=true;render();},
   skip:function(){close();},
-  pickCity:function(v){areaCity=v||null;areaDist=null;areaCls=null;qty.rm=0;render();},
-  pickDist:function(v){areaDist=v||null;areaCls=classify(areaCity,areaDist);qty.rm=(areaCls==='remote')?1:0;render();},
+  pickCity:function(v){areaCity=v||null;areaDist=null;areaCls=null;qty.rm=0;_qbOpen=areaCity?1:-1;/* 選好縣市直接打開鄉鎮清單，少點一次 */render();_qbShow();},
+  pickDist:function(v){areaDist=v||null;areaCls=classify(areaCity,areaDist);qty.rm=(areaCls==='remote')?1:0;_qbOpen=-1;render();},
+  qbToggle:function(i){if(i===1&&!areaCity){api.needPick('.qb-btn');return;}_qbOpen=(_qbOpen===i)?-1:i;render();_qbShow();},
   pickEnv:function(k){env=k;if(k!=='biz')qty.bz=0;render();},
   pick:function(k){if(k==='dh'||k==='air'){showTerms(k,'gate');return;}if(k==='hi'&&(sumKeys(INK)+sumKeys(['o1','om']))<1)return;var was=qty[k]||0;if(!qty[k])qty[k]=1;render();},
   terms:function(k){showTerms(k,'read');},
@@ -4171,6 +4192,20 @@ var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30
  +'#qw-ovl#qw-ovl .qw .qwmore span{background:linear-gradient(135deg,#D4A947,#B8892E)!important;color:#fff!important;border:none!important;font-size:14.5px!important;font-weight:900!important;padding:9px 18px!important;box-shadow:0 8px 18px -6px rgba(184,137,46,.85)!important;animation:qwMoreB 1.6s ease-in-out infinite}'
  +'@keyframes qwMoreB{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}'
  +'@media (prefers-reduced-motion:reduce){#qw-ovl#qw-ovl .qw .qwmore span{animation:none}}';
+ (document.head||document.documentElement).appendChild(st);}catch(e){}})();
+/* ===== 2026-10-22 地區選單乙的樣式（白底、整條分隔線、選到的打 ✓、縣市旁標北部/中部；清單在選單正下方展開，不會超出精靈） ===== */
+(function(){try{var st=document.createElement('style');st.id='qw-qb';st.textContent=''
+ +'#qw-ovl .qw .qb-w{position:relative;margin:0 0 4px}'
+ +'#qw-ovl .qw .qb-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1.5px solid #DCE4EE;border-radius:14px;background:#fff;padding:12px 14px;font-size:16px;font-weight:700;color:#8A99AB;font-family:inherit;cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s}'
+ +'#qw-ovl .qw .qb-btn.has{color:#16202B;font-weight:800}'
+ +'#qw-ovl .qw .qb-w.open .qb-btn{border-color:#0C447C;box-shadow:0 0 0 3px rgba(12,68,124,.12)}'
+ +'#qw-ovl .qw .qb-btn i{font-style:normal;color:#0C447C;font-size:17px;line-height:1;transition:transform .2s}#qw-ovl .qw .qb-w.open .qb-btn i{transform:rotate(180deg)}'
+ +'#qw-ovl .qw .qb-list{margin-top:6px;background:#fff;border:1px solid #D5DFEA;border-radius:14px;box-shadow:0 14px 30px -14px rgba(12,45,87,.35);max-height:300px;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:4px 0}'
+ +'#qw-ovl .qw .qb-it{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:none;border-bottom:1px solid #EEF2F6;background:#fff;padding:12px 16px;font-size:15.5px;font-weight:700;color:#16202B;font-family:inherit;text-align:left;cursor:pointer}'
+ +'#qw-ovl .qw .qb-it:last-child{border-bottom:none}#qw-ovl .qw .qb-it:active{background:#F3F6FA}'
+ +'#qw-ovl .qw .qb-it.sel{background:#EEF4FB;color:#0C2D57;font-weight:900}#qw-ovl .qw .qb-it.sel::after{content:"✓";color:#B8892E;font-weight:900}'
+ +'#qw-ovl .qw .qb-it em{font-style:normal;font-size:12px;color:#8A99AB;font-weight:700}'
+ +'#qw-ovl .qw .qb-btn.qw-shake{animation:qwShake .45s}';
  (document.head||document.documentElement).appendChild(st);}catch(e){}})();
 
 ;/* ===== 2026-10-18 測試頁專用（只在 ub3ibm 啟動；正式頁、員工頁完全不受影響）=====
