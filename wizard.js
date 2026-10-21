@@ -3986,11 +3986,14 @@ function buildDetailToc(){try{
   var base=_qdBase();
   if(!base||!window.fetch||!window.Promise){_qdImgVersion(imgs,box);return true;}
   var done=false;
-  var to=setTimeout(function(){if(done)return;done=true;_qdImgVersion(imgs,box);},6000);
+  /* 2026-10-21：連續測 8 次有 1 次 detail.html 下載時連線被中斷（ERR_CONNECTION_CLOSED）→ 沒有說明內容、抽屜打不開。下載失敗自動重試 2 次（間隔 0.8 秒），總等待放寬到 9 秒 */
+  var to=setTimeout(function(){if(done)return;done=true;_qdImgVersion(imgs,box);},9000);
+  (function get(n){
   fetch(base+'detail.html').then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(t){
     if(done)return;done=true;clearTimeout(to);
     if(!_qdHtmlVersion(t,base,box))_qdImgVersion(imgs,box);
-  })['catch'](function(){if(done)return;done=true;clearTimeout(to);_qdImgVersion(imgs,box);});
+  })['catch'](function(){if(done)return;if(n<2){setTimeout(function(){get(n+1);},800);return;}done=true;clearTimeout(to);_qdImgVersion(imgs,box);});
+  })(0);
   return true;
 }catch(e){return true;}}
 var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30)clearInterval(_qdT);},500);
@@ -4011,13 +4014,13 @@ var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30
   +'.modal.show .modal-dialog:has(.checkout-step-wrap){margin-top:10px!important;margin-bottom:10px!important}'
   +'.modal.show .modal-dialog:has(.checkout-step-wrap) .content-scroll{min-height:0;flex:1 1 auto}}'
   +'.checkout-step-wrap~.form .step.step3 textarea[name=Note]{height:68px!important;min-height:0!important}'
-  /* 2026-10-21 老闆：購物車「用引導精靈重選」改成置中膠囊按鈕（B），動態選 ③光澤每 4 秒掃過＋④出現時輕跳兩下、圖示轉一圈。按下去一樣先 confirm 再清空 */
-  +'#qs-rewiz.qs-rw{border:1.5px solid #C9D6E4!important;background:#fff!important;background-image:none!important;color:#0C447C!important;font-size:13.5px!important;font-weight:800!important;border-radius:999px!important;padding:9px 18px!important;font-family:inherit;display:inline-flex!important;align-items:center;gap:6px;cursor:pointer;position:relative;overflow:hidden;line-height:1.3;animation:qsRwNudge 1.2s ease-in-out .6s 2}'
-  +'#qs-rewiz .qs-rw-ic{display:inline-block;font-size:15px;animation:qsRwSpin 1.2s ease-in-out .6s}'
-  +'#qs-rewiz.qs-rw::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg,transparent,rgba(12,68,124,.16),transparent);animation:qsRwShine 4s ease-in-out infinite;pointer-events:none}'
-  +'@keyframes qsRwNudge{0%,100%{transform:translateY(0)}20%{transform:translateY(-4px)}40%{transform:translateY(0)}60%{transform:translateY(-3px)}80%{transform:translateY(0)}}'
+  /* 2026-10-21 老闆：購物車「用引導精靈重選」改成置中膠囊按鈕；動態先選 ③④，老闆覺得不夠醒目 → 改 H：金色實心，每 2.4 秒跳兩下並稍放大＋亮光掃過＋圖示轉一圈（一直重複）。按下去一樣先 confirm 再清空 */
+  +'#qs-rewiz.qs-rw{border:none!important;background-color:#B8892E!important;background-image:linear-gradient(135deg,#D4A947,#B8892E)!important;color:#fff!important;font-size:14.5px!important;font-weight:800!important;border-radius:999px!important;padding:11px 22px!important;font-family:inherit;display:inline-flex!important;align-items:center;gap:7px;cursor:pointer;position:relative;overflow:hidden;line-height:1.3;box-shadow:0 8px 18px -6px rgba(184,137,46,.7)!important;animation:qsRwBounce 2.4s ease-in-out infinite}'
+  +'#qs-rewiz .qs-rw-ic{display:inline-block;font-size:17px;animation:qsRwSpin 2.4s ease-in-out infinite}'
+  +'#qs-rewiz.qs-rw::after{content:"";position:absolute;top:0;bottom:0;left:0;width:45%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:qsRwShine 2.4s ease-in-out infinite;pointer-events:none}'
+  +'@keyframes qsRwBounce{0%,100%{transform:translateY(0) scale(1)}15%{transform:translateY(-6px) scale(1.04)}30%{transform:translateY(0) scale(1)}45%{transform:translateY(-3px) scale(1.02)}60%{transform:translateY(0) scale(1)}}'
   +'@keyframes qsRwSpin{to{transform:rotate(-360deg)}}'
-  +'@keyframes qsRwShine{0%,70%{transform:translateX(-130%) skewX(-18deg)}100%{transform:translateX(260%) skewX(-18deg)}}'
+  +'@keyframes qsRwShine{0%{transform:translateX(-140%) skewX(-20deg)}55%,100%{transform:translateX(320%) skewX(-20deg)}}'
   +'@media (prefers-reduced-motion:reduce){#qs-rewiz.qs-rw,#qs-rewiz .qs-rw-ic,#qs-rewiz.qs-rw::after{animation:none!important}}';
  (document.head||document.documentElement).appendChild(st);
  function hook(){var cd=document.getElementById('qw-cdcal');if(!cd)return;var bd=cd.querySelector('.qwcd-bd'),ft=cd.querySelector('.qwcd-ft');if(!bd||!ft||ft.querySelector('.qwcd-more'))return;
@@ -4521,6 +4524,8 @@ function deco(){
  /* 方案卡圖片可能比問答晚載入、把版面撐高 → 載入後與稍後再檢查一次（2026-10-18 小手機實測抓到要捲 111） */
  [].forEach.call(q.querySelectorAll('img'),function(im){if(!im.complete)im.addEventListener('load',function(){fit(q,dl,blk);},{once:true});});
  setTimeout(function(){fit(q,dl,blk);},400);setTimeout(function(){fit(q,dl,blk);},1500);
+ /* 2026-10-21：t118 抓到一般手機方案頁放了 4 題、之後版面又變高要捲 33（變高的時間點不在上面幾次檢查之間）→ 前 6 秒每 0.25 秒檢查一次，放不下就少一題 */
+ var _fn=0,_fi=setInterval(function(){if(++_fn>24||!q.isConnected){clearInterval(_fi);return;}fit(q,dl,blk);},250);
 }
 /* 放不下就從最後一題拿掉；剩不到 2 題收成一行「付款前常見問題（4 題）」；連一行都放不下就整個拿掉。以「卡片不用捲動」為準 */
 function over(q){return q.scrollHeight-q.clientHeight>1;}
