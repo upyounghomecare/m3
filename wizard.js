@@ -634,14 +634,16 @@ function _qwFoot(card){try{
  if(head===nav)return;/* 沒有商品清單的步驟(地區/場域/方案)不加往下滑提示 */
  f.className='qwfoot qwfoot-l'+(cp?' qwfoot-cp':'');
  var h2=card.querySelector('h2'),ht=h2?(h2.textContent||''):'';
- var unit=(ht.indexOf('\u52a0\u8cfc')>=0)?'\u9805\u52a0\u8cfc\u9805\u76ee':'\u7a2e\u6a5f\u578b';
+ var unit=(ht.indexOf('\u52a0\u8cfc')>=0)?'\u9805\u52a0\u8cfc':'\u7a2e\u6a5f\u578b';
  var m=document.createElement('div');m.className='qwmore';
  var sp=document.createElement('span');m.appendChild(sp);
  f.insertBefore(m,f.firstChild);
  function upd(){try{
   var top=f.getBoundingClientRect().top,n=0,cs=card.querySelectorAll('.opt');
-  for(var i=0;i<cs.length;i++){if(cs[i].getBoundingClientRect().top>=top-6)n++;}
-  if(n>0){sp.textContent='\u25bc \u5f80\u4e0b\u6ed1\u52d5\u9084\u6709 '+n+' '+unit;m.className='qwmore';}
+  /* 2026-10-22 老闆：「完全不知道下方還有其他加購品」→ 改成「沒有完整露出」就算還沒看到。
+     原本只算整張都在底部下面的卡片，電腦版第 4 項露出一點標題就不算 → 提示完全不出現 */
+  for(var i=0;i<cs.length;i++){if(cs[i].getBoundingClientRect().bottom>top+4)n++;}
+  if(n>0){sp.textContent='\u25bc \u5f80\u4e0b\u6ed1\u9084\u6709 '+n+' '+unit;m.className='qwmore';}
   /* 2026-09-29 沒有商品清單的步驟(最後一步)也要提示:iPhone SE 這種小手機內容比螢幕高 171px,
      原本不顯示提示,客戶不知道下面還有「先看服務說明」等內容。還沒捲到底就顯示「往下滑看更多」。 */
   else if(!cs.length&&(card.scrollHeight-card.clientHeight-card.scrollTop)>40){sp.textContent='\u25bc \u5f80\u4e0b\u6ed1\u770b\u66f4\u591a';m.className='qwmore';}
@@ -4162,6 +4164,14 @@ var _qdTry=0,_qdT=setInterval(function(){_qdTry++;if(buildDetailToc()||_qdTry>30
   upd();var n=0,iv=setInterval(function(){if(!document.body.contains(bd)){clearInterval(iv);return;}upd();if(++n>40)clearInterval(iv);},250);}
  new MutationObserver(hook).observe(document.documentElement,{childList:true,subtree:true});
 }catch(e){}})();
+/* ===== 2026-10-22 老闆選 A：「往下滑還有 N 項」提示改成金色、輕輕跳動（原本白色小字不明顯）=====
+   適用精靈所有用到 .qwmore 的地方（加購、機型、內容比畫面高的步驟）；客人手機設定「減少動態效果」時不跳 */
+(function(){try{var st=document.createElement('style');st.id='qw-more-gold';st.textContent=''
+ +'#qw-ovl#qw-ovl .qw .qwmore{top:-30px;z-index:5}#qw-ovl#qw-ovl .qw .qwfoot-cp .qwmore{top:-52px}'
+ +'#qw-ovl#qw-ovl .qw .qwmore span{background:linear-gradient(135deg,#D4A947,#B8892E)!important;color:#fff!important;border:none!important;font-size:14.5px!important;font-weight:900!important;padding:9px 18px!important;box-shadow:0 8px 18px -6px rgba(184,137,46,.85)!important;animation:qwMoreB 1.6s ease-in-out infinite}'
+ +'@keyframes qwMoreB{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}'
+ +'@media (prefers-reduced-motion:reduce){#qw-ovl#qw-ovl .qw .qwmore span{animation:none}}';
+ (document.head||document.documentElement).appendChild(st);}catch(e){}})();
 
 ;/* ===== 2026-10-18 測試頁專用（只在 ub3ibm 啟動；正式頁、員工頁完全不受影響）=====
    ① app 化：風格固定「① 品牌延伸」（老闆 10-20 選，不讓客人自己選；拿掉「試用其他風格」鈕）＋返回鍵＋換頁滑動＋按鈕放大＋記住進度
