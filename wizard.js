@@ -796,7 +796,7 @@ function render(){
     var canNext=(areaCls==='normal'||areaCls==='remote');
     w='<div class="qw">'+stepBar()+'<h2>您的服務地區在哪裡？</h2><p class="sub">先確認是否在服務範圍</p>'
      /* 2026-10-22 原生 <select> 在手機上跳出的是瀏覽器自己畫的清單（Z Fold 7 實測：超出精靈、分隔線半截、灰底，網頁改不了）→ 改精靈自製清單 */
-     +'<div class="flbl">縣市</div>'+_qbHtml(0,'請選擇縣市',areaCity,Object.keys(TW),'pickCity',true)
+     +'<div class="flbl">縣市</div>'+_qbHtml(0,'請選擇縣市',areaCity,_qbCities(),'pickCity',true)
      +'<div class="flbl">鄉鎮市區</div>'+_qbHtml(1,areaCity?'請選擇鄉鎮市區':'請先選擇縣市',areaDist,(areaCity&&TW[areaCity])?TW[areaCity]:[],'pickDist',false)
      +resImg
      +(areaCls==='nosvc'?'<a class="cslink" href="'+LINE_CS+'" target="_blank" rel="noopener">聯繫客服 →</a>'
@@ -1041,6 +1041,9 @@ var _QB_RG={'基隆市':'北部','台北市':'北部','臺北市':'北部','新�
  '苗栗縣':'中部','台中市':'中部','臺中市':'中部','彰化縣':'中部','南投縣':'中部','雲林縣':'中部',
  '嘉義市':'南部','嘉義縣':'南部','台南市':'南部','臺南市':'南部','高雄市':'南部','屏東縣':'南部',
  '花蓮縣':'東部','台東縣':'東部','臺東縣':'東部','澎湖縣':'離島','金門縣':'離島','連江縣':'離島'};
+/* 縣市清單照北→中→南→東→離島排（老闆 10-22：原本雲林夾在嘉義和台南中間）；不在清單裡的縣市照原順序排最後 */
+var _QB_ORD=['基隆市','台北市','臺北市','新北市','桃園市','新竹市','新竹縣','宜蘭縣','苗栗縣','台中市','臺中市','彰化縣','南投縣','雲林縣','嘉義市','嘉義縣','台南市','臺南市','高雄市','屏東縣','花蓮縣','台東縣','臺東縣','澎湖縣','金門縣','連江縣'];
+function _qbCities(){var a=Object.keys(TW);return a.map(function(c,i){var k=_QB_ORD.indexOf(c);return {c:c,k:k<0?100+i:k};}).sort(function(x,y){return x.k-y.k;}).map(function(x){return x.c;});}
 function _qbShow(){setTimeout(function(){try{
   var c=ovl&&ovl.querySelector('.qw'),l=c&&c.querySelector('.qb-list');if(!l)return;
   var f=c.querySelector('.qwfoot'),lim=f?f.getBoundingClientRect().top:c.getBoundingClientRect().bottom;
