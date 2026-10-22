@@ -757,6 +757,15 @@ function _cfCss(){
   +'@media (prefers-reduced-motion:reduce){#qcf-ld .bar b::after,#qcf-ld .it.on i{animation-duration:2.4s}}'
   /* 精靈內結帳（2026-10-22） */
   +'body.qck-run #qs-ovl,body.qck-run #checkout{opacity:0!important}'
+  /* 歡迎回來卡片（2026-10-23） */
+  +'#qwb-ovl{position:fixed;inset:0;z-index:2147482000;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit;animation:qcfLdIn .2s ease-out both}'
+  +'#qwb-ovl .c{width:min(420px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:20px;box-shadow:0 24px 50px -20px rgba(0,0,0,.5)}'
+  +'#qwb-ovl .hd{background:linear-gradient(170deg,#0C447C,#042C53);color:#fff;padding:20px 20px 16px}#qwb-ovl .hd .t{font-size:20px;font-weight:900}#qwb-ovl .hd .s{font-size:13px;color:#C9D6E4;margin-top:4px}'
+  +'#qwb-ovl .bd{padding:14px 18px 4px}#qwb-ovl .it{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #EEF2F6}#qwb-ovl .it img,#qwb-ovl .it .noim{width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid #EEF2F6;background:#F3F6FA;flex:none}'
+  +'#qwb-ovl .it .n{flex:1;min-width:0;font-size:14.5px;font-weight:800;color:#0C2D57}#qwb-ovl .it .n small{display:block;font-size:12px;color:#7A8899;font-weight:600}#qwb-ovl .it .p{font-weight:900;color:#0C2D57;white-space:nowrap}'
+  +'#qwb-ovl .sum{display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:#FFFAEE;border:1px solid #F0DFB3;border-radius:14px;padding:12px 14px;margin:12px 0;font-variant-numeric:tabular-nums}#qwb-ovl .sum span{font-weight:900;color:#0C2D57}#qwb-ovl .sum small{display:block;font-size:12px;color:#8A5A00;font-weight:800}#qwb-ovl .sum b{font-size:24px;font-weight:900;color:#0C2D57;white-space:nowrap}'
+  +'#qwb-ovl .ft{display:flex;flex-direction:column;gap:8px;padding:4px 18px 16px}#qwb-ovl .go{border:none;border-radius:14px;padding:13px;font:900 16.5px/1.2 inherit;font-family:inherit;color:#fff;background:linear-gradient(135deg,#D4A947,#B8892E);box-shadow:0 10px 20px -8px rgba(184,137,46,.75);cursor:pointer}'
+  +'#qwb-ovl .re{border:1.5px solid #C9D6E4;border-radius:14px;padding:11px;font:800 14.5px/1.2 inherit;font-family:inherit;color:#33475C;background:#fff;cursor:pointer}#qwb-ovl .x{border:none;background:none;font:700 12.5px/1.4 inherit;font-family:inherit;color:#7A8899;padding:4px;cursor:pointer}'
   +'#qw-ovl .qx-sub{display:flex;gap:6px;margin-top:10px}#qw-ovl .qx-sub span{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12.5px;font-weight:800;line-height:1.2;border-radius:999px;padding:6px 0;background:rgba(255,255,255,.12);color:#C9D6E4}'
   +'#qw-ovl .qx-sub span.on{background:#D4A947;color:#2B1E00}#qw-ovl .qx-sub span.ok{background:rgba(212,169,71,.22);color:#F3D38A}'
   +'#qw-ovl .qck-box{background:#fff;border:1px solid #E6ECF2;border-radius:16px;padding:14px;margin:12px 0 4px}#qw-ovl .qck-h{font-size:16px;font-weight:900;color:#0C2D57;margin-bottom:8px}'
@@ -969,6 +978,57 @@ function _ckSubmit(){
     });
   });
   });}
+
+/* ===== 2026-10-23 結帳到一半離開、回來：歡迎回來卡片（老闆選甲）=====
+   1SHOP 會記住結帳走到第幾步，購物車有東西時重開網址會自己跳出結帳視窗（第3步、欄位空白），精靈也被蓋掉。
+   → 頁面打開後 25 秒內、客人還沒碰畫面時，若 1SHOP 自己跳出結帳視窗：關掉它，改跳「歡迎回來」卡片。
+   → 「繼續結帳」用購物車＋快照還原方案/環境/地區，回到精靈「結帳 ① 確認」（同意要重新勾，存證時間才是當次的）。 */
+var _ckTouched=false;try{['pointerdown','touchstart','keydown'].forEach(function(t){document.addEventListener(t,function(){_ckTouched=true;},true);});}catch(e){}
+function _ckSnapSave(){try{if(!window.__QW_CHECKOUT)return;localStorage.setItem('qw_ck_snap',JSON.stringify({t:Date.now(),plan:plan,env:env,city:areaCity,dist:areaDist,cd:window.__qsCleanDate||'',hi:qty.hi||0,ck:{name:_ck.name,gender:_ck.gender,mobile:_ck.mobile,addr:_ck.addr,email:_ck.email,env:_ck.env,model:_ck.model,note:_ck.note,age:_ck.age}}));}catch(e){}}
+function _ckSnapLoad(){try{var v=JSON.parse(localStorage.getItem('qw_ck_snap')||'null');if(v&&Date.now()-v.t<3*864e5)return v;}catch(e){}return null;}
+function _ckSnapClear(){try{localStorage.removeItem('qw_ck_snap');}catch(e){}}
+try{if(/\/order\b/.test(location.pathname)||/[?&]t2=/.test(location.search))_ckSnapClear();}catch(e){}/* 已到訂單頁＝訂單成立，快照用不到了 */
+function _ckResume(){
+  var sn=_ckSnapLoad(),c=_cfCart()||{it:[],cp:[]},cpn=c.cp.map(function(x){return x.n;}).join('');
+  plan=/早鳥/.test(cpn)?'early':(/標準|全戶/.test(cpn)?'std':((sn&&sn.plan)||plan));
+  env=c.it.some(function(x){return /商用|重油汙/.test(x.n);})?'biz':((sn&&sn.env)||env||'home');
+  var cc=document.querySelector('select[name="CountyAndCity"]'),ar=document.querySelector('select[name="Area"]');
+  var fc=(cc&&cc.selectedIndex>0)?(cc.options[cc.selectedIndex].text||''):'',fa=(ar&&ar.selectedIndex>0)?String(ar.options[ar.selectedIndex].text||'').replace(/^\d+\s*/,''):'';
+  areaCity=(sn&&sn.city)||fc||areaCity;areaDist=(sn&&sn.dist)||fa||areaDist;
+  if(areaCity&&!TW[areaCity]){var a2=areaCity.replace(/臺/g,'台');if(TW[a2])areaCity=a2;}
+  try{areaCls=classify(areaCity,areaDist);}catch(e){}
+  qty.hi=sn?(sn.hi||0):c.it.filter(function(x){return /挑高/.test(x.n);}).reduce(function(a,x){return a+x.q;},0);
+  if(sn){if(!window.__qsCleanDate)window.__qsCleanDate=sn.cd||'';for(var k in sn.ck){if(sn.ck.hasOwnProperty(k)&&!_ck[k]&&sn.ck[k])_ck[k]=sn.ck[k];}}
+  _ck.agree=false;_ck.ack=false;_ck.err={};
+  window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;window.__qsAreaCls=areaCls;
+  if(ovl)close();_qwResume='confirm';_cfT0=Date.now();_cfSig='';_cfChg=Date.now();open();}
+/* 關掉 1SHOP 自己跳出的結帳視窗：它還在「打開動畫」時 modal('hide') 會被忽略，所以重試到真的關掉（最多 6 秒，最後硬關） */
+function _ckHideModal(){var n=0;(function lp(){var m=document.getElementById('checkout');if(!m||!/\bshow\b/.test(m.className))return;n++;
+  try{jQuery('#checkout').modal('hide');}catch(e){}
+  if(n>=20){try{m.classList.remove('show');m.style.display='none';m.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');document.body.style.paddingRight='';[].slice.call(document.querySelectorAll('.modal-backdrop')).forEach(function(x){x.parentNode.removeChild(x);});}catch(e){}return;}
+  setTimeout(lp,300);})();}
+function _ckWbHide(){var o=document.getElementById('qwb-ovl');if(o&&o.parentNode)o.parentNode.removeChild(o);}
+function _ckWelcome(){
+  if(document.getElementById('qwb-ovl'))return;_cfCss();
+  var c=_cfCart();if(!c||!c.it.length)return;
+  var orig=0;c.it.forEach(function(x){orig+=x.a;});var save=orig-(c.pay||0);
+  var o=document.createElement('div');o.id='qwb-ovl';o.setAttribute('role','dialog');o.setAttribute('aria-label','歡迎回來');
+  o.innerHTML='<div class="c"><div class="hd"><div class="t">歡迎回來！</div><div class="s">您上次還沒完成結帳，購物車都幫您留著</div></div><div class="bd">'
+   +c.it.map(function(x){return '<div class="it">'+(x.im?'<img src="'+_esc(x.im)+'" alt="">':'<span class="noim"></span>')+'<div class="n">'+_esc(x.n)+'<small>× '+x.q+'</small></div><div class="p">'+_cfMoney(x.a)+'</div></div>';}).join('')
+   +'<div class="sum"><div><span>應付金額</span>'+(save>0?'<small>✦ '+_esc(c.cp.map(function(x){return x.n;}).join('、'))+' 已省 '+_cfMoney(save)+'</small>':'')+'</div><b>'+_cfMoney(c.pay||0)+'</b></div></div>'
+   +'<div class="ft"><button type="button" class="go" onclick="__qw.wbGo()">繼續結帳</button><button type="button" class="re" onclick="__qw.wbRe()">重新選購</button><button type="button" class="x" onclick="__qw.wbX()">先看看賣場 ✕</button></div></div>';
+  document.body.appendChild(o);
+  /* 手機開場畫面（app_preview 的 #qw-splash）要等精靈打開才淡出，最久 8 秒；卡片出現時直接收掉，不然卡片被蓋住、客人只看到轉圈 */
+  try{var sp=document.getElementById('qw-splash');if(sp){sp.classList.add('out');setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},400);}}catch(e){}}
+(function(){var t0=Date.now(),tm=setInterval(function(){try{
+  if(Date.now()-t0>25000||_ckTouched||_ckRun){clearInterval(tm);return;}
+  if(!window.__QW_CHECKOUT||!_ckModal())return;
+  var c=_cfCart();if(!c||!c.it.length)return;
+  clearInterval(tm);
+  _ckHideModal();
+  if(ovl)close();
+  _ckWelcome();
+}catch(e){}},400);})();
 function _cfToCart(){toast('已為您加入購物車，可再調整或結帳');
   setTimeout(function(){try{
     var t=null,hs=document.querySelectorAll('h1');
@@ -1574,16 +1634,19 @@ var api={
   /* 2026-10-22 確認頁按鈕 */
   cfGo:function(){
     if(step!=='confirm'||!ovl)return;var d=_cfCart();if(_cfBusy(d))return;
-    if(window.__QW_CHECKOUT){if(!_ckAgreeOK()){_ckShake(!_ck.age?'.qck-age':'.qck-agree .qck-box');return;}_ck.agreeAt=_ck.agreeAt||Date.now();step='ck2';render();return;}
+    if(window.__QW_CHECKOUT){_ckSnapSave();if(!_ckAgreeOK()){_ckShake(!_ck.age?'.qck-age':'.qck-agree .qck-box');return;}_ck.agreeAt=_ck.agreeAt||Date.now();step='ck2';render();return;}
     var rb=_cfRealBtn();if(!rb)return;
     clearInterval(_cfTm);_cfTm=null;close();
     setTimeout(function(){try{rb.click();}catch(e){}},60);
   },
   /* 2026-10-22 精靈內結帳 */
-  ckPick:function(k,v){_ck[k]=v;if(k==='age'&&v!=='10-15年')_ck.ack=false;if(k==='env'&&v!=='社區')_ck.mgmt=false;delete _ck.err[k];
+  ckPick:function(k,v){_ck[k]=v;_ckSnapSave();if(k==='age'&&v!=='10-15年')_ck.ack=false;if(k==='env'&&v!=='社區')_ck.mgmt=false;delete _ck.err[k];
     if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}else render();},
-  ckSet:function(k,v){_ck[k]=v;if(_ck.err[k]){delete _ck.err[k];var e=ovl&&ovl.querySelector('[data-ckerr="'+k+'"]');if(e)e.textContent='';var i=ovl&&ovl.querySelector('[data-ck="'+k+'"]');if(i)i.classList.remove('bad');}
+  ckSet:function(k,v){_ck[k]=v;clearTimeout(window.__qwSnapT);window.__qwSnapT=setTimeout(_ckSnapSave,600);if(_ck.err[k]){delete _ck.err[k];var e=ovl&&ovl.querySelector('[data-ckerr="'+k+'"]');if(e)e.textContent='';var i=ovl&&ovl.querySelector('[data-ck="'+k+'"]');if(i)i.classList.remove('bad');}
     if(step==='confirm'&&(k==='agree'||k==='ack'))_cfTick();},
+  wbGo:function(){_ckWbHide();_ckResume();},
+  wbRe:function(){_ckWbHide();_ckSnapClear();var r=document.getElementById('qs-rewiz');if(r)r.click();},
+  wbX:function(){_ckWbHide();_ckHideModal();if(ovl)close();},
   ckBack:function(){if(step==='ck2'){step='confirm';render();}else if(step==='ck3'){step='ck2';render();}},
   ckNext:function(){
     var e={},dg=function(x){return String(x||'').replace(/[\s-]/g,'');};
@@ -2806,7 +2869,7 @@ function addContinueBtn(){
         /* 清空期間 __qsAdding 會凍結所有金額保護,若此時購物車還剩「保護品已被刪、校正還在」的
            中間狀態,小計會虛高。所以要同時舉起計算中旗標把結帳鈕鎖住(每輪刷新,避免12秒上限中途到期) */
         function _done(){
-          qty={};plan=null;env=null;areaCity=null;areaDist=null;areaCls=null;opened={};
+          qty={};plan=null;env=null;areaCity=null;areaDist=null;areaCls=null;opened={};_ckSnapClear();
           window.__qsPlan=null;window.__qsDhDelivery='';window.__qsCleanDate='';window.__qsRead_dh='';window.__qsRead_air='';
           /* 這幾個全域若不一起清掉會變成幽靈設定:
              __qsEnv 殘留 'biz' → 客戶改用「自己選」時系統仍自動加收商用加價 $1,000/台,並壓掉車馬費判斷
