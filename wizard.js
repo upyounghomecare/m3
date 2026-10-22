@@ -757,7 +757,7 @@ function _cfCss(){
   +'@media (prefers-reduced-motion:reduce){#qcf-ld .bar b::after,#qcf-ld .it.on i{animation-duration:2.4s}}'
   /* 精靈內結帳（2026-10-22） */
   +'body.qck-run #qs-ovl,body.qck-run #checkout{opacity:0!important}'
-  +'#qw-ovl .qx-sub{display:flex!important;gap:6px;margin:4px 0 2px!important;padding-bottom:10px!important}#qw-ovl .qx-sub span{flex:1;text-align:center;font-size:12.5px;font-weight:800;border-radius:999px;padding:5px 0;background:rgba(255,255,255,.12);color:#C9D6E4}'
+  +'#qw-ovl .qx-sub{display:flex;gap:6px;margin-top:10px}#qw-ovl .qx-sub span{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12.5px;font-weight:800;line-height:1.2;border-radius:999px;padding:6px 0;background:rgba(255,255,255,.12);color:#C9D6E4}'
   +'#qw-ovl .qx-sub span.on{background:#D4A947;color:#2B1E00}#qw-ovl .qx-sub span.ok{background:rgba(212,169,71,.22);color:#F3D38A}'
   +'#qw-ovl .qck-box{background:#fff;border:1px solid #E6ECF2;border-radius:16px;padding:14px;margin:12px 0 4px}#qw-ovl .qck-h{font-size:16px;font-weight:900;color:#0C2D57;margin-bottom:8px}'
   +'#qw-ovl .qck-q{font-size:14.5px;font-weight:800;color:#16202B;margin:2px 0 8px}#qw-ovl .qck-q b{font-size:11.5px;color:#fff;background:#C0392B;border-radius:999px;padding:2px 7px;margin-left:6px}'
@@ -842,7 +842,8 @@ function _cfLoad(on,n){
 var _ck={age:'',ack:false,agree:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null;
 var _CK_RULES=['只服務<b>三菱重工</b>冷氣（室內機面板有「HEAVY INDUSTRIES」），不含三菱電機及其他品牌','機齡 15 年以上、安裝高度 4 米以上恕不提供服務','機齡 10 年（含）以上恕不提供保固','偏遠地區／商用場所／挑高施作依規範加價','保固範圍、取消政策與注意事項依賣場服務規範'];
 function _ckAgreeOK(){return !!(_ck.agree&&_ck.age&&_ck.age.indexOf('15年以上')<0&&(_ck.age!=='10-15年'||_ck.ack));}
-function _ckSub(k){return '<p class="sub qx-sub">'+['① 確認','② 聯絡','③ 補充'].map(function(t,i){return '<span class="'+(i<k?'ok':(i===k?'on':''))+'">'+(i<k?'✓ ':'')+t+'</span>';}).join('')+'</p>';}
+/* 小步驟膠囊放在標題說明(.sub)裡面：跟標題區同一塊深藍底、同寬、上下間距一致（10-22 老闆：原本獨立一塊，膠囊上下沒置中、電腦版左右露白） */
+function _ckSub(k){return '<span class="qx-sub">'+['① 確認','② 聯絡','③ 補充'].map(function(t,i){return '<span class="'+(i<k?'ok':(i===k?'on':''))+'">'+(i<k?'✓ ':'')+t+'</span>';}).join('')+'</span>';}
 function _ckShake(sel){try{var el=ovl&&ovl.querySelector(sel);if(!el)return;var c=ovl.querySelector('.qw');if(c)c.scrollTop=Math.max(0,el.offsetTop-120);el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}catch(e){}}
 function _ckAgreeHtml(){
   var A=['10年內','10-15年','15年以上（恕不服務）'],h='<div class="qck-box"><div class="qck-h">結帳前請確認</div>'
@@ -880,7 +881,7 @@ function _ckHtml(k){
      +_ckIn('note','備註',0,'有特殊需求可以寫在這裡（選填）','ta')
      +'<div class="qck-note">🧾 <b>發票</b>：按「前往付款」後的付款頁可以選擇（個人電子發票／公司統編／捐贈），預設為個人電子發票。<br>💳 付款會到<b>綠界</b>的頁面輸入信用卡，卡號只在綠界輸入。</div>';
   }
-  return '<div class="qw qw-step-ck">'+stepBar(7)+'<h2 class="qh4">'+(k===2?'聯絡資料':'補充資料')+'</h2><p class="sub">'+(k===2?'技師到府前，專人會打這支電話跟您約時間':'最後一頁，填完就前往付款')+'</p>'+_ckSub(k-1)
+  return '<div class="qw qw-step-ck">'+stepBar(7)+'<h2 class="qh4">'+(k===2?'聯絡資料':'補充資料')+'</h2><p class="sub">'+(k===2?'技師到府前，專人會打這支電話跟您約時間':'最後一頁，填完就前往付款')+_ckSub(k-1)+'</p>'
    +'<div class="qck-body">'+b+'</div>'
    +'<div class="nav"><button class="btn gho" onclick="__qw.ckBack()">上一步</button><button class="btn pri qck-go'+(k===3?' gold':'')+'" onclick="__qw.ckNext()">'+(k===2?'<span class="l1">下一步：補充資料</span>':'<span class="l1">前往付款</span><span class="l2">應付 '+_cfMoney(pay)+'・綠界信用卡</span>')+'</button></div></div>';}
 /* —— 送出：代走 1SHOP 結帳 —— */
@@ -976,7 +977,7 @@ function _cfToCart(){toast('已為您加入購物車，可再調整或結帳');
     if(t)_scrollToStable(t,70);
   }catch(e){}},420);}
 function _cfLeave(){clearInterval(_cfTm);_cfTm=null;close();_cfToCart();}
-function _cfHtml(){var ck=!!window.__QW_CHECKOUT;return '<div class="qw qw-step-cf">'+stepBar(7)+'<h2 class="qh4">'+(ck?'確認訂單與服務規範':'最後確認您的訂單')+'</h2><p class="sub">'+(ck?'確認沒問題，下一步填聯絡資料':'確認沒問題，就可以直接結帳囉')+'</p>'+(ck?_ckSub(0):'')
+function _cfHtml(){var ck=!!window.__QW_CHECKOUT;return '<div class="qw qw-step-cf">'+stepBar(7)+'<h2 class="qh4">'+(ck?'確認訂單與服務規範':'最後確認您的訂單')+'</h2><p class="sub">'+(ck?'確認沒問題，下一步填聯絡資料':'確認沒問題，就可以直接結帳囉')+(ck?_ckSub(0):'')+'</p>'
   +'<div class="qcf-body"></div>'+(ck?'<div class="qck-agree">'+_ckAgreeHtml()+'</div>':'')
   +'<div class="nav"><button class="btn gho qcf-bk" onclick="__qw.cfBack()">上一步</button><button class="btn pri qcf-go" disabled onclick="__qw.cfGo()"><span class="l1">金額確認中…</span></button></div></div>';}
 function render(){
