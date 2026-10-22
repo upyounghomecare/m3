@@ -770,6 +770,11 @@ function _cfCss(){
   +'@keyframes qybG{0%,100%{box-shadow:0 0 0 0 rgba(212,169,71,.55)}50%{box-shadow:0 0 0 7px rgba(212,169,71,0)}}'
   +'#qw-ovl .qck-box.need{border:2px solid #D4A947;animation:qybG 1.8s ease-in-out infinite}#qw-ovl .qck-box .qck-h b{margin-left:8px;font-size:12px;font-weight:900;color:#fff;background:#C0392B;border-radius:999px;padding:2px 8px;vertical-align:2px}'
   +'@media (prefers-reduced-motion:reduce){#qya i,#qw-ovl .qck-box.need{animation:none}}'
+  /* 發票區（2026-10-23） */
+  +'#qw-ovl .qiv{display:flex;flex-direction:column;gap:10px;border:1px solid #E6ECF2;border-radius:14px;padding:12px;background:#fff}'
+  +'#qw-ovl .qiv-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}#qw-ovl .qiv-seg button{border:1.5px solid #D5DFEA;border-radius:12px;padding:9px 4px;text-align:center;font:800 14px/1.3 inherit;font-family:inherit;color:#16202B;background:#fff;cursor:pointer}'
+  +'#qw-ovl .qiv-seg button small{display:block;font-size:11px;color:#8A99AB;font-weight:700}#qw-ovl .qiv-seg button.sel{background:#0C2D57;border-color:#0C2D57;color:#fff}#qw-ovl .qiv-seg button.sel small{color:#C9D6E4}'
+  +'#qw-ovl .qiv-n{font-size:12.5px;color:#5B6B7D;line-height:1.6}#qw-ovl .qiv-w{font-size:12.5px;color:#B4441C;font-weight:800;background:#FFF1EE;border:1px solid #F2C9BC;border-radius:10px;padding:7px 10px}'
   /* 歡迎回來卡片（2026-10-23） */
   +'#qwb-ovl{position:fixed;inset:0;z-index:2147482000;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit;animation:qcfLdIn .2s ease-out both}'
   +'#qwb-ovl .c{width:min(420px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:20px;box-shadow:0 24px 50px -20px rgba(0,0,0,.5)}'
@@ -861,7 +866,7 @@ function _cfLoad(on,n){
 /* ===== 2026-10-22 精靈內結帳（老闆選乙：第 7 步「結帳」內含 ①確認 ②聯絡 ③補充）=====
    客人在精靈填完 → 按「前往付款」→ 精靈照原本的路走：立即結帳 → 同意視窗(代勾代按) → 1SHOP 第1/2/3步(代填代按) → 送出 → 訂單頁(發票、付款)
    原本的金額保護、方案券檢查、同意存證(fillConsent)都照樣會跑；任何一步沒過就停下來，顯示 1SHOP 原本的結帳視窗讓客人自己完成。 */
-var _ck={age:'',ack:false,agree:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null;
+var _ck={age:'',ack:false,agree:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',rType:'0',rCar:'0',rNum:'',rTitle:'',rUBN:'',rLove:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null;
 var _CK_RULES=['只服務<b>三菱重工</b>冷氣（室內機面板有「HEAVY INDUSTRIES」），不含三菱電機及其他品牌','機齡 15 年以上、安裝高度 4 米以上恕不提供服務','機齡 10 年（含）以上恕不提供保固','偏遠地區／商用場所／挑高施作依規範加價','保固範圍、取消政策與注意事項依賣場服務規範'];
 /* 2026-10-23 老闆選 A＋B：確認頁提醒客人要選「冷氣用了幾年」並勾同意 —— 回傳還沒完成的項目（A 提示條、B 金框徽章共用） */
 function _ckTodo(){var t=[];if(!_ck.age)t.push(['age','選冷氣使用年數']);else if(_ck.age.indexOf('15年以上')>=0)return [['stop','']];
@@ -907,7 +912,8 @@ function _ckHtml(k){
      +'<div class="qck-auto"><div>機齡 '+_esc((_ck.age||'').replace('（恕不服務）',''))+'・安裝高度 '+_esc(_ckHeight().replace('（不加價）',''))+'<em>✓ 已依前面的選擇帶入</em></div></div>'
      +_ckIn('model','機器型號',0,'例：SRK35ZSXT-W','text','選填，方便技師事前準備')
      +_ckIn('note','備註',0,'有特殊需求可以寫在這裡（選填）','ta')
-     +'<div class="qck-note">🧾 <b>發票</b>：按「前往付款」後的付款頁可以選擇（個人電子發票／公司統編／捐贈），預設為個人電子發票。<br>💳 付款會到<b>綠界</b>的頁面輸入信用卡，卡號只在綠界輸入。</div>';
+     +_rcHtml()
+     +'<div class="qck-note">💳 按「前往付款」後會到<b>綠界</b>的頁面輸入信用卡，卡號只在綠界輸入。</div>';
   }
   return '<div class="qw qw-step-ck">'+stepBar(7)+'<h2 class="qh4">'+(k===2?'聯絡資料':'補充資料')+'</h2><p class="sub">'+(k===2?'技師到府前，專人會打這支電話跟您約時間':'最後一頁，填完就前往付款')+_ckSub(k-1)+'</p>'
    +'<div class="qck-body">'+b+'</div>'
@@ -986,6 +992,7 @@ function _ckSubmit(){
               [].slice.call(m.querySelectorAll('form.step3 input[type=checkbox].need')).forEach(function(c){if(!c.checked&&!(c.closest('.hide'))){ok3=false;why='第 3 步有勾選沒勾';}});
               if(!ok3)return _ckFail(why);
               _ckLoad(true,3,'訂單建立中，馬上前往付款…');
+              _rcSave();/* 訂單成立後在訂單頁自動填發票 */
               if(window.__QW_CK_DRY){window.__qwCkResult={ok:true,dry:true,step:3};_ckRun=false;_ckLoad(false);return;}
               /* 最後一下：1SHOP 第 3 步的「送出」(savaOrder(3,1))，成功會自己跳到訂單頁（發票、付款） */
               try{nb().click();}catch(e){return _ckFail('送出按鈕按不下去');}
@@ -1003,7 +1010,7 @@ function _ckSubmit(){
    → 頁面打開後 25 秒內、客人還沒碰畫面時，若 1SHOP 自己跳出結帳視窗：關掉它，改跳「歡迎回來」卡片。
    → 「繼續結帳」用購物車＋快照還原方案/環境/地區，回到精靈「結帳 ① 確認」（同意要重新勾，存證時間才是當次的）。 */
 var _ckTouched=false;try{['pointerdown','touchstart','keydown'].forEach(function(t){document.addEventListener(t,function(){_ckTouched=true;},true);});}catch(e){}
-function _ckSnapSave(){try{if(!window.__QW_CHECKOUT)return;localStorage.setItem('qw_ck_snap',JSON.stringify({t:Date.now(),plan:plan,env:env,city:areaCity,dist:areaDist,cd:window.__qsCleanDate||'',hi:qty.hi||0,ck:{name:_ck.name,gender:_ck.gender,mobile:_ck.mobile,addr:_ck.addr,email:_ck.email,env:_ck.env,model:_ck.model,note:_ck.note,age:_ck.age}}));}catch(e){}}
+function _ckSnapSave(){try{if(!window.__QW_CHECKOUT)return;localStorage.setItem('qw_ck_snap',JSON.stringify({t:Date.now(),plan:plan,env:env,city:areaCity,dist:areaDist,cd:window.__qsCleanDate||'',hi:qty.hi||0,ck:{name:_ck.name,gender:_ck.gender,mobile:_ck.mobile,addr:_ck.addr,email:_ck.email,env:_ck.env,model:_ck.model,note:_ck.note,age:_ck.age,rType:_ck.rType,rCar:_ck.rCar,rNum:_ck.rNum,rTitle:_ck.rTitle,rUBN:_ck.rUBN,rLove:_ck.rLove}}));}catch(e){}}
 function _ckSnapLoad(){try{var v=JSON.parse(localStorage.getItem('qw_ck_snap')||'null');if(v&&Date.now()-v.t<3*864e5)return v;}catch(e){}return null;}
 function _ckSnapClear(){try{localStorage.removeItem('qw_ck_snap');}catch(e){}}
 try{if(/\/order\b/.test(location.pathname)||/[?&]t2=/.test(location.search))_ckSnapClear();}catch(e){}/* 已到訂單頁＝訂單成立，快照用不到了 */
@@ -1048,6 +1055,59 @@ function _ckWelcome(){
   if(ovl)close();
   _ckWelcome();
 }catch(e){}},400);})();
+
+/* ===== 2026-10-23 發票整合進精靈（老闆：先做發票整合）===== */
+function _rcHtml(){
+  var T=[['0','個人','電子發票'],['2','公司','統編'],['1','捐贈','捐給公益']],h='<div class="qiv"><div class="qck-l">🧾 發票</div><div class="qiv-seg">'
+   +T.map(function(t){return '<button type="button" class="'+(_ck.rType===t[0]?'sel':'')+'" onclick="__qw.ckPick(\'rType\',\''+t[0]+'\')">'+t[1]+'<small>'+t[2]+'</small></button>';}).join('')+'</div>';
+  if(_ck.rType==='0'){
+    h+='<div class="qck-ch">'+[['0','寄到 Email（會員載具）'],['3','手機條碼'],['2','自然人憑證']].map(function(c){return '<button type="button" class="'+(_ck.rCar===c[0]?'sel':'')+'" onclick="__qw.ckPick(\'rCar\',\''+c[0]+'\')">'+c[1]+'</button>';}).join('')+'</div>';
+    if(_ck.rCar==='0')h+='<div class="qiv-n">發票會寄到上面填的 Email</div>';
+    else h+=_ckIn('rNum','',0,_ck.rCar==='3'?'手機條碼，例：/ABC1234（/ 開頭共 8 碼）':'自然人憑證，例：AB12345678901234（2 碼英文＋14 碼數字）','text','');
+  }else if(_ck.rType==='2'){
+    h+=_ckIn('rTitle','公司抬頭',1,'例：上洋產業股份有限公司','text','')+_ckIn('rUBN','統一編號',1,'8 碼數字','tel','')+'<div class="qiv-n">公司統編發票將開立為紙本發票</div>';
+  }else{
+    h+=_ckIn('rLove','愛心碼',0,'選填，3～7 碼數字','tel','')+'<div class="qiv-w">⚠️ 捐贈的發票開出後無法取回</div><div class="qiv-n">不填愛心碼會捐給：336 天使心家族、2911811 良顯堂、003 台灣安心家庭關懷協會（隨機一個）</div>';
+  }
+  return h+'</div>';}
+function _rcCheck(e){
+  var up=function(x){return String(x||'').replace(/\s/g,'').toUpperCase();};
+  if(_ck.rType==='0'&&_ck.rCar==='3'){_ck.rNum=up(_ck.rNum);if(!/^\/[0-9A-Z.+\-]{7}$/.test(_ck.rNum))e.rNum='手機條碼格式不對：/ 開頭，共 8 碼';}
+  if(_ck.rType==='0'&&_ck.rCar==='2'){_ck.rNum=up(_ck.rNum);if(!/^[A-Z]{2}\d{14}$/.test(_ck.rNum))e.rNum='自然人憑證格式不對：2 碼英文＋14 碼數字';}
+  if(_ck.rType==='2'){if(String(_ck.rTitle||'').trim().length<2)e.rTitle='請填寫公司抬頭';var u=String(_ck.rUBN||'').replace(/\D/g,'');_ck.rUBN=u;if(!/^\d{8}$/.test(u))e.rUBN='統一編號要 8 碼數字';}
+  if(_ck.rType==='1'&&_ck.rLove){var l=String(_ck.rLove).replace(/\D/g,'');_ck.rLove=l;if(l.length<3||l.length>7)e.rLove='愛心碼要 3～7 碼數字';}
+  return e;}
+function _rcSave(){try{localStorage.setItem('qw_rcpt_pending',JSON.stringify({t:Date.now(),type:_ck.rType,car:_ck.rCar,num:_ck.rNum,title:_ck.rTitle,ubn:_ck.rUBN,love:_ck.rLove,email:String(_ck.email||'').trim()}));}catch(e){}}
+function _rcLoad(){try{var v=JSON.parse(localStorage.getItem('qw_rcpt_pending')||'null');if(v&&Date.now()-v.t<30*60000)return v;}catch(e){}return null;}
+/* 訂單頁：1SHOP 發票頁(form#receipt)出現 → 用精靈收的資料自動填好送出；失敗就留給客人（已填好），按「送出」即可 */
+function _rcAuto(){var t0=Date.now(),done=false,tm=setInterval(function(){try{
+  if(done||Date.now()-t0>30000){clearInterval(tm);return;}
+  var f=document.getElementById('receipt');if(!f||!f.offsetHeight)return;
+  var v=_rcLoad();if(!v){clearInterval(tm);return;}
+  done=true;clearInterval(tm);window.__qwRcptLock=true;/* 擋掉 fixReceiptDefault 把類型改回個人 */
+  _ckLoad(true,3,'正在為您填寫發票…');
+  var $=window.jQuery,set=function(sel,val){var el=f.querySelector(sel);if(!el)return null;if($)$(el).val(val).trigger('change');else{el.value=val;el.dispatchEvent(new Event('change',{bubbles:true}));}return el;};
+  set('[name="ReceiptType"]',v.type);
+  setTimeout(function(){
+    if(v.type==='0'){set('[name="CarruerType"]',v.car);}
+    setTimeout(function(){
+      var vis=function(name){return [].slice.call(f.querySelectorAll('[name="'+name+'"]')).filter(function(x){return x.offsetParent!==null;})[0];};
+      var put=function(name,val){var el=vis(name);if(el){el.value=val;if($)$(el).trigger('input').trigger('change');}};
+      if(v.type==='0'){if(v.car==='0'){var em=vis('ReceiptEmail');if(em&&!em.value&&v.email)put('ReceiptEmail',v.email);}else put('CarruerNum',v.num);}
+      else if(v.type==='2'){put('ReceiptTitle',v.title);put('TaxNum',v.ubn);}
+      else if(v.type==='1'){put('LoveCode',v.love||'');}
+      var ok=true;try{if($&&$(f).valid)ok=$(f).valid();}catch(e){}
+      if(window.__QW_CK_DRY){window.__qwRcResult={ok:ok,dry:true,type:v.type};_ckLoad(false);return;}
+      if(!ok){_ckLoad(false);toast('發票資料已幫您帶入，請確認後按「送出」');return;}
+      var b=f.querySelector('[type="submit"]');if(b)b.click();
+      /* 送出成功後 1SHOP 會把發票頁換成付款頁；等它換好再收掉過場 */
+      var t1=Date.now(),w=setInterval(function(){var still=document.getElementById('receipt');
+        if(!still||!still.offsetHeight){clearInterval(w);try{localStorage.removeItem('qw_rcpt_pending');}catch(e){}_ckLoad(false);toast('發票已幫您填好，請按「前往付款」');}
+        else if(Date.now()-t1>15000){clearInterval(w);_ckLoad(false);toast('發票資料已幫您帶入，請確認後按「送出」');}},400);
+    },350);
+  },350);
+}catch(e){done=true;clearInterval(tm);try{_ckLoad(false);}catch(e2){}}},400);}
+try{if(window.jQuery||document.readyState)setTimeout(_rcAuto,300);}catch(e){}
 function _cfToCart(){toast('已為您加入購物車，可再調整或結帳');
   setTimeout(function(){try{
     var t=null,hs=document.querySelectorAll('h1');
@@ -1659,7 +1719,7 @@ var api={
     setTimeout(function(){try{rb.click();}catch(e){}},60);
   },
   /* 2026-10-22 精靈內結帳 */
-  ckPick:function(k,v){_ck[k]=v;_ckSnapSave();if(k==='age'&&v!=='10-15年')_ck.ack=false;if(k==='env'&&v!=='社區')_ck.mgmt=false;delete _ck.err[k];
+  ckPick:function(k,v){_ck[k]=v;_ckSnapSave();if(k==='rType'||k==='rCar'){delete _ck.err.rNum;delete _ck.err.rTitle;delete _ck.err.rUBN;delete _ck.err.rLove;}if(k==='age'&&v!=='10-15年')_ck.ack=false;if(k==='env'&&v!=='社區')_ck.mgmt=false;delete _ck.err[k];
     if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}else render();},
   ckSet:function(k,v){_ck[k]=v;clearTimeout(window.__qwSnapT);window.__qwSnapT=setTimeout(_ckSnapSave,600);if(_ck.err[k]){delete _ck.err[k];var e=ovl&&ovl.querySelector('[data-ckerr="'+k+'"]');if(e)e.textContent='';var i=ovl&&ovl.querySelector('[data-ck="'+k+'"]');if(i)i.classList.remove('bad');}
     if(step==='confirm'&&(k==='agree'||k==='ack'))_cfTick();},
@@ -1678,6 +1738,7 @@ var api={
     if(step==='ck3'){
       if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(_ck.email||'').trim()))e.email='請填寫正確的 Email（訂單與發票通知會寄到這裡）';
       if(env!=='biz'&&_ck.env==='社區'&&!_ck.mgmt)e.mgmt='社區大樓需先取得管委會同意，請勾選確認';
+      _rcCheck(e);
       _ck.err=e;if(Object.keys(e).length){render();_ckShake('.qck-f .bad,.qck-chk.bad');return;}
       _ckSubmit();}
   },
@@ -2143,7 +2204,7 @@ function _hideBackBtn(){try{var b=document.getElementById('qw-back');if(b&&b.par
       每輪都設則會跟 Vue 打架變成閃爍(場勘折扣列那次的教訓)。 */
 var _rtSeen=false,_rtDone=false;
 function fixReceiptDefault(){try{
-  if(_rtDone)return;
+  if(_rtDone||window.__qwRcptLock||(function(){try{return !!JSON.parse(localStorage.getItem('qw_rcpt_pending')||'null');}catch(e){return false;}})())return;/* 2026-10-23 精靈代填發票時不動 */
   var s=document.querySelector('select[name="ReceiptType"]');
   if(!s||!s.options.length)return;
   if(!_rtSeen){_rtSeen=true;return;}   /* 第一輪只記錄,讓 Vue 先渲染完 */
