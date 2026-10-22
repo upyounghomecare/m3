@@ -738,7 +738,12 @@ function _cfTick(){
   if(go.getAttribute('data-h')!==gh){go.setAttribute('data-h',gh);go.innerHTML=gh;}
   /* 結帳模式：同意區沒完成也讓按鈕可以按（按了會把同意區捲出來搖一下），只有金額計算中才真的鎖 */
   go.disabled=!!busy;go.classList.toggle('qcf-busy',!!busy||(ck&&!aok));
-  var bk=ovl.querySelector('.qcf-bk');if(bk)bk.disabled=_cfClearing;}
+  var bk=ovl.querySelector('.qcf-bk');if(bk)bk.disabled=_cfClearing;
+  if(ck){try{var td=_ckTodo(),stop=td.length&&td[0][0]==='stop',n=stop?0:td.length,box=ovl.querySelector('.qck-box'),ft=ovl.querySelector('.qwfoot'),bar=ovl.querySelector('#qya');
+    if(box){box.classList.toggle('need',n>0);var bd=box.querySelector('.qck-h b');if(n>0){if(!bd){bd=document.createElement('b');box.querySelector('.qck-h').appendChild(bd);}bd.textContent='還差 '+n+' 步';}else if(bd)bd.parentNode.removeChild(bd);}
+    if(ft&&n>0&&!busy){if(!bar){bar=document.createElement('button');bar.type='button';bar.id='qya';bar.onclick=function(){_ckGoTodo();};ft.insertBefore(bar,ft.firstChild);}
+      var tx='<i>👇</i><span>'+(n>1?'還差 '+n+' 步就能結帳：'+td.map(function(x){return x[1];}).join('、'):'還差 1 步：'+td[0][1])+'</span><b>點我</b>';if(bar.getAttribute('data-t')!==tx){bar.setAttribute('data-t',tx);bar.innerHTML=tx;}}
+    else if(bar)bar.parentNode.removeChild(bar);}catch(e){}}}
 function _cfCss(){
   if(!document.getElementById('qcf-st')){var st=document.createElement('style');st.id='qcf-st';st.textContent=''
   /* 計算中過場：白色半透明蓋住精靈、中間金色轉圈＋三步驟打勾 */
@@ -757,6 +762,14 @@ function _cfCss(){
   +'@media (prefers-reduced-motion:reduce){#qcf-ld .bar b::after,#qcf-ld .it.on i{animation-duration:2.4s}}'
   /* 精靈內結帳（2026-10-22） */
   +'body.qck-run #qs-ovl,body.qck-run #checkout{opacity:0!important}'
+  /* 確認頁提醒（2026-10-23 老闆選 A＋B）：A 底部提示條、B 確認區金框呼吸光＋「還差 N 步」；確認頁不再顯示「往下滑看更多」（A 取代） */
+  +'#qw-ovl .qw-step-cf .qwmore{display:none!important}'
+  +'#qya{display:flex;align-items:center;gap:8px;width:calc(100% + 32px);margin:0 -16px 8px;padding:9px 16px;border:none;border-top:1px solid #F0D58C;border-bottom:1px solid #F0D58C;background:linear-gradient(135deg,#FFF3D6,#FFE7AE);font:900 13.5px/1.4 inherit;font-family:inherit;color:#6B4A00;text-align:left;cursor:pointer}'
+  +'#qya span{flex:1}#qya b{flex:none;background:#C0392B;color:#fff;border-radius:999px;padding:2px 9px;font-size:12px}#qya i{font-style:normal;font-size:16px;animation:qyaB 1.4s ease-in-out infinite}@keyframes qyaB{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}'
+  +'@media (min-width:760px) and (pointer:fine),(min-width:1100px){#qya{width:calc(100% + 44px);margin:0 -22px 8px;padding:9px 22px}}'
+  +'@keyframes qybG{0%,100%{box-shadow:0 0 0 0 rgba(212,169,71,.55)}50%{box-shadow:0 0 0 7px rgba(212,169,71,0)}}'
+  +'#qw-ovl .qck-box.need{border:2px solid #D4A947;animation:qybG 1.8s ease-in-out infinite}#qw-ovl .qck-box .qck-h b{margin-left:8px;font-size:12px;font-weight:900;color:#fff;background:#C0392B;border-radius:999px;padding:2px 8px;vertical-align:2px}'
+  +'@media (prefers-reduced-motion:reduce){#qya i,#qw-ovl .qck-box.need{animation:none}}'
   /* 歡迎回來卡片（2026-10-23） */
   +'#qwb-ovl{position:fixed;inset:0;z-index:2147482000;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit;animation:qcfLdIn .2s ease-out both}'
   +'#qwb-ovl .c{width:min(420px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:20px;box-shadow:0 24px 50px -20px rgba(0,0,0,.5)}'
@@ -850,10 +863,16 @@ function _cfLoad(on,n){
    原本的金額保護、方案券檢查、同意存證(fillConsent)都照樣會跑；任何一步沒過就停下來，顯示 1SHOP 原本的結帳視窗讓客人自己完成。 */
 var _ck={age:'',ack:false,agree:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null;
 var _CK_RULES=['只服務<b>三菱重工</b>冷氣（室內機面板有「HEAVY INDUSTRIES」），不含三菱電機及其他品牌','機齡 15 年以上、安裝高度 4 米以上恕不提供服務','機齡 10 年（含）以上恕不提供保固','偏遠地區／商用場所／挑高施作依規範加價','保固範圍、取消政策與注意事項依賣場服務規範'];
+/* 2026-10-23 老闆選 A＋B：確認頁提醒客人要選「冷氣用了幾年」並勾同意 —— 回傳還沒完成的項目（A 提示條、B 金框徽章共用） */
+function _ckTodo(){var t=[];if(!_ck.age)t.push(['age','選冷氣使用年數']);else if(_ck.age.indexOf('15年以上')>=0)return [['stop','']];
+  if(_ck.age==='10-15年'&&!_ck.ack)t.push(['ack','勾選 10 年以上不保固的確認']);if(!_ck.agree)t.push(['agree','勾選同意服務規範']);return t;}
+function _ckGoTodo(){var t=_ckTodo();if(!t.length)return;var k=t[0][0],sel=k==='age'||k==='stop'?'.qck-age':(k==='ack'?'.qck-agree .qck-chk:not(.qck-ag)':'.qck-agree .qck-ag');_ckShake(sel);}
 function _ckAgreeOK(){return !!(_ck.agree&&_ck.age&&_ck.age.indexOf('15年以上')<0&&(_ck.age!=='10-15年'||_ck.ack));}
 /* 小步驟膠囊放在標題說明(.sub)裡面：跟標題區同一塊深藍底、同寬、上下間距一致（10-22 老闆：原本獨立一塊，膠囊上下沒置中、電腦版左右露白） */
 function _ckSub(k){return '<span class="qx-sub">'+['① 確認','② 聯絡','③ 補充'].map(function(t,i){return '<span class="'+(i<k?'ok':(i===k?'on':''))+'">'+(i<k?'✓ ':'')+t+'</span>';}).join('')+'</span>';}
-function _ckShake(sel){try{var el=ovl&&ovl.querySelector(sel);if(!el)return;var c=ovl.querySelector('.qw');if(c)c.scrollTop=Math.max(0,el.offsetTop-120);el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}catch(e){}}
+function _ckShake(sel){try{var el=ovl&&ovl.querySelector(sel);if(!el)return;var c=ovl.querySelector('.qw');
+  /* 用畫面位置換算（offsetTop 是相對最近的定位容器，會算錯）；扣掉手機固定在上方的標題區 */
+  if(c){var st=c.querySelector('.qw-stick'),off=(st?st.offsetHeight:0)+16;c.scrollTop=Math.max(0,el.getBoundingClientRect().top-c.getBoundingClientRect().top+c.scrollTop-off);}el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}catch(e){}}
 function _ckAgreeHtml(){
   var A=['10年內','10-15年','15年以上（恕不服務）'],h='<div class="qck-box"><div class="qck-h">結帳前請確認</div>'
    +'<div class="qck-q">您家冷氣大約用了幾年？<b>必選</b></div><div class="qck-age">'+A.map(function(v){return '<button type="button" class="'+(_ck.age===v?'sel ':'')+(v.indexOf('15年以上')>=0?'no':'')+'" onclick="__qw.ckPick(\'age\',\''+v+'\')">'+v.replace('（','<br>（')+'</button>';}).join('')+'</div>';
@@ -1634,7 +1653,7 @@ var api={
   /* 2026-10-22 確認頁按鈕 */
   cfGo:function(){
     if(step!=='confirm'||!ovl)return;var d=_cfCart();if(_cfBusy(d))return;
-    if(window.__QW_CHECKOUT){_ckSnapSave();if(!_ckAgreeOK()){_ckShake(!_ck.age?'.qck-age':'.qck-agree .qck-box');return;}_ck.agreeAt=_ck.agreeAt||Date.now();step='ck2';render();return;}
+    if(window.__QW_CHECKOUT){_ckSnapSave();if(!_ckAgreeOK()){_ckGoTodo();return;}_ck.agreeAt=_ck.agreeAt||Date.now();step='ck2';render();return;}
     var rb=_cfRealBtn();if(!rb)return;
     clearInterval(_cfTm);_cfTm=null;close();
     setTimeout(function(){try{rb.click();}catch(e){}},60);
