@@ -2918,8 +2918,35 @@ function addContinueBtn(){
     };
   }catch(e){}
 }
+/* 2026-10-23 老闆選甲：期望到府日期改放獨立欄位（後台結帳表單自訂欄位「期望到府日期」，文字、非必填、客人看不到）。
+   格式：2026/10/26（一）下午（14-18點）；先不指定 → 未指定，由專人與客人約定。
+   有這個欄位：精靈藏起來＋自動填，同意存證就不再重複寫日期；沒有這個欄位（例如正式頁還沒加）：日期照舊寫在同意存證最前面。 */
+/* 老闆 10-23 選丙：「2026/10/26（週一）下午 14:00–18:00｜標準方案」；沒指定：「未指定（由專人來電約定）｜標準方案」 */
+function _cdPretty(){var c=window.__qsCleanDate||'',pl=window.__qsPlan==='early'?'早鳥方案':(window.__qsPlan==='std'?'標準方案':'');pl=pl?'｜'+pl:'';
+  if(!c||c==='未指定')return '未指定（由專人來電約定）'+pl;
+  var m=c.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/),wd='';if(m){var d=new Date(+m[1],+m[2]-1,+m[3]);wd='（週'+'日一二三四五六'.charAt(d.getDay())+'）';}
+  var sl=/上午/.test(c)?'上午 13:00 前':(/下午/.test(c)?'下午 14:00–18:00':(/晚上/.test(c)?'晚上':''));
+  return (m?m[1]+'/'+('0'+m[2]).slice(-2)+'/'+('0'+m[3]).slice(-2)+wd:c.replace(/（.*$/,''))+sl+pl;}
+function _cdField(re){re=re||/期望到府日期/;var cfs=document.querySelectorAll('[name^="cf-"]');for(var i=0;i<cfs.length;i++){var r=cfs[i].closest('.form-group');var l=r?((r.querySelector('label')||{}).textContent||''):'';if(re.test(l))return {el:cfs[i],row:r};}return null;}
+/* 除濕機期望配送日（老闆 10-23：跟清洗日分開成獨立欄位「除濕機期望配送日」；只有買除濕機的單才填）。格式：2026/11/02（一）上午 */
+function _dhPretty(){var c=window.__qsDhDelivery||'';var m=c.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(!m)return c;var d=new Date(+m[1],+m[2]-1,+m[3]);
+  var sl=(c.match(/（([^）]*)）\s*$/)||[])[1]||'';return m[1]+'/'+('0'+m[2]).slice(-2)+'/'+('0'+m[3]).slice(-2)+'（週'+'日一二三四五六'.charAt(d.getDay())+'）'+sl;}
+function _cfHide(f){if(f&&f.row&&f.row.getAttribute('data-qsc')!=='1'){f.row.style.cssText+=';position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;border:0!important;white-space:nowrap!important;';f.row.setAttribute('data-qsc','1');}}
+function _cfFill(f,v){if(!f||f.el.value===v)return;var st=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;st.call(f.el,v);f.el.dispatchEvent(new Event('input',{bubbles:true}));f.el.dispatchEvent(new Event('change',{bubbles:true}));}
+function fillDhDate(hasDh){try{var f=_cdField(/除濕機期望配送/);if(!f)return false;_cfHide(f);var on=!!(hasDh&&window.__qsDhDelivery);
+  /* 1SHOP 送單(savaOrder)會略過 .hide 的欄位 → 沒買除濕機時整行不送，後台訂單就不會出現這一行（老闆 10-23：沒買就不要顯示） */
+  if(f.row)f.row.classList.toggle('hide',!on);_cfFill(f,on?_dhPretty():'');return true;}catch(e){return false;}}
+function fillCleanDate(){try{
+  var f=_cdField();if(!f)return false;_cfHide(f);
+  if(!window.__qsPlan&&!window.__qsCleanDate)return true;
+  _cfFill(f,window.__qsCleanDate?_cdPretty():'');
+  return true;}catch(e){return false;}}
 function fillConsent(){
   try{
+    /* 兩個日期欄位不管有沒有走精靈都先藏起來（客人結帳時看不到，後台照常顯示） */
+    try{_cfHide(_cdField());var _dhf=_cdField(/除濕機期望配送/);_cfHide(_dhf);
+      /* 沒走精靈的單也一樣：購物車沒有除濕機（或沒選配送日）→ 標成 .hide，送單時不送，後台不出現這一行 */
+      if(_dhf&&_dhf.row){var _hd=_cartArr().some(function(x){return (x.ProductName||'').indexOf('除濕機')>=0;});_dhf.row.classList.toggle('hide',!(_hd&&window.__qsDhDelivery));}}catch(e){}
     /* 2026-09-22 欄位加回正式頁(8/16 刪掉後,除濕機期望配送日沒地方存、整個遺失)。
        後台欄位名稱「同意存證（含除濕機配送日）」,非必填;這裡一律把整列藏起來(客戶結帳畫面看不到,後台訂單明細照常顯示)。
        先找欄位、先藏,再判斷要不要寫 —— 上次被刪就是因為沒走精靈時沒藏,結帳頁冒出一個空白欄位。 */
@@ -2946,7 +2973,8 @@ function fillConsent(){
     var _cur=el.value||'';
     var _mt=_cur.match(/｜時間:([^｜]+)$/);var ts;
     if(_mt){ts=_mt[1];}else{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
-    var rec=(window.__qsCleanDate?'【期望清洗日:'+window.__qsCleanDate+'】':'')+(_hasDh?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+'｜時間:'+ts;
+    var _cdOwn=fillCleanDate(),_dhOwn=fillDhDate(_hasDh);/* 有獨立欄位就不在存證裡重複寫日期 */
+    var rec=((window.__qsCleanDate&&!_cdOwn)?'【期望清洗日:'+window.__qsCleanDate+'】':'')+((_hasDh&&!_dhOwn)?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+'｜時間:'+ts;
     if(_cur!==rec){
       var st=Object.getOwnPropertyDescriptor((el.tagName==='TEXTAREA'?window.HTMLTextAreaElement:window.HTMLInputElement).prototype,'value').set;
       st.call(el,rec);
