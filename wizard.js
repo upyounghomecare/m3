@@ -679,8 +679,8 @@ function curPos(){return step==='area'?1:(step==='env'?2:(step===1?3:(step===2?3
 /* 2026-10-19 老闆：測試頁多了「選日期」這一步 → 6 步；進度列、開場頁步驟說明都由這份清單自動產生 */
 var STEP_LB=['地區','環境','機型','加購','方案','日期'];
 /* 2026-10-22 老闆：精靈最後多一步「確認訂單」（__QW_CONFIRM 啟用時）→ 7 步 */
-function _lb(){return window.__QW_CONFIRM?STEP_LB.concat([window.__QW_CHECKOUT?'結帳':'確認']):STEP_LB;}
-function stepBar(p){var pos=p||curPos();function d(n){var c=(pos>n?'done':pos===n?'on':'');return '<div class="qwst '+c+'"><div class="qwdot '+c+'">'+(pos>n?'✓':n)+'</div><span class="qwdl">'+_lb()[n-1]+'</span></div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}var h='',L=_lb().length;for(var n=1;n<=L;n++){h+=d(n);if(n<L)h+=l(n);}return '<div class="qwbar">'+h+'</div>';}
+function _lb(){if(_svOn())return ['地區','環境','場勘','日期','結帳'];return window.__QW_CONFIRM?STEP_LB.concat([window.__QW_CHECKOUT?'結帳':'確認']):STEP_LB;}
+function stepBar(p){if(_svOn()&&p)p={6:4,7:5}[p]||p;var pos=p||curPos();function d(n){var c=(pos>n?'done':pos===n?'on':'');return '<div class="qwst '+c+'"><div class="qwdot '+c+'">'+(pos>n?'✓':n)+'</div><span class="qwdl">'+_lb()[n-1]+'</span></div>';}function l(n){return '<div class="qwln '+(pos>n?'done':'')+'"></div>';}var h='',L=_lb().length;for(var n=1;n<=L;n++){h+=d(n);if(n<L)h+=l(n);}return '<div class="qwbar">'+h+'</div>';}
 
 /* ===== 2026-10-22 第 7 步「確認訂單」（老闆 10-21 看過預覽說好）=====
    加完購物車後精靈不關，改顯示確認頁：地區/環境/期望日期、方案、品項、金色摘要（原價、折扣、應付）。
@@ -718,8 +718,9 @@ function _cfBusy(d){
   return false;}
 function _cfBody(d,busy){
   var e=_esc,h='<div class="qcf-info"><span>📍 '+e((areaCity||'')+' '+(areaDist||''))+'</span><span>'+(env==='biz'?'🏢 營業場所':'🏠 家用')+'</span>'
-   +'<span>🗓 '+((window.__qsCleanDate&&window.__qsCleanDate!=='未指定')?'期望到府：'+e(window.__qsCleanDate):'到府日期：由專人與您約定')+'</span></div>';
-  if(plan)h+='<div class="qcf-plan"><div class="ck">✓</div><div><div class="t1">您選擇的方案</div><div class="t2">'+(plan==='early'?'早鳥方案・約時起 30 天後到府':'標準方案・約時起 2 週內到府')+'</div><div class="t3">📞 專人將於 0.5～1 個工作天內來電約時（付款後起算、不含假日）</div></div></div>';
+   +'<span>🗓 '+((window.__qsCleanDate&&window.__qsCleanDate!=='未指定')?(_svOn()?'期望場勘：':'期望到府：')+e(window.__qsCleanDate):(_svOn()?'場勘日期：由專人與您約定':'到府日期：由專人與您約定'))+'</span></div>';
+  if(_svOn())h+='<div class="qcf-plan"><div class="ck">🔍</div><div><div class="t1">您選擇的服務</div><div class="t2">到府場勘估價</div><div class="t3">技師到府勘查，依實際機型與環境提供確定報價；📞 專人將於 0.5～1 個工作天內來電約時（付款後起算、不含假日）</div></div></div><div class="qcf-pn" style="margin:0 0 10px">※ 場勘後若未安排清洗，此費用不予退還</div>';
+  else if(plan)h+='<div class="qcf-plan"><div class="ck">✓</div><div><div class="t1">您選擇的方案</div><div class="t2">'+(plan==='early'?'早鳥方案・約時起 30 天後到府':'標準方案・約時起 2 週內到府')+'</div><div class="t3">📞 專人將於 0.5～1 個工作天內來電約時（付款後起算、不含假日）</div></div></div>';
   if(!d||!d.it.length)return h+'<div class="qcf-sum busy"><div class="sp"><i></i>正在為您加入購物車…</div></div>';
   var its=d.it.filter(function(x){return !_isCorr(x.n);}),orig=0;its.forEach(function(x){orig+=x.a;});var prot=its.some(function(x){return _isProt(x.n);}),svy=its.some(function(x){return (x.n||'').indexOf(SURVEY_PREFIX)===0;});
   h+='<div class="qcf-list">'+its.map(function(x){var u=x.q?x.a/x.q:x.a;
@@ -731,7 +732,7 @@ function _cfBody(d,busy){
      +'<div class="r"><span>原價合計</span><span>'+_cfMoney(orig)+'</span></div>'
      +(save>0?'<div class="r g"><span>✦ '+e(cpn||'折扣')+(prot?'（清洗項目）':'')+'</span><span>－'+_cfMoney(save)+'</span></div>':(save<0?'<div class="r"><span>其他費用</span><span>＋'+_cfMoney(-save)+'</span></div>':''))
      +'<div class="t"><span>應付金額</span><b>'+_cfMoney(d.pay)+'</b></div>'+(prot?'<div class="qcf-pn">AIRMON、除濕機為加購優惠價，不參與方案折扣</div>':'')+(svy?'<div class="qcf-pn">到府場勘費不適用任何方案折扣與優惠碼</div>':'')+'</div>';}
-  return h+'<button type="button" class="qcf-more" onclick="__qw.cfMore()">＋ 還要加購其他清洗項目</button>';}
+  return h+(_svOn()?'':'<button type="button" class="qcf-more" onclick="__qw.cfMore()">＋ 還要加購其他清洗項目</button>');}
 function _cfTick(){
   if(step!=='confirm'||!ovl){clearInterval(_cfTm);_cfTm=null;return;}
   var body=ovl.querySelector('.qcf-body'),go=ovl.querySelector('.qcf-go');if(!body||!go)return;
@@ -740,6 +741,14 @@ function _cfTick(){
   if(_cfClearing){var hc='<div class="qcf-sum busy"><div class="sp"><i></i>正在清空購物車，清完會回到「選方案」…</div></div>';if(_cfLast!==hc){body.innerHTML=hc;_cfLast=hc;}}
   else{var h=_cfBody(d,busy);if(h!==_cfLast){body.innerHTML=h;_cfLast=h;}}
   var ck=!!window.__QW_CHECKOUT,aok=ck?_ckAgreeOK():true;
+  /* 2026-10-25 老闆：金額顯示完，等 2 秒自動捲到「結帳前請確認」並搖一下要做的那一項。
+     每次進確認頁只做一次；客人已經自己在捲、或已經勾完，就不動，免得跟客人搶畫面 */
+  if(ck&&!busy&&!_cfClearing&&!_cfLd&&!document.getElementById('qcf-ld')&&_cfAutoAt!==_cfT0){/* 「計算中」過場完全收掉、客人看得到金額，才開始算 2 秒 */_cfAutoAt=_cfT0;var _q0=ovl.querySelector('.qw'),_s0=_q0?_q0.scrollTop:0;
+    setTimeout(function(){try{if(step!=='confirm'||!ovl||_ckAgreeOK())return;var q=ovl.querySelector('.qw'),bx=ovl.querySelector('.qck-box');if(!q||!bx||Math.abs(q.scrollTop-_s0)>40)return;
+      var st=q.querySelector('.qw-stick'),off=(st?st.offsetHeight:0)+12,to=Math.max(0,bx.getBoundingClientRect().top-q.getBoundingClientRect().top+q.scrollTop-off);
+      try{q.scrollTo({top:to,behavior:'smooth'});}catch(e){q.scrollTop=to;}
+      setTimeout(function(){try{if(Math.abs(q.scrollTop-to)>30)q.scrollTop=to;var t=_ckTodo();if(!t.length)return;var k=t[0][0],sel=(k==='age'||k==='stop')?'.qck-age':(k==='ack'?'.qck-agree .qck-chk:not(.qck-ag)':'.qck-agree .qck-ag');var el=ovl.querySelector(sel);if(el){el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}}catch(e){}},700);
+    }catch(e){}},2000);}
   var gh=busy?'<span class="l1">金額確認中…</span>':(ck?'<span class="l1">下一步：填聯絡資料</span><span class="l2">'+(aok?'應付 '+_cfMoney(d.pay):'請先完成上方的確認')+'</span>':'<span class="l1">立即結帳</span><span class="l2">應付 '+_cfMoney(d.pay)+'</span>');
   if(go.getAttribute('data-h')!==gh){go.setAttribute('data-h',gh);go.innerHTML=gh;}
   /* 結帳模式：同意區沒完成也讓按鈕可以按（按了會把同意區捲出來搖一下），只有金額計算中才真的鎖 */
@@ -849,11 +858,11 @@ var _cfLd=null,_cfLdTm=null,_cfLdT0=0,_cfLdN=0,_cfLdP=0,_cfLdS=[false,false,fals
 function _cfLoad(on,n){
   if(!on){clearInterval(_cfLdTm);_cfLdTm=null;var o=_cfLd;_cfLd=null;if(o){o.classList.add('out');setTimeout(function(){if(o.parentNode)o.parentNode.removeChild(o);},260);}return;}
   if(!ovl||_cfLd)return;_cfCss();_cfLdT0=Date.now();_cfLdN=n||1;
-  var pn=plan==='early'?'早鳥85折':(plan==='std'?'標準方案折扣':'方案折扣');
+  var pn=plan==='early'?'早鳥85折':(plan==='std'?'標準方案折扣':'方案折扣');var _sv1=_svOn();
   var d=document.createElement('div');d.id='qcf-ld';d.setAttribute('role','status');d.setAttribute('aria-live','polite');
   /* 老闆 10-22 選：A 的步驟打勾＋B 的金色進度條 */
   d.innerHTML='<div class="box"><div class="t">正在為您計算訂單金額</div><div class="bar"><b></b></div><div class="pct">0%</div><div class="s">約需 10～20 秒，請稍候</div>'
-   +'<div class="st"><div class="it on" data-k="1"><i></i>加入您選的清洗項目</div><div class="it" data-k="2"><i></i>套用'+pn+'</div><div class="it" data-k="3"><i></i>確認應付金額</div></div></div>';
+   +'<div class="st"><div class="it on" data-k="1"><i></i>'+(_sv1?'加入到府場勘':'加入您選的清洗項目')+'</div><div class="it" data-k="2"><i></i>'+(_sv1?'確認場勘費（不適用折扣）':'套用'+pn)+'</div><div class="it" data-k="3"><i></i>確認應付金額</div></div></div>';
   document.body.appendChild(d);_cfLd=d;_cfLdP=0;_cfLdS=[false,false,false];/* 掛 body：掛在 #qw-ovl 裡，確認頁重畫(innerHTML)會把過場一起洗掉 */
   _cfLdTm=setInterval(function(){try{
     if(!_cfLd)return;if(!ovl){_cfLoad(false);return;}
@@ -873,22 +882,27 @@ function _cfLoad(on,n){
 /* ===== 2026-10-22 精靈內結帳（老闆選乙：第 7 步「結帳」內含 ①確認 ②聯絡 ③補充）=====
    客人在精靈填完 → 按「前往付款」→ 精靈照原本的路走：立即結帳 → 同意視窗(代勾代按) → 1SHOP 第1/2/3步(代填代按) → 送出 → 訂單頁(發票、付款)
    原本的金額保護、方案券檢查、同意存證(fillConsent)都照樣會跑；任何一步沒過就停下來，顯示 1SHOP 原本的結帳視窗讓客人自己完成。 */
-var _cfBackOk=0;
+var _cfBackOk=0,_cfAutoAt=0;
+var _svFlow=false;/* 2026-10-25 精靈正在走「到府場勘」新流程（日期→確認→聯絡→補充） */
+function _svOn(){return _svFlow&&!!window.__QW_CHECKOUT;}
 var _ck={age:'',ack:false,agree:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',rType:'0',rCar:'0',rNum:'',rTitle:'',rUBN:'',rLove:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null;
 var _CK_RULES=['只服務<b>三菱重工</b>冷氣（室內機面板有「HEAVY INDUSTRIES」），不含三菱電機及其他品牌','機齡 15 年以上、安裝高度 4 米以上恕不提供服務','機齡 10 年（含）以上恕不提供保固','偏遠地區／商用場所／挑高施作依規範加價','保固範圍、取消政策與注意事項依賣場服務規範'];
 /* 2026-10-23 老闆選 A＋B：確認頁提醒客人要選「冷氣用了幾年」並勾同意 —— 回傳還沒完成的項目（A 提示條、B 金框徽章共用） */
-function _ckTodo(){var t=[];if(!_ck.age)t.push(['age','選冷氣使用年數']);else if(_ck.age.indexOf('15年以上')>=0)return [['stop','']];
+function _ckTodo(){var t=[];if(_svOn()){if(!_ck.agree)t.push(['agree','勾選同意服務規範']);return t;}if(!_ck.age)t.push(['age','選冷氣使用年數']);else if(_ck.age.indexOf('15年以上')>=0)return [['stop','']];
   if(_ck.age==='10-15年'&&!_ck.ack)t.push(['ack','勾選 10 年以上不保固的確認']);if(!_ck.agree)t.push(['agree','勾選同意服務規範']);return t;}
 function _ckGoTodo(){var t=_ckTodo();if(!t.length)return;var k=t[0][0],sel=k==='age'||k==='stop'?'.qck-age':(k==='ack'?'.qck-agree .qck-chk:not(.qck-ag)':'.qck-agree .qck-ag');_ckShake(sel);}
-function _ckAgreeOK(){return !!(_ck.agree&&_ck.age&&_ck.age.indexOf('15年以上')<0&&(_ck.age!=='10-15年'||_ck.ack));}
+function _ckAgreeOK(){if(_svOn())return !!_ck.agree;return !!(_ck.agree&&_ck.age&&_ck.age.indexOf('15年以上')<0&&(_ck.age!=='10-15年'||_ck.ack));}
 /* 小步驟膠囊放在標題說明(.sub)裡面：跟標題區同一塊深藍底、同寬、上下間距一致（10-22 老闆：原本獨立一塊，膠囊上下沒置中、電腦版左右露白） */
 function _ckSub(k){return '<span class="qx-sub">'+['① 確認','② 聯絡','③ 補充'].map(function(t,i){return '<span class="'+(i<k?'ok':(i===k?'on':''))+'">'+(i<k?'✓ ':'')+t+'</span>';}).join('')+'</span>';}
 function _ckShake(sel){try{var el=ovl&&ovl.querySelector(sel);if(!el)return;var c=ovl.querySelector('.qw');
   /* 用畫面位置換算（offsetTop 是相對最近的定位容器，會算錯）；扣掉手機固定在上方的標題區 */
   if(c){var st=c.querySelector('.qw-stick'),off=(st?st.offsetHeight:0)+16;c.scrollTop=Math.max(0,el.getBoundingClientRect().top-c.getBoundingClientRect().top+c.scrollTop-off);}el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}catch(e){}}
 function _ckAgreeHtml(){
-  var A=['10年內','10-15年','15年以上（恕不服務）'],h='<div class="qck-box"><div class="qck-h">結帳前請確認</div>'
-   +'<div class="qck-q">您家冷氣大約用了幾年？<b>必選</b></div><div class="qck-age">'+A.map(function(v){return '<button type="button" class="'+(_ck.age===v?'sel ':'')+(v.indexOf('15年以上')>=0?'no':'')+'" onclick="__qw.ckPick(\'age\',\''+v+'\')">'+v.replace('（','<br>（')+'</button>';}).join('')+'</div>';
+  var A=['10年內','10-15年','15年以上（恕不服務）'],h='<div class="qck-box"><div class="qck-h">結帳前請確認</div>';
+  if(_svOn()){/* 場勘：技師到府才看得到機齡，這裡不問 */
+    return h+'<ul class="qck-rules">'+_CK_RULES.map(function(r){return '<li>'+r+'</li>';}).join('')+'</ul>'
+     +'<label class="qck-chk qck-ag'+(_ck.agree?' on':'')+'"><input type="checkbox"'+(_ck.agree?' checked':'')+' onchange="__qw.ckSet(\'agree\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我已詳閱並同意賣場服務規範與隱私權政策</span></label></div>';}
+  h+='<div class="qck-q">您家冷氣大約用了幾年？<b>必選</b></div><div class="qck-age">'+A.map(function(v){return '<button type="button" class="'+(_ck.age===v?'sel ':'')+(v.indexOf('15年以上')>=0?'no':'')+'" onclick="__qw.ckPick(\'age\',\''+v+'\')">'+v.replace('（','<br>（')+'</button>';}).join('')+'</div>';
   if(_ck.age==='10-15年')h+='<label class="qck-chk'+(_ck.ack?' on':'')+'"><input type="checkbox"'+(_ck.ack?' checked':'')+' onchange="__qw.ckSet(\'ack\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我已了解 10 年以上機種清洗不提供保固，仍願意預約服務</span></label>';
   if(_ck.age.indexOf('15年以上')>=0)h+='<div class="qck-stop">很抱歉，機齡 15 年以上因零件老化風險高，恕無法提供清洗服務。如有疑問請聯繫客服。</div>';
   h+='<ul class="qck-rules">'+_CK_RULES.map(function(r){return '<li>'+r+'</li>';}).join('')+'</ul>'
@@ -924,8 +938,8 @@ function _ckHtml(k){
      +'<div class="qck-f"><div class="qck-l">服務環境<b>*</b></div>'+(isBiz?'<div class="qck-auto"><div>營業場所／重油汙<em>✓ 依您選的「營業場所」帶入</em></div></div>'
        :'<div class="qck-ch">'+[['住家','一般住家'],['社區','社區大樓（需管委會同意）']].map(function(g){return '<button type="button" class="'+(_ck.env===g[0]?'sel':'')+'" onclick="__qw.ckPick(\'env\',\''+g[0]+'\')">'+g[1]+'</button>';}).join('')+'</div>')+'</div>'
      +((!isBiz&&_ck.env==='社區')?'<label class="qck-chk'+(_ck.mgmt?' on':'')+(_ck.err.mgmt?' bad':'')+'"><input type="checkbox"'+(_ck.mgmt?' checked':'')+' onchange="__qw.ckSet(\'mgmt\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked);this.parentNode.classList.remove(\'bad\')"><span>我已取得社區管委會同意施工</span></label><div class="qck-err" data-ckerr="mgmt">'+(_ck.err.mgmt||'')+'</div>':'')
-     +'<div class="qck-auto"><div>機齡 '+_esc((_ck.age||'').replace('（恕不服務）',''))+'・安裝高度 '+_esc(_ckHeight().replace('（不加價）',''))+'<em>✓ 已依前面的選擇帶入</em></div></div>'
-     +_ckIn('model','機器型號',0,'例：SRK35ZSXT-W','text','選填，方便技師事前準備')
+     +(_svOn()?'':'<div class="qck-auto"><div>機齡 '+_esc((_ck.age||'').replace('（恕不服務）',''))+'・安裝高度 '+_esc(_ckHeight().replace('（不加價）',''))+'<em>✓ 已依前面的選擇帶入</em></div></div>'
+     +_ckIn('model','機器型號',0,'例：SRK35ZSXT-W','text','選填，方便技師事前準備'))
      +_ckIn('note','備註',0,'有特殊需求可以寫在這裡（選填）','ta')
      +_rcHtml()
      +'<div class="qck-note">💳 按「前往付款」後會到<b>綠界</b>的頁面輸入信用卡，卡號只在綠界輸入。</div>';
@@ -1022,12 +1036,14 @@ function _ckSubmit(){
             /* 第 3 步：稱呼、Email、機齡、保固確認、安裝高度、服務環境、管委會、型號、備註；同意存證由 fillConsent 寫 */
             var g=m.querySelector('[name="Gender"][value="'+_ck.gender+'"]');if(g){g.checked=true;_ckFire(g);}
             _ckSet(m.querySelector('[name="UserEmail"]'),String(_ck.email).trim());
+            if(_svOn()){[/機齡確認/,/10年以上機種/,/安裝高度/,/機器型號/].forEach(function(re){var x=_ckField(re),g=x&&x.closest('.form-group,.checkbox');if(g)g.classList.add('hide');});}
+            else{
             _ckSet(_ckField(/機齡確認/),_ck.age);
             if(_ck.age==='10-15年')_ckSet(_ckField(/10年以上機種/),true);
-            _ckSet(_ckField(/安裝高度/),_ckHeight());
+            _ckSet(_ckField(/安裝高度/),_ckHeight());}
             var ev=_ckField(/服務環境/);if(ev){_ckSet(ev,env==='biz'?'營業場所':(_ck.env==='社區'?'社區大樓':'一般住家'));ev.setAttribute('data-qse','1');}
             if(env!=='biz'&&_ck.env==='社區')setTimeout(function(){_ckSet(_ckField(/管委會/),true);},200);
-            if(_ck.model)_ckSet(_ckField(/機器型號/),String(_ck.model).trim());
+            if(_ck.model&&!_svOn())_ckSet(_ckField(/機器型號/),String(_ck.model).trim());
             if(_ck.note)_ckSet(m.querySelector('[name="Note"]'),String(_ck.note));
             try{fillConsent();}catch(e){}
             setTimeout(function(){
@@ -1062,6 +1078,7 @@ try{if(/\/order\b/.test(location.pathname)||/[?&]t2=/.test(location.search))_ckS
 function _ckResume(){
   var sn=_ckSnapLoad(),c=_cfCart()||{it:[],cp:[]},cpn=c.cp.map(function(x){return x.n;}).join('');
   plan=/早鳥/.test(cpn)?'early':(/標準|全戶/.test(cpn)?'std':((sn&&sn.plan)||plan));
+  _svFlow=_svInCart();if(_svFlow)plan=null;/* 2026-10-25 場勘單沒有方案（車上的券只是被價差補回的） */
   env=c.it.some(function(x){return /商用|重油汙/.test(x.n);})?'biz':((sn&&sn.env)||env||'home');
   var cc=document.querySelector('select[name="CountyAndCity"]'),ar=document.querySelector('select[name="Area"]');
   var fc=(cc&&cc.selectedIndex>0)?(cc.options[cc.selectedIndex].text||''):'',fa=(ar&&ar.selectedIndex>0)?String(ar.options[ar.selectedIndex].text||'').replace(/^\d+\s*/,''):'';
@@ -1182,6 +1199,7 @@ function _cfHtml(){var ck=!!window.__QW_CHECKOUT;return '<div class="qw qw-step-
   +'<div class="nav"><button class="btn gho qcf-bk" onclick="__qw.cfBack()">上一步</button><button class="btn pri qcf-go" disabled onclick="__qw.cfGo()"><span class="l1">金額確認中…</span></button></div></div>';}
 function render(){
   var w='';
+  if(step===0||step==='area'||step==='env'||step===1||step===2||step===3||step===4)_svFlow=false;
   if(env==='biz')qty.bz=bzQty();qty.tf=tfQty();
   if(window.__QW_CONFIRM)_cfCss();
   if(step==='confirm'){w=_cfHtml();}
@@ -1272,7 +1290,7 @@ function render(){
        老闆定案:錢照收,但這裡要先把明細攤開來給客戶看。 */
     var svRm=(areaCls==='remote'), svTot=sv.p+(svRm?600:0);
     w='<div class="qw">'
-     +'<div class="qwbar"><span class="ws"><i class="wsn">1</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>場勘</span></div>'
+     +'<div class="qwbar"><span class="ws"><i class="wsn">1</i>地區</span><span class="wsa">›</span><span class="ws"><i class="wsn">2</i>環境</span><span class="wsa">›</span><span class="ws"><i class="wsn">3</i>場勘</span>'+(window.__QW_CHECKOUT?'<span class="wsa">›</span><span class="ws"><i class="wsn">4</i>日期</span><span class="wsa">›</span><span class="ws"><i class="wsn">5</i>結帳</span>':'')+'</div>'
      +'<h2>到府場勘估價</h2><p class="sub">技師到府現場勘查，並提供清洗報價</p>'
      +'<div class="qsum">'
      +'<div class="qsr"><span>服務地區</span><b>'+(areaCity||'')+' '+(areaDist||'')+(svRm?'<span class="qsr-tag">偏遠</span>':'')+'</b></div>'
@@ -1288,7 +1306,7 @@ function render(){
      +'<div class="qsok">✓ 技師到府現場勘查，依實際機型與環境<b>提供確定報價</b><br>不需要您自行判斷要洗哪些</div>'
      +'<div class="qswarn">※ 場勘後若未安排清洗，此費用不予退還</div>'
      +'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">返回，我要直接選機型</button>'
-     +'<button class="btn pri" onclick="__qw.finishSurvey()">加入購物車</button></div></div>';
+     +(window.__QW_CHECKOUT?'<button class="btn pri" onclick="__qw.svDate()">下一步：選期望日期</button>':'<button class="btn pri" onclick="__qw.finishSurvey()">加入購物車</button>')+'</div></div>';
   } else if(step===2){
     var outN=sumKeys(['o1','om']),inNow=sumKeys(['wall','cs','cm','cl','m4','f4']);
     var tfHint=(env==='home'&&inNow===0&&outN===1);
@@ -1568,7 +1586,7 @@ function showCleanDatePicker(pl,onDone,opt){
     老闆 2026-10-12：「先不指定」維持按鈕樣式(不要文字連結)。 */
  opt=opt||{};
  if(document.getElementById('qw-cdcal'))return;
- var RG={std:[3,90],early:[30,90]}/* 2026-10-18 老闆：標準方案可約 D+3～D+90（原 3～14） */,PN={std:'標準方案',early:'早鳥方案'};
+ var RG={std:[3,90],early:[30,90],sv:[3,90]}/* 2026-10-18 老闆：標準方案可約 D+3～D+90（原 3～14） */,PN={std:'標準方案',early:'早鳥方案',sv:'到府場勘'};
  var a=RG[pl][0], z=RG[pl][1];
  var MIN=new Date();MIN.setHours(0,0,0,0);MIN.setDate(MIN.getDate()+a);
  var MAX=new Date();MAX.setHours(23,59,59,999);MAX.setDate(MAX.getDate()+z);
@@ -1596,7 +1614,7 @@ function showCleanDatePicker(pl,onDone,opt){
   +'<div class="qwcd-hd"><div class="qwcd-grab"></div><div class="qwcd-ttl">'+(ED?'變更期望到府服務時間':'選擇期望到府服務時間')+'</div><button id="qwcd-x" type="button" class="qwcd-x" aria-label="關閉">×</button>'
    +(ED?'':stepBar(6))
   +(ED?'<div class="qwcd-st">您選擇的方案<span>只能改日期與時段，方案不變</span></div><div class="qwcd-ed"><i class="qwcd-ck">✓</i>'+PN[pl]+'</div>'
-      :'<div class="qwcd-st">您選擇的方案<span>右邊可以改選</span></div><div class="qwcd-seg">'+segOn()+segSw()+'</div>')
+      :(opt.sv?'<div class="qwcd-st">您選擇的服務</div><div class="qwcd-ed"><i class="qwcd-ck">✓</i>到府場勘估價</div>':'<div class="qwcd-st">您選擇的方案<span>右邊可以改選</span></div><div class="qwcd-seg">'+segOn()+segSw()+'</div>'))
   +(ex?'<div id="qwcd-plan" class="qwcd-ex">'+ex+'</div>':'')+'</div>'
   +'<div class="qwcd-bd">'
   +'<div class="qwcd-row"><span class="qwcd-k">期望到府日期</span><span class="qwcd-rg">'+PN[pl]+'可選 '+_dhFmt(_F).slice(5)+'～'+_dhFmt(_L).slice(5)+'</span></div>'
@@ -1755,6 +1773,12 @@ var api={
   goSurvey:function(){step='survey';render();},
   /* 單獨買場勘費:不經過方案步驟(沒有清洗要排程,方案沒有意義),
      所以不設 __qsPlan、也不呼叫 __qsApplyPlanCoupon */
+  /* 2026-10-25 場勘新流程：先選期望場勘日期（可略過），再加入購物車、進確認頁 */
+  svDate:function(){
+    if(_finishing||window.__qsAdding)return;
+    _svFlow=true;plan=null;window.__qsPlan=null;window.__qsCleanDate='';
+    showCleanDatePicker('sv',function(){api.finishSurvey();},{sv:1});
+  },
   finishSurvey:function(){
     if(_finishing||window.__qsAdding)return;
     var sv=_surveyOf();
@@ -1771,6 +1795,20 @@ var api={
          拿早鳥的 0.15 去跟客戶輸入的碼比較而擋錯人。這裡直接清掉。 */
       window.__qsPlan=null;plan=null;
       try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}
+      /* 2026-10-25 新流程：不關精靈，等場勘真的進購物車（偏遠再補「偏遠地區加價」，金額才跟場勘頁一致），再進確認頁 */
+      if(window.__QW_CHECKOUT&&window.__QW_CONFIRM&&ovl){
+        _svFlow=true;_cfLoad(true,(areaCls==='remote')?2:1);
+        var _t0=Date.now(),_rmDone=(areaCls!=='remote');
+        (function _w(){
+          var has=_svInCart();
+          if(has&&!_rmDone){_rmDone=true;var rr=_resolveBtn('偏遠地區加價');if(rr){try{window.viewProduct(rr.btn,rr.pid);}catch(e){}}setTimeout(_w,900);return;}
+          if(!has&&Date.now()-_t0<8000){setTimeout(_w,250);return;}
+          setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
+          if(!has){_cfLoad(false);_finishing=false;window.__qsAdding=false;_qwDlg({title:'加入購物車沒有成功',html:'抱歉，加入「到府場勘」時發生問題，請再試一次；若持續失敗，請聯繫客服。'});return;}
+          _cfT0=Date.now();_cfSig='';_cfChg=Date.now();step='confirm';render();try{_ckSnapSave();}catch(e){}
+        })();
+        return;
+      }
       setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
       close();toast('已加入到府場勘，可直接結帳');
       setTimeout(function(){try{
@@ -1824,7 +1862,7 @@ var api={
   },
   cfBack:function(){
     if(step!=='confirm'||_cfClearing)return;
-    if(!_cfBackOk){_qwDlg({title:'要修改選擇嗎？',html:'會先<b style="color:#C0392B">清空目前購物車</b>，再回到「選方案」這一步。<div class="keep">✓ 您選的地區、機型、台數都會保留</div>',cancel:'不用了',ok:'確定修改',
+    if(!_cfBackOk){_qwDlg({title:'要修改選擇嗎？',html:'會先<b style="color:#C0392B">清空目前購物車</b>，再回到'+(_svOn()?'「到府場勘」':'「選方案」')+'這一步。<div class="keep">✓ 您選的地區、'+(_svOn()?'服務環境':'機型、台數')+'都會保留</div>',cancel:'不用了',ok:'確定修改',
       onOk:function(){_cfBackOk=1;window.__qw.cfBack();},
       onCancel:function(){try{history.pushState({qw:'7'},'');}catch(e){}try{window.dispatchEvent(new Event('qw-back-cancel'));}catch(e){}}});return;}
     _cfBackOk=0;
@@ -1834,7 +1872,7 @@ var api={
       /* 全域方案/地區先清掉(避免空車時被保護機制拿去用),精靈自己的選擇(qty/plan/env/地區)保留,再按完成時 finish 會重新寫回 */
       window.__qsPlan=null;window.__qsEnv=null;window.__qsAreaCity=null;window.__qsAreaDist=null;window.__qsAreaCls=null;
       window.__qsCorrBusy=0;
-      setTimeout(function(){window.__qsAdding=false;_cfClearing=false;clearInterval(_cfTm);_cfTm=null;if(ovl){step=4;render();}},900);
+      setTimeout(function(){window.__qsAdding=false;_cfClearing=false;clearInterval(_cfTm);_cfTm=null;if(ovl){step=_svOn()?'survey':4;render();}},900);
     });
   },
   confirmPlan:function(){
@@ -1896,6 +1934,7 @@ var api={
     },180);
   },
   finish:function(){
+    _svFlow=false;
     /* 防重入用獨立旗標 _finishing;__qsAdding 會凍結所有保護機制(校正/車馬費/挑高/孤兒把關),
        只能在真正開始加購時才設,且任何中途返回或例外都必須解除,否則保護會永久停擺 */
     if(_finishing||window.__qsAdding)return;
@@ -2738,7 +2777,7 @@ function _renderWhen(){try{
      +'<button type="button" data-qs-edit="'+x.k+'" style="flex:none;border:1.5px solid #C9D7E6;background:#fff;color:#0C447C;font-size:12px;font-weight:800;border-radius:999px;padding:4px 11px;cursor:pointer;font-family:inherit">修改</button></div>';}).join('')
    +'</div>';
   [].slice.call(el.querySelectorAll('[data-qs-edit]')).forEach(function(b){b.onclick=function(e){e.preventDefault();e.stopPropagation();_qwCss();
-    if(b.getAttribute('data-qs-edit')==='c'){var pl=(window.__qsPlan==='early')?'early':'std';showCleanDatePicker(pl,function(){_renderWhen();},{edit:true,cur:window.__qsCleanDate});}
+    if(b.getAttribute('data-qs-edit')==='c'){var pl=(window.__qsPlan==='early')?'early':(_svInCart()&&!window.__qsPlan?'sv':'std');showCleanDatePicker(pl,function(){_renderWhen();},{edit:true,cur:window.__qsCleanDate});}
     else{showDeliveryPicker(function(){_renderWhen();},{edit:true,cur:window.__qsDhDelivery});}};});
 }catch(e){}}
 function _renderPlanSum(wrap,collapsed){
@@ -3063,7 +3102,7 @@ function addContinueBtn(){
    格式：2026/10/26（一）下午（14-18點）；先不指定 → 未指定，由專人與客人約定。
    有這個欄位：精靈藏起來＋自動填，同意存證就不再重複寫日期；沒有這個欄位（例如正式頁還沒加）：日期照舊寫在同意存證最前面。 */
 /* 老闆 10-23 選丙：「2026/10/26（週一）下午 14:00–18:00｜標準方案」；沒指定：「未指定（由專人來電約定）｜標準方案」 */
-function _cdPretty(){var c=window.__qsCleanDate||'',pl=window.__qsPlan==='early'?'早鳥方案':(window.__qsPlan==='std'?'標準方案':'');pl=pl?'｜'+pl:'';
+function _cdPretty(){var c=window.__qsCleanDate||'',pl=window.__qsPlan==='early'?'早鳥方案':(window.__qsPlan==='std'?'標準方案':(_svInCart()?'到府場勘':''));pl=pl?'｜'+pl:'';
   if(!c||c==='未指定')return '未指定（由專人來電約定）'+pl;
   var m=c.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/),wd='';if(m){var d=new Date(+m[1],+m[2]-1,+m[3]);wd='（週'+'日一二三四五六'.charAt(d.getDay())+'）';}
   var sl=/上午/.test(c)?'上午 13:00 前':(/下午/.test(c)?'下午 14:00–18:00':(/晚上/.test(c)?'晚上':''));
@@ -3103,12 +3142,13 @@ function fillConsent(){
       row.setAttribute('data-qsc','1');
     }
     var _hasDh=!!(window.__qsDhDelivery&&_cartArr().some(function(x){return (x.ProductName||'').indexOf('除濕機')>=0;}));
-    if(!window.__qsPlan&&!_hasDh)return;
+    var _svC=!window.__qsPlan&&_svInCart();
+    if(!window.__qsPlan&&!_hasDh&&!_svC)return;
     /* 存證:改為「內容有變才更新」(原本只寫一次會漏記後加的配送日/換方案/已閱讀)；保留第一次的時間戳、收斂後即不再寫，不抖動 */
     /* 這行會寫進訂單的「同意存證」欄位,客服對帳時會看。達標時折數要跟著換,
        否則存證寫 95 折、實收 92 折,存證就失去意義(它的用途正是證明客戶同意了什麼)。
        用 _whQualC()(看購物車):這裡是結帳當下,商品已經在車上了。 */
-    var planTxt=!window.__qsPlan?'(未於結帳前選擇方案)'
+    var planTxt=!window.__qsPlan?(_svC?'到府場勘估價(不適用任何折扣)':'(未於結帳前選擇方案)')
                 :(window.__qsPlan==='early')?'早鳥方案(30天後到府・85折'+(function(){var c=_earlyCny();return c?'・已告知春節前三週'+_md(c.s)+'～'+_md(c.e)+'不安排早鳥':'';})()+')'
                 :(_whQualC()?'標準方案(兩週內到府・全戶加碼92折)':'標準方案(兩週內到府・95折)');
     var _cur=el.value||'';
@@ -4916,9 +4956,9 @@ new MutationObserver(stickHead).observe(document.documentElement,{childList:true
 function sig(){var o=document.getElementById('qw-ovl');if(!o)return null;var q=o.querySelector('.qw');if(!q)return null;
  if(q.classList.contains('wel'))return '0';var on=q.querySelector('.qwdot.on');var h=q.querySelector('h2');
  return (on?on.textContent:'?')+'|'+(h?h.textContent:'');}
-function pos(s){if(!s)return -1;if(s==='0')return 0;var n=parseInt(s,10);if(isNaN(n))return 0;
- /* 2026-10-25 結帳 ①確認 ②聯絡 ③補充 進度圓點都是 7，用標題分成 7 / 7.1 / 7.2，各算一頁 */
- if(n===7){if(/聯絡/.test(s))return 7.1;if(/補充/.test(s))return 7.2;}return n;}
+function pos(s){if(!s)return -1;if(s==='0')return 0;if(/到府場勘估價/.test(s))return 3.5;/* 場勘頁在機型(3)之後 */var n=parseInt(s,10);if(isNaN(n))return 0;
+ /* 2026-10-25 結帳 ①確認 ②聯絡 ③補充 進度圓點相同（清洗是 7、場勘是 5），用標題分成 n / n.1 / n.2，各算一頁 */
+ if(/聯絡/.test(s))return n+0.1;if(/補充/.test(s))return n+0.2;return n;}
 
 if(LV>=2){
  var last=null,goingBack=false,depth=0,skipPop=false;
