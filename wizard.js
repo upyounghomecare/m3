@@ -773,6 +773,11 @@ function _cfTick(){
   go.disabled=!!busy;go.classList.toggle('qcf-busy',!!busy||(ck&&!aok));
   var bk=ovl.querySelector('.qcf-bk');if(bk)bk.disabled=_cfClearing;
   if(ck){try{var td=_ckTodo(),stop=td.length&&td[0][0]==='stop',n=stop?0:td.length,box=ovl.querySelector('.qck-box'),ft=ovl.querySelector('.qwfoot'),bar=ovl.querySelector('#qya');
+    try{var _ag=ovl.querySelector('.qck-agree');if(_ag){var _k=(n>0&&!stop&&!busy)?td[0][0]:'',_tg=_k==='age'?_ag.querySelector('.qck-age'):(_k==='ack'?_ag.querySelector('.qck-chk:not(.qck-ag)'):(_k==='agree'?_ag.querySelector('.qck-ag'):null));
+      [].slice.call(_ag.querySelectorAll('.qck-todo')).forEach(function(x){if(x!==_tg)x.classList.remove('qck-todo');});[].slice.call(_ag.querySelectorAll('.qck-hint')).forEach(function(h){if(!_tg||h.getAttribute('data-k')!==_k)h.parentNode.removeChild(h);});
+      if(_tg&&!_ag.querySelector('.qck-hint[data-k="'+_k+'"]')){_tg.classList.add('qck-todo');var _h=document.createElement('span');_h.className='qck-hint';_h.setAttribute('data-k',_k);_h.setAttribute('aria-hidden','true');
+        if(_k==='age'){_h.textContent='請點選下方一個 👇';_tg.parentNode.insertBefore(_h,_tg);}else{_h.textContent='請勾選 👇';_tg.appendChild(_h);}}
+      if(box)box.classList.toggle('hint-on',!!_tg);}}catch(e){}/* 2026-10-25 老闆選 C 款 */
     if(box){box.classList.toggle('need',n>0);var bd=box.querySelector('.qck-h b');if(n>0){if(!bd){bd=document.createElement('b');box.querySelector('.qck-h').appendChild(bd);}bd.textContent='還差 '+n+' 步';}else if(bd)bd.parentNode.removeChild(bd);}
     if(ft&&n>0&&!busy){if(!bar){bar=document.createElement('button');bar.type='button';bar.id='qya';bar.onclick=function(){_ckGoTodo();};ft.insertBefore(bar,ft.firstChild);}
       var tx='<i>👇</i><span>'+(n>1?'還差 '+n+' 步就能結帳：'+td.map(function(x){return x[1];}).join('、'):'還差 1 步：'+td[0][1])+'</span><b>點我</b>';if(bar.getAttribute('data-t')!==tx){bar.setAttribute('data-t',tx);bar.innerHTML=tx;}}
@@ -1508,7 +1513,7 @@ function close(){try{_cfLoad(false);}catch(e){}if(ovl){ovl.parentNode.removeChil
    o={title,html,ok,cancel(沒有=只有一顆鈕),onOk,onCancel}；手機返回鍵＝取消（app_preview 會呼叫 __qwDlgClose） */
 function _qwDlg(o){try{var old=document.getElementById('qw-dlg');if(old)old.parentNode.removeChild(old);
   if(!document.getElementById('qw-dlg-css')){var st=document.createElement('style');st.id='qw-dlg-css';st.textContent='#qw-dlg{position:fixed;inset:0;z-index:2147483600;background:rgba(4,24,48,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;animation:qwdlgIn .16s ease-out}@keyframes qwdlgIn{from{opacity:0}to{opacity:1}}#qw-dlg .bx{width:340px;max-width:100%;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.3)}#qw-dlg .hd{background:#0C2D57;color:#fff;padding:15px 18px;font-size:17px;font-weight:900;line-height:1.4}#qw-dlg .bd{padding:16px 18px 4px;font-size:15px;color:#33475C;line-height:1.75}#qw-dlg .bd .keep{margin-top:10px;padding:9px 12px;background:#EAF7EF;border:1px solid #BFE3CB;border-radius:10px;color:#0B5A2E;font-size:14px}#qw-dlg .ft{display:flex;gap:10px;padding:14px 18px 18px}#qw-dlg button{flex:1;min-height:48px;border-radius:12px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer}#qw-dlg .no{border:1.5px solid #D6DEE8;background:#fff;color:#33475C}#qw-dlg .yes{border:0;background:linear-gradient(135deg,#D4A63A,#B8860B);color:#fff;font-weight:900}';document.head.appendChild(st);}
-  var d=document.createElement('div');d.id='qw-dlg';d.setAttribute('role','alertdialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label',o.title||'提示');
+  var d=document.createElement('div');d.id='qw-dlg';if(o.sheet)d.className='sh';d.setAttribute('role','alertdialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label',o.title||'提示');
   d.innerHTML='<div class="bx"><div class="hd">'+(o.title||'提示')+'</div><div class="bd">'+(o.html||'')+'</div><div class="ft">'+(o.cancel?'<button type="button" class="no">'+o.cancel+'</button>':'')+'<button type="button" class="yes">'+(o.ok||'我知道了')+'</button></div></div>';
   var done=false,fin=function(ok){if(done)return;done=true;if(d.parentNode)d.parentNode.removeChild(d);window.__qwDlgClose=null;try{(ok?o.onOk:o.onCancel)&&(ok?o.onOk:o.onCancel)();}catch(e){}};
   d.querySelector('.yes').onclick=function(){fin(true);};var nb=d.querySelector('.no');if(nb)nb.onclick=function(){fin(false);};
@@ -1516,6 +1521,23 @@ function _qwDlg(o){try{var old=document.getElementById('qw-dlg');if(old)old.pare
   document.body.appendChild(d);setTimeout(function(){try{(nb||d.querySelector('.yes')).focus();}catch(e){}},50);
 }catch(e){/* 萬一畫不出來，退回瀏覽器視窗，至少功能不壞 */if(o.cancel){if(window.confirm((o.title||'')+'\n'+String(o.html||'').replace(/<[^>]+>/g,'')))o.onOk&&o.onOk();else o.onCancel&&o.onCancel();}else{window.alert(String(o.html||'').replace(/<[^>]+>/g,''));o.onOk&&o.onOk();}}}
 window.__qwDlg=_qwDlg;
+/* 2026-10-25 底部滑出版（服務重點）＋確認區 C 款提示的樣式 */
+(function(){var st=document.createElement('style');st.textContent='#qw-dlg.sh{align-items:flex-end;padding:0}#qw-dlg.sh .bx{width:100%;max-width:480px;border-radius:20px 20px 0 0;animation:qwShUp .22s ease-out}@keyframes qwShUp{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}'
+ +'#qw-dlg.sh .hd small{display:block;font-size:13px;font-weight:600;opacity:.8;margin-top:3px}#qw-dlg.sh .bd{max-height:62vh;overflow:auto;padding:6px 18px 4px}#qw-dlg.sh .ft{padding:10px 18px calc(16px + env(safe-area-inset-bottom,0px))}#qw-dlg.sh .yes{min-height:52px;font-size:16.5px}'
+ +'#qw-dlg .svp{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #EEF2F7;font-size:14.5px;line-height:1.65;color:#33475C}#qw-dlg .svp i{font-style:normal;font-size:20px;line-height:1.3;flex:none}#qw-dlg .svm{display:block;text-align:center;margin:10px 0 2px;color:#0C447C;font-size:14px;font-weight:800;text-decoration:underline;cursor:pointer;background:none;border:0;width:100%;font-family:inherit}'
+ +'@keyframes qckHb{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}#qw-ovl .qck-hint{display:flex;align-items:center;gap:4px;width:max-content;margin:6px auto 2px;background:#C0392B;color:#fff!important;-webkit-text-fill-color:#fff;border-radius:999px;padding:3px 11px;font-size:13px!important;font-weight:900;line-height:1.5;letter-spacing:.5px;animation:qckHb 1s ease-in-out infinite;box-shadow:0 3px 10px rgba(0,0,0,.18);pointer-events:none}'
+ +'#qw-ovl .qck-todo.qck-chk{position:relative;margin-top:38px!important;border-color:#D4A947!important}#qw-ovl .qck-todo.qck-chk .qck-hint{position:absolute;left:8px;top:-31px;margin:0}#qw-ovl .qck-todo.qck-age button{border-color:#D4A947!important}#qw-ovl .qck-box.need.hint-on{animation:none!important}'
+ +'@media (prefers-reduced-motion:reduce){#qw-ovl .qck-hint{animation:none}}';(document.head||document.documentElement).appendChild(st);})();
+/* 方案頁「下一步」前的 5 點重點（文字取自精靈裡既有的正式說法：取消改約＝_TMS/_TME、保固、不服務條件） */
+var _svcAck=false;
+function _svcHtml(){var e=(plan==='early'),r=function(a){return a.map(function(x){return x[0]+' '+x[1];}).join('；');};
+  var P=[['📞','下單付款後，專人 <b>0.5～1 個工作天內</b>（不含假日）來電，與您約定實際到府時間'],
+    ['🗓','<b>取消／改約</b>：正式約定日期前免費；約定後（'+(e?'早鳥方案':'標準方案')+'）'+r(e?_TME:_TMS)],
+    ['🛡','清洗後享 <b>30 天基本功能保固</b>；機齡 10 年（含）以上不提供保固'],
+    ['⛔','<b>不服務</b>：非三菱重工冷氣、機齡 15 年以上、安裝高度 4 米以上'],
+    ['💰','偏遠地區每張訂單 +NT$600；營業場所室內機、室外機每台 +NT$1,000；挑高 3.5–4 米每台 +NT$1,000']];
+  return P.map(function(p){return '<div class="svp"><i>'+p[0]+'</i><div>'+p[1]+'</div></div>';}).join('')+'<button type="button" class="svm" onclick="__qw.svcMore()">📖 看完整服務說明 ›</button>';}
+
 var _NOPICK={title:'還沒選要清洗的冷氣',html:'請至少選擇一台<b>室內機</b>或<b>室外機</b>清洗喔！<br>可回上一步（室內機／室外機）選擇台數。'};
 function toast(msg,ms){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},ms||2600);}
 /* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
@@ -1911,6 +1933,8 @@ var api={
        方案名稱從頭到尾只有「標準方案」,全戶降級成折扣的名字 ——
        客戶在方案卡(圖上寫標準方案)、確認彈窗、結帳摘要看到的就都是同一個方案名。
        ⚠️ 名字可以統一,折數不行:達標時一定要寫 92 折,不能說一套收一套。 */
+    if(window.__QW_CHECKOUT&&!_svcAck){_qwDlg({sheet:1,title:'下單前，請先了解這 5 點<small>約 10 秒，了解後再選期望到府時間</small>',html:_svcHtml(),ok:'我已了解，選擇期望到府時間 ›',
+      onOk:function(){_svcAck=true;var d=new Date(),z=function(n){return (n<10?'0':'')+n;};window.__qsSvcAck=z(d.getMonth()+1)+'/'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());api.confirmPlan();}});return;}
     var _whQ=_whQualQ();
     var _sO=_whQ?'92 折':'95 折';
     var _sX=_whQ?'（已加碼全戶優惠）':'';
@@ -1943,6 +1967,7 @@ var api={
       }});
   },
   /* 先看服務說明/規範完整圖文介紹:關精靈→捲到詳情圖區→浮出「回到引導精靈」(選擇都保留,回來時停在原本那一步) */
+  svcMore:function(){try{if(window.__qwDlgClose)window.__qwDlgClose();}catch(e){}api.seeDetail();},
   seeDetail:function(){
     _qwResume=step;
     close();
@@ -3178,7 +3203,7 @@ function fillConsent(){
     var _mt=_cur.match(/｜時間:([^｜]+)$/);var ts;
     if(_mt){ts=_mt[1];}else{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
     var _cdOwn=fillCleanDate(),_dhOwn=fillDhDate(_hasDh);/* 有獨立欄位就不在存證裡重複寫日期 */
-    var rec=((window.__qsCleanDate&&!_cdOwn)?'【期望清洗日:'+window.__qsCleanDate+'】':'')+((_hasDh&&!_dhOwn)?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+'｜時間:'+ts;
+    var rec=((window.__qsCleanDate&&!_cdOwn)?'【期望清洗日:'+window.__qsCleanDate+'】':'')+((_hasDh&&!_dhOwn)?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+(window.__qsSvcAck?'｜已閱讀下單前5點重點('+window.__qsSvcAck+')':'')+'｜時間:'+ts;
     if(_cur!==rec){
       var st=Object.getOwnPropertyDescriptor((el.tagName==='TEXTAREA'?window.HTMLTextAreaElement:window.HTMLInputElement).prototype,'value').set;
       st.call(el,rec);
