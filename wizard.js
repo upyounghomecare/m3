@@ -9,7 +9,9 @@ var IMG_QUICK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f3482
 var PLAN_STD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/standard.jpg';
 var PLAN_EARLY='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/earlybird2.jpg';
 var IMG_HOME='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/home.jpg';
-var IMG_SHOP='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/shop.jpg';
+var IMG_SHOP_OLD='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/shop.jpg';
+/* 2026-10-26 老闆換營業場所新圖（室內外機每台加價$1,000）：新圖 shop-v2.jpg 跟 wizard.js 同一次上傳，網址跟著 wizard.js 的版本號走；找不到就退回舊圖 */
+var IMG_SHOP=(function(){try{var s=(document.currentScript&&document.currentScript.src)||'';if(!/m3@/.test(s)){var ss=document.querySelectorAll('script[src*="upyounghomecare/m3@"]');for(var i=ss.length-1;i>=0;i--){if(/\/wizard\.js(\?|$)/.test(ss[i].src)){s=ss[i].src;break;}}}var m=s.match(/^(https:\/\/cdn\.jsdelivr\.net\/gh\/upyounghomecare\/m3@[0-9a-f]{7,40})\/wizard\.js/);return m?m[1]+'/shop-v2.jpg':IMG_SHOP_OLD;}catch(e){return IMG_SHOP_OLD;}})();
 var IMG_AREA_OK='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/green.jpg';
 var IMG_AREA_RM='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/gold.jpg';
 var IMG_AREA_NO='https://cdn.jsdelivr.net/gh/upyounghomecare/m3@80ddf1921e696f34827eb07d92e39899a0df3f46/red.jpg';
@@ -1333,7 +1335,7 @@ function render(){
     w='<div class="qw">'+stepBar()+'<h2>冷氣的使用環境為？</h2><p class="sub">先確認環境，幫你算好正確價格</p>'
     +(env?'<div class="env-tip ok">✓ 您選擇的是「'+(env==='biz'?'營業場所':'一般家用')+'」</div>':'<div class="env-tip need">👇 請點選下面一個環境 <b>必選</b></div>')
     +'<div class="env-g '+(env?'has':'need')+'">'+[['home',IMG_HOME,'一般家用'],['biz',IMG_SHOP,'營業場所']].map(function(o){var on=env===o[0];
-      return '<button type="button" class="env-o '+(on?'sel':'')+'" aria-pressed="'+on+'" onclick="__qw.pickEnv(&quot;'+o[0]+'&quot;)"><img src="'+o[1]+'" alt="'+o[2]+'"><span class="env-rd" aria-hidden="true">✓</span>'+(on?'<span class="env-sb">✓ 您選擇的</span>':'')+'</button>';}).join('')+'</div>'
+      return '<button type="button" class="env-o '+(on?'sel':'')+'" aria-pressed="'+on+'" onclick="__qw.pickEnv(&quot;'+o[0]+'&quot;)"><img src="'+o[1]+'" alt="'+o[2]+'"'+(o[0]==='biz'?' onerror="this.onerror=null;this.src=&quot;'+IMG_SHOP_OLD+'&quot;"':'')+'><span class="env-rd" aria-hidden="true">✓</span>'+(on?'<span class="env-sb">✓ 您選擇的</span>':'')+'</button>';}).join('')+'</div>'
     +'<div class="envnote">選「營業場所」後，之後選的室內機、室外機，每台會自動幫你算好加價 <b>$1,000</b></div>'
     +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri'+(env?'':' qw-needbtn')+'" onclick="'+(env?'__qw.go(1)':'__qw.needPick(&quot;.env-g&quot;)')+'">'+(env?'下一步：室內機':'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">還沒選環境</span><span style="display:block;line-height:1.35">👆 請先點上方一個</span>')+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===1){
