@@ -691,6 +691,8 @@ var _cfT0=0,_cfTm=null,_cfSig='',_cfChg=0,_cfClearing=false,_cfLast='';
 /* 2026-10-25：1SHOP 的「加購品已享優惠價…」是校正項目（把方案券多折到 AIRMON/除濕機的錢補回來），不是客人買的東西 → 不列、不算進原價 */
 function _isCorr(n){return /加購品已享優惠價|價差調整|不適用優惠碼折扣/.test(n||'');}
 function _isProt(n){return /AIRMON|除濕機/.test(n||'');}
+/* 2026-10-25 場勘單：整張都不打折（場勘費＋偏遠加價），價差調整全部補回 */
+function _svInCart(c){c=c||_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf(SURVEY_PREFIX)===0)return true;}return false;}
 function _cfRealBtn(){var b=[].slice.call(document.querySelectorAll('.cart-checkout .btn'));for(var i=0;i<b.length;i++){if(!(ovl&&ovl.contains(b[i])))return b[i];}return null;}
 function _cfAmt(e){var n=Number(e&&e.getAttribute('data-amount'));return isFinite(n)?n:0;}
 function _cfMoney(n){return 'NT$ '+Math.round(n).toLocaleString('en-US');}
@@ -712,13 +714,14 @@ function _cfBusy(d){
   var early=Date.now()-_cfT0<40000;/* 以下兩項最多等 40 秒；之後交給 1SHOP 結帳鈕本身的保護 */
   if(early&&plan&&!d.cp.length)return true;/* 方案券還沒套上 */
   if(early&&window.__qsSwapBusy)return true;
+  try{if(early&&(_corrBusy()||_corrShort()))return true;}catch(e){}/* 2026-10-25 價差調整還沒補好（AIRMON/除濕機/場勘）→ 還在算 */
   return false;}
 function _cfBody(d,busy){
   var e=_esc,h='<div class="qcf-info"><span>📍 '+e((areaCity||'')+' '+(areaDist||''))+'</span><span>'+(env==='biz'?'🏢 營業場所':'🏠 家用')+'</span>'
    +'<span>🗓 '+((window.__qsCleanDate&&window.__qsCleanDate!=='未指定')?'期望到府：'+e(window.__qsCleanDate):'到府日期：由專人與您約定')+'</span></div>';
   if(plan)h+='<div class="qcf-plan"><div class="ck">✓</div><div><div class="t1">您選擇的方案</div><div class="t2">'+(plan==='early'?'早鳥方案・約時起 30 天後到府':'標準方案・約時起 2 週內到府')+'</div><div class="t3">📞 專人將於 0.5～1 個工作天內來電約時（付款後起算、不含假日）</div></div></div>';
   if(!d||!d.it.length)return h+'<div class="qcf-sum busy"><div class="sp"><i></i>正在為您加入購物車…</div></div>';
-  var its=d.it.filter(function(x){return !_isCorr(x.n);}),orig=0;its.forEach(function(x){orig+=x.a;});var prot=its.some(function(x){return _isProt(x.n);});
+  var its=d.it.filter(function(x){return !_isCorr(x.n);}),orig=0;its.forEach(function(x){orig+=x.a;});var prot=its.some(function(x){return _isProt(x.n);}),svy=its.some(function(x){return (x.n||'').indexOf(SURVEY_PREFIX)===0;});
   h+='<div class="qcf-list">'+its.map(function(x){var u=x.q?x.a/x.q:x.a;
     return '<div class="qcf-it">'+(x.im?'<img src="'+e(x.im)+'" alt="">':'<span class="noim"></span>')+'<div class="n">'+e(x.n)+(u>1?'<small>'+_cfMoney(u)+' × '+x.q+'</small>':'')+'</div><div class="p">'+_cfMoney(x.a)+'</div></div>';}).join('')+'</div>';
   if(busy){h+='<div class="qcf-sum busy"><div class="r"><span>原價合計</span><span>'+_cfMoney(orig)+'</span></div><div class="t"><span>應付金額</span><b>計算中</b></div><div class="sp"><i></i>正在為您套用方案折扣、確認金額，約需 10～20 秒…</div></div>';}
@@ -727,7 +730,7 @@ function _cfBody(d,busy){
     h+='<div class="qcf-sum'+(save>0?' rb':'')+'">'+(save>0?'<div class="rib">省 '+_cfMoney(save)+'</div>':'')
      +'<div class="r"><span>原價合計</span><span>'+_cfMoney(orig)+'</span></div>'
      +(save>0?'<div class="r g"><span>✦ '+e(cpn||'折扣')+(prot?'（清洗項目）':'')+'</span><span>－'+_cfMoney(save)+'</span></div>':(save<0?'<div class="r"><span>其他費用</span><span>＋'+_cfMoney(-save)+'</span></div>':''))
-     +'<div class="t"><span>應付金額</span><b>'+_cfMoney(d.pay)+'</b></div>'+(prot?'<div class="qcf-pn">AIRMON、除濕機為加購優惠價，不參與方案折扣</div>':'')+'</div>';}
+     +'<div class="t"><span>應付金額</span><b>'+_cfMoney(d.pay)+'</b></div>'+(prot?'<div class="qcf-pn">AIRMON、除濕機為加購優惠價，不參與方案折扣</div>':'')+(svy?'<div class="qcf-pn">到府場勘費不適用任何方案折扣與優惠碼</div>':'')+'</div>';}
   return h+'<button type="button" class="qcf-more" onclick="__qw.cfMore()">＋ 還要加購其他清洗項目</button>';}
 function _cfTick(){
   if(step!=='confirm'||!ovl){clearInterval(_cfTm);_cfTm=null;return;}
@@ -2574,13 +2577,13 @@ function _lockCheckout(busy){try{
    寧可少一張單,不要一張少收三千的單。
    ⚠️ 容差 $3:reconcileAdjust 自己的看門狗也是用 ±3,兩邊一致才不會互相打架。 */
 function _corrShort(){try{
-  var cart=_cartArr();if(!cart.length)return false;
+  var cart=_cartArr();if(!cart.length)return false;var _sv=_svInCart(cart);
   var P=0,X=0,sub=0,hasCp=false;
   for(var i=0;i<cart.length;i++){
     if(Number(cart[i].ProductType)===99){hasCp=true;continue;}
     var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
     if(nm.indexOf('加購品已享優惠價')>=0)X+=lt;
-    else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0)P+=lt;
+    else if(_sv||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0)P+=lt;
   }
   if(P<=0)return false;/* 沒有保護品就沒有校正的問題 */
   /* 洞 B(2026-09-07 壓力測試抓到):保護品 + 券都在、校正卻是 0 → 一定是少收,不必等算式。
@@ -2802,7 +2805,7 @@ function _surveyOnly(){try{
 var SURVEY_CAP_CODE='UP95';   /* 標準方案的券 */
 var SURVEY_CAP_OFF=0.05;      /* 95 折 = 折扣率 0.05,場勘單的上限 */
 var _svCapTry=0,_svCapAt=0,_svCapSeen=0,_svCapKey='';
-function capCouponForSurvey(){try{
+function capCouponForSurvey(){return;/* 2026-10-25 停用：老闆改成場勘完全不打折，改由價差調整補回（_svInCart）。不再把券換成 UP95 */try{
   if(window.__qsAdding||_corrBusy()||_cpBusy())return;
   /* ⚠️ 這裡「不可以」用 _surveyOnly() —— 它是黏著的,購物車讀不到時會沿用上次結論。
      客戶從場勘單改成清洗單的那一瞬間若沿用了舊結論,就會把他的早鳥85折降成95折,
@@ -3890,10 +3893,10 @@ function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
 function reconcileAdjust(){try{
  if(window.__qsAdding||_adjSyncing)return;
  var cart=_cartArr();if(!cart.length){_adjC=null;window.__qsCorrBusy=0;return;}
- var P=0,X=0,sub=0;
+ var P=0,X=0,sub=0,_sv=_svInCart(cart);
  for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
   if(nm.indexOf('加購品已享優惠價')>=0){X+=Number(cart[i].LineTotal)||0;}
-  else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
+  else if((_sv&&Number(cart[i].ProductType)!==99)||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
  var xiao=_readXiaoji();if(xiao==null)return;
  if(X===0||_adjC==null){_adjC=sub>0?(sub-xiao)/sub:0;}
  var C=Math.round((_adjC||0)*100)/100;/* 2026-09-21:折扣率對齊到整數%。頁面重新整理時補差已在購物車裡,重新量到的折扣率會被1SHOP四捨五入污染
@@ -3911,10 +3914,10 @@ function reconcileAdjust(){try{
 var _adjWatchLastX=null,_adjWatchStuck=0;
 function reconcileAdjustWatch(){try{
   var cart=_cartArr();if(!cart.length){_adjWatchLastX=null;_adjWatchStuck=0;return;}
-  var P=0,X=0,sub=0;
+  var P=0,X=0,sub=0,_sv=_svInCart(cart);
   for(var i=0;i<cart.length;i++){var nm=cart[i].ProductName||'';var lt=Number(cart[i].LineTotal)||0;sub+=lt;
     if(nm.indexOf('加購品已享優惠價')>=0){X+=Number(cart[i].LineTotal)||0;}
-    else if(nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
+    else if((_sv&&Number(cart[i].ProductType)!==99)||nm.indexOf('AIRMON')>=0||nm.indexOf('三菱重工除濕機')>=0){P+=lt;}}
   if(P<=0){_adjWatchStuck=0;_adjWatchLastX=X;return;}
   var xiao=_readXiaoji();if(xiao==null)return;
   var C=Math.round(((X===0)?(sub>0?(sub-xiao)/sub:0):(_adjC||0))*100)/100;
@@ -5373,7 +5376,7 @@ function draw(){try{
   var box=document.getElementById('qs-cartg');
   if(!tot||!totAmt||!items.length){if(box)box.parentNode.removeChild(box);_sig='';return;}
   /* 2026-10-25：校正項目（加購品已享優惠價…）不是客人買的 → 藏起來、不算原價；折扣＝原價－應付 */
-  var orig=0,prot=false;[].slice.call(sec.querySelectorAll('.cart-item:not(.coupon)')).forEach(function(ci){var nm=((ci.querySelector('h4')||{}).textContent||'');var isC=/加購品已享優惠價|價差調整|不適用優惠碼折扣/.test(nm);ci.classList.toggle('qs-corr',isC);if(!isC){orig+=amt(ci.querySelector('.price .amount'));if(/AIRMON|除濕機/.test(nm))prot=true;}});
+  var orig=0,prot=false,svy=false;[].slice.call(sec.querySelectorAll('.cart-item:not(.coupon)')).forEach(function(ci){var nm=((ci.querySelector('h4')||{}).textContent||'');var isC=/加購品已享優惠價|價差調整|不適用優惠碼折扣/.test(nm);ci.classList.toggle('qs-corr',isC);if(!isC){orig+=amt(ci.querySelector('.price .amount'));if(/AIRMON|除濕機/.test(nm))prot=true;if(/^\s*到府場勘估價/.test(nm))svy=true;}});
   var cps=[],disc=0,cs=sec.querySelectorAll('.cart-item.coupon');
   for(var j=0;j<cs.length;j++){var a=Math.abs(amt(cs[j].querySelector('.price .amount')));var h=cs[j].querySelector('h4');
     cps.push({n:((h&&h.textContent)||'折扣').replace(/[（(][^）)]*[）)]/g,'').trim(),a:a});disc+=a;}
@@ -5389,6 +5392,7 @@ function draw(){try{
   else if(save<0)h2+='<div class="r"><span>其他費用</span><span>＋'+f(-save)+'</span></div>';
   h2+='<div class="t"><span>應付金額</span><b>'+f(pay)+'</b></div>';
   if(prot)h2+='<div class="pn">AIRMON、除濕機為加購優惠價，不參與方案折扣</div>';
+  if(svy)h2+='<div class="pn">到府場勘費不適用任何方案折扣與優惠碼</div>';
   if(!box){box=document.createElement('div');box.id='qs-cartg';}
   box.className=save>0?'has-rib':'';box.innerHTML=h2;
   if(box.previousElementSibling!==tot)tot.parentNode.insertBefore(box,tot.nextSibling);
