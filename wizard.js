@@ -1605,6 +1605,7 @@ window.__qwDlg=_qwDlg;
  +'#qw-ovl .qck-stop2.qw-shake,#qw-ovl .qck-act.qw-shake,#qw-ovl .qck-nt.qw-shake{animation:qwShake .45s}'
  +'#qw-ovl .qw-site{margin:16px 2px 8px;font-size:14.5px;font-weight:900;color:#0C2D57;border-top:1px dashed #C9D5E3;padding-top:12px}#qw-ovl .qw-site small{display:block;font-size:12.5px;font-weight:700;color:#6B7C90;margin-top:2px}'
  +'#qw-ovl .qw-hole{margin:8px 0 10px;background:#FFF8E8;border:1.5px solid #E8D29A;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:800;color:#6B5418;line-height:1.6}'
+ +'#qw-ovl,#qw-ovl .qw,#qw-dlg,#qw-dlg .bd,.qwcd-sheet,.qwcd-sheet *,#qdx-sheet,#qdx-sheet *{overscroll-behavior:contain}'/* 2026-10-26 老闆：電腦版捲到精靈底再捲，後面的銷售頁不要跟著動 */
  +'@media (prefers-reduced-motion:reduce){#qw-ovl .qck-hint{animation:none}}';(document.head||document.documentElement).appendChild(st);})();
 /* 方案頁「下一步」前的 5 點重點（文字取自精靈裡既有的正式說法：取消改約＝_TMS/_TME、保固、不服務條件） */
 var _svcAck=false;
