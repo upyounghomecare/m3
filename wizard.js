@@ -870,6 +870,7 @@ function _cfLoad(on,n){
 /* ===== 2026-10-22 精靈內結帳（老闆選乙：第 7 步「結帳」內含 ①確認 ②聯絡 ③補充）=====
    客人在精靈填完 → 按「前往付款」→ 精靈照原本的路走：立即結帳 → 同意視窗(代勾代按) → 1SHOP 第1/2/3步(代填代按) → 送出 → 訂單頁(發票、付款)
    原本的金額保護、方案券檢查、同意存證(fillConsent)都照樣會跑；任何一步沒過就停下來，顯示 1SHOP 原本的結帳視窗讓客人自己完成。 */
+var _cfBackOk=0;
 var _ck={age:'',ack:false,agree:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',rType:'0',rCar:'0',rNum:'',rTitle:'',rUBN:'',rLove:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null;
 var _CK_RULES=['只服務<b>三菱重工</b>冷氣（室內機面板有「HEAVY INDUSTRIES」），不含三菱電機及其他品牌','機齡 15 年以上、安裝高度 4 米以上恕不提供服務','機齡 10 年（含）以上恕不提供保固','偏遠地區／商用場所／挑高施作依規範加價','保固範圍、取消政策與注意事項依賣場服務規範'];
 /* 2026-10-23 老闆選 A＋B：確認頁提醒客人要選「冷氣用了幾年」並勾同意 —— 回傳還沒完成的項目（A 提示條、B 金框徽章共用） */
@@ -892,10 +893,17 @@ function _ckAgreeHtml(){
   return h;}
 function _ckSlot(){var c=window.__qsCleanDate||'';return /上午/.test(c)?{v:'1',t:'13點前'}:(/下午/.test(c)?{v:'2',t:'14-18點'}:{v:'0',t:'不指定'});}
 function _ckHeight(){var n=qty.hi||0;return n<=0?'3.5米以下（不加價）':(n>=9?'3.5-4米：9 台以上（客服另行確認）':'3.5-4米：'+n+' 台');}
-function _ckIn(k,lbl,req,ph,type,sm){var bad=_ck.err[k];return '<div class="qck-f"><div class="qck-l">'+lbl+(req?'<b>*</b>':'')+(sm?'<small>'+sm+'</small>':'')+'</div>'
-  +(type==='ta'?'<textarea data-ck="'+k+'" class="qck-i'+(bad?' bad':'')+'" placeholder="'+_esc(ph)+'" oninput="__qw.ckSet(\''+k+'\',this.value)">'+_esc(_ck[k])+'</textarea>'
-   :'<input data-ck="'+k+'" class="qck-i'+(bad?' bad':'')+'" type="'+(type||'text')+'"'+(type==='tel'?' inputmode="numeric" autocomplete="tel"':(type==='email'?' autocomplete="email"':(k==='name'?' autocomplete="name"':'')))+' placeholder="'+_esc(ph)+'" value="'+_esc(_ck[k])+'" oninput="__qw.ckSet(\''+k+'\',this.value)">')
-  +'<div class="qck-err" data-ckerr="'+k+'">'+(bad||'')+'</div></div>';}
+/* 2026-10-25 每格告訴手機「這格是什麼」：地址跳出存的地址、公司抬頭跳出公司名；統編／愛心碼／條碼不再跳出手機號碼。
+   另外標上欄位名稱與錯誤（aria），讀螢幕功能才會唸出欄位名和錯誤內容 */
+var _CK_AC={name:'name',mobile:'tel',addr:'address-line1',email:'email',rTitle:'organization',rUBN:'off',rLove:'off',rNum:'off',model:'off'};
+var _CK_AL={addr:'地址（巷弄街道、門牌、樓層）',rNum:'載具號碼'};
+function _ckIn(k,lbl,req,ph,type,sm){var bad=_ck.err[k];
+  var ac=_CK_AC[k]?' autocomplete="'+_CK_AC[k]+'"':'',im=type==='tel'?' inputmode="numeric"':'';
+  var aria=' aria-label="'+_esc(lbl||_CK_AL[k]||ph)+'" aria-describedby="qck-e-'+k+'"'+(bad?' aria-invalid="true"':'')+(req?' aria-required="true"':'');
+  return '<div class="qck-f"><div class="qck-l">'+lbl+(req?'<b>*</b>':'')+(sm?'<small>'+sm+'</small>':'')+'</div>'
+  +(type==='ta'?'<textarea data-ck="'+k+'" class="qck-i'+(bad?' bad':'')+'"'+aria+' placeholder="'+_esc(ph)+'" oninput="__qw.ckSet(\''+k+'\',this.value)">'+_esc(_ck[k])+'</textarea>'
+   :'<input data-ck="'+k+'" class="qck-i'+(bad?' bad':'')+'" type="'+(type||'text')+'"'+im+ac+aria+' placeholder="'+_esc(ph)+'" value="'+_esc(_ck[k])+'" oninput="__qw.ckSet(\''+k+'\',this.value)">')
+  +'<div class="qck-err" id="qck-e-'+k+'" data-ckerr="'+k+'"'+(bad?' role="alert"':'')+'>'+(bad||'')+'</div></div>';}
 function _ckHtml(k){
   var d=_cfCart(),pay=d&&d.pay!=null?d.pay:0,b='';
   if(k===2){
@@ -941,14 +949,43 @@ function _ckSet(el,v){if(!el)return false;
 function _ckField(re){var m=document.querySelector('#checkout form.step3');if(!m)return null;var gs=m.querySelectorAll('.form-group,.checkbox');for(var i=0;i<gs.length;i++){var l=gs[i].querySelector('label');if(l&&re.test(l.textContent||'')){return gs[i].querySelector('select,textarea,input:not([type=hidden])');}}return null;}
 function _ckFail(msg){
   window.__qwCkResult={ok:false,msg:msg};_ckRun=false;_ckLoad(false);
+  /* 2026-10-25 金額還沒算好（折扣/補差還在套）時不直接打開 1SHOP 結帳：那樣會跳過同意視窗、也可能用未定的金額付款 */
+  var bz=false;try{bz=_cfBusy(_cfCart());}catch(e){}
+  if(bz&&!_ckModal()){toast('金額還在確認中，請稍候幾秒，再按畫面下方的「繼續結帳／立即結帳」',7000);return;}
   if(!_ckModal()){try{if(window.openViewCheckoutModal)openViewCheckoutModal();}catch(e){}}
   toast('自動填寫沒有完成（'+msg+'）<br>資料已幫您帶入，請確認後按「下一步／送出」');}
+/* 2026-10-25 最後「送出」之後：1SHOP 送出中會把送出鈕變灰（停用），失敗才恢復、成功直接跳訂單頁。
+   → 送出鈕還是灰的＝訂單可能正在建立，絕不能叫客人再按（會變兩張訂單）；只有鈕恢復可按（＝1SHOP 說失敗）才請客人修正後再送 */
+/* 1SHOP 送單請求自己設了 30 秒逾時：逾時它會說「出現錯誤」並把送出鈕恢復，但 1SHOP 那邊可能其實已經建立訂單。
+   所以要分清楚：1SHOP 明確回「失敗」（資料有誤）→ 可以修正再送；逾時／斷線（不確定有沒有成立）→ 請客人先別再送、先確認 */
+function _ckWatchSave(){if(!window.jQuery||jQuery.__qwWrap)return;var oa=jQuery.ajax;
+  jQuery.ajax=function(o){var x=oa.apply(this,arguments);try{var u=(o&&o.url)||'',d=(o&&typeof o.data==='string')?o.data:'';
+    if(/view\/CheckOut/.test(u)&&/"Fields"/.test(d)&&/"VerifyOrder":1/.test(d)&&x&&x.done){window.__qwSave={st:1,t:Date.now()};
+      x.done(function(a){window.__qwSave={st:(a&&a.success==0&&a.data&&a.data.t2)?2:3,msg:a&&a.msg};}).fail(function(h,ts){window.__qwSave={st:4,why:ts||''};});}}catch(e){}return x;};
+  jQuery.__qwWrap=1;}
+function _ckAfterSend(nb){var t0=Date.now(),warned=false;
+  (function wt(){
+    if(/\/order/.test(location.pathname)||!_ckLd)return;
+    var sv=window.__qwSave||{st:0};
+    if(sv.st===3)return _ckFail('1SHOP 回覆：'+(sv.msg||'資料有誤')+'。訂單沒有成立，請修正後再按送出');
+    if(sv.st===4)return _ckStuck();
+    var b=null;try{b=nb();}catch(e){}var busy=!!(b&&(b.disabled||/\bdisabled\b/.test(b.className||'')));var el=Date.now()-t0;
+    if(!busy&&!sv.st&&el>1500)return _ckFail('訂單沒有送出成功，請看畫面上方的提示');
+    if(busy&&el>20000&&!warned){warned=true;_ckLoad(true,3,'網路比較慢，訂單仍在建立中…請不要關閉畫面，也不要重複按送出');}
+    if(el>120000)return _ckStuck();
+    setTimeout(wt,500);})();}
+function _ckStuck(){if(!_ckLd)return;_ckRun=false;window.__qwCkResult={ok:false,msg:'送出後很久沒有回應'};
+  var bx=_ckLd.querySelector('.box');if(!bx)return;
+  bx.innerHTML='<div class="t">還沒收到訂單建立的回應</div><div class="s" style="text-align:left;line-height:1.75;margin-top:8px">網路回應逾時，訂單<b>可能已經成立</b>。為避免重複下單，<b>請先不要再按送出</b>：<br>① 請看手機簡訊或 Email 有沒有收到「訂單成立」通知<br>② 5 分鐘內都沒收到，請聯繫客服幫您確認</div><button type="button" class="qck-stk" style="margin-top:14px;width:100%;min-height:46px;border:0;border-radius:12px;background:#0C447C;color:#fff;font-size:16px;font-weight:800">我知道了</button>';
+  var k=bx.querySelector('.qck-stk');if(k)k.onclick=function(){_ckLoad(false);};}
 function _ckSubmit(){
   if(_ckRun)return;_ckRun=true;window.__qwCkResult=null;
   var dg=String(_ck.mobile||'').replace(/[\s-]/g,''),sl=_ckSlot();
   _ckLoad(true,0);
   /* 金額還在算就等（最多 15 秒），算好才走 */
-  _ckWait(function(){return !_cfBusy(_cfCart());},15000,function(){
+  _ckWait(function(){return !_cfBusy(_cfCart());},15000,function(amtOk){
+  /* 2026-10-25 等 15 秒金額還沒好：停在精靈這一頁，請客人稍候再按（原本會繼續往下走） */
+  if(!amtOk){_ckRun=false;_ckLoad(false);window.__qwCkResult={ok:false,msg:'金額還在確認中'};toast('金額還在確認中，請稍候 10 秒再按「前往付款」',7000);return;}
   _ckLoad(true,1);
   var rb=_cfRealBtn();clearInterval(_cfTm);_cfTm=null;if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}
   if(!rb)return _ckFail('找不到結帳按鈕');
@@ -999,8 +1036,9 @@ function _ckSubmit(){
               _rcSave();/* 訂單成立後在訂單頁自動填發票 */
               if(window.__QW_CK_DRY){window.__qwCkResult={ok:true,dry:true,step:3};_ckRun=false;_ckLoad(false);return;}
               /* 最後一下：1SHOP 第 3 步的「送出」(savaOrder(3,1))，成功會自己跳到訂單頁（發票、付款） */
+              _ckWatchSave();window.__qwSave=null;
               try{nb().click();}catch(e){return _ckFail('送出按鈕按不下去');}
-              setTimeout(function(){if(_ckLd&&!/order/.test(location.href))_ckFail('送出後沒有回應');},25000);
+              _ckAfterSend(nb);
             },700);
           });},500);
         });
@@ -1015,7 +1053,7 @@ function _ckSubmit(){
    → 「繼續結帳」用購物車＋快照還原方案/環境/地區，回到精靈「結帳 ① 確認」（同意要重新勾，存證時間才是當次的）。 */
 var _ckTouched=false;try{['pointerdown','touchstart','keydown'].forEach(function(t){document.addEventListener(t,function(){_ckTouched=true;},true);});}catch(e){}
 function _ckSnapSave(){try{if(!window.__QW_CHECKOUT)return;localStorage.setItem('qw_ck_snap',JSON.stringify({t:Date.now(),plan:plan,env:env,city:areaCity,dist:areaDist,cd:window.__qsCleanDate||'',hi:qty.hi||0,ck:{name:_ck.name,gender:_ck.gender,mobile:_ck.mobile,addr:_ck.addr,email:_ck.email,env:_ck.env,model:_ck.model,note:_ck.note,age:_ck.age,rType:_ck.rType,rCar:_ck.rCar,rNum:_ck.rNum,rTitle:_ck.rTitle,rUBN:_ck.rUBN,rLove:_ck.rLove}}));}catch(e){}}
-function _ckSnapLoad(){try{var v=JSON.parse(localStorage.getItem('qw_ck_snap')||'null');if(v&&Date.now()-v.t<3*864e5)return v;}catch(e){}return null;}
+function _ckSnapLoad(){try{var v=JSON.parse(localStorage.getItem('qw_ck_snap')||'null');if(v&&Date.now()-v.t<864e5)return v;if(v)localStorage.removeItem('qw_ck_snap');}catch(e){}return null;}/* 2026-10-25 個資只留 1 天（原 3 天），過期順手刪掉 */
 function _ckSnapClear(){try{localStorage.removeItem('qw_ck_snap');}catch(e){}}
 try{if(/\/order\b/.test(location.pathname)||/[?&]t2=/.test(location.search))_ckSnapClear();}catch(e){}/* 已到訂單頁＝訂單成立，快照用不到了 */
 function _ckResume(){
@@ -1028,7 +1066,7 @@ function _ckResume(){
   if(areaCity&&!TW[areaCity]){var a2=areaCity.replace(/臺/g,'台');if(TW[a2])areaCity=a2;}
   try{areaCls=classify(areaCity,areaDist);}catch(e){}
   qty.hi=sn?(sn.hi||0):c.it.filter(function(x){return /挑高/.test(x.n);}).reduce(function(a,x){return a+x.q;},0);
-  if(sn){if(!window.__qsCleanDate)window.__qsCleanDate=sn.cd||'';for(var k in sn.ck){if(sn.ck.hasOwnProperty(k)&&!_ck[k]&&sn.ck[k])_ck[k]=sn.ck[k];}}
+  if(sn){if(!window.__qsCleanDate)window.__qsCleanDate=sn.cd||'';var _df={gender:'1',rType:'0',rCar:'0'};for(var k in sn.ck){if(sn.ck.hasOwnProperty(k)&&sn.ck[k]&&(!_ck[k]||_ck[k]===_df[k]))_ck[k]=sn.ck[k];}}
   _ck.agree=false;_ck.ack=false;_ck.err={};
   window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;window.__qsAreaCls=areaCls;
   if(ovl)close();_qwResume='confirm';_cfT0=Date.now();_cfSig='';_cfChg=Date.now();open();}
@@ -1040,7 +1078,7 @@ function _ckHideModal(){var n=0;(function lp(){var m=document.getElementById('ch
 function _ckWbHide(){var o=document.getElementById('qwb-ovl');if(o&&o.parentNode)o.parentNode.removeChild(o);}
 function _ckWelcome(){
   if(document.getElementById('qwb-ovl'))return;_cfCss();
-  var c=_cfCart();if(!c||!c.it.length)return;
+  var c=_cfCart();if(!c||!c.it.length||c.pay==null)return;
   c={it:c.it.filter(function(x){return !_isCorr(x.n);}),cp:c.cp,pay:c.pay};
   var orig=0;c.it.forEach(function(x){orig+=x.a;});var save=orig-(c.pay||0);
   try{sessionStorage.setItem('qwb_seen','1');}catch(e){}
@@ -1058,7 +1096,7 @@ function _wbEligible(){if(!window.__QW_CHECKOUT||_ckRun)return false;try{if(sess
   if(!_ckSnapLoad())return false;var c=_cfCart();if(!c||!c.it.some(function(x){return !_isCorr(x.n);}))return false;
   try{if(_cfBusy(c))return false;}catch(e){}return true;}
 (function(){var t0=Date.now(),tm=setInterval(function(){try{
-  if(Date.now()-t0>20000){clearInterval(tm);return;}
+  if(Date.now()-t0>30000){clearInterval(tm);return;}
   if(Date.now()-t0<2500)return;
   if(ovl&&step!==0)return;/* 客人已經自己在精靈裡操作 */
   if(_wbEligible()){clearInterval(tm);if(ovl)close();_ckWelcome();}
@@ -1069,8 +1107,9 @@ function _wbEligible(){if(!window.__QW_CHECKOUT||_ckRun)return false;try{if(sess
   var c=_cfCart();if(!c||!c.it.length)return;
   clearInterval(tm);
   _ckHideModal();
-  if(ovl)close();
-  _ckWelcome();
+  /* 2026-10-25 只有符合四條規則（精靈買的、這次瀏覽還沒看過、金額已定）才跳卡片；其他情況只關掉 1SHOP 表單，由浮動結帳條提醒 */
+  if(ovl)close();/* 跟原本一樣：1SHOP 自己跳結帳表單時，開場畫面也收起來，讓浮動結帳條提醒 */
+  if(_wbEligible())_ckWelcome();
 }catch(e){}},400);})();
 
 /* ===== 2026-10-23 發票整合進精靈（老闆：先做發票整合）===== */
@@ -1087,11 +1126,13 @@ function _rcHtml(){
     h+=_ckIn('rLove','愛心碼',0,'選填，3～7 碼數字','tel','')+'<div class="qiv-w">⚠️ 捐贈的發票開出後無法取回</div><div class="qiv-n">不填愛心碼會捐給：336 天使心家族、2911811 良顯堂、003 台灣安心家庭關懷協會（隨機一個）</div>';
   }
   return h+'</div>';}
+/* 2026-10-25 統一編號檢查碼（財政部規則：各位數乘 1,2,1,2,1,2,4,1、乘積的十位＋個位相加，總和可被 5 整除；第 7 碼是 7 時總和＋1 也算對） */
+function _ubnOk(u){if(!/^\d{8}$/.test(u))return false;var w=[1,2,1,2,1,2,4,1],t=0;for(var i=0;i<8;i++){var p=Number(u[i])*w[i];t+=Math.floor(p/10)+p%10;}return t%5===0||(u[6]==='7'&&(t+1)%5===0);}
 function _rcCheck(e){
   var up=function(x){return String(x||'').replace(/\s/g,'').toUpperCase();};
   if(_ck.rType==='0'&&_ck.rCar==='3'){_ck.rNum=up(_ck.rNum);if(!/^\/[0-9A-Z.+\-]{7}$/.test(_ck.rNum))e.rNum='手機條碼格式不對：/ 開頭，共 8 碼';}
   if(_ck.rType==='0'&&_ck.rCar==='2'){_ck.rNum=up(_ck.rNum);if(!/^[A-Z]{2}\d{14}$/.test(_ck.rNum))e.rNum='自然人憑證格式不對：2 碼英文＋14 碼數字';}
-  if(_ck.rType==='2'){if(String(_ck.rTitle||'').trim().length<2)e.rTitle='請填寫公司抬頭';var u=String(_ck.rUBN||'').replace(/\D/g,'');_ck.rUBN=u;if(!/^\d{8}$/.test(u))e.rUBN='統一編號要 8 碼數字';}
+  if(_ck.rType==='2'){if(String(_ck.rTitle||'').trim().length<2)e.rTitle='請填寫公司抬頭';var u=String(_ck.rUBN||'').replace(/\D/g,'');_ck.rUBN=u;if(!/^\d{8}$/.test(u))e.rUBN='統一編號要 8 碼數字';else if(!_ubnOk(u))e.rUBN='統一編號好像打錯了，請再核對一次';}
   if(_ck.rType==='1'&&_ck.rLove){var l=String(_ck.rLove).replace(/\D/g,'');_ck.rLove=l;if(l.length<3||l.length>7)e.rLove='愛心碼要 3～7 碼數字';}
   return e;}
 function _rcSave(){try{localStorage.setItem('qw_rcpt_pending',JSON.stringify({t:Date.now(),type:_ck.rType,car:_ck.rCar,num:_ck.rNum,title:_ck.rTitle,ubn:_ck.rUBN,love:_ck.rLove,email:String(_ck.email||'').trim()}));}catch(e){}}
@@ -1420,7 +1461,20 @@ function _qbHtml(i,ph,val,list,fn,rg){
   return h+'</div>';}
 function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
 function close(){try{_cfLoad(false);}catch(e){}if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
-function toast(msg){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);}
+/* 2026-10-25 精靈風格的確認／提示視窗（取代瀏覽器灰色 confirm/alert：字小、上面還寫網址、看起來像錯誤）
+   o={title,html,ok,cancel(沒有=只有一顆鈕),onOk,onCancel}；手機返回鍵＝取消（app_preview 會呼叫 __qwDlgClose） */
+function _qwDlg(o){try{var old=document.getElementById('qw-dlg');if(old)old.parentNode.removeChild(old);
+  if(!document.getElementById('qw-dlg-css')){var st=document.createElement('style');st.id='qw-dlg-css';st.textContent='#qw-dlg{position:fixed;inset:0;z-index:2147483600;background:rgba(4,24,48,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;animation:qwdlgIn .16s ease-out}@keyframes qwdlgIn{from{opacity:0}to{opacity:1}}#qw-dlg .bx{width:340px;max-width:100%;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.3)}#qw-dlg .hd{background:#0C2D57;color:#fff;padding:15px 18px;font-size:17px;font-weight:900;line-height:1.4}#qw-dlg .bd{padding:16px 18px 4px;font-size:15px;color:#33475C;line-height:1.75}#qw-dlg .bd .keep{margin-top:10px;padding:9px 12px;background:#EAF7EF;border:1px solid #BFE3CB;border-radius:10px;color:#0B5A2E;font-size:14px}#qw-dlg .ft{display:flex;gap:10px;padding:14px 18px 18px}#qw-dlg button{flex:1;min-height:48px;border-radius:12px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer}#qw-dlg .no{border:1.5px solid #D6DEE8;background:#fff;color:#33475C}#qw-dlg .yes{border:0;background:linear-gradient(135deg,#D4A63A,#B8860B);color:#fff;font-weight:900}';document.head.appendChild(st);}
+  var d=document.createElement('div');d.id='qw-dlg';d.setAttribute('role','alertdialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label',o.title||'提示');
+  d.innerHTML='<div class="bx"><div class="hd">'+(o.title||'提示')+'</div><div class="bd">'+(o.html||'')+'</div><div class="ft">'+(o.cancel?'<button type="button" class="no">'+o.cancel+'</button>':'')+'<button type="button" class="yes">'+(o.ok||'我知道了')+'</button></div></div>';
+  var done=false,fin=function(ok){if(done)return;done=true;if(d.parentNode)d.parentNode.removeChild(d);window.__qwDlgClose=null;try{(ok?o.onOk:o.onCancel)&&(ok?o.onOk:o.onCancel)();}catch(e){}};
+  d.querySelector('.yes').onclick=function(){fin(true);};var nb=d.querySelector('.no');if(nb)nb.onclick=function(){fin(false);};
+  window.__qwDlgClose=function(){fin(!o.cancel&&false);};
+  document.body.appendChild(d);setTimeout(function(){try{(nb||d.querySelector('.yes')).focus();}catch(e){}},50);
+}catch(e){/* 萬一畫不出來，退回瀏覽器視窗，至少功能不壞 */if(o.cancel){if(window.confirm((o.title||'')+'\n'+String(o.html||'').replace(/<[^>]+>/g,'')))o.onOk&&o.onOk();else o.onCancel&&o.onCancel();}else{window.alert(String(o.html||'').replace(/<[^>]+>/g,''));o.onOk&&o.onOk();}}}
+window.__qwDlg=_qwDlg;
+var _NOPICK={title:'還沒選要清洗的冷氣',html:'請至少選擇一台<b>室內機</b>或<b>室外機</b>清洗喔！<br>可回上一步（室內機／室外機）選擇台數。'};
+function toast(msg,ms){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},ms||2600);}
 /* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
 var _TERMS={
  dh:{pill:'📦 另行宅配',title:'三菱重工除濕機 DH18W-T 織紋白',body:
@@ -1702,7 +1756,7 @@ var api={
     if(_finishing||window.__qsAdding)return;
     var sv=_surveyOf();
     var r=_resolveBtn(sv.n);
-    if(!r){alert('抱歉，目前無法加入「'+sv.n+'」，請洽詢客服協助。');return;}
+    if(!r){_qwDlg({title:'目前無法加入',html:'抱歉，目前無法加入「'+_esc(sv.n)+'」，請洽詢客服協助。'});return;}
     _finishing=true;
     var btn=ovl?ovl.querySelector('.btn.pri'):null;if(btn){btn.disabled=true;btn.textContent='加入中…';}
     try{
@@ -1725,7 +1779,7 @@ var api={
       }catch(e){}},420);
     }catch(e){_finishing=false;window.__qsAdding=false;}
   },
-  go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){alert('請至少選擇一台室內機或室外機清洗喔！\n可回上一步（室內機／室外機）選擇台數。');return;}}step=n;render();},
+  go:function(n){if(n===3){var out=sumKeys(['o1','om']),indoor=sumKeys(['wall','cs','cm','cl','m4','f4']);if(out===0&&indoor===0){_qwDlg(_NOPICK);return;}}step=n;render();},
   /* 方案確認彈窗:按「完成，前往結帳」時先跳一次確認(兩種方案各自內容),確認後才真的加入購物車 */
   /* 2026-10-22 確認頁按鈕 */
   cfGo:function(){
@@ -1740,7 +1794,7 @@ var api={
     if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}else render();},
   ckSet:function(k,v){_ck[k]=v;clearTimeout(window.__qwSnapT);window.__qwSnapT=setTimeout(_ckSnapSave,600);if(_ck.err[k]){delete _ck.err[k];var e=ovl&&ovl.querySelector('[data-ckerr="'+k+'"]');if(e)e.textContent='';var i=ovl&&ovl.querySelector('[data-ck="'+k+'"]');if(i)i.classList.remove('bad');}
     if(step==='confirm'&&(k==='agree'||k==='ack'))_cfTick();},
-  wbGo:function(){_ckWbHide();_ckResume();},
+  wbGo:function(){try{sessionStorage.removeItem('qw_more');}catch(e){}_ckWbHide();_ckResume();},
   wbRe:function(){_ckWbHide();_ckSnapClear();var r=document.getElementById('qs-rewiz');if(r)r.click();},
   wbX:function(){_ckWbHide();_ckHideModal();if(ovl)close();},
   ckBack:function(){if(step==='ck2'){step='confirm';render();}else if(step==='ck3'){step='ck2';render();}},
@@ -1761,11 +1815,16 @@ var api={
   },
   cfMore:function(){
     if(step!=='confirm')return;clearInterval(_cfTm);_cfTm=null;close();
-    setTimeout(function(){var cb=document.getElementById('qs-contbtn');if(cb)cb.click();else _cfToCart();},120);
+    /* 2026-10-25 加購完要能回到精靈：記住「正在加購」，浮動條改成「回到結帳確認」 */
+    try{sessionStorage.setItem('qw_more','1');}catch(e){}
+    setTimeout(function(){var cb=document.getElementById('qs-contbtn');if(cb)cb.click();else _cfToCart();toast('選好要加購的項目後，按畫面下方的「回到結帳確認」',5000);},120);
   },
   cfBack:function(){
     if(step!=='confirm'||_cfClearing)return;
-    if(!confirm('要修改的話，會先清空目前購物車，再回到「選方案」這一步。\n您選的地區、機型、台數都會保留。\n確定要修改嗎？')){try{history.pushState({qw:'7'},'');}catch(e){}return;}
+    if(!_cfBackOk){_qwDlg({title:'要修改選擇嗎？',html:'會先<b style="color:#C0392B">清空目前購物車</b>，再回到「選方案」這一步。<div class="keep">✓ 您選的地區、機型、台數都會保留</div>',cancel:'不用了',ok:'確定修改',
+      onOk:function(){_cfBackOk=1;window.__qw.cfBack();},
+      onCancel:function(){try{history.pushState({qw:'7'},'');}catch(e){}try{window.dispatchEvent(new Event('qw-back-cancel'));}catch(e){}}});return;}
+    _cfBackOk=0;
     _cfClearing=true;_cfTick();
     window.__qsAgreed=false;window.__qsGatePass=false;
     _qwClearCart(function(){
@@ -1779,7 +1838,7 @@ var api={
     /* 2026-10-12 老闆選 D＋E：沒選方案時按鈕可以按，按了把方案卡捲進畫面並搖一下，不再是灰色按了沒反應 */
     if(!plan){try{var _pl=document.querySelector('#qw-ovl .qplans');if(_pl){var _c=_pl.closest('.qw');if(_c)_c.scrollTop=Math.max(0,_pl.offsetTop-90);_pl.classList.remove('qw-shake');void _pl.offsetWidth;_pl.classList.add('qw-shake');}}catch(e){}return;}
     if(window.__qsAdding)return;/* 加購進行中不再跳確認窗 */
-    if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
+    if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){_qwDlg(_NOPICK);return;}
     /* ⚠️ 達標時這裡的字一定要跟著換。2026-09-09 實測抓到:方案卡已經寫 92 折、算 8,280,
        確認彈窗卻還寫「標準方案 95 折」—— 客戶按下確認前最後看到的就是這一句,
        說一個折數收另一個折數是這頁最不能犯的錯。
@@ -1837,7 +1896,7 @@ var api={
     /* 防重入用獨立旗標 _finishing;__qsAdding 會凍結所有保護機制(校正/車馬費/挑高/孤兒把關),
        只能在真正開始加購時才設,且任何中途返回或例外都必須解除,否則保護會永久停擺 */
     if(_finishing||window.__qsAdding)return;
-    if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){alert('請至少選擇一台室內機或室外機清洗喔！');return;}
+    if(sumKeys(['wall','cs','cm','cl','m4','f4'])===0&&sumKeys(['o1','om'])===0){_qwDlg(_NOPICK);return;}
     _finishing=true;
     try{
     /* 動態對應：不靠寫死商品ID，改用「名稱開頭比對」找出當前頁面的真實按鈕與ID
@@ -1852,7 +1911,7 @@ var api={
     if(areaCls==='remote')qty.rm=1;
     var items=INDOOR.concat(OUTLIST,ADDON).filter(function(x){return qty[x.k]>0;});
     var jobs=[];items.forEach(function(x){var r=resolve(x.n);if(r){var ad=ADDON.indexOf(x)>=0;for(var i=0;i<qty[x.k];i++){jobs.push({btn:r.btn,pid:r.pid,addon:ad});}}});
-    if(jobs.length===0){alert('抱歉，加入購物車時發生問題，請再試一次；若持續失敗，可關閉精靈自行選購。');_finishing=false;return;}
+    if(jobs.length===0){_qwDlg({title:'加入購物車沒有成功',html:'抱歉，加入購物車時發生問題，請再試一次。<br>若持續失敗，可以關閉精靈自行選購，或聯繫客服。'});_finishing=false;return;}
     var btn=ovl?ovl.querySelector('.btn.pri'):null;if(btn){btn.disabled=true;btn.textContent='加入中…';}
     if(window.__QW_CONFIRM)_cfLoad(true,jobs.length);/* 2026-10-22 計算中過場 */
     var i=0,_waitMain=0,_verified=0;
@@ -2449,11 +2508,11 @@ function guardSurveyExclusive(){try{
             if(!hasClean)for(b2=0;b2<OUTNAMES.length;b2++){if(cn.indexOf(OUTNAMES[b2])===0){hasClean=true;break;}}
           }
           if(isClean&&hasSv){
-            alert('購物車裡已經有「到府場勘估價」。\n\n場勘是為了讓技師先到府確認要洗哪些，\n如果您已經確定要清洗的品項，請先移除場勘，再選購清洗服務。');
+            _qwDlg({title:'購物車裡已經有「到府場勘」',html:'場勘是為了讓技師先到府確認要洗哪些。<br>如果您已經確定要清洗的品項，請先移除場勘，再選購清洗服務。'});
             return;
           }
           if(isSv&&hasClean){
-            alert('購物車裡已經有清洗服務。\n\n到府場勘是給「還不確定要洗哪些」的客戶用的，\n您已經選好清洗品項，不需要再加場勘。\n\n如果仍想先請技師到府確認，請先移除清洗品項。');
+            _qwDlg({title:'購物車裡已經有清洗服務',html:'到府場勘是給「還不確定要洗哪些」的客戶用的，您已經選好清洗品項，不需要再加場勘。<br>如果仍想先請技師到府確認，請先移除清洗品項。'});
             return;
           }
         }
@@ -2959,7 +3018,8 @@ function addContinueBtn(){
       if(!a||a.getAttribute('data-b'))return;
       a.setAttribute('data-b','1');
       a.onclick=function(){
-        if(!confirm('這會清空目前購物車，重新用引導精靈挑選。\n確定要重新開始嗎？'))return;
+        if(!a.__qwOk){_qwDlg({title:'要重新挑選嗎？',html:'這會<b style="color:#C0392B">清空目前購物車</b>，重新用引導精靈一步步挑選。',cancel:'不用了',ok:'確定重新挑選',onOk:function(){a.__qwOk=1;a.onclick();}});return;}
+        a.__qwOk=0;
         var _origTxt=a.textContent;
         a.textContent='清空中…';
         window.__qsAdding=true;
@@ -4032,9 +4092,11 @@ function updateFab(){
     var pe=fab.querySelector('#qs-fab-p');if(pe)pe.textContent=_corrBusy()?'計算中…':('NT$ '+shown.toLocaleString('en-US'));
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
     try{var ck=!!(window.__QW_CHECKOUT&&_ckSnapLoad()),fb=fab.querySelector('#qs-fab-btn'),lt=fb&&fb.previousElementSibling;
-      if(fb&&fb.textContent!==(ck?'繼續結帳':'立即結帳')){fb.textContent=ck?'繼續結帳':'立即結帳';fb.style.background=ck?'linear-gradient(135deg,#D4A947,#B8892E)':'#042C53';}
+      var more=false;try{more=ck&&sessionStorage.getItem('qw_more')==='1';}catch(e){}
+      var lbl=more?'回到結帳確認 ›':(ck?'繼續結帳':'立即結帳');
+      if(fb&&fb.textContent!==lbl){fb.textContent=lbl;fb.style.background=ck?'linear-gradient(135deg,#D4A947,#B8892E)':'#042C53';}
       if(lt&&ck){var cpn=[].slice.call(document.querySelectorAll('#cart-section .cart-item.coupon h4')).map(function(x){return (x.textContent||'').replace(/[（(][^）)]*[）)]/g,'').trim();}).join('、');
-        var hh='<span style="display:block;font-size:12px;font-weight:700;color:#5B6B7D">🛒 '+cnt+' 項還沒結帳'+(cpn?'・已套用'+cpn:'')+'</span><span style="font-size:16px;font-weight:900;color:#042C53">應付 <span style="color:#B8860B">'+(_corrBusy()?'計算中…':'NT$ '+shown.toLocaleString('en-US'))+'</span></span>';
+        var hh='<span style="display:block;font-size:12px;font-weight:700;color:#5B6B7D">'+(more?'加購完成了嗎？已選 '+cnt+' 項':'🛒 '+cnt+' 項還沒結帳'+(cpn?'・已套用'+cpn:''))+'</span><span style="font-size:16px;font-weight:900;color:#042C53">應付 <span style="color:#B8860B">'+(_corrBusy()?'計算中…':'NT$ '+shown.toLocaleString('en-US'))+'</span></span>';
         if(lt.getAttribute('data-h')!==hh){lt.setAttribute('data-h',hh);lt.innerHTML=hh;lt.style.whiteSpace='normal';lt.style.lineHeight='1.35';}}
     }catch(e){}
   }catch(e){}
@@ -4851,10 +4913,12 @@ new MutationObserver(stickHead).observe(document.documentElement,{childList:true
 function sig(){var o=document.getElementById('qw-ovl');if(!o)return null;var q=o.querySelector('.qw');if(!q)return null;
  if(q.classList.contains('wel'))return '0';var on=q.querySelector('.qwdot.on');var h=q.querySelector('h2');
  return (on?on.textContent:'?')+'|'+(h?h.textContent:'');}
-function pos(s){if(!s)return -1;if(s==='0')return 0;var n=parseInt(s,10);return isNaN(n)?0:n;}
+function pos(s){if(!s)return -1;if(s==='0')return 0;var n=parseInt(s,10);if(isNaN(n))return 0;
+ /* 2026-10-25 結帳 ①確認 ②聯絡 ③補充 進度圓點都是 7，用標題分成 7 / 7.1 / 7.2，各算一頁 */
+ if(n===7){if(/聯絡/.test(s))return 7.1;if(/補充/.test(s))return 7.2;}return n;}
 
 if(LV>=2){
- var last=null,goingBack=false,depth=0;
+ var last=null,goingBack=false,depth=0,skipPop=false;
  var mo=new MutationObserver(function(){
   var s=sig();if(s===last)return;
   var o=document.getElementById('qw-ovl'),q=o&&o.querySelector('.qw');
@@ -4863,29 +4927,39 @@ if(LV>=2){
    q.classList.remove('qw-in-r','qw-in-l');void q.offsetWidth;q.classList.add(back?'qw-in-l':'qw-in-r');
   }
   if(s!==null&&last!==null&&!goingBack&&pos(s)>pos(last)){try{history.pushState({qw:s},'');depth++;}catch(e){}}
+  /* 2026-10-25 用精靈裡的「上一步」往回：同步退掉一筆返回紀錄，免得之後按返回鍵「沒反應」 */
+  else if(s!==null&&last!==null&&!goingBack&&pos(s)<pos(last)&&depth>0){depth--;skipPop=true;try{history.back();}catch(e){skipPop=false;}}
+  /* 2026-10-25 精靈關掉：把精靈留下的返回紀錄一次清掉（原本要按好幾次返回鍵才離開）。送單中（qck-run）不動，以免干擾跳轉付款頁 */
+  if(s===null&&last!==null&&depth>0&&!document.body.classList.contains('qck-run')){var d=depth;depth=0;skipPop=true;try{history.go(-d);}catch(e){skipPop=false;}}
   if(goingBack&&depth>0)depth--;
   goingBack=false;last=s;
  });
  mo.observe(document.documentElement,{childList:true,subtree:true});
  /* 手機返回鍵：精靈開著就回上一步，不離開賣場 */
  /* 選日期整頁也算一頁：打開時多記一筆歷史，按返回就關掉回選方案；用 ‹ 或選完日期關掉時，把那筆歷史退掉（不觸發回上一步） */
- var cdOpen=false,skipPop=false;
+ var cdOpen=false;
  new MutationObserver(function(){var c=!!document.getElementById('qw-cdcal');
   if(c&&!cdOpen){cdOpen=true;try{history.pushState({qwcd:1},'');}catch(e){}}
   else if(!c&&cdOpen){cdOpen=false;if(history.state&&history.state.qwcd){skipPop=true;try{history.back();}catch(e){skipPop=false;}}}
  }).observe(document.documentElement,{childList:true,subtree:true});
+ window.addEventListener('qw-back-cancel',function(){goingBack=false;});
  window.addEventListener('popstate',function(){
   if(skipPop){skipPop=false;return;}
+  /* 2026-10-25 精靈視窗開著時按返回鍵＝取消視窗；被吃掉的那筆返回紀錄補回來 */
+  if(document.getElementById('qw-dlg')&&window.__qwDlgClose){try{history.pushState({qw:'dlg'},'');}catch(e){}window.__qwDlgClose();return;}
   var cd=document.getElementById('qw-cdcal');if(cd){cdOpen=false;var xb=cd.querySelector('.qwcd-x');if(xb)xb.click();else cd.remove();return;}
   var o=document.getElementById('qw-ovl');if(!o)return;
   var prev=[].slice.call(o.querySelectorAll('.qwfoot button,.nav button,button')).filter(function(b){return /上一步/.test(b.textContent||'');})[0];
-  goingBack=true;
+  goingBack=true;var sb=sig();
+  /* 2026-10-25 「上一步」被取消（例如確認頁問要不要清空購物車、客人按取消）：畫面沒變就恢復，不要把下一次往前誤當成往回 */
+  setTimeout(function(){if(goingBack&&sig()===sb&&!document.getElementById('qw-dlg'))goingBack=false;},900);
   if(prev){prev.click();}else if(window.__qw){/* 地區頁沒有上一步鈕 → 回開場 */try{window.__qw.go(0);}catch(e){goingBack=false;}}
  });
 }
 
 if(LV>=3){
  var KEY='qw_app_resume';
+ function esc(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
  function load(){try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){return null;}}
  function save(v){try{localStorage.setItem(KEY,JSON.stringify(v));}catch(e){}}
  var replaying=false;
@@ -4906,9 +4980,11 @@ if(LV>=3){
  function card(){
   var o=document.getElementById('qw-ovl');if(!o)return;var q=o.querySelector('.qw.wel');if(!q||q.querySelector('#qw-resume'))return;
   var v=load();if(!v||!v.log||v.log.length<4||!v.sum)return;
+  /* 2026-10-25 選到一半的紀錄只留 3 天（原本沒有期限，幾個月後還會跳） */
+  if(!v.t||Date.now()-v.t>3*864e5){try{localStorage.removeItem(KEY);}catch(e){}return;}
   var el=document.createElement('div');el.id='qw-resume';
   var ago=Math.max(1,Math.round((Date.now()-(v.t||Date.now()))/86400000));
-  el.innerHTML='<div class="rs-t">👋 歡迎回來！您上次選到一半</div><div class="rs-s">'+v.sum.replace(/已選/,'已選 ')+'</div><div class="rs-a">服務地區：'+(area(v)||'—')+'</div>'
+  el.innerHTML='<div class="rs-t">👋 歡迎回來！您上次選到一半</div><div class="rs-s">'+esc(v.sum.replace(/已選/,'已選 '))+'</div><div class="rs-a">服務地區：'+esc(area(v)||'—')+'</div>'
    +'<div class="rs-b"><button type="button" class="rs-new">重新開始</button><button type="button" class="rs-go">繼續上次的選擇 ›</button></div>';
   var steps=q.querySelector('.wel-steps');q.insertBefore(el,steps?steps.nextSibling:q.firstChild);
   el.querySelector('.rs-new').onclick=function(){try{localStorage.removeItem(KEY);}catch(e){}window.__qw.start();};
