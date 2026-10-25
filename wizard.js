@@ -900,7 +900,8 @@ function _cfLoad(on,n){
 /* ===== 2026-10-22 精靈內結帳（老闆選乙：第 7 步「結帳」內含 ①確認 ②聯絡 ③補充）=====
    客人在精靈填完 → 按「前往付款」→ 精靈照原本的路走：立即結帳 → 同意視窗(代勾代按) → 1SHOP 第1/2/3步(代填代按) → 送出 → 訂單頁(發票、付款)
    原本的金額保護、方案券檢查、同意存證(fillConsent)都照樣會跑；任何一步沒過就停下來，顯示 1SHOP 原本的結帳視窗讓客人自己完成。 */
-var _cfBackOk=0,_cfAutoAt=0;
+var _cfBackOk=0,_cfAutoAt=0,_wizUsed=false;
+function _qmClr(){try{sessionStorage.removeItem('qw_more');}catch(e){}}/* 2026-10-25 重新選購／重新挑選／修改時清掉「加購中」 */
 var _svFlow=false;/* 2026-10-25 精靈正在走「到府場勘」新流程（日期→確認→聯絡→補充） */
 function _svOn(){return _svFlow&&!!window.__QW_CHECKOUT;}
 var _ck={age:'',ack:false,agree:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',rType:'0',rCar:'0',rNum:'',rTitle:'',rUBN:'',rLove:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null;
@@ -988,7 +989,7 @@ function _ckFail(msg){
   var bz=false;try{bz=_cfBusy(_cfCart());}catch(e){}
   if(bz&&!_ckModal()){toast('金額還在確認中，請稍候幾秒，再按畫面下方的「繼續結帳／立即結帳」',7000);return;}
   if(!_ckModal()){try{if(window.openViewCheckoutModal)openViewCheckoutModal();}catch(e){}}
-  toast('自動填寫沒有完成（'+msg+'）<br>資料已幫您帶入，請確認後按「下一步／送出」');}
+  toast('自動填寫沒有完成（'+_esc(String(msg||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim())+'）<br>資料已幫您帶入，請確認後按「下一步／送出」');}
 /* 2026-10-25 最後「送出」之後：1SHOP 送出中會把送出鈕變灰（停用），失敗才恢復、成功直接跳訂單頁。
    → 送出鈕還是灰的＝訂單可能正在建立，絕不能叫客人再按（會變兩張訂單）；只有鈕恢復可按（＝1SHOP 說失敗）才請客人修正後再送 */
 /* 1SHOP 送單請求自己設了 30 秒逾時：逾時它會說「出現錯誤」並把送出鈕恢復，但 1SHOP 那邊可能其實已經建立訂單。
@@ -1136,6 +1137,7 @@ function _wbEligible(){if(!window.__QW_CHECKOUT||_ckRun)return false;try{if(sess
 (function(){var t0=Date.now(),tm=setInterval(function(){try{
   if(Date.now()-t0>30000){clearInterval(tm);return;}
   if(Date.now()-t0<2500)return;
+  if(_wizUsed){clearInterval(tm);return;}
   if(ovl&&step!==0)return;/* 客人已經自己在精靈裡操作 */
   if(_wbEligible()){clearInterval(tm);if(ovl)close();_ckWelcome();}
 }catch(e){}},500);})();
@@ -1217,6 +1219,7 @@ function _cfHtml(){var ck=!!window.__QW_CHECKOUT;return '<div class="qw qw-step-
   +'<div class="nav"><button class="btn gho qcf-bk" onclick="__qw.cfBack()">上一步</button><button class="btn pri qcf-go" disabled onclick="__qw.cfGo()"><span class="l1">金額確認中…</span></button></div></div>';}
 function render(){
   var w='';
+  if(step!==0)_wizUsed=true;/* 2026-10-25 這次打開網頁用過精靈：不是回訪客人，不跳「歡迎回來」 */
   if(step===0||step==='area'||step==='env'||step===1||step===2||step===3||step===4)_svFlow=false;
   if(env==='biz')qty.bz=bzQty();qty.tf=tfQty();
   if(window.__QW_CONFIRM)_cfCss();
@@ -1823,7 +1826,7 @@ var api={
           if(has&&!_rmDone){_rmDone=true;var rr=_resolveBtn('偏遠地區加價');if(rr){try{window.viewProduct(rr.btn,rr.pid);}catch(e){}}setTimeout(_w,900);return;}
           if(!has&&Date.now()-_t0<8000){setTimeout(_w,250);return;}
           setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
-          if(!has){_cfLoad(false);_finishing=false;window.__qsAdding=false;_qwDlg({title:'加入購物車沒有成功',html:'抱歉，加入「到府場勘」時發生問題，請再試一次；若持續失敗，請聯繫客服。'});return;}
+          if(!has){_cfLoad(false);_finishing=false;window.__qsAdding=false;render();_qwDlg({title:'加入購物車沒有成功',html:'抱歉，加入「到府場勘」時發生問題，請再試一次；若持續失敗，請聯繫客服。'});return;}
           _cfT0=Date.now();_cfSig='';_cfChg=Date.now();step='confirm';render();try{_ckSnapSave();}catch(e){}
         })();
         return;
@@ -1855,7 +1858,7 @@ var api={
   ckSet:function(k,v){_ck[k]=v;clearTimeout(window.__qwSnapT);window.__qwSnapT=setTimeout(_ckSnapSave,600);if(_ck.err[k]){delete _ck.err[k];var e=ovl&&ovl.querySelector('[data-ckerr="'+k+'"]');if(e)e.textContent='';var i=ovl&&ovl.querySelector('[data-ck="'+k+'"]');if(i)i.classList.remove('bad');}
     if(step==='confirm'&&(k==='agree'||k==='ack'))_cfTick();},
   wbGo:function(){try{sessionStorage.removeItem('qw_more');}catch(e){}_ckWbHide();_ckResume();},
-  wbRe:function(){_ckWbHide();_ckSnapClear();var r=document.getElementById('qs-rewiz');if(r)r.click();},
+  wbRe:function(){_qmClr();_ckWbHide();_ckSnapClear();var r=document.getElementById('qs-rewiz');if(r)r.click();},
   wbX:function(){_ckWbHide();_ckHideModal();if(ovl)close();},
   ckBack:function(){if(step==='ck2'){step='confirm';render();}else if(step==='ck3'){step='ck2';render();}},
   ckNext:function(){
@@ -1881,9 +1884,10 @@ var api={
   },
   cfBack:function(){
     if(step!=='confirm'||_cfClearing)return;
+    var _viaBack=!!window.__qwBackKey;
     if(!_cfBackOk){_qwDlg({title:'要修改選擇嗎？',html:'會先<b style="color:#C0392B">清空目前購物車</b>，再回到'+(_svOn()?'「到府場勘」':'「選方案」')+'這一步。<div class="keep">✓ 您選的地區、'+(_svOn()?'服務環境':'機型、台數')+'都會保留</div>',cancel:'不用了',ok:'確定修改',
-      onOk:function(){_cfBackOk=1;window.__qw.cfBack();},
-      onCancel:function(){try{history.pushState({qw:'7'},'');}catch(e){}try{window.dispatchEvent(new Event('qw-back-cancel'));}catch(e){}}});return;}
+      onOk:function(){_cfBackOk=1;_qmClr();window.__qw.cfBack();},
+      onCancel:function(){if(_viaBack){try{history.pushState({qw:'7'},'');}catch(e){}}try{window.dispatchEvent(new Event('qw-back-cancel'));}catch(e){}}});return;}
     _cfBackOk=0;
     _cfClearing=true;_cfTick();
     window.__qsAgreed=false;window.__qsGatePass=false;
@@ -1953,7 +1957,7 @@ var api={
     },180);
   },
   finish:function(){
-    _svFlow=false;
+    _svFlow=false;_qmClr();
     /* 防重入用獨立旗標 _finishing;__qsAdding 會凍結所有保護機制(校正/車馬費/挑高/孤兒把關),
        只能在真正開始加購時才設,且任何中途返回或例外都必須解除,否則保護會永久停擺 */
     if(_finishing||window.__qsAdding)return;
@@ -3079,7 +3083,7 @@ function addContinueBtn(){
       if(!a||a.getAttribute('data-b'))return;
       a.setAttribute('data-b','1');
       a.onclick=function(){
-        if(!a.__qwOk){_qwDlg({title:'要重新挑選嗎？',html:'這會<b style="color:#C0392B">清空目前購物車</b>，重新用引導精靈一步步挑選。',cancel:'不用了',ok:'確定重新挑選',onOk:function(){a.__qwOk=1;a.onclick();}});return;}
+        if(!a.__qwOk){_qwDlg({title:'要重新挑選嗎？',html:'這會<b style="color:#C0392B">清空目前購物車</b>，重新用引導精靈一步步挑選。',cancel:'不用了',ok:'確定重新挑選',onOk:function(){_qmClr();a.__qwOk=1;a.onclick();}});return;}
         a.__qwOk=0;
         var _origTxt=a.textContent;
         a.textContent='清空中…';
@@ -4890,6 +4894,8 @@ var st=document.createElement('style');st.id='qw-app-preview';st.textContent=css
 
 /* 開場畫面：頁面一開就蓋上，精靈出現後淡出（最多 8 秒） */
 function splash(){
+ /* 2026-10-25 付款完成頁（/order?t2=…）不是選購頁，不要蓋開場畫面（原本客人付完款要先看 8～10 秒「正在為您準備選購精靈…」） */
+ if(/\/order\b/.test(location.pathname)||/[?&]t2=/.test(location.search))return;
  if(!mob()||document.getElementById('qw-splash')||document.getElementById('qw-ovl'))return;
  var d=document.createElement('div');d.id='qw-splash';
  d.innerHTML='<div class="sp-b">三菱重工 · 原廠空調清洗</div><div class="sp-l"></div><div class="sp-h">官方賣場</div><div class="sp-s">正在為您準備選購精靈…</div><div class="sp-r"></div>';
@@ -5010,12 +5016,12 @@ if(LV>=2){
   /* 2026-10-25 精靈視窗開著時按返回鍵＝取消視窗；被吃掉的那筆返回紀錄補回來 */
   if(document.getElementById('qw-dlg')&&window.__qwDlgClose){try{history.pushState({qw:'dlg'},'');}catch(e){}window.__qwDlgClose();return;}
   var cd=document.getElementById('qw-cdcal');if(cd){cdOpen=false;var xb=cd.querySelector('.qwcd-x');if(xb)xb.click();else cd.remove();return;}
-  var o=document.getElementById('qw-ovl');if(!o)return;
-  var prev=[].slice.call(o.querySelectorAll('.qwfoot button,.nav button,button')).filter(function(b){return /上一步/.test(b.textContent||'');})[0];
+  var o=document.getElementById('qw-ovl');if(!o){if(depth>0)depth--;return;}/* 2026-10-25 精靈關著時按返回也要扣計數，免得之後關精靈多退幾格 */
+  var prev=[].slice.call(o.querySelectorAll('.qwfoot button,.nav button,button')).filter(function(b){return /上一步|返回選機型|直接選機型/.test(b.textContent||'');})[0];
   goingBack=true;var sb=sig();
   /* 2026-10-25 「上一步」被取消（例如確認頁問要不要清空購物車、客人按取消）：畫面沒變就恢復，不要把下一次往前誤當成往回 */
-  setTimeout(function(){if(goingBack&&sig()===sb&&!document.getElementById('qw-dlg'))goingBack=false;},900);
-  if(prev){prev.click();}else if(window.__qw){/* 地區頁沒有上一步鈕 → 回開場 */try{window.__qw.go(0);}catch(e){goingBack=false;}}
+  setTimeout(function(){if(goingBack&&sig()===sb&&!document.getElementById('qw-dlg')&&!/正在清空購物車/.test(((document.querySelector('#qw-ovl .qw')||{}).innerText)||''))goingBack=false;},900);
+  if(prev){window.__qwBackKey=true;try{prev.click();}finally{window.__qwBackKey=false;}}else if(window.__qw){/* 地區頁沒有上一步鈕 → 回開場 */try{window.__qw.go(0);}catch(e){goingBack=false;}}
  });
 }
 
