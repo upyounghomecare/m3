@@ -726,7 +726,7 @@ function _cfCart(){var sec=document.getElementById('cart-section');if(!sec)retur
 function _cfBusy(d){
   var rb=_cfRealBtn();
   if(!rb||rb.getAttribute('data-qslock')!=null||rb.disabled)return true;/* 1SHOP 結帳鈕被鎖＝金額計算中，永遠尊重 */
-  if(window.__qsAdding||_finishing||_cfClearing)return true;
+  if(window.__qsAdding||_finishing||_cfClearing||_ckAddBusy)return true;
   if(!d||!d.it.length||d.pay==null)return true;
   if(Date.now()-_cfChg<2000)return true;/* 購物車剛變動，等它穩定 */
   var early=Date.now()-_cfT0<40000;/* 以下兩項最多等 40 秒；之後交給 1SHOP 結帳鈕本身的保護 */
@@ -765,18 +765,19 @@ function _cfTick(){
     setTimeout(function(){try{if(step!=='confirm'||!ovl||_ckAgreeOK())return;var q=ovl.querySelector('.qw'),bx=ovl.querySelector('.qck-box');if(!q||!bx||Math.abs(q.scrollTop-_s0)>40)return;
       var st=q.querySelector('.qw-stick'),off=(st?st.offsetHeight:0)+12,to=Math.max(0,bx.getBoundingClientRect().top-q.getBoundingClientRect().top+q.scrollTop-off);
       try{q.scrollTo({top:to,behavior:'smooth'});}catch(e){q.scrollTop=to;}
-      setTimeout(function(){try{if(Math.abs(q.scrollTop-to)>30)q.scrollTop=to;var t=_ckTodo();if(!t.length)return;var k=t[0][0],sel=(k==='age'||k==='stop')?'.qck-age':(k==='ack'?'.qck-agree .qck-chk:not(.qck-ag)':'.qck-agree .qck-ag');var el=ovl.querySelector(sel);if(el){el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}}catch(e){}},700);
+      setTimeout(function(){try{if(Math.abs(q.scrollTop-to)>30)q.scrollTop=to;var t=_ckTodo();if(!t.length)return;var el=ovl.querySelector(_ckSel(t[0][0]));if(el){el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}}catch(e){}},700);
     }catch(e){}},2000);}
-  var gh=busy?'<span class="l1">金額確認中…</span>':(ck?'<span class="l1">下一步：填聯絡資料</span><span class="l2">'+(aok?'應付 '+_cfMoney(d.pay):'請先完成上方的確認')+'</span>':'<span class="l1">立即結帳</span><span class="l2">應付 '+_cfMoney(d.pay)+'</span>');
+  var _why=ck?_ckStopWhy():'';var gh=busy?'<span class="l1">金額確認中…</span>':(ck&&_why?'<span class="l1">無法結帳</span><span class="l2">'+_why+'</span>':(ck?'<span class="l1">下一步：填聯絡資料</span><span class="l2">'+(aok?'應付 '+_cfMoney(d.pay):'請先完成上方的確認')+'</span>':'<span class="l1">立即結帳</span><span class="l2">應付 '+_cfMoney(d.pay)+'</span>'));
   if(go.getAttribute('data-h')!==gh){go.setAttribute('data-h',gh);go.innerHTML=gh;}
   /* 結帳模式：同意區沒完成也讓按鈕可以按（按了會把同意區捲出來搖一下），只有金額計算中才真的鎖 */
   go.disabled=!!busy;go.classList.toggle('qcf-busy',!!busy||(ck&&!aok));
   var bk=ovl.querySelector('.qcf-bk');if(bk)bk.disabled=_cfClearing;
+  if(ck&&!_svOn()){try{var _cs=[_hiInCart(),_bzInCart(),_fanInCart(),_blowInCart(),_outdoorInCart(),_indoorInCart(),_ckAddBusy].join(',');if(_cs!==_ckCS){_ckCS=_cs;var _a0=ovl.querySelector('.qck-agree');if(_a0)_a0.innerHTML=_ckAgreeHtml();}}catch(e){}}
   if(ck){try{var td=_ckTodo(),stop=td.length&&td[0][0]==='stop',n=stop?0:td.length,box=ovl.querySelector('.qck-box'),ft=ovl.querySelector('.qwfoot'),bar=ovl.querySelector('#qya');
-    try{var _ag=ovl.querySelector('.qck-agree');if(_ag){var _k=(n>0&&!stop&&!busy)?td[0][0]:'',_tg=_k==='age'?_ag.querySelector('.qck-age'):(_k==='ack'?_ag.querySelector('.qck-chk:not(.qck-ag)'):(_k==='agree'?_ag.querySelector('.qck-ag'):null));
+    try{var _ag=ovl.querySelector('.qck-agree');if(_ag){var _k=(n>0&&!stop&&!busy&&!_ckAddBusy)?td[0][0]:'',_tg=_k?ovl.querySelector(_ckSel(_k)):null;
       [].slice.call(_ag.querySelectorAll('.qck-todo')).forEach(function(x){if(x!==_tg)x.classList.remove('qck-todo');});[].slice.call(_ag.querySelectorAll('.qck-hint')).forEach(function(h){if(!_tg||h.getAttribute('data-k')!==_k)h.parentNode.removeChild(h);});
       if(_tg&&!_ag.querySelector('.qck-hint[data-k="'+_k+'"]')){_tg.classList.add('qck-todo');var _h=document.createElement('span');_h.className='qck-hint';_h.setAttribute('data-k',_k);_h.setAttribute('aria-hidden','true');
-        if(_k==='age'){_h.textContent='請點選下方一個 👇';_tg.parentNode.insertBefore(_h,_tg);}else{_h.textContent='請勾選 👇';_tg.appendChild(_h);}}
+        if(_tg.tagName!=='LABEL'){_h.textContent=/Add$|Del$/.test(_k)?'請按下方按鈕 👇':'請點選下方一個 👇';_tg.parentNode.insertBefore(_h,_tg);}else{_h.textContent='請勾選 👇';_tg.appendChild(_h);}}
       if(box)box.classList.toggle('hint-on',!!_tg);}}catch(e){}/* 2026-10-25 老闆選 C 款 */
     if(box){box.classList.toggle('need',n>0);var bd=box.querySelector('.qck-h b');if(n>0){if(!bd){bd=document.createElement('b');box.querySelector('.qck-h').appendChild(bd);}bd.textContent='還差 '+n+' 步';}else if(bd)bd.parentNode.removeChild(bd);}
     if(ft&&n>0&&!busy){if(!bar){bar=document.createElement('button');bar.type='button';bar.id='qya';bar.onclick=function(){_ckGoTodo();};ft.insertBefore(bar,ft.firstChild);}
@@ -833,6 +834,16 @@ function _cfCss(){
   +'#qw-ovl .qck-chk{display:flex;align-items:flex-start;gap:9px;margin-top:10px;border:1.5px solid #E1E8F0;border-radius:12px;padding:10px 11px;font-size:13.5px;font-weight:800;color:#33475C;cursor:pointer;background:#fff}'
   +'#qw-ovl .qck-chk input{width:20px;height:20px;flex:none;margin:0;accent-color:#1E8E4E}#qw-ovl .qck-chk.on{border-color:#BFE3CB;background:#EAF7EF;color:#0B5A2E}#qw-ovl .qck-chk.bad{border-color:#E57373;background:#FFF6F5}'
   +'#qw-ovl .qck-ag{border-color:#E8D29A;background:#FFF8E8;color:#6B5418}'
+  +'#qw-ovl .qck-sub{font-size:12.5px;font-weight:700;color:#6B7C90;margin:-4px 0 8px;line-height:1.5}#qw-ovl .qck-q+.qck-sub+.qck-age,#qw-ovl .qck-q+.qck-age{margin-top:0}#qw-ovl .qck-s{margin-bottom:2px}#qw-ovl .qck-age+.qck-q,#qw-ovl .qck-nt+.qck-q,#qw-ovl .qck-chk+.qck-q{margin-top:16px}'
+  +'#qw-ovl .qck-age button small{display:block;font-size:11.5px;font-weight:700;opacity:.85;margin-top:2px}#qw-ovl .qck-age.two{grid-template-columns:1fr 1fr}'
+  +'#qw-ovl .qck-nt{margin-top:10px;border-radius:12px;padding:10px 11px;font-size:13.5px;font-weight:800;line-height:1.6}#qw-ovl .qck-nt.ok{background:#EAF7EF;border:1px solid #BFE3CB;color:#0B5A2E}#qw-ovl .qck-nt.warn{background:#FFF8E8;border:1px solid #E8D29A;color:#6B5418}'
+  +'#qw-ovl .qck-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}#qw-ovl .qck-row>span{font-size:13px}'
+  +'#qw-ovl .qck-st{display:flex;align-items:center;border:1.5px solid #D5DFEA;border-radius:999px;overflow:hidden;background:#fff}#qw-ovl .qck-st button{width:40px;height:38px;border:0;background:none;font-size:20px;color:#0C2D57;cursor:pointer;font-family:inherit}#qw-ovl .qck-st button:disabled{color:#C5CED8;cursor:default}#qw-ovl .qck-st span{min-width:30px;text-align:center;font-size:16px;font-weight:900;color:#16202B}'
+  +'#qw-ovl .qck-act{display:block;width:100%;margin-top:9px;border:0;border-radius:12px;padding:12px;font:900 14.5px/1.3 inherit;font-family:inherit;cursor:pointer}#qw-ovl .qck-act.gold{background:linear-gradient(135deg,#E2BC5E,#C8962E);color:#2A1C00}#qw-ovl .qck-act.line{background:#fff;border:1.5px solid #0C2D57;color:#0C2D57}#qw-ovl .qck-act:disabled{opacity:.6;cursor:default}'
+  +'#qw-ovl .qck-fq{display:flex;gap:6px;margin-top:8px}#qw-ovl .qck-fq input{flex:1;min-width:0;border:1.5px solid #DCE4EE;border-radius:10px;padding:9px 11px;font-size:16px;font-family:inherit;color:#16202B}#qw-ovl .qck-fq button{border:0;background:#0C2D57;color:#fff;border-radius:10px;padding:0 14px;font:800 14px inherit;font-family:inherit;cursor:pointer}'
+  +'#qw-ovl .qck-wh{margin-top:6px;font-size:12.5px;color:#B4441C;font-weight:800}#qw-ovl .qck-fr{margin-top:8px;font-size:13.5px}#qw-ovl .qck-ft{display:block;margin-top:8px;font-size:12.5px;font-weight:700}#qw-ovl .qck-out{border-color:#E8D29A}'
+  +'#qw-ovl .qck-stop2{margin-top:10px;background:#FFF1EE;border:1.5px solid #E8A08C;border-radius:12px;padding:11px 12px;font-size:13.5px;font-weight:800;color:#B4441C;line-height:1.6}#qw-ovl .qck-stop2 b{display:block;font-size:15px;margin-bottom:2px}'
+  +'#qw-ovl .qck-line{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:9px;background:#06C755;color:#fff!important;border-radius:10px;padding:11px;font-size:14.5px;font-weight:900;text-decoration:none}#qw-ovl .qck-stop2 .alt{display:block;margin-top:7px;text-align:center;font-size:12.5px;color:#8A5A48;font-weight:700}'
   +'#qw-ovl .qck-stop{margin-top:10px;background:#FFF1EE;border:1px solid #F2C9BC;border-radius:12px;padding:10px 11px;font-size:13.5px;font-weight:800;color:#B4441C;line-height:1.6}'
   +'#qw-ovl .qck-rules{margin:12px 0 0;padding:9px 12px 9px 28px;background:#F7F9FC;border:1px solid #E6ECF2;border-radius:12px;font-size:13px;color:#33475C;line-height:1.7}'
   +'#qw-ovl .qck-body{display:flex;flex-direction:column;gap:12px;padding:8px 0 12px}#qw-ovl .qck-f{display:flex;flex-direction:column;gap:6px}'
@@ -909,13 +920,24 @@ var _cfBackOk=0,_cfAutoAt=0,_wizUsed=false;
 function _qmClr(){try{sessionStorage.removeItem('qw_more');}catch(e){}}/* 2026-10-25 重新選購／重新挑選／修改時清掉「加購中」 */
 var _svFlow=false;/* 2026-10-25 精靈正在走「到府場勘」新流程（日期→確認→聯絡→補充） */
 function _svOn(){return _svFlow&&!!window.__QW_CHECKOUT;}
-var _ck={age:'',ack:false,agree:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',rType:'0',rCar:'0',rNum:'',rTitle:'',rUBN:'',rLove:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null;
+var _ck={age:'',ack:false,agree:false,hgt:'',oil:'',fan:'',out:false,name:'',gender:'1',mobile:'',addr:'',email:'',env:'',mgmt:false,model:'',note:'',rType:'0',rCar:'0',rNum:'',rTitle:'',rUBN:'',rLove:'',err:{},agreeAt:0},_ckRun=false,_ckLd=null,_ckN={},_ckAddBusy='',_ckCS='',_ckFanQ='',_ckFanR=null;
 var _CK_RULES=['只服務<b>三菱重工</b>冷氣（室內機面板有「HEAVY INDUSTRIES」），不含三菱電機及其他品牌','機齡 15 年以上、安裝高度 4 米以上恕不提供服務','機齡 10 年（含）以上恕不提供保固','偏遠地區／商用場所／挑高施作依規範加價','保固範圍、取消政策與注意事項依賣場服務規範'];
 /* 2026-10-23 老闆選 A＋B：確認頁提醒客人要選「冷氣用了幾年」並勾同意 —— 回傳還沒完成的項目（A 提示條、B 金框徽章共用） */
-function _ckTodo(){var t=[];if(_svOn()){if(!_ck.agree)t.push(['agree','勾選同意服務規範']);return t;}if(!_ck.age)t.push(['age','選冷氣使用年數']);else if(_ck.age.indexOf('15年以上')>=0)return [['stop','']];
-  if(_ck.age==='10-15年'&&!_ck.ack)t.push(['ack','勾選 10 年以上不保固的確認']);if(!_ck.agree)t.push(['agree','勾選同意服務規範']);return t;}
-function _ckGoTodo(){var t=_ckTodo();if(!t.length)return;var k=t[0][0],sel=k==='age'||k==='stop'?'.qck-age':(k==='ack'?'.qck-agree .qck-chk:not(.qck-ag)':'.qck-agree .qck-ag');_ckShake(sel);}
-function _ckAgreeOK(){if(_svOn())return !!_ck.agree;return !!(_ck.agree&&_ck.age&&_ck.age.indexOf('15年以上')<0&&(_ck.age!=='10-15年'||_ck.ack));}
+function _ckTodo(){var t=[];if(_svOn()){if(!_ck.agree)t.push(['agree','勾選同意服務規範']);return t;}if(!_ck.age)t.push(['age','選冷氣使用年數']);else if(_ck.age.indexOf('15年以上')>=0)return [['stop','age']];
+  if(_ck.age==='10-15年'&&!_ck.ack)t.push(['ack','勾選 10 年以上不保固的確認']);
+  /* 2026-10-25 現場條件（老闆逐題定案）：高度、油煙（家用）、風鼓（吊隱大/全）、室外機位置 */
+  _ckPrefill();
+  if(_ck.hgt==='hi4')return [['stop','hgt']];
+  if(!_ck.hgt)t.push(['hgt','選安裝高度']);else if(_ck.hgt==='mid'&&_hiInCart()<1)t.push(['hiAdd','加入挑高加價']);else if(_ck.hgt==='lo'&&_hiInCart()>0)t.push(['hiDel','移除挑高加價（或改選 3.5–4 米）']);
+  if(env!=='biz'){if(!_ck.oil)t.push(['oil','回答冷氣附近有沒有油煙']);else if(_ck.oil==='yes'&&_bzInCart()<1)t.push(['bzAdd','加入重油汙加價']);else if(_ck.oil==='no'&&_bzInCart()>0)t.push(['bzDel','移除重油汙加價（或改選「有」）']);}
+  if(_blowInCart()>0){if(!_ck.fan)t.push(['fan','回答吊隱式風鼓數量']);else if(_ck.fan==='ge3'&&_fanInCart()<1)t.push(['fanAdd','加入風鼓加洗']);else if(_ck.fan==='le2'&&_fanInCart()>0)t.push(['fanDel','移除風鼓加洗（或改選 3 個以上）']);}
+  if(_outdoorInCart()>0&&!_ck.out)t.push(['out','勾選室外機位置確認']);
+  if(!_ck.agree)t.push(['agree','勾選同意服務規範']);return t;}
+function _ckPrefill(){if(_svOn())return;if(!_ck.hgt&&_hiInCart()>0)_ck.hgt='mid';if(env!=='biz'&&!_ck.oil&&_bzInCart()>0)_ck.oil='yes';if(!_ck.fan&&_fanInCart()>0&&_blowInCart()>0)_ck.fan='ge3';}
+function _ckSel(k){return (k==='age')?'.qck-agree .qck-age':(k==='stop'?'.qck-agree .qck-stop2':(k==='ack'?'.qck-agree .qck-chk:not(.qck-ag):not([data-todo])':(k==='agree'?'.qck-agree .qck-ag':'.qck-agree [data-todo="'+k+'"]')));}
+function _ckStopWhy(){var t=_ckTodo();return (t.length&&t[0][0]==='stop')?(t[0][1]==='hgt'?'安裝高度 4 米以上恕不服務':'機齡 15 年以上恕不服務'):'';}
+function _ckGoTodo(){var t=_ckTodo();if(!t.length)return;_ckShake(_ckSel(t[0][0]));}
+function _ckAgreeOK(){if(_svOn())return !!_ck.agree;return _ckTodo().length===0;}
 /* 小步驟膠囊放在標題說明(.sub)裡面：跟標題區同一塊深藍底、同寬、上下間距一致（10-22 老闆：原本獨立一塊，膠囊上下沒置中、電腦版左右露白） */
 function _ckSub(k){return '<span class="qx-sub">'+['① 確認','② 聯絡','③ 補充'].map(function(t,i){return '<span class="'+(i<k?'ok':(i===k?'on':''))+'">'+(i<k?'✓ ':'')+t+'</span>';}).join('')+'</span>';}
 function _ckShake(sel){try{var el=ovl&&ovl.querySelector(sel);if(!el)return;var c=ovl.querySelector('.qw');
@@ -926,14 +948,65 @@ function _ckAgreeHtml(){
   if(_svOn()){/* 場勘：技師到府才看得到機齡，這裡不問 */
     return h+'<ul class="qck-rules">'+_CK_RULES.map(function(r){return '<li>'+r+'</li>';}).join('')+'</ul>'
      +'<label class="qck-chk qck-ag'+(_ck.agree?' on':'')+'"><input type="checkbox"'+(_ck.agree?' checked':'')+' onchange="__qw.ckSet(\'agree\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我已詳閱並同意賣場服務規範與隱私權政策</span></label></div>';}
-  h+='<div class="qck-q">您家冷氣大約用了幾年？<b>必選</b></div><div class="qck-age">'+A.map(function(v){return '<button type="button" class="'+(_ck.age===v?'sel ':'')+(v.indexOf('15年以上')>=0?'no':'')+'" onclick="__qw.ckPick(\'age\',\''+v+'\')">'+v.replace('（','<br>（')+'</button>';}).join('')+'</div>';
-  if(_ck.age==='10-15年')h+='<label class="qck-chk'+(_ck.ack?' on':'')+'"><input type="checkbox"'+(_ck.ack?' checked':'')+' onchange="__qw.ckSet(\'ack\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我已了解 10 年以上機種清洗不提供保固，仍願意預約服務</span></label>';
-  if(_ck.age.indexOf('15年以上')>=0)h+='<div class="qck-stop">很抱歉，機齡 15 年以上因零件老化風險高，恕無法提供清洗服務。如有疑問請聯繫客服。</div>';
+  h+='<div class="qck-q">最舊的那台冷氣大約用了幾年？<b>必選</b></div><div class="qck-sub">有好幾台的話，以最舊的那台為準（15 年以上不服務、10 年以上不保固都是看每一台）</div><div class="qck-age">'+A.map(function(v){return '<button type="button" class="'+(_ck.age===v?'sel ':'')+(v.indexOf('15年以上')>=0?'no':'')+'" onclick="__qw.ckPick(\'age\',\''+v+'\')">'+v.replace('（','<br>（')+'</button>';}).join('')+'</div>';
+  if(_ck.age==='10-15年')h+='<label class="qck-chk'+(_ck.ack?' on':'')+'"><input type="checkbox"'+(_ck.ack?' checked':'')+' onchange="__qw.ckSet(\'ack\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我已了解 10 年以上機種清洗<b>不提供保固</b>；若長期在硫磺、鹽害環境或整體狀況不佳，技師可能現場婉拒，仍願意預約服務</span></label>';
+  var _stopA=_ck.age.indexOf('15年以上')>=0;
+  if(_stopA)h+=_ckStopBox('很抱歉，機齡 15 年以上恕無法服務','零件老化風險高，清洗容易造成損壞。如果不確定年份，可以先問客服怎麼查。');
+  else h+=_ckSiteHtml();
+  var _stop=_stopA||_ck.hgt==='hi4';
   h+='<ul class="qck-rules">'+_CK_RULES.map(function(r){return '<li>'+r+'</li>';}).join('')+'</ul>'
-   +'<label class="qck-chk qck-ag'+(_ck.agree?' on':'')+'"><input type="checkbox"'+(_ck.agree?' checked':'')+' onchange="__qw.ckSet(\'agree\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我已詳閱並同意賣場服務規範與隱私權政策</span></label></div>';
+   +(_stop?'</div>':'<label class="qck-chk qck-ag'+(_ck.agree?' on':'')+'"><input type="checkbox"'+(_ck.agree?' checked':'')+' onchange="__qw.ckSet(\'agree\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我已詳閱並同意賣場服務規範與隱私權政策</span></label></div>');
   return h;}
+function _ckStopBox(t,why){return '<div class="qck-stop2"><b>'+t+'</b>'+why+'<a class="qck-line" href="'+LINE_CS+'" target="_blank" rel="noopener">💬 LINE 詢問客服</a><span class="alt">選錯了？直接改選上面的選項就能繼續</span></div>';}
+/* 2026-10-25 現場條件題目（只在精靈內結帳、非場勘） */
+var _CKA={hi:{nm:'挑高施作',p:1000,u:'台'},bz:{nm:'商用/重油汙加價',p:1000,u:'台'},fan:{nm:'風鼓清洗',p:500,u:'個'}};
+function _ckAMax(k){return k==='fan'?9:Math.max(1,_indoorInCart()+_outdoorInCart());}
+function _ckAIn(k){return k==='hi'?_hiInCart():(k==='bz'?_bzInCart():_fanInCart());}
+function _ckQ(k,title,opts,sub){return '<div class="qck-q">'+title+'<b>必選</b></div>'+(sub?'<div class="qck-sub">'+sub+'</div>':'')+'<div class="qck-age qck-s'+(opts.length===2?' two':'')+'" data-todo="'+k+'">'+opts.map(function(o){return '<button type="button" class="'+(_ck[k]===o[0]?'sel ':'')+(o[3]||'')+'" onclick="__qw.ckPick(\''+k+'\',\''+o[0]+'\')">'+o[1]+'<small>'+o[2]+'</small></button>';}).join('')+'</div>';}
+function _ckStepper(k){var n=_ckN[k];return '<div class="qck-st"><button type="button" aria-label="減少" onclick="__qw.ckN(\''+k+'\',-1)"'+(n<=1?' disabled':'')+'>－</button><span>'+n+'</span><button type="button" aria-label="增加" onclick="__qw.ckN(\''+k+'\',1)"'+(n>=_ckAMax(k)?' disabled':'')+'>＋</button></div>';}
+function _ckAddBox(k,ask,lbl){var a=_CKA[k],cur=_ckAIn(k),bz=_ckAddBusy===k,m=function(x){return 'NT$'+x.toLocaleString('en-US');};
+  if(_ckN[k]==null||_ckN[k]<1)_ckN[k]=cur>0?cur:1;if(_ckN[k]>_ckAMax(k))_ckN[k]=_ckAMax(k);var n=_ckN[k];
+  if(cur>0)return '<div class="qck-nt ok">✓ 已加入 <b>'+cur+' '+a.u+'</b>'+lbl+'（每'+a.u+' +'+m(a.p)+'）'+(k==='hi'?'':'')+'<div class="qck-row"><span>數量不對？</span>'+_ckStepper(k)+'</div>'
+    +(n!==cur?'<button type="button" class="qck-act line" data-todo="'+k+'Chg" onclick="__qw.ckAdd(\''+k+'\')"'+(bz?' disabled':'')+'>'+(bz?'更新中…':'改成 '+n+' '+a.u+'（'+(n>cur?'+':'－')+m(Math.abs(n-cur)*a.p)+'）')+'</button>':'')+'</div>';
+  var _wh=(k==='bz'&&plan!=='early'&&_whQualC0())?'<div class="qck-wh">⚠️ 依規範，重油汙環境不適用全戶 92 折；加入後改為標準方案 95 折</div>':'';
+  return '<div class="qck-nt warn">'+ask+_wh+'<div class="qck-row"><span>每'+a.u+' +'+m(a.p)+'</span>'+_ckStepper(k)+'</div><button type="button" class="qck-act gold" data-todo="'+k+'Add" onclick="__qw.ckAdd(\''+k+'\')"'+(bz?' disabled':'')+'>'+(bz?'加入中…':'加入 '+n+' '+a.u+lbl+'（+'+m(n*a.p)+'）')+'</button></div>';}
+function _whQualC0(){try{return !!WH_ON&&env==='home'&&_indoorInCart()>=WH_MIN;}catch(e){return false;}}
+function _ckDelBox(k,msg,lbl){var a=_CKA[k],cur=_ckAIn(k),bz=_ckAddBusy===k;return '<div class="qck-nt warn">⚠️ '+msg+'<button type="button" class="qck-act line" data-todo="'+k+'Del" onclick="__qw.ckDel(\''+k+'\')"'+(bz?' disabled':'')+'>'+(bz?'移除中…':'移除'+lbl+'（－NT$'+(cur*a.p).toLocaleString('en-US')+'）')+'</button></div>';}
+function _ckSiteHtml(){if(_svOn())return '';_ckPrefill();var h='';
+  h+=_ckQ('hgt','冷氣安裝高度（地面到室內機頂端）？',[['lo','3.5米以下','不加價'],['mid','3.5–4米','每台 +NT$1,000'],['hi4','4米以上','恕不服務','no']]);
+  if(_ck.hgt==='hi4')return h+_ckStopBox('很抱歉，安裝高度 4 米以上恕無法服務','需要特殊高空設備，技師無法安全施作。如果不確定高度，可以先拍照問客服。');
+  if(_ck.hgt==='mid')h+=_ckAddBox('hi','有幾台裝在 3.5–4 米？','挑高加價');
+  else if(_ck.hgt==='lo'&&_hiInCart()>0)h+=_ckDelBox('hi','您在加購頁加了 <b>'+_hiInCart()+' 台</b>挑高加價。若所有冷氣都在 3.5 米以下，請移除這筆加價；若有冷氣在 3.5–4 米，請改選「3.5–4米」。','挑高加價');
+  else if(_ck.hgt==='lo')h+='<div class="qck-nt ok">✓ 3.5 米以下，不需挑高加價</div>';
+  if(env!=='biz'){h+=_ckQ('oil','冷氣附近有明顯油煙嗎？（例如靠近廚房）',[['no','沒有','一般家用'],['yes','有','每台 +NT$1,000']],'若技師到府評估為油煙環境、無法依原訂規格施作，將依規範酌收車馬費 NT$600');
+    if(_ck.oil==='yes')h+=_ckAddBox('bz','有幾台在油煙環境？','重油汙加價');
+    else if(_ck.oil==='no'&&_bzInCart()>0)h+=_ckDelBox('bz','購物車裡有 <b>'+_bzInCart()+' 台</b>重油汙加價。若冷氣附近沒有明顯油煙，請移除這筆加價；若有，請改選「有」。','重油汙加價');}
+  if(_blowInCart()>0){h+=_ckQ('fan','吊隱式的風鼓有幾個？（大／全保養）',[['le2','2 個以下','不用加洗'],['ge3','3 個以上','每多 1 個 +NT$500'],['unk','不確定','幫我查']]);
+    if(_ck.fan==='ge3')h+=_ckAddBox('fan','要加洗幾個風鼓？（3 個加洗 1 個、4 個加洗 2 個）','風鼓加洗');
+    else if(_ck.fan==='le2'&&_fanInCart()>0)h+=_ckDelBox('fan','購物車裡有 <b>'+_fanInCart()+' 個</b>風鼓加洗。若風鼓都在 2 個以下，請移除；若有 3 個以上，請改選「3 個以上」。','風鼓加洗');
+    else if(_ck.fan==='unk')h+='<div class="qck-nt warn">輸入型號馬上查（型號在機身或維修孔內側標籤）<div class="qck-fq"><input id="qck-fan-in" type="text" inputmode="latin" autocomplete="off" spellcheck="false" placeholder="例：FDUM112KXE6T3" value="'+_esc(_ckFanQ)+'" oninput="__qw.ckFanQ(this.value)" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();__qw.ckFanLook();}"><button type="button" onclick="__qw.ckFanLook()">查詢</button></div>'+_ckFanResHtml()+'<span class="qck-ft">查不到也沒關係：技師到府確認，需要加洗時現場收費（每個 NT$500）</span></div>';}
+  if(_outdoorInCart()>0)h+='<label class="qck-chk qck-out'+(_ck.out?' on':'')+'" data-todo="out"><input type="checkbox"'+(_ck.out?' checked':'')+' onchange="__qw.ckSet(\'out\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我家室外機在陽台、地面或可安全站立的平台（掛在外牆外側、無法安全接近的恕無法清洗）</span></label>';
+  return h;}
+function _ckFanResHtml(){var r=_ckFanR;if(!r)return '';var t;
+  if(r.t==='short')t='請輸入完整型號（至少 4 個字）';else if(r.t==='none')t='查不到這個型號，可能是打錯字或不是吊隱式機型。';else if(r.t==='more'||r.t==='many')t='請輸入<b>完整型號</b>（室內機標籤上的英數字）';
+  else if(r.x===0)t='✅ 風鼓 1～2 個，大／全保養已包含，不用加洗<button type="button" class="qck-act line" onclick="__qw.ckPick(\'fan\',\'le2\')">改選「2 個以下」</button>';
+  else t='➕ 風鼓 '+(r.x+2)+' 個，需要加洗 <b>'+r.x+' 個</b><button type="button" class="qck-act gold" onclick="__qw.ckFanUse('+r.x+')">改選「3 個以上」並加入 '+r.x+' 個</button>';
+  return '<div class="qck-fr">'+t+'</div>';}
 function _ckSlot(){var c=window.__qsCleanDate||'';return /上午/.test(c)?{v:'1',t:'13點前'}:(/下午/.test(c)?{v:'2',t:'14-18點'}:{v:'0',t:'不指定'});}
-function _ckHeight(){var n=qty.hi||0;return n<=0?'3.5米以下（不加價）':(n>=9?'3.5-4米：9 台以上（客服另行確認）':'3.5-4米：'+n+' 台');}
+function _ckSetAddon(k,target){var nm=_CKA[k].nm,t0=Date.now();
+  var rows=function(){return [].slice.call(document.querySelectorAll('#cart-section .cart-item:not(.coupon)')).filter(function(x){var h=x.querySelector('h4');return h&&(h.textContent||'').trim().indexOf(nm)===0;});};
+  var cur=_qtyByName(nm);if(cur===target)return;
+  _ckAddBusy=k;try{var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}catch(e){}
+  try{var it=rows()[0];
+    if(target<=0){var rb=it&&[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];if(rb)rb.click();}
+    else if(it&&cur>0){var iq=it.getAttribute('data-item');if(window.cartChangeItem&&iq!=null){window.cartChangeItem(iq,target);}else{var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];if(btn&&window.selectQty)window.selectQty(btn,target-cur);}}
+    else{var r=_resolveBtn(nm);if(r){var c=0;(function one(){if(c>=target)return;try{window.viewProduct(r.btn,r.pid);}catch(e){}c++;setTimeout(one,700);})();}}
+  }catch(e){}
+  (function wt(){var q=_qtyByName(nm);if(q===target||Date.now()-t0>15000){_ckAddBusy='';_cfChg=Date.now();_ckCS='';
+      if(q!==target)_qwDlg({title:'購物車更新沒有成功',html:'抱歉，「'+nm+'」的數量沒有更新成功，請再按一次；若持續失敗，請聯繫客服。'});
+      try{var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}catch(e){}return;}
+    setTimeout(wt,400);})();}
+function _ckHeight(){if(window.__QW_CHECKOUT&&!_svOn()&&_ck.hgt){var m=_hiInCart();return _ck.hgt==='lo'||m<=0?'3.5米以下（不加價）':(m>=9?'3.5-4米：9 台以上（客服另行確認）':'3.5-4米：'+m+' 台');}var n=qty.hi||0;return n<=0?'3.5米以下（不加價）':(n>=9?'3.5-4米：9 台以上（客服另行確認）':'3.5-4米：'+n+' 台');}
 /* 2026-10-25 每格告訴手機「這格是什麼」：地址跳出存的地址、公司抬頭跳出公司名；統編／愛心碼／條碼不再跳出手機號碼。
    另外標上欄位名稱與錯誤（aria），讀螢幕功能才會唸出欄位名和錯誤內容 */
 var _CK_AC={name:'name',mobile:'tel',addr:'address-line1',email:'email',rTitle:'organization',rUBN:'off',rLove:'off',rNum:'off',model:'off'};
@@ -1095,7 +1168,7 @@ function _ckSubmit(){
    → 頁面打開後 25 秒內、客人還沒碰畫面時，若 1SHOP 自己跳出結帳視窗：關掉它，改跳「歡迎回來」卡片。
    → 「繼續結帳」用購物車＋快照還原方案/環境/地區，回到精靈「結帳 ① 確認」（同意要重新勾，存證時間才是當次的）。 */
 var _ckTouched=false;try{['pointerdown','touchstart','keydown'].forEach(function(t){document.addEventListener(t,function(){_ckTouched=true;},true);});}catch(e){}
-function _ckSnapSave(){try{if(!window.__QW_CHECKOUT)return;localStorage.setItem('qw_ck_snap',JSON.stringify({t:Date.now(),plan:plan,env:env,city:areaCity,dist:areaDist,cd:window.__qsCleanDate||'',hi:qty.hi||0,ck:{name:_ck.name,gender:_ck.gender,mobile:_ck.mobile,addr:_ck.addr,email:_ck.email,env:_ck.env,model:_ck.model,note:_ck.note,age:_ck.age,rType:_ck.rType,rCar:_ck.rCar,rNum:_ck.rNum,rTitle:_ck.rTitle,rUBN:_ck.rUBN,rLove:_ck.rLove}}));}catch(e){}}
+function _ckSnapSave(){try{if(!window.__QW_CHECKOUT)return;localStorage.setItem('qw_ck_snap',JSON.stringify({t:Date.now(),plan:plan,env:env,city:areaCity,dist:areaDist,cd:window.__qsCleanDate||'',hi:qty.hi||0,ck:{name:_ck.name,gender:_ck.gender,mobile:_ck.mobile,addr:_ck.addr,email:_ck.email,env:_ck.env,model:_ck.model,note:_ck.note,age:_ck.age,hgt:_ck.hgt,oil:_ck.oil,fan:_ck.fan,rType:_ck.rType,rCar:_ck.rCar,rNum:_ck.rNum,rTitle:_ck.rTitle,rUBN:_ck.rUBN,rLove:_ck.rLove}}));}catch(e){}}
 function _ckSnapLoad(){try{var v=JSON.parse(localStorage.getItem('qw_ck_snap')||'null');if(v&&Date.now()-v.t<864e5)return v;if(v)localStorage.removeItem('qw_ck_snap');}catch(e){}return null;}/* 2026-10-25 個資只留 1 天（原 3 天），過期順手刪掉 */
 function _ckSnapClear(){try{localStorage.removeItem('qw_ck_snap');}catch(e){}}
 try{if(/\/order\b/.test(location.pathname)||/[?&]t2=/.test(location.search))_ckSnapClear();}catch(e){}/* 已到訂單頁＝訂單成立，快照用不到了 */
@@ -1111,7 +1184,7 @@ function _ckResume(){
   try{areaCls=classify(areaCity,areaDist);}catch(e){}
   qty.hi=sn?(sn.hi||0):c.it.filter(function(x){return /挑高/.test(x.n);}).reduce(function(a,x){return a+x.q;},0);
   if(sn){if(!window.__qsCleanDate)window.__qsCleanDate=sn.cd||'';var _df={gender:'1',rType:'0',rCar:'0'};for(var k in sn.ck){if(sn.ck.hasOwnProperty(k)&&sn.ck[k]&&(!_ck[k]||_ck[k]===_df[k]))_ck[k]=sn.ck[k];}}
-  _ck.agree=false;_ck.ack=false;_ck.err={};
+  _ck.agree=false;_ck.ack=false;_ck.out=false;_ck.err={};
   window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;window.__qsAreaCls=areaCls;
   if(ovl)close();_qwResume='confirm';_cfT0=Date.now();_cfSig='';_cfChg=Date.now();open();}
 /* 關掉 1SHOP 自己跳出的結帳視窗：它還在「打開動畫」時 modal('hide') 會被忽略，所以重試到真的關掉（最多 6 秒，最後硬關） */
@@ -1269,7 +1342,7 @@ function render(){
     /* 06 分類捷徑:點了只是捲到那一類,三類全部照樣列在下面(老闆:還是要能捲動看到所有室內機) */
     _gk.forEach(function(g,i){var ks=groups[g].map(function(x){return x.k;}),n=sumKeys(ks),im=(P[ks[0]]||{}).img||'';
       _gt+='<button type="button" class="qw-gt" data-g="'+i+'" onclick="__qw.jumpGrp('+i+')"><i class="qw-gtp" style="background-image:url('+im+');background-position:'+(GRP_POS[g]||'50% 30%')+';background-size:'+(GRP_SIZE[g]||'150%')+' auto"></i><span>'+(GRP_SHORT[g]||g)+'</span>'+(n>0?'<em>'+n+' 台</em>':'')+'</button>';
-      body+='<div class="grp-lbl" data-g="'+i+'">'+g+'機型適用</div>'+groups[g].map(function(x){var h=optRow(x);
+      body+='<div class="grp-lbl" data-g="'+i+'">'+g+'機型適用</div>'+(g==='吊隱式'?'<div class="qw-hole">🔧 吊隱式要有<b>夠大的維修孔</b>才能拆洗；維修孔太小可能只能部分清洗、需加價或無法施作。不確定的話，可以先拍維修孔照片傳 LINE 給客服看。</div>':'')+groups[g].map(function(x){var h=optRow(x);
         /* 07 老闆:風鼓查詢也要放在吊隱大/全保養這裡(客人選的當下最需要知道);兩個都選就放在後面那張下方 */
         if(x.k===_fanAt()&&_fanOk())h+=_fanBox();return h;}).join('');});
     var _tabsHtml='<div class="qw-gtabs">'+_gt+'</div>';
@@ -1339,12 +1412,12 @@ function render(){
     var tfHint=(env==='home'&&inNow===0&&outN===1);
     var outLbl=outN>0?'下一步：加購':'不洗室外機，下一步';
     var outNote=(env==='biz')?'<div class="optnote">🏢 營業場所：室外機每台也加收 <b>$1,000</b> 商用加價（可單獨清洗，也可搭配室內機）</div>':(inNow>0?'<div class="optnote">室外機清洗為選配，可搭配室內機一起清洗。</div>':'<div class="optnote">只洗室外機：<b>1 台</b>加 <b>$600 車馬費</b>（單筆）、<b>2 台以上免</b></div>');
-    w='<div class="qw">'+stepBar()+'<h2>要清洗室外機嗎？</h2><p class="sub">室外機清洗為選配，不需要可直接按下一步</p>'+outNote+OUTLIST.map(optRow).join('')+(tfHint?'<div class="warnbox" style="color:#8a6410;background:rgba(184,134,11,.08)">🚗 目前只洗 1 台室外機，將自動加收 <b>車馬費 $600</b>（技師車程成本，單筆）</div>':'')+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">上一步</button><button class="btn pri" onclick="__qw.go(3)">'+outLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要清洗室外機嗎？</h2><p class="sub">室外機清洗為選配，不需要可直接按下一步</p>'+outNote+'<div class="qw-hole">📍 室外機要在<b>陽台、地面或可安全站立的平台</b>上；掛在外牆外側、無法安全接近的恕無法清洗。若技師到府評估無法安全施作，將依規範酌收車馬費 NT$600。</div>'+OUTLIST.map(optRow).join('')+(tfHint?'<div class="warnbox" style="color:#8a6410;background:rgba(184,134,11,.08)">🚗 目前只洗 1 台室外機，將自動加收 <b>車馬費 $600</b>（技師車程成本，單筆）</div>':'')+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(1)">上一步</button><button class="btn pri" onclick="__qw.go(3)">'+outLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else if(step===3){
     /* 只顯示銷售頁上真的買得到的加購品:後台把商品從銷售頁移除,精靈就自動不再提供(加回來也會自動出現),
        不必改程式。__qsBtnMap 還沒建好時不過濾,避免開場瞬間全部消失。 */
     var _bmReady=Object.keys(window.__qsBtnMap||{}).length>0;
-    var body='';ADDON.forEach(function(x){if(_bmReady&&!_resolveBtn(x.n))return;if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機、室外機每台各 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='fan')body+=_fanBox();if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 適用三菱重工家用壁掛式、晴空 ZST 吊隱式及商用壁掛式（DXK／FDK），請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5–4M 高處的機器台數（最多 '+(sumKeys(INK)+sumKeys(['o1','om']))+' 台）</div>';}});
+    var body='',_shSec=0;ADDON.forEach(function(x){if(_bmReady&&!_resolveBtn(x.n))return;if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「商用/重油汙加價」<b>× '+bn+'</b>（室內機、室外機每台各 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(window.__QW_CHECKOUT&&!_shSec&&(x.k==='fan'||x.k==='hi'||x.k==='bz')){_shSec=1;body+='<div class="qw-site">📋 現場條件<small>依您家實際狀況加購；結帳前會再請您確認一次</small></div>';}if(window.__QW_CHECKOUT&&(x.k==='fan'||x.k==='hi'||x.k==='bz')){body+=optRow(Object.assign({},x,{tag:'結帳前會確認'}));if(x.k==='fan')body+=_fanBox();return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='fan')body+=_fanBox();if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 適用三菱重工家用壁掛式、晴空 ZST 吊隱式及商用壁掛式（DXK／FDK），請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5–4M 高處的機器台數（最多 '+(sumKeys(INK)+sumKeys(['o1','om']))+' 台）</div>';}});
     if(!hasBlow()){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
     var nextLbl=sumKeys(ADDON.map(function(a){return a.k;}))>0?'下一步：選到府方案':'不加購，下一步';
     w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
@@ -1527,13 +1600,17 @@ window.__qwDlg=_qwDlg;
  +'#qw-dlg .svp{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #EEF2F7;font-size:14.5px;line-height:1.65;color:#33475C}#qw-dlg .svp i{font-style:normal;font-size:20px;line-height:1.3;flex:none}#qw-dlg .svm{display:block;text-align:center;margin:10px 0 2px;color:#0C447C;font-size:14px;font-weight:800;text-decoration:underline;cursor:pointer;background:none;border:0;width:100%;font-family:inherit}'
  +'@keyframes qckHb{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}#qw-ovl .qck-hint{display:flex;align-items:center;gap:4px;width:max-content;margin:6px auto 2px;background:#C0392B;color:#fff!important;-webkit-text-fill-color:#fff;border-radius:999px;padding:3px 11px;font-size:13px!important;font-weight:900;line-height:1.5;letter-spacing:.5px;animation:qckHb 1s ease-in-out infinite;box-shadow:0 3px 10px rgba(0,0,0,.18);pointer-events:none}'
  +'#qw-ovl .qck-todo.qck-chk{position:relative;margin-top:38px!important;border-color:#D4A947!important}#qw-ovl .qck-todo.qck-chk .qck-hint{position:absolute;left:8px;top:-31px;margin:0}#qw-ovl .qck-todo.qck-age button{border-color:#D4A947!important}#qw-ovl .qck-box.need.hint-on{animation:none!important}'
+ +'#qw-ovl .qck-stop2.qw-shake,#qw-ovl .qck-act.qw-shake,#qw-ovl .qck-nt.qw-shake{animation:qwShake .45s}'
+ +'#qw-ovl .qw-site{margin:16px 2px 8px;font-size:14.5px;font-weight:900;color:#0C2D57;border-top:1px dashed #C9D5E3;padding-top:12px}#qw-ovl .qw-site small{display:block;font-size:12.5px;font-weight:700;color:#6B7C90;margin-top:2px}'
+ +'#qw-ovl .qw-hole{margin:8px 0 10px;background:#FFF8E8;border:1.5px solid #E8D29A;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:800;color:#6B5418;line-height:1.6}'
  +'@media (prefers-reduced-motion:reduce){#qw-ovl .qck-hint{animation:none}}';(document.head||document.documentElement).appendChild(st);})();
 /* 方案頁「下一步」前的 5 點重點（文字取自精靈裡既有的正式說法：取消改約＝_TMS/_TME、保固、不服務條件） */
 var _svcAck=false;
 function _svcHtml(){var e=(plan==='early'),r=function(a){return a.map(function(x){return x[0]+' '+x[1];}).join('；');};
-  var P=[['📞','下單付款後，專人 <b>0.5～1 個工作天內</b>（不含假日）來電，與您約定實際到府時間'],
+  var P=[['📞','下單付款後，專人 <b>0.5～1 個工作天內</b>（不含假日）來電約時間；<b>請在 30 天內約好日期</b>，多次聯繫不上將取消並退款'],
     ['🗓','<b>取消／改約</b>：正式約定日期前免費；約定後（'+(e?'早鳥方案':'標準方案')+'）'+r(e?_TME:_TMS)],
     ['🛡','清洗後享 <b>30 天基本功能保固</b>；機齡 10 年（含）以上不提供保固'],
+    ['🏠','<b>到府當天請準備</b>：110V 電源、水源與排水；冷氣下方清空約 1.5×1.5 公尺；服務時全程有人在家'],
     ['⛔','<b>不服務</b>：非三菱重工冷氣、機齡 15 年以上、安裝高度 4 米以上'],
     ['💰','偏遠地區每張訂單 +NT$600；營業場所室內機、室外機每台 +NT$1,000；挑高 3.5–4 米每台 +NT$1,000']];
   return P.map(function(p){return '<div class="svp"><i>'+p[0]+'</i><div>'+p[1]+'</div></div>';}).join('')+'<button type="button" class="svm" onclick="__qw.svcMore()">📖 看完整服務說明 ›</button>';}
@@ -1875,10 +1952,16 @@ var api={
     setTimeout(function(){try{rb.click();}catch(e){}},60);
   },
   /* 2026-10-22 精靈內結帳 */
-  ckPick:function(k,v){_ck[k]=v;_ckSnapSave();if(k==='rType'||k==='rCar'){delete _ck.err.rNum;delete _ck.err.rTitle;delete _ck.err.rUBN;delete _ck.err.rLove;}if(k==='age'&&v!=='10-15年')_ck.ack=false;if(k==='env'&&v!=='社區')_ck.mgmt=false;delete _ck.err[k];
+  ckPick:function(k,v){_ck[k]=v;_ckSnapSave();if(k==='rType'||k==='rCar'){delete _ck.err.rNum;delete _ck.err.rTitle;delete _ck.err.rUBN;delete _ck.err.rLove;}if(k==='age'&&v!=='10-15年')_ck.ack=false;if(k==='env'&&v!=='社區')_ck.mgmt=false;if(k==='fan'&&v!=='unk')_ckFanR=null;delete _ck.err[k];
     if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}else render();},
+  ckN:function(k,d){var v=(_ckN[k]||1)+d;_ckN[k]=Math.max(1,Math.min(_ckAMax(k),v));if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();}},
+  ckAdd:function(k){if(_ckAddBusy)return;_ckSetAddon(k,_ckN[k]||1);},
+  ckDel:function(k){if(_ckAddBusy)return;_ckSetAddon(k,0);},
+  ckFanQ:function(v){_ckFanQ=v;},
+  ckFanLook:function(){_ckFanR=_fanFind(_ckFanQ);var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();},
+  ckFanUse:function(x){_ck.fan='ge3';_ckN.fan=x;_ckSetAddon('fan',x);},
   ckSet:function(k,v){_ck[k]=v;clearTimeout(window.__qwSnapT);window.__qwSnapT=setTimeout(_ckSnapSave,600);if(_ck.err[k]){delete _ck.err[k];var e=ovl&&ovl.querySelector('[data-ckerr="'+k+'"]');if(e)e.textContent='';var i=ovl&&ovl.querySelector('[data-ck="'+k+'"]');if(i)i.classList.remove('bad');}
-    if(step==='confirm'&&(k==='agree'||k==='ack'))_cfTick();},
+    if(step==='confirm'&&(k==='agree'||k==='ack'||k==='out'))_cfTick();},
   wbGo:function(){try{sessionStorage.removeItem('qw_more');}catch(e){}_ckWbHide();_ckResume();},
   wbRe:function(){_qmClr();_ckWbHide();_ckSnapClear();var r=document.getElementById('qs-rewiz');if(r)r.click();},
   wbX:function(){_ckWbHide();_ckHideModal();if(ovl)close();},
@@ -1933,7 +2016,7 @@ var api={
        方案名稱從頭到尾只有「標準方案」,全戶降級成折扣的名字 ——
        客戶在方案卡(圖上寫標準方案)、確認彈窗、結帳摘要看到的就都是同一個方案名。
        ⚠️ 名字可以統一,折數不行:達標時一定要寫 92 折,不能說一套收一套。 */
-    if(window.__QW_CHECKOUT&&!_svcAck){_qwDlg({sheet:1,title:'下單前，請先了解這 5 點<small>約 10 秒，了解後再選期望到府時間</small>',html:_svcHtml(),ok:'我已了解，選擇期望到府時間 ›',
+    if(window.__QW_CHECKOUT&&!_svcAck){_qwDlg({sheet:1,title:'下單前，請先了解這 6 點<small>約 15 秒，了解後再選期望到府時間</small>',html:_svcHtml(),ok:'我已了解，選擇期望到府時間 ›',
       onOk:function(){_svcAck=true;var d=new Date(),z=function(n){return (n<10?'0':'')+n;};window.__qsSvcAck=z(d.getMonth()+1)+'/'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());api.confirmPlan();}});return;}
     var _whQ=_whQualQ();
     var _sO=_whQ?'92 折':'95 折';
@@ -3203,7 +3286,7 @@ function fillConsent(){
     var _mt=_cur.match(/｜時間:([^｜]+)$/);var ts;
     if(_mt){ts=_mt[1];}else{var d=new Date(),p=function(n){return (n<10?'0':'')+n;};ts=d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
     var _cdOwn=fillCleanDate(),_dhOwn=fillDhDate(_hasDh);/* 有獨立欄位就不在存證裡重複寫日期 */
-    var rec=((window.__qsCleanDate&&!_cdOwn)?'【期望清洗日:'+window.__qsCleanDate+'】':'')+((_hasDh&&!_dhOwn)?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+(window.__qsSvcAck?'｜已閱讀下單前5點重點('+window.__qsSvcAck+')':'')+'｜時間:'+ts;
+    var rec=((window.__qsCleanDate&&!_cdOwn)?'【期望清洗日:'+window.__qsCleanDate+'】':'')+((_hasDh&&!_dhOwn)?'【除濕機期望配送:'+window.__qsDhDelivery+'】':'')+'【結帳前同意存證】方案:'+planTxt+'｜已詳閱並同意:僅限三菱重工冷氣、機齡15年以上不服務、安裝高度4米以上不服務、機齡10年以上不提供保固、偏遠/商用/挑高加價規範、保固範圍與取消政策、服務規範與隱私權政策'+(window.__qsRead_dh?'｜已閱讀確認「三菱重工除濕機」加購注意事項('+window.__qsRead_dh+')':'')+(window.__qsRead_air?'｜已閱讀確認「AIRMON智慧遠端控制器」加購注意事項('+window.__qsRead_air+')':'')+(window.__qsSvcAck?'｜已閱讀下單前6點重點('+window.__qsSvcAck+')':'')+((window.__QW_CHECKOUT&&!_svOn()&&_ck.hgt)?'｜現場確認:最舊一台機齡'+_ck.age+'、安裝高度'+_ckHeight()+(env!=='biz'?'、油煙'+(_ck.oil==='yes'?'有('+_bzInCart()+'台加價)':'沒有'):'')+(_blowInCart()>0?'、風鼓'+({le2:'2個以下',ge3:'3個以上(加洗'+_fanInCart()+'個)',unk:'不確定(技師到府確認)'}[_ck.fan]||''):'')+((_outdoorInCart()>0&&_ck.out)?'、室外機位置可安全接近':''):'')+'｜時間:'+ts;
     if(_cur!==rec){
       var st=Object.getOwnPropertyDescriptor((el.tagName==='TEXTAREA'?window.HTMLTextAreaElement:window.HTMLInputElement).prototype,'value').set;
       st.call(el,rec);
