@@ -688,6 +688,9 @@ function stepBar(p){var pos=p||curPos();function d(n){var c=(pos>n?'done':pos===
    ⚠️「立即結帳」只是幫客人按 1SHOP 原本的結帳鈕，所有金額保護(_lockCheckout 等)照舊；計算中(加入中/鎖定/方案券還沒落地/購物車 2 秒內有變動)一律鎖住。
    ⚠️「上一步」要先清空購物車再回方案頁（不清的話再按完成會重複加入 → 多收），選擇都保留。 */
 var _cfT0=0,_cfTm=null,_cfSig='',_cfChg=0,_cfClearing=false,_cfLast='';
+/* 2026-10-25：1SHOP 的「加購品已享優惠價…」是校正項目（把方案券多折到 AIRMON/除濕機的錢補回來），不是客人買的東西 → 不列、不算進原價 */
+function _isCorr(n){return /加購品已享優惠價|價差調整|不適用優惠碼折扣/.test(n||'');}
+function _isProt(n){return /AIRMON|除濕機/.test(n||'');}
 function _cfRealBtn(){var b=[].slice.call(document.querySelectorAll('.cart-checkout .btn'));for(var i=0;i<b.length;i++){if(!(ovl&&ovl.contains(b[i])))return b[i];}return null;}
 function _cfAmt(e){var n=Number(e&&e.getAttribute('data-amount'));return isFinite(n)?n:0;}
 function _cfMoney(n){return 'NT$ '+Math.round(n).toLocaleString('en-US');}
@@ -696,7 +699,7 @@ function _cfCart(){var sec=document.getElementById('cart-section');if(!sec)retur
     /* 1SHOP 圖片是延遲載入，img.src 常常還是空的/佔位圖 → 先用連結上 data-srcset 的第一張(150 寬)，再退回 img、原圖連結 */
     var u=((lk&&lk.getAttribute('data-srcset'))||'').split(',')[0].trim().split(/\s+/)[0]||'';
     if(!/^https?:/.test(u))u=(im&&/^https?:/.test(im.currentSrc||im.src||''))?(im.currentSrc||im.src):((lk&&lk.getAttribute('href'))||'');
-    return {n:((h&&h.textContent)||'').trim(),q:q,a:a,im:/^https?:/.test(u)?u:''};});
+    return {n:((h&&h.textContent)||'').trim().replace(/\s*加購$/,''),q:q,a:a,im:/^https?:/.test(u)?u:''};});
   var cp=[].slice.call(sec.querySelectorAll('.cart-item.coupon')).map(function(c){var h=c.querySelector('h4');return {n:((h&&h.textContent)||'折扣').replace(/[（(][^）)]*[）)]/g,'').trim(),a:Math.abs(_cfAmt(c.querySelector('.price .amount')))};});
   var t=sec.querySelector('.cart-total .row.total .amount');
   return {it:it,cp:cp,pay:t?_cfAmt(t):null};}
@@ -715,16 +718,16 @@ function _cfBody(d,busy){
    +'<span>🗓 '+((window.__qsCleanDate&&window.__qsCleanDate!=='未指定')?'期望到府：'+e(window.__qsCleanDate):'到府日期：由專人與您約定')+'</span></div>';
   if(plan)h+='<div class="qcf-plan"><div class="ck">✓</div><div><div class="t1">您選擇的方案</div><div class="t2">'+(plan==='early'?'早鳥方案・約時起 30 天後到府':'標準方案・約時起 2 週內到府')+'</div><div class="t3">📞 專人將於 0.5～1 個工作天內來電約時（付款後起算、不含假日）</div></div></div>';
   if(!d||!d.it.length)return h+'<div class="qcf-sum busy"><div class="sp"><i></i>正在為您加入購物車…</div></div>';
-  var orig=0;d.it.forEach(function(x){orig+=x.a;});
-  h+='<div class="qcf-list">'+d.it.map(function(x){var u=x.q?x.a/x.q:x.a;
+  var its=d.it.filter(function(x){return !_isCorr(x.n);}),orig=0;its.forEach(function(x){orig+=x.a;});var prot=its.some(function(x){return _isProt(x.n);});
+  h+='<div class="qcf-list">'+its.map(function(x){var u=x.q?x.a/x.q:x.a;
     return '<div class="qcf-it">'+(x.im?'<img src="'+e(x.im)+'" alt="">':'<span class="noim"></span>')+'<div class="n">'+e(x.n)+(u>1?'<small>'+_cfMoney(u)+' × '+x.q+'</small>':'')+'</div><div class="p">'+_cfMoney(x.a)+'</div></div>';}).join('')+'</div>';
-  if(busy){h+='<div class="qcf-sum busy"><div class="r"><span>清洗項目原價</span><span>'+_cfMoney(orig)+'</span></div><div class="t"><span>應付金額</span><b>計算中</b></div><div class="sp"><i></i>正在為您套用方案折扣、確認金額，約需 10～20 秒…</div></div>';}
-  else{var disc=0;d.cp.forEach(function(c){disc+=c.a;});var adj=d.pay-(orig-disc),save=orig-d.pay;
+  if(busy){h+='<div class="qcf-sum busy"><div class="r"><span>原價合計</span><span>'+_cfMoney(orig)+'</span></div><div class="t"><span>應付金額</span><b>計算中</b></div><div class="sp"><i></i>正在為您套用方案折扣、確認金額，約需 10～20 秒…</div></div>';}
+  else{/* 2026-10-25：折扣＝原價合計－應付（校正項目已經把保護品的折扣補回去，這樣算才是客人真正省的） */
+    var save=orig-d.pay,cpn=d.cp.map(function(c){return c.n;}).join('、');
     h+='<div class="qcf-sum'+(save>0?' rb':'')+'">'+(save>0?'<div class="rib">省 '+_cfMoney(save)+'</div>':'')
-     +'<div class="r"><span>清洗項目原價</span><span>'+_cfMoney(orig)+'</span></div>'
-     +d.cp.map(function(c){return '<div class="r g"><span>✦ '+e(c.n)+'</span><span>－'+_cfMoney(c.a)+'</span></div>';}).join('')
-     +(Math.abs(adj)>=1?'<div class="r"><span>其他調整</span><span>'+(adj<0?'－':'＋')+_cfMoney(Math.abs(adj))+'</span></div>':'')
-     +'<div class="t"><span>應付金額</span><b>'+_cfMoney(d.pay)+'</b></div></div>';}
+     +'<div class="r"><span>原價合計</span><span>'+_cfMoney(orig)+'</span></div>'
+     +(save>0?'<div class="r g"><span>✦ '+e(cpn||'折扣')+(prot?'（清洗項目）':'')+'</span><span>－'+_cfMoney(save)+'</span></div>':(save<0?'<div class="r"><span>其他費用</span><span>＋'+_cfMoney(-save)+'</span></div>':''))
+     +'<div class="t"><span>應付金額</span><b>'+_cfMoney(d.pay)+'</b></div>'+(prot?'<div class="qcf-pn">AIRMON、除濕機為加購優惠價，不參與方案折扣</div>':'')+'</div>';}
   return h+'<button type="button" class="qcf-more" onclick="__qw.cfMore()">＋ 還要加購其他清洗項目</button>';}
 function _cfTick(){
   if(step!=='confirm'||!ovl){clearInterval(_cfTm);_cfTm=null;return;}
@@ -770,6 +773,7 @@ function _cfCss(){
   +'@keyframes qybG{0%,100%{box-shadow:0 0 0 0 rgba(212,169,71,.55)}50%{box-shadow:0 0 0 7px rgba(212,169,71,0)}}'
   +'#qw-ovl .qck-box.need{border:2px solid #D4A947;animation:qybG 1.8s ease-in-out infinite}#qw-ovl .qck-box .qck-h b{margin-left:8px;font-size:12px;font-weight:900;color:#fff;background:#C0392B;border-radius:999px;padding:2px 8px;vertical-align:2px}'
   +'@media (prefers-reduced-motion:reduce){#qya i,#qw-ovl .qck-box.need{animation:none}}'
+  +'#qw-ovl .qcf-sum .qcf-pn{font-size:12px;color:#8A6A2A;font-weight:700;margin-top:6px}'
   /* 發票區（2026-10-23） */
   +'#qw-ovl .qiv{display:flex;flex-direction:column;gap:10px;border:1px solid #E6ECF2;border-radius:14px;padding:12px;background:#fff}'
   +'#qw-ovl .qiv-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}#qw-ovl .qiv-seg button{border:1.5px solid #D5DFEA;border-radius:12px;padding:9px 4px;text-align:center;font:800 14px/1.3 inherit;font-family:inherit;color:#16202B;background:#fff;cursor:pointer}'
@@ -1037,7 +1041,9 @@ function _ckWbHide(){var o=document.getElementById('qwb-ovl');if(o&&o.parentNode
 function _ckWelcome(){
   if(document.getElementById('qwb-ovl'))return;_cfCss();
   var c=_cfCart();if(!c||!c.it.length)return;
+  c={it:c.it.filter(function(x){return !_isCorr(x.n);}),cp:c.cp,pay:c.pay};
   var orig=0;c.it.forEach(function(x){orig+=x.a;});var save=orig-(c.pay||0);
+  try{sessionStorage.setItem('qwb_seen','1');}catch(e){}
   var o=document.createElement('div');o.id='qwb-ovl';o.setAttribute('role','dialog');o.setAttribute('aria-label','歡迎回來');
   o.innerHTML='<div class="c"><div class="hd"><div class="t">歡迎回來！</div><div class="s">您上次還沒完成結帳，購物車都幫您留著</div></div><div class="bd">'
    +c.it.map(function(x){return '<div class="it">'+(x.im?'<img src="'+_esc(x.im)+'" alt="">':'<span class="noim"></span>')+'<div class="n">'+_esc(x.n)+'<small>× '+x.q+'</small></div><div class="p">'+_cfMoney(x.a)+'</div></div>';}).join('')
@@ -1046,6 +1052,17 @@ function _ckWelcome(){
   document.body.appendChild(o);
   /* 手機開場畫面（app_preview 的 #qw-splash）要等精靈打開才淡出，最久 8 秒；卡片出現時直接收掉，不然卡片被蓋住、客人只看到轉圈 */
   try{var sp=document.getElementById('qw-splash');if(sp){sp.classList.add('out');setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},400);}}catch(e){}}
+/* 2026-10-25 老闆同意的四條規則：①精靈加的購物車（有快照）＋這次開網頁還沒看過卡片 → 開頁就跳 ②按過「先看看賣場」→ 這次瀏覽不再跳（sessionStorage）
+   ③沒用精靈自己加購物車（沒快照）→ 不跳 ④下次打開網頁（新的 session）→ 再跳；快照 3 天 */
+function _wbEligible(){if(!window.__QW_CHECKOUT||_ckRun)return false;try{if(sessionStorage.getItem('qwb_seen'))return false;}catch(e){}
+  if(!_ckSnapLoad())return false;var c=_cfCart();if(!c||!c.it.some(function(x){return !_isCorr(x.n);}))return false;
+  try{if(_cfBusy(c))return false;}catch(e){}return true;}
+(function(){var t0=Date.now(),tm=setInterval(function(){try{
+  if(Date.now()-t0>20000){clearInterval(tm);return;}
+  if(Date.now()-t0<2500)return;
+  if(ovl&&step!==0)return;/* 客人已經自己在精靈裡操作 */
+  if(_wbEligible()){clearInterval(tm);if(ovl)close();_ckWelcome();}
+}catch(e){}},500);})();
 (function(){var t0=Date.now(),tm=setInterval(function(){try{
   if(Date.now()-t0>25000||_ckTouched||_ckRun){clearInterval(tm);return;}
   if(!window.__QW_CHECKOUT||!_ckModal())return;
@@ -1880,7 +1897,7 @@ var api={
           }}/* 先讓方案券落地,再送客戶自己的碼:1SHOP 會留折扣多的那張 */
         setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
         /* 2026-10-22 第 7 步：不關精靈，改顯示「確認訂單」(精靈已被客人關掉時照舊帶到購物車) */
-        if(window.__QW_CONFIRM&&ovl){_cfT0=Date.now();_cfSig='';_cfChg=Date.now();step='confirm';render();return;}
+        if(window.__QW_CONFIRM&&ovl){_cfT0=Date.now();_cfSig='';_cfChg=Date.now();step='confirm';render();try{_ckSnapSave();}catch(e){}return;}
         close();toast('已為您加入購物車，可再調整或結帳');
         /* 加完自動帶到「目前已經選購」購物車區,讓客戶馬上看到結果(不然精靈關掉後不知道發生什麼事) */
         setTimeout(function(){try{
@@ -3994,7 +4011,8 @@ function updateFab(){
   try{
     var cart=_cartArr(),hasProd=false,subtotal=0,cnt=0;
     for(var i=0;i<cart.length;i++){if(cart[i].ProductType===0){hasProd=true;subtotal+=Number(cart[i].LineTotal)||0;if((cart[i].ProductName||'').indexOf('加購品已享優惠價')<0)cnt+=Number(cart[i].Quantity)||0;}}
-    var shown=_cartTotalShown();if(shown==null||shown<=0)shown=subtotal;
+    var _ta=document.querySelector('#cart-section .cart-total .row.total .amount'),shown=_ta?Number(_ta.getAttribute('data-amount')):NaN;
+    if(!(shown>0))shown=_cartTotalShown();if(shown==null||shown<=0)shown=subtotal;/* 2026-10-25 修：先讀 1SHOP 小計的 data-amount（G 購物車把那行藏起來，原本讀不到就顯示打折前） */
     var _cc=document.querySelector('select[name="CountyAndCity"]');
     var inCheckout=(_cc&&_cc.offsetHeight>0)||[].slice.call(document.querySelectorAll('button')).some(function(b){var t=(b.textContent||'').trim();return (t==='同意並繼續結帳'||/^請先選擇/.test(t))&&b.offsetHeight>0;});
     var wizardOpen=!!document.getElementById('qw-ovl');
@@ -4006,13 +4024,19 @@ function updateFab(){
       fab.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9998;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid rgba(4,44,83,.12);box-shadow:0 -6px 22px rgba(4,44,83,.1);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));font-family:\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif';
       fab.innerHTML='<div style=\"width:100%;max-width:640px;margin:0 auto;display:flex;align-items:center;gap:14px\"><div style=\"flex:1;min-width:0;font-size:14.5px;color:#1c2733;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">共 <b id=\"qs-fab-n\" style=\"color:#042C53\">0</b> 件 · <span id=\"qs-fab-p\" style=\"font-size:17px;font-weight:900;color:#B8860B\"></span></div><button id=\"qs-fab-btn\" type=\"button\" style=\"flex:0 0 auto;border:none;border-radius:999px;background:#042C53;color:#fff;font-size:15px;font-weight:800;padding:14px 46px;font-family:inherit;cursor:pointer;white-space:nowrap\">立即結帳</button></div>';
       document.body.appendChild(fab);
-      fab.querySelector('#qs-fab-btn').onclick=function(){var co=[].slice.call(document.querySelectorAll('button')).filter(function(b){return (b.textContent||'').trim()==='立即結帳'&&!b.closest('#qs-fab');})[0];if(co)co.click();};
+      fab.querySelector('#qs-fab-btn').onclick=function(){if(window.__QW_CHECKOUT&&_ckSnapLoad()&&window.__qw&&__qw.wbGo){__qw.wbGo();return;}var co=[].slice.call(document.querySelectorAll('button')).filter(function(b){return (b.textContent||'').trim()==='立即結帳'&&!b.closest('#qs-fab');})[0];if(co)co.click();};
       if(window.visualViewport){var vv=window.visualViewport;var repos=function(){var f=document.getElementById('qs-fab');if(!f)return;var lvh=document.documentElement.clientHeight;var gap=lvh-vv.height-vv.offsetTop;f.style.bottom=(gap>0?gap:0)+'px';};vv.addEventListener('resize',repos);vv.addEventListener('scroll',repos);window.addEventListener('scroll',repos,{passive:true});repos();}
     }
     fab.style.display='flex';
     document.body.style.paddingBottom='76px';
     var pe=fab.querySelector('#qs-fab-p');if(pe)pe.textContent=_corrBusy()?'計算中…':('NT$ '+shown.toLocaleString('en-US'));
     var ne=fab.querySelector('#qs-fab-n');if(ne)ne.textContent=cnt;
+    try{var ck=!!(window.__QW_CHECKOUT&&_ckSnapLoad()),fb=fab.querySelector('#qs-fab-btn'),lt=fb&&fb.previousElementSibling;
+      if(fb&&fb.textContent!==(ck?'繼續結帳':'立即結帳')){fb.textContent=ck?'繼續結帳':'立即結帳';fb.style.background=ck?'linear-gradient(135deg,#D4A947,#B8892E)':'#042C53';}
+      if(lt&&ck){var cpn=[].slice.call(document.querySelectorAll('#cart-section .cart-item.coupon h4')).map(function(x){return (x.textContent||'').replace(/[（(][^）)]*[）)]/g,'').trim();}).join('、');
+        var hh='<span style="display:block;font-size:12px;font-weight:700;color:#5B6B7D">🛒 '+cnt+' 項還沒結帳'+(cpn?'・已套用'+cpn:'')+'</span><span style="font-size:16px;font-weight:900;color:#042C53">應付 <span style="color:#B8860B">'+(_corrBusy()?'計算中…':'NT$ '+shown.toLocaleString('en-US'))+'</span></span>';
+        if(lt.getAttribute('data-h')!==hh){lt.setAttribute('data-h',hh);lt.innerHTML=hh;lt.style.whiteSpace='normal';lt.style.lineHeight='1.35';}}
+    }catch(e){}
   }catch(e){}
 }
 /* 在1SHOP內建浮動鈕群(.chat)加一顆「↓ 前往選購」:長頁(詳情圖多)客戶要滑很久才到選購區,原生只有回到最上方。
@@ -5241,7 +5265,7 @@ if(document.documentElement)boot();else{var m0=new MutationObserver(function(){i
    ・摘要框放在 .cart-total「外面」，不改 .cart-total 的文字（別的程式用正規式讀「小計」） */
 (function(){
 var CSS=''
-+'#cart-section .cart-item.coupon,#cart-section .cart-total .row.total{display:none!important}'
++'#cart-section .cart-item.coupon,#cart-section .cart-total .row.total,#cart-section .cart-item.qs-corr{display:none!important}'
 +'#cart-section{border:1px solid #EFE4C8!important;border-radius:18px!important;box-shadow:0 10px 26px -14px rgba(184,137,46,.4)!important;overflow:hidden}'
 +'#cart-section .cart-item:not(.coupon){border-bottom:1px solid #F2EAD8!important}'
 +'#cart-section .cart-item h4{font-size:16px!important;font-weight:800!important;color:#0C2D57!important}'
@@ -5256,7 +5280,7 @@ var CSS=''
 +'#qs-cartg.has-rib{padding-top:40px}'
 +'#qs-cartg .rib{position:absolute;top:0;right:16px;background:linear-gradient(135deg,#D4A947,#B8892E);color:#fff;font-weight:900;font-size:13.5px;padding:6px 14px 8px;border-radius:0 0 12px 12px;box-shadow:0 6px 12px -6px rgba(184,137,46,.8)}'
 +'#qs-cartg .r{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;color:#5B4A20;padding:3px 0}'
-+'#qs-cartg .r.g{color:#8A5A00;font-weight:800}'
++'#qs-cartg .r.g{color:#8A5A00;font-weight:800}#qs-cartg .pn{font-size:12px;color:#8A6A2A;font-weight:700;margin-top:6px}'
 +'#qs-cartg .t{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;padding-top:10px;border-top:1px solid #F0DFB3}'
 +'#qs-cartg .t span{font-weight:900;color:#0C2D57;font-size:15px}#qs-cartg .t b{font-size:26px;font-weight:900;color:#0C2D57}'
 +'body .cart-checkout .btn.btn-primary{border-radius:999px!important;min-height:54px!important;font-size:17px!important;font-weight:900!important;color:#fff!important;background:linear-gradient(135deg,#D4A947,#B8892E)!important;border:none!important;box-shadow:0 10px 20px -8px rgba(184,137,46,.75)!important}'
@@ -5272,21 +5296,23 @@ function draw(){try{
   var items=sec.querySelectorAll('.cart-item:not(.coupon) .price .amount');
   var box=document.getElementById('qs-cartg');
   if(!tot||!totAmt||!items.length){if(box)box.parentNode.removeChild(box);_sig='';return;}
-  var orig=0;for(var i=0;i<items.length;i++)orig+=amt(items[i]);
+  /* 2026-10-25：校正項目（加購品已享優惠價…）不是客人買的 → 藏起來、不算原價；折扣＝原價－應付 */
+  var orig=0,prot=false;[].slice.call(sec.querySelectorAll('.cart-item:not(.coupon)')).forEach(function(ci){var nm=((ci.querySelector('h4')||{}).textContent||'');var isC=/加購品已享優惠價|價差調整|不適用優惠碼折扣/.test(nm);ci.classList.toggle('qs-corr',isC);if(!isC){orig+=amt(ci.querySelector('.price .amount'));if(/AIRMON|除濕機/.test(nm))prot=true;}});
   var cps=[],disc=0,cs=sec.querySelectorAll('.cart-item.coupon');
   for(var j=0;j<cs.length;j++){var a=Math.abs(amt(cs[j].querySelector('.price .amount')));var h=cs[j].querySelector('h4');
     cps.push({n:((h&&h.textContent)||'折扣').replace(/[（(][^）)]*[）)]/g,'').trim(),a:a});disc+=a;}
-  var pay=amt(totAmt);var adj=pay-(orig-disc);
+  var pay=amt(totAmt);
   var sig=[orig,pay,JSON.stringify(cps)].join('|');
   if(box&&sig===_sig&&box.previousElementSibling===tot)return;
   _sig=sig;
-  var save=orig-pay;
+  var save=orig-pay,cpn=cps.map(function(c){return c.n;}).join('、');
   var h2='';
   if(save>0)h2+='<div class="rib">省 '+f(save)+'</div>';
-  h2+='<div class="r"><span>清洗項目原價</span><span>'+f(orig)+'</span></div>';
-  for(var k=0;k<cps.length;k++)h2+='<div class="r g"><span>✦ '+esc(cps[k].n)+'</span><span>－'+f(cps[k].a)+'</span></div>';
-  if(Math.abs(adj)>=1)h2+='<div class="r"><span>其他調整</span><span>'+(adj<0?'－':'＋')+f(Math.abs(adj))+'</span></div>';
+  h2+='<div class="r"><span>原價合計</span><span>'+f(orig)+'</span></div>';
+  if(save>0)h2+='<div class="r g"><span>✦ '+esc(cpn||'折扣')+(prot?'（清洗項目）':'')+'</span><span>－'+f(save)+'</span></div>';
+  else if(save<0)h2+='<div class="r"><span>其他費用</span><span>＋'+f(-save)+'</span></div>';
   h2+='<div class="t"><span>應付金額</span><b>'+f(pay)+'</b></div>';
+  if(prot)h2+='<div class="pn">AIRMON、除濕機為加購優惠價，不參與方案折扣</div>';
   if(!box){box=document.createElement('div');box.id='qs-cartg';}
   box.className=save>0?'has-rib':'';box.innerHTML=h2;
   if(box.previousElementSibling!==tot)tot.parentNode.insertBefore(box,tot.nextSibling);
