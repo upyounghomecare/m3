@@ -57,6 +57,8 @@ function _svcPass(){try{
   if((new Date()).getTime()-(o.t||0)>30*864e5){localStorage.removeItem(_SVC_KEY);return null;}/* 放30天就失效 */
   return o;
 }catch(e){return null}}
+/* 2026-10-27 O8：通行碼用過、訂單也成立了（到了訂單頁）→ 清掉，不會再加到下一張單 */
+try{if(/\/order\b/.test(location.pathname)||/[?&]t2=/.test(location.search)){var _sp=JSON.parse(localStorage.getItem(_SVC_KEY)||'null');if(_sp&&_sp.used&&Date.now()-_sp.used<6*3600e3)localStorage.removeItem(_SVC_KEY);}}catch(e){}
 function _svcUnlocked(k){var o=_svcPass();return !!(o&&o.a===k);}
 function classify(c,d){if(!c||!d)return null;var k=c+d;
   if(NOSVC.indexOf(k)>=0)return _svcUnlocked(k)?'remote':'nosvc';/* 客服已核准 → 當偏遠處理 */
@@ -713,6 +715,18 @@ function _isCorr(n){return /加購品已享優惠價|價差調整|不適用優�
 function _isProt(n){return /AIRMON|除濕機/.test(n||'');}
 /* 2026-10-25 場勘單：整張都不打折（場勘費＋偏遠加價），價差調整全部補回 */
 function _svInCart(c){c=c||_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf(SURVEY_PREFIX)===0)return true;}return false;}
+/* 2026-10-27 O2 老闆選 A：購物車的「立即結帳」一律先回精靈「結帳前請確認」（原本會繞過油煙、風鼓、室外機位置、下單前重點）。
+   精靈自己代按時(_ckRun)放行；只在測試頁的精靈內結帳模式(__QW_CHECKOUT)生效 */
+try{document.addEventListener('click',function(e){try{
+  if(!window.__QW_CHECKOUT||_ckRun||window.__qwCkPass)return;
+  var t=e.target&&e.target.closest?e.target.closest('button,a'):null;if(!t)return;
+  if(ovl&&ovl.contains(t))return;if(t.closest('#qs-fab,#qs-ovl,#checkout,#qw-dlg'))return;
+  var isCo=!!t.closest('.cart-checkout')||(t.textContent||'').replace(/\s/g,'')==='立即結帳';if(!isCo)return;
+  if((_indoorInCart()+_outdoorInCart())<=0&&!_svInCart())return;
+  e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+  try{sessionStorage.removeItem('qw_more');}catch(x){}
+  if(window.__qw&&__qw.wbGo)__qw.wbGo();
+}catch(x){}},true);}catch(e){}
 function _cfRealBtn(){var b=[].slice.call(document.querySelectorAll('.cart-checkout .btn'));for(var i=0;i<b.length;i++){if(!(ovl&&ovl.contains(b[i])))return b[i];}return null;}
 function _cfAmt(e){var n=Number(e&&e.getAttribute('data-amount'));return isFinite(n)?n:0;}
 function _cfMoney(n){return 'NT$ '+Math.round(n).toLocaleString('en-US');}
@@ -732,7 +746,7 @@ function _cfBusy(d){
   if(!d||!d.it.length||d.pay==null)return true;
   if(Date.now()-_cfChg<2000)return true;/* 購物車剛變動，等它穩定 */
   var early=Date.now()-_cfT0<40000;/* 以下兩項最多等 40 秒；之後交給 1SHOP 結帳鈕本身的保護 */
-  if(early&&plan&&!d.cp.length)return true;/* 方案券還沒套上 */
+  if(plan&&!d.cp.length)return true;/* 方案券還沒套上 → 2026-10-27 老闆選 A：不論等多久都不放行原價（原本 40 秒後放行，客人會多付 5～15%） */
   if(early&&window.__qsSwapBusy)return true;
   try{if(early&&(_corrBusy()||_corrShort()))return true;}catch(e){}/* 2026-10-25 價差調整還沒補好（AIRMON/除濕機/場勘）→ 還在算 */
   return false;}
@@ -745,7 +759,7 @@ function _cfBody(d,busy){
   var its=d.it.filter(function(x){return !_isCorr(x.n);}),orig=0;its.forEach(function(x){orig+=x.a;});var prot=its.some(function(x){return _isProt(x.n);}),svy=its.some(function(x){return (x.n||'').indexOf(SURVEY_PREFIX)===0;});
   h+='<div class="qcf-list">'+its.map(function(x){var u=x.q?x.a/x.q:x.a;
     return '<div class="qcf-it">'+(x.im?'<img src="'+e(x.im)+'" alt="">':'<span class="noim"></span>')+'<div class="n">'+e(x.n)+(u>1?'<small>'+_cfMoney(u)+' × '+x.q+'</small>':'')+'</div><div class="p">'+_cfMoney(x.a)+'</div></div>';}).join('')+'</div>';
-  if(busy){h+='<div class="qcf-sum busy"><div class="r"><span>原價合計</span><span>'+_cfMoney(orig)+'</span></div><div class="t"><span>應付金額</span><b>計算中</b></div><div class="sp"><i></i>正在為您套用方案折扣、確認金額，約需 10～20 秒…</div></div>';}
+  if(busy){var _slow=plan&&!d.cp.length&&Date.now()-_cfT0>60000;h+='<div class="qcf-sum busy"><div class="r"><span>原價合計</span><span>'+_cfMoney(orig)+'</span></div><div class="t"><span>應付金額</span><b>計算中</b></div>'+(_slow?'<div class="qcf-slow">⏳ 方案折扣還沒套上，系統持續為您重試中。為了不讓您用原價付款，套上之前不會開放結帳。<br>等太久的話，可以重新整理頁面，或<a href="'+LINE_CS+'" target="_blank" rel="noopener">用 LINE 詢問客服</a>。</div>':'<div class="sp"><i></i>正在為您套用方案折扣、確認金額，約需 10～20 秒…</div>')+'</div>';}
   else{/* 2026-10-25：折扣＝原價合計－應付（校正項目已經把保護品的折扣補回去，這樣算才是客人真正省的） */
     var save=orig-d.pay,cpn=d.cp.map(function(c){return c.n;}).join('、');
     h+='<div class="qcf-sum'+(save>0?' rb':'')+'">'+(save>0?'<div class="rib">省 '+_cfMoney(save)+'</div>':'')
@@ -755,6 +769,8 @@ function _cfBody(d,busy){
   return h+(_svOn()?'':'<button type="button" class="qcf-more" onclick="__qw.cfMore()">＋ 還要加購其他清洗項目</button>');}
 function _cfTick(){
   if(step!=='confirm'||!ovl){clearInterval(_cfTm);_cfTm=null;return;}
+  /* 2026-10-27 R3：確認頁超過 12 秒還沒套上方案券 → 每 15 秒讓內文JS 的自動補券重新開始（它失敗 3 次就會放棄） */
+  try{if(plan&&!_svOn()&&Date.now()-_cfT0>12000){var _cc=_cfCart();if(_cc&&_cc.it.length&&!_cc.cp.length&&(!_cfTick._rt||Date.now()-_cfTick._rt>15000)){_cfTick._rt=Date.now();window.__qsAutoFails=0;window.__qsAutoTried=0;}}}catch(e){}
   var body=ovl.querySelector('.qcf-body'),go=ovl.querySelector('.qcf-go');if(!body||!go)return;
   var d=_cfCart(),sig=JSON.stringify(d);if(sig!==_cfSig){_cfSig=sig;_cfChg=Date.now();}
   var busy=_cfBusy(d);
@@ -934,7 +950,16 @@ function _ckTodo(){var t=[];if(_svOn()){if(!_ck.agree)t.push(['agree','勾選同
   if(env!=='biz'){if(!_ck.oil)t.push(['oil','回答冷氣附近有沒有油煙']);else if(_ck.oil==='yes'&&_bzInCart()<1)t.push(['bzAdd','加入重油汙加價']);else if(_ck.oil==='no'&&_bzInCart()>0)t.push(['bzDel','移除重油汙加價（或改選「有」）']);}
   if(_blowInCart()>0){if(!_ck.fan)t.push(['fan','回答吊隱式風鼓數量']);else if(_ck.fan==='ge3'&&_fanInCart()<1)t.push(['fanAdd','加入風鼓加洗']);else if(_ck.fan==='le2'&&_fanInCart()>0)t.push(['fanDel','移除風鼓加洗（或改選 3 個以上）']);}
   if(_outdoorInCart()>0&&!_ck.out)t.push(['out','勾選室外機位置確認']);
+  _ckRedo().forEach(function(x){t.push(x);});
   if(!_ck.agree)t.push(['agree','勾選同意服務規範']);return t;}
+/* 2026-10-27 O7 老闆選 A：隔天回來、或自己在購物車加了除濕機/AIRMON → 已閱讀紀錄、除濕機配送日不見了，要在確認頁重新確認（存證時間是當次的） */
+function _ckRedo(){var r=[];try{if(_svOn()||!window.__QW_CHECKOUT)return r;
+  if(!_svcAck||_svcAckPlan!==plan)r.push(['svcR','閱讀下單前重點']);
+  if(_qtyByName('三菱重工除濕機')>0&&(!window.__qsRead_dh||!window.__qsDhDelivery))r.push(['dhR','閱讀除濕機注意事項並選配送日']);
+  if(_qtyByName('AIRMON')>0&&!window.__qsRead_air)r.push(['airR','閱讀 AIRMON 注意事項']);}catch(e){}return r;}
+function _ckRefresh(){try{var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_ckCS='';_cfTick();}catch(e){}}
+function _ckRedoHtml(){var r=_ckRedo();if(!r.length)return '';var L={svcR:['📋 下單前重點','請再看一次（約 15 秒）'],dhR:['📦 除濕機','請閱讀注意事項並選期望配送日'],airR:['📱 AIRMON','請閱讀加購注意事項']};
+  return '<div class="qck-q">回來繼續結帳，請再確認這幾項<b>必選</b></div>'+r.map(function(x){return '<button type="button" class="qck-act gold qck-redo" data-todo="'+x[0]+'" onclick="__qw.ckRedo(\''+x[0]+'\')">'+L[x[0]][0]+'：'+L[x[0]][1]+' ›</button>';}).join('');}
 function _ckPrefill(){if(_svOn())return;if(!_ck.hgt&&_hiInCart()>0)_ck.hgt='mid';if(env!=='biz'&&!_ck.oil&&_bzInCart()>0)_ck.oil='yes';if(!_ck.fan&&_fanInCart()>0&&_blowInCart()>0)_ck.fan='ge3';}
 function _ckSel(k){return (k==='age')?'.qck-agree .qck-age':(k==='stop'?'.qck-agree .qck-stop2':(k==='ack'?'.qck-agree .qck-chk:not(.qck-ag):not([data-todo])':(k==='agree'?'.qck-agree .qck-ag':'.qck-agree [data-todo="'+k+'"]')));}
 function _ckStopWhy(){var t=_ckTodo();return (t.length&&t[0][0]==='stop')?(t[0][1]==='hgt'?'安裝高度 4 米以上恕不服務':'機齡 15 年以上恕不服務'):'';}
@@ -974,7 +999,7 @@ function _ckAddBox(k,ask,lbl){var a=_CKA[k],cur=_ckAIn(k),bz=_ckAddBusy===k,m=fu
   return '<div class="qck-nt warn">'+ask+_wh+'<div class="qck-row"><span>每'+a.u+' +'+m(a.p)+'</span>'+_ckStepper(k)+'</div><button type="button" class="qck-act gold" data-todo="'+k+'Add" onclick="__qw.ckAdd(\''+k+'\')"'+(bz?' disabled':'')+'>'+(bz?'加入中…':'加入 '+n+' '+a.u+lbl+'（+'+m(n*a.p)+'）')+'</button></div>';}
 function _whQualC0(){try{return !!WH_ON&&env==='home'&&_indoorInCart()>=WH_MIN;}catch(e){return false;}}
 function _ckDelBox(k,msg,lbl){var a=_CKA[k],cur=_ckAIn(k),bz=_ckAddBusy===k;return '<div class="qck-nt warn">⚠️ '+msg+'<button type="button" class="qck-act line" data-todo="'+k+'Del" onclick="__qw.ckDel(\''+k+'\')"'+(bz?' disabled':'')+'>'+(bz?'移除中…':'移除'+lbl+'（－NT$'+(cur*a.p).toLocaleString('en-US')+'）')+'</button></div>';}
-function _ckSiteHtml(){if(_svOn())return '';_ckPrefill();var h='';
+function _ckSiteHtml(){if(_svOn())return '';_ckPrefill();var h=_ckRedoHtml();
   h+=_ckQ('hgt','冷氣安裝高度（地面到室內機頂端）？',[['lo','3.5米以下','不加價'],['mid','3.5–4米','每台 +NT$1,000'],['hi4','4米以上','恕不服務','no']]);
   if(_ck.hgt==='hi4')return h+_ckStopBox('很抱歉，安裝高度 4 米以上恕無法服務','需要特殊高空設備，技師無法安全施作。如果不確定高度，可以先拍照問客服。');
   if(_ck.hgt==='mid')h+=_ckAddBox('hi','有幾台裝在 3.5–4 米？','挑高加價');
@@ -1035,8 +1060,8 @@ function _ckHtml(k){
      +'<div class="qck-f"><div class="qck-l">怎麼稱呼您</div><div class="qck-ch">'+[['1','先生'],['2','小姐'],['0','不指定']].map(function(g){return '<button type="button" class="'+(_ck.gender===g[0]?'sel':'')+'" onclick="__qw.ckPick(\'gender\',\''+g[0]+'\')">'+g[1]+'</button>';}).join('')+'</div></div>'
      +_ckIn('mobile','手機號碼',1,'例：0912345678','tel','專人會用這支電話跟您約時間')
      +'<div class="qck-f"><div class="qck-l">服務地址<b>*</b></div><div class="qck-auto"><div>'+_esc((areaCity||'')+' '+(areaDist||''))+'<em>✓ 已依您選的地區帶入</em></div></div></div>'
-     +_ckIn('addr','',0,'巷弄街道＋門牌號碼＋樓層，例：中山路一段12巷5號3樓','text','')
-     +'<div class="qck-hint">📍 不用再打縣市區域；請寫到門牌和樓層，技師才找得到</div>'
+     +_ckIn('addr','',0,'例：中山路一段 12 號 5 樓','text','')
+     +'<div class="qck-addrtip"><span>📍</span><span>不用再打縣市區域，請寫到<b>門牌號碼和樓層</b>，技師才找得到。<br><span class="ex">例：中山路一段 12 號 5 樓</span></span></div>'/* 2026-10-27 O10 老闆選 A：淡黃提示框（原本用 qck-hint 跟結帳前紅色提示撞名，變成紅色跳動、不換行） */
      +'<div class="qck-f"><div class="qck-l">期望服務時段</div><div class="qck-auto"><div>'+_esc((!cd||cd==='未指定')?'不指定，由專人與您約定':cd)+'<em>✓ 依您選的期望日期帶入（'+sl.t+'）</em></div></div></div>';
   }else{
     var isBiz=(env==='biz');if(!_ck.env)_ck.env=isBiz?'營業':'住家';
@@ -1052,7 +1077,7 @@ function _ckHtml(k){
   }
   return '<div class="qw qw-step-ck">'+stepBar(7)+'<h2 class="qh4">'+(k===2?'聯絡資料':'補充資料')+'</h2><p class="sub">'+(k===2?'技師到府前，專人會打這支電話跟您約時間':'最後一頁，填完就前往付款')+_ckSub(k-1)+'</p>'
    +'<div class="qck-body">'+b+'</div>'
-   +'<div class="nav"><button class="btn gho" onclick="__qw.ckBack()">上一步</button><button class="btn pri qck-go'+(k===3?' gold':'')+'" onclick="__qw.ckNext()">'+(k===2?'<span class="l1">下一步：補充資料</span>':'<span class="l1">前往付款</span><span class="l2">應付 '+_cfMoney(pay)+'・綠界信用卡</span>')+'</button></div></div>';}
+   +'<div class="nav"><button class="btn gho" onclick="__qw.ckBack()">上一步</button><button class="btn pri qck-go'+(k===3?' gold':'')+'" onclick="__qw.ckNext()">'+(k===2?'<span class="l1">下一步：補充資料</span>':'<span class="l1">前往付款</span><span class="l2" data-ckpay="1">應付 '+_cfMoney(pay)+'・綠界信用卡</span>')+'</button></div></div>';}
 /* —— 送出：代走 1SHOP 結帳 —— */
 function _ckLoad(on,n,txt){
   if(!on){var o=_ckLd;_ckLd=null;try{document.body.classList.remove('qck-run');}catch(e){}if(o){o.classList.add('out');setTimeout(function(){if(o.parentNode)o.parentNode.removeChild(o);},260);}return;}
@@ -1099,11 +1124,19 @@ function _ckAfterSend(nb){var t0=Date.now(),warned=false;
     if(el>120000)return _ckStuck();
     setTimeout(wt,500);})();}
 function _ckStuck(){if(!_ckLd)return;_ckRun=false;window.__qwCkResult={ok:false,msg:'送出後很久沒有回應'};
+  /* 2026-10-27 O5 老闆選 A：不確定有沒有成立時，送出鈕鎖 3 分鐘，避免重複下單；並附 LINE 客服 */
+  window.__qwCkLockUntil=Date.now()+180000;
   var bx=_ckLd.querySelector('.box');if(!bx)return;
-  bx.innerHTML='<div class="t">還沒收到訂單建立的回應</div><div class="s" style="text-align:left;line-height:1.75;margin-top:8px">網路回應逾時，訂單<b>可能已經成立</b>。為避免重複下單，<b>請先不要再按送出</b>：<br>① 請看手機簡訊或 Email 有沒有收到「訂單成立」通知<br>② 5 分鐘內都沒收到，請聯繫客服幫您確認</div><button type="button" class="qck-stk" style="margin-top:14px;width:100%;min-height:46px;border:0;border-radius:12px;background:#0C447C;color:#fff;font-size:16px;font-weight:800">我知道了</button>';
+  bx.innerHTML='<div class="t">還沒收到訂單建立的回應</div><div class="s" style="text-align:left;line-height:1.75;margin-top:8px">網路回應逾時，訂單<b>可能已經成立</b>。為避免重複下單，<b>請先不要再按送出</b>：<br>① 請看手機簡訊或 Email 有沒有收到「訂單成立」通知<br>② 5 分鐘內都沒收到，請聯繫客服幫您確認</div><a href="'+LINE_CS+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;margin-top:12px;min-height:46px;border-radius:12px;background:#06C755;color:#fff;font-size:16px;font-weight:800;text-decoration:none">💬 用 LINE 詢問客服</a><button type="button" class="qck-stk" style="margin-top:14px;width:100%;min-height:46px;border:0;border-radius:12px;background:#0C447C;color:#fff;font-size:16px;font-weight:800">我知道了</button>';
   var k=bx.querySelector('.qck-stk');if(k)k.onclick=function(){_ckLoad(false);};}
+/* 2026-10-27 O11 老闆選 B：手機打字時（鍵盤彈出）頁首縮成一行、底部按鈕變矮，正在打的欄位捲到中間；離開輸入框就恢復 */
+try{(function(){var tm=null,coarse=function(){try{return matchMedia('(pointer:coarse)').matches;}catch(e){return false;}};
+  document.addEventListener('focusin',function(e){try{var t=e.target;if(!coarse()||!t||!/^(INPUT|TEXTAREA)$/.test(t.tagName)||/^(checkbox|radio|button)$/.test(t.type||''))return;var o=document.getElementById('qw-ovl');if(!o||!o.contains(t))return;
+    clearTimeout(tm);o.classList.add('qw-kb');setTimeout(function(){try{var q=o.querySelector('.qw');if(!q)return;var r=t.getBoundingClientRect(),vh=(window.visualViewport?window.visualViewport.height:innerHeight);q.scrollTop+=r.top-vh/2+r.height/2;}catch(x){}},350);}catch(x){}},true);
+  document.addEventListener('focusout',function(e){try{var o=document.getElementById('qw-ovl');if(!o)return;clearTimeout(tm);tm=setTimeout(function(){var a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&o.contains(a)))o.classList.remove('qw-kb');},250);}catch(x){}},true);})();}catch(e){}
 function _ckSubmit(){
-  if(_ckRun)return;_ckRun=true;window.__qwCkResult=null;
+  if(_ckRun)return;
+  if(window.__qwCkLockUntil&&Date.now()<window.__qwCkLockUntil){_qwDlg({title:'請先不要再按送出',html:'剛才的訂單<b>可能已經成立</b>，為避免重複下單，請先看手機簡訊或 Email 有沒有「訂單成立」通知。<br>5 分鐘內都沒收到，請<a href="'+LINE_CS+'" target="_blank" rel="noopener">用 LINE 詢問客服</a>。'});return;}_ckRun=true;window.__qwCkResult=null;
   var dg=String(_ck.mobile||'').replace(/[\s-]/g,''),sl=_ckSlot();
   _ckLoad(true,0);
   /* 金額還在算就等（最多 15 秒），算好才走 */
@@ -1156,6 +1189,7 @@ function _ckSubmit(){
             if(env!=='biz'&&_ck.env==='社區')setTimeout(function(){_ckSet(_ckField(/管委會/),true);},200);
             if(_ck.model&&!_svOn())_ckSet(_ckField(/機器型號/),String(_ck.model).trim());
             if(_ck.note)_ckSet(m.querySelector('[name="Note"]'),String(_ck.note));
+            try{var _nt=m.querySelector('[name="Note"]');if(_nt){_nt.removeAttribute('data-qssvc');svcPassNote();}}catch(e){}/* 2026-10-27 O8：客人的備註寫進去後，再把「客服核准例外」接在後面，不會被蓋掉 */
             try{fillConsent();}catch(e){}
             setTimeout(function(){
               var f3=window.jQuery?jQuery('#checkout form.step3'):null,ok3=true,why='';
@@ -1330,7 +1364,14 @@ function render(){
   if(env==='biz')qty.bz=bzQty();qty.tf=tfQty();
   if(window.__QW_CONFIRM)_cfCss();
   if(step==='confirm'){w=_cfHtml();}
-  else if(step==='ck2'||step==='ck3'){w=_ckHtml(step==='ck2'?2:3);}
+  else if(step==='ck2'||step==='ck3'){w=_ckHtml(step==='ck2'?2:3);
+    /* 2026-10-27 R4 老闆選 A：補充資料頁的「應付」跟著購物車即時更新；還在算就顯示「金額確認中」、先不能按 */
+    if(!window.__qwCkPayT)window.__qwCkPayT=setInterval(function(){try{
+      if(step!=='ck3'||!ovl){return;}
+      var g=ovl.querySelector('.qck-go'),l2=g&&g.querySelector('[data-ckpay]');if(!l2)return;
+      var d=_cfCart(),b=_cfBusy(d),tx=b?'金額確認中…':'應付 '+_cfMoney(d.pay)+'・綠界信用卡';
+      if(l2.textContent!==tx)l2.textContent=tx;g.classList.toggle('qcf-busy',!!b);g.setAttribute('aria-disabled',b?'true':'false');
+    }catch(e){}},800);}
   else if(step===0){
     w='<div class="qw wel"><div class="wel-brand">三菱重工 · 原廠空調清洗 官方賣場</div><div class="wel-bar"></div>'
     +'<h2 class="wel-h">快速選擇您的冷氣清洗保養方案</h2>'
@@ -1632,9 +1673,12 @@ window.__qwDlg=_qwDlg;
  +'#qw-ovl .qw-site{margin:16px 2px 8px;font-size:14.5px;font-weight:900;color:#0C2D57;border-top:1px dashed #C9D5E3;padding-top:12px}#qw-ovl .qw-site small{display:block;font-size:12.5px;font-weight:700;color:#6B7C90;margin-top:2px}'
  +'#qw-ovl .qw-hole{margin:8px 0 10px;background:#FFF8E8;border:1.5px solid #E8D29A;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:800;color:#6B5418;line-height:1.6}'
  +'#qw-ovl,#qw-ovl .qw,#qw-dlg,#qw-dlg .bd,.qwcd-sheet,.qwcd-sheet *,#qdx-sheet,#qdx-sheet *{overscroll-behavior:contain}'/* 2026-10-26 老闆：電腦版捲到精靈底再捲，後面的銷售頁不要跟著動 */
+ +'#qw-ovl.qw-kb .qw .qw-stick>.qwbar,#qw-ovl.qw-kb .qw .qw-stick>.sub,#qw-ovl.qw-kb .qw .qw-stick .qx-sub{display:none!important}#qw-ovl.qw-kb .qw .qw-stick>h2{font-size:16px!important;padding:8px 14px!important}#qw-ovl.qw-kb .qw .qwfoot .nav{padding:6px 10px!important}#qw-ovl.qw-kb .qw .qwfoot .btn{min-height:40px!important;padding:6px!important;font-size:14px!important}#qw-ovl.qw-kb #qya{display:none!important}'
+ +'#qw-ovl .qck-addrtip{display:flex;gap:8px;align-items:flex-start;margin:-4px 0 4px;background:#FFF8E1;border:1px solid #F0DCA0;border-radius:12px;padding:10px 12px;color:#6B4E00;font-size:14px;font-weight:700;line-height:1.6}#qw-ovl .qck-addrtip .ex{color:#8A6A2A;font-weight:600}'
+ +'#qw-ovl .qcf-slow{margin-top:8px;background:#FFF8E8;border:1px solid #E8D29A;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:800;color:#6B5418;line-height:1.65}#qw-ovl .qcf-slow a{color:#0B7A43;text-decoration:underline}'
  +'@media (prefers-reduced-motion:reduce){#qw-ovl .qck-hint{animation:none}}';(document.head||document.documentElement).appendChild(st);})();
 /* 方案頁「下一步」前的 5 點重點（文字取自精靈裡既有的正式說法：取消改約＝_TMS/_TME、保固、不服務條件） */
-var _svcAck=false;
+var _svcAck=false,_svcAckPlan=null;
 function _svcHtml(){var e=(plan==='early'),r=function(a){return a.map(function(x){return x[0]+' '+x[1];}).join('；');};
   var P=[['📞','下單付款後，專人 <b>0.5～1 個工作天內</b>（不含假日）來電約時間；<b>請在 30 天內約好日期</b>，多次聯繫不上將取消並退款'],
     ['🗓','<b>取消／改約</b>：正式約定日期前免費；約定後（'+(e?'早鳥方案':'標準方案')+'）'+r(e?_TME:_TMS)],
@@ -1947,6 +1991,7 @@ var api={
       try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}
       /* 2026-10-25 新流程：不關精靈，等場勘真的進購物車（偏遠再補「偏遠地區加價」，金額才跟場勘頁一致），再進確認頁 */
       if(window.__QW_CHECKOUT&&window.__QW_CONFIRM&&ovl){
+        try{_ck.agree=false;_ck.agreeAt=0;}catch(e){}
         _svFlow=true;_cfLoad(true,(areaCls==='remote')?2:1);
         var _t0=Date.now(),_rmDone=(areaCls!=='remote');
         (function _w(){
@@ -1989,6 +2034,10 @@ var api={
   /* 2026-10-22 精靈內結帳 */
   ckPick:function(k,v){_ck[k]=v;_ckSnapSave();if(k==='rType'||k==='rCar'){delete _ck.err.rNum;delete _ck.err.rTitle;delete _ck.err.rUBN;delete _ck.err.rLove;}if(k==='age'&&v!=='10-15年')_ck.ack=false;if(k==='env'&&v!=='社區')_ck.mgmt=false;if(k==='fan'&&v!=='unk')_ckFanR=null;delete _ck.err[k];
     if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}else render();},
+  ckRedo:function(k){
+    if(k==='svcR'){_qwDlg({sheet:1,title:'下單前，請先了解這 6 點<small>約 15 秒</small>',html:_svcHtml(),ok:'我已了解',onOk:function(){_svcAck=true;_svcAckPlan=plan;var d=new Date(),z=function(n){return (n<10?'0':'')+n;};window.__qsSvcAck=z(d.getMonth()+1)+'/'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes())+(plan==='early'?' 早鳥':' 標準');_ckRefresh();}});return;}
+    if(k==='dhR'){if(window.__qsRead_dh&&!window.__qsDhDelivery){showDeliveryPicker(_ckRefresh);}else{showTerms('dh','gate',_ckRefresh);}return;}
+    if(k==='airR'){showTerms('air','gate',_ckRefresh);return;}},
   ckN:function(k,d){var v=(_ckN[k]||1)+d;_ckN[k]=Math.max(1,Math.min(_ckAMax(k),v));if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();}},
   ckAdd:function(k){if(_ckAddBusy)return;_ckSetAddon(k,_ckN[k]||1);},
   ckDel:function(k){if(_ckAddBusy)return;_ckSetAddon(k,0);},
@@ -2010,6 +2059,7 @@ var api={
       _ck.err=e;if(Object.keys(e).length){render();_ckShake('.qck-f .bad');return;}
       step='ck3';render();return;}
     if(step==='ck3'){
+      try{if(_cfBusy(_cfCart())){toast('金額還在確認中，請稍候幾秒再按「前往付款」',5000);return;}}catch(e){}
       if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(_ck.email||'').trim()))e.email='請填寫正確的 Email（訂單與發票通知會寄到這裡）';
       if(env!=='biz'&&_ck.env==='社區'&&!_ck.mgmt)e.mgmt='社區大樓需先取得管委會同意，請勾選確認';
       _rcCheck(e);
@@ -2028,7 +2078,7 @@ var api={
     if(!_cfBackOk){_qwDlg({title:'要修改選擇嗎？',html:'會先<b style="color:#C0392B">清空目前購物車</b>，再回到'+(_svOn()?'「到府場勘」':'「選方案」')+'這一步。<div class="keep">✓ 您選的地區、'+(_svOn()?'服務環境':'機型、台數')+'都會保留</div>',cancel:'不用了',ok:'確定修改',
       onOk:function(){_cfBackOk=1;_qmClr();window.__qw.cfBack();},
       onCancel:function(){if(_viaBack){try{history.pushState({qw:'7'},'');}catch(e){}}try{window.dispatchEvent(new Event('qw-back-cancel'));}catch(e){}}});return;}
-    _cfBackOk=0;
+    _cfBackOk=0;try{_ck.agree=false;_ck.out=false;_ck.agreeAt=0;}catch(e){}
     _cfClearing=true;_cfTick();
     window.__qsAgreed=false;window.__qsGatePass=false;
     _qwClearCart(function(){
@@ -2051,8 +2101,8 @@ var api={
        方案名稱從頭到尾只有「標準方案」,全戶降級成折扣的名字 ——
        客戶在方案卡(圖上寫標準方案)、確認彈窗、結帳摘要看到的就都是同一個方案名。
        ⚠️ 名字可以統一,折數不行:達標時一定要寫 92 折,不能說一套收一套。 */
-    if(window.__QW_CHECKOUT&&!_svcAck){_qwDlg({sheet:1,title:'下單前，請先了解這 6 點<small>約 15 秒，了解後再選期望到府時間</small>',html:_svcHtml(),ok:'我已了解，選擇期望到府時間 ›',
-      onOk:function(){_svcAck=true;var d=new Date(),z=function(n){return (n<10?'0':'')+n;};window.__qsSvcAck=z(d.getMonth()+1)+'/'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());api.confirmPlan();}});return;}
+    if(window.__QW_CHECKOUT&&(!_svcAck||_svcAckPlan!==plan)){/* 2026-10-27 O6：換了方案（取消規則不同）就再看一次 */_qwDlg({sheet:1,title:'下單前，請先了解這 6 點<small>約 15 秒，了解後再選期望到府時間</small>',html:_svcHtml(),ok:'我已了解，選擇期望到府時間 ›',
+      onOk:function(){_svcAck=true;_svcAckPlan=plan;var d=new Date(),z=function(n){return (n<10?'0':'')+n;};window.__qsSvcAck=z(d.getMonth()+1)+'/'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes())+(plan==='early'?' 早鳥':' 標準');api.confirmPlan();}});return;}
     var _whQ=_whQualQ();
     var _sO=_whQ?'92 折':'95 折';
     var _sX=_whQ?'（已加碼全戶優惠）':'';
@@ -2100,6 +2150,7 @@ var api={
     },180);
   },
   finish:function(){
+    try{_ck.agree=false;_ck.out=false;_ck.agreeAt=0;}catch(e){}/* 2026-10-27 O6：重新加入購物車＝內容可能變了，同意與室外機位置要重新勾 */
     _svFlow=false;_qmClr();
     /* 防重入用獨立旗標 _finishing;__qsAdding 會凍結所有保護機制(校正/車馬費/挑高/孤兒把關),
        只能在真正開始加購時才設,且任何中途返回或例外都必須解除,否則保護會永久停擺 */
@@ -2126,7 +2177,7 @@ var api={
     /* 2026-09-21 修:精靈每 0.55 秒加一樣,控制器緊接在清洗服務後面。1SHOP 規定購物車要先有主商品才收加購品,
        清洗服務還沒落地時控制器會被「默默拒絕」→ 客戶選了控制器、購物車卻沒有(測試 9 次漏 4 次,永遠是控制器)。
        ①加購品先等購物車裡確定有清洗服務(最多等 8 秒) ②全部加完再核對控制器/除濕機數量,少了補加一次。
-       其他加購(挑高/商用/偏遠/車馬費/風鼓)各有 reconcile 自動補回,不在此核對。 */
+       其他加購(營業場所/偏遠/車馬費)各有 reconcile 自動補回,不在此核對；挑高/風鼓/家用重油煙 2026-10-27 起也在此核對。 */
     function _cartQtyAll(){var n=0;_cartArr().forEach(function(it){if(Number(it.ProductType)!==99)n+=Number(it.Quantity)||0;});return n;}
     function _cq(nm){var c=_cartArr(),n=0;c.forEach(function(it){if((it.ProductName||'').indexOf(nm)===0)n+=Number(it.Quantity)||0;});return n;}
     function next(){
@@ -2138,7 +2189,7 @@ var api={
         _verified++;
         setTimeout(function(){
           var miss=[];
-          INDOOR.concat(OUTLIST).map(function(x){return [x.k,x.n,false];}).concat([['air','AIRMON',true],['dh','三菱重工除濕機',true]]).forEach(function(p){var want=qty[p[0]]||0;if(want<=0)return;var r=resolve(p[1]);if(!r)return;for(var m=_cq(p[1]);m<want;m++)miss.push({btn:r.btn,pid:r.pid,addon:p[2],chk:p[1],want:m+1});});
+          INDOOR.concat(OUTLIST).map(function(x){return [x.k,x.n,false];}).concat([['air','AIRMON',true],['dh','三菱重工除濕機',true],['hi','挑高施作',true],['fan','風鼓清洗',true]].concat(env!=='biz'?[['bz','商用/重油汙加價',true]]:[]))/* 2026-10-27 R5 老闆選 A：挑高、風鼓、家用重油煙也核對，少了補加（營業場所加價有 reconcileBz 自己補） */.forEach(function(p){var want=qty[p[0]]||0;if(want<=0)return;var r=resolve(p[1]);if(!r)return;for(var m=_cq(p[1]);m<want;m++)miss.push({btn:r.btn,pid:r.pid,addon:p[2],chk:p[1],want:m+1});});
           if(miss.length)jobs=jobs.concat(miss);else _verified=2;
           next();
         },2500);
@@ -2616,6 +2667,11 @@ function planMemoryWatch(){try{
    ⚠️ 只加一次,而且不覆蓋客戶自己打的字(接在後面)。客戶手動刪掉就不再補,免得跟他打架。 */
 function svcPassNote(){try{
   var o=_svcPass(); if(!o)return;
+  /* 2026-10-27 O8 老闆選 A：只有訂單地址＝通行碼綁定的地區才加註（原本不分地區，30 天內其他地區的單也被加註） */
+  try{var _n=function(x){return String(x||'').replace(/^\d+\s*/,'').replace(/臺/g,'台').trim();};
+    var _cc=document.querySelector('select[name="CountyAndCity"]'),_ar=document.querySelector('select[name="Area"]');
+    var _fc=_cc&&_cc.selectedIndex>0?_n(_cc.options[_cc.selectedIndex].text):'',_fa=_ar&&_ar.selectedIndex>0?_n(_ar.options[_ar.selectedIndex].text):'';
+    var _key=(_fc&&_fa)?(_fc+_fa):(_n(areaCity)+_n(areaDist));if(!_key||_key!==_n(o.a))return;}catch(e){return;}
   var wrap=document.querySelector('form.step3 .form-group.form-note')||document.querySelector('.form-group.form-note');
   if(!wrap)return;
   var ta=wrap.querySelector('textarea')||document.querySelector('textarea[name="Note"]');
@@ -2623,6 +2679,7 @@ function svcPassNote(){try{
   ta.setAttribute('data-qssvc','1');
   var tag='【客服核准例外】地區：'+o.a+'・通行碼：'+o.c;
   if((ta.value||'').indexOf('【客服核准例外】')>=0)return;
+  try{o.used=Date.now();localStorage.setItem(_SVC_KEY,JSON.stringify(o));}catch(e){}/* 用過一次：訂單成立後就清掉 */
   var v=(ta.value||'').trim();
   var nv=v?(v+'\n'+tag):tag;
   try{
@@ -4699,7 +4756,7 @@ setTimeout(fixCards,1500);setTimeout(fixCards,3500);setTimeout(fixCards,6000);
    ⚠️ 找不到詳情圖(例如換了詳情圖檔名)就什麼都不做,頁面維持原樣。 */
 /* 常見問題文字版(2026-09-22):內容逐字取自「客服 FAQ 題庫」Google Sheet 的「常見問題」分頁,
    分類與順序照原本 17/18/19 三張常見問題圖(A~F 74 題),老闆同意再加 3 題(A 類 2 題、D 類 1 題);2026-09-22 Sheet 移除 ATM 付款相關內容(刪 1 題、改 3 題);同日新增「如何預約服務？」,共 77 題。⚠️ 對客戶的說法只能以那張 Sheet 為準,改 Sheet 後要同步更新這裡。 */
-var QD_FAQ=[["A","預約、付款與發票",[["早鳥方案與標準方案有什麼不同？怎麼選？","依您的需求，可選擇兩種方案：\n\n早鳥方案（提早規劃、省錢）\n・全室內外機清洗服務品項享 85 折\n・自專人約時起，需安排 30 天後（含）～90 天內到府；農曆春節前三週（除夕前 21 天～除夕）不安排，該期間想到府可補差價改為標準方案\n・適合：不趕時間、想省錢的您\n\n標準方案（近期就要洗）\n・清洗項目 95 折\n・約時起 2 週內可到府（想晚一點，也可以直接選期望日期，最晚約 3 個月）\n・適合：想盡快清洗的您\n\n兩方案的取消／改約規則不同（早鳥約定後即依規則計費；標準享較彈性的免費期限），詳見「訂單取消／改約須知」。"],["要如何購買冷氣清洗服務？","您可以點選下方的【清洗購買】按鈕，依方便的付款方式選擇購買管道：\n\n1️⃣ 1SHOP 線上商城\n支援信用卡付款。\n2️⃣ LINE 線上商城\n支援 LINE Pay 付款。\n\n完成下單及付款後，將由專人主動與您聯繫，協助安排到府服務時間。\n如有任何問題，也歡迎隨時透過 LINE OA 詢問我們。"],["如何預約服務？","從下單到完工，共五個步驟：\n\n1️⃣ 購買服務\n選擇規格、加入購物車完成結帳。\n2️⃣ 預約服務時間\n下單後 0.5～1 個工作天內（不含假日），將有專人主動與您聯繫、安排到府時間。\n3️⃣ 到府服務\n服務前一天以 Email 提醒，技師準時到府清洗。\n4️⃣ 服務驗收\n清洗完成後，當場與技師一同檢視清潔成果、確認驗收。\n5️⃣ 滿意度問卷\n服務完成後 1 天發送滿意度問卷，歡迎回饋您的寶貴意見。\n\n如有任何疑問，也歡迎隨時透過 LINE OA 聯繫客服。"],["可以服務完成後再付款嗎？","目前清洗服務皆採先付款、後安排服務，恕無法於服務完成後再付款。\n\n您可透過以下方式完成下單及付款：\n1️⃣ LINE線上商城\n付款方式：LINE Pay\n2️⃣ 1SHOP線上商城\n付款方式：信用卡\n\n完成付款並確認款項後，我們才會依訂單順序協助安排到府服務。\n📌 若技師到府後臨時增加清洗項目，且當天後續班表時間允許，加洗費用可採現場現金付款。"],["發票如何開立？","本服務使用「綠界電子發票」，發票開立方式及時間依下單管道如下：\n\n1️⃣ LINE 線上商城下單\n完成下單付款後，將於 1個工作天內完成發票開立。\n2️⃣ 1SHOP 線上商城下單\n完成下單付款後，系統將自動開立發票。\n\n📌 發票類型說明：\n如需開立「公司統編發票」，將開立為紙本發票，請於下單時正確填寫「公司抬頭」及「統一編號」。\n非統編發票則預設開立為電子發票。\n發票開立完成後，綠界將寄送「發票開立通知」至訂單填寫或您提供的 Email，請留意收件匣及垃圾郵件匣。\n如需使用「個人手機載具」，請於下單時填寫正確的手機條碼載具。\n\n🧾 電子發票如需列印紙本：\n可於收到綠界發票開立通知信後，依信件提供的發票資訊，前往7-ELEVEN ibon操作列印。\nhttps://www.ecpay.com.tw/Business/invoice_KIOSK_General"],["下單後多久會接到聯絡？","通常在您完成下單並付款完成後的 0.5～1 個工作天內（不含假日），客服人員會主動與您聯繫，確認服務時間與相關細節。"],["訂購後需要在多久內完成預約？","為利技師排程，訂購後需於 30 日內與約時人員約定「到府清洗保養服務日期」。\n若逾期仍未預約，且經多次不同時段致電、留言仍無法取得聯繫，我們將取消訂單並依原付款方式辦理退款，敬請留意。"],["如果一直聯繫不上我，訂單會怎麼處理？","完成訂購後，將由專人於 0.5～1 個工作天內（不含假日）與您聯繫約時。\n若經 3 次以上、於不同時段致電並留言仍無法取得聯繫，訂單將暫緩安排。\n若持續無法聯繫，將取消訂單並依原付款方式辦理退款。建議您留意來電，或直接透過 LINE 客服回覆，以利盡快安排。"],["如何查詢我的冷氣機齡？","請檢視室內機側面的產品資訊標籤，可找到「製造年份」或「出廠日期」。"],["從哪裡可看到機型／機號？","位於室內機右側／下方，或室外機右側的銘板貼紙上。"],["可以指定時段或假日施工嗎？","可預約時段為週一至週日（全年無休），服務時間 09:00–18:00。實際到府時間以客服協調排程為準。"],["你們服務哪些地區？偏遠地區要加價嗎？","服務範圍請見詳情頁「服務區域一覽」。部分偏遠地區需加價 NT$600，另有少數未開放區域；若不確定您的地址是否可服務，歡迎預約前先透過 LINE 客服確認。"],["客服會主動通知我操作 ATM、儲值嗎？（防詐）","不會。本服務客服絕不會主動通知「誤扣款／欠費／分期設定錯誤」等理由，要求您操作 ATM、網路銀行或超商儲值。如接獲可疑來電或訊息，請勿依指示操作，並可撥打 165 反詐騙專線查證。"],["有服務其他品牌的冷氣嗎？","本服務主要提供三菱重工原廠空調的清洗保養。若為其他品牌機型，建議您可洽詢其他品牌原廠服務單位或原購買經銷商，協助確認相關清洗與保養費用，感謝您。"],["技師遲到或未到怎麼辦？","技師會依約定時段到府。若因交通、前一場次延誤等因素可能遲到，客服或技師會主動提前通知您並協調；若遇天災等不可抗力需改期，亦會主動為您重新安排。如已到約定時間卻遲未接到聯繫，歡迎直接透過 LINE 客服或客服專線與我們確認，我們會立即為您查詢。"]]],["B","服務內容、範圍與施工方式",[["壁掛式/吊隱式/四方吹空調清洗是否等同冷氣維修？","不是。清洗屬保養與衛生清潔服務，並非故障修復；若冷氣本身已有異音、不冷、漏冷媒、跳電等狀況，需另行安排檢修。"],["冷氣清洗後還需要補冷媒嗎？","冷媒不是消耗品，通常不會因清洗而需要補充；若原本就有不冷、結霜、結冰等情形，建議另外安排檢測。"],["室外機是如何清洗的？","現場將由技師使用高壓清洗設備進行作業，主要清除室外機外殼表面的灰塵，以及散熱鰭片上的污垢。室外機清洗採不拆卸、不移動原安裝位置的方式進行，是否能施作仍需依現場環境條件評估後確認。\n\n＊如室外機現場有以下情況，將無法提供清洗服務：\n1. 室外機設置於外牆懸掛、無法安全接近，或有工安疑慮的環境\n2. 清洗產生的污水排放可能影響其他住戶\n3. 散熱鰭片老化嚴重，不適合再進行清洗"],["可以只清洗室外機嗎？","可以。室外機可單獨清洗，也可搭配室內機一起清洗。 ・單獨清洗且只洗 1 台：需加收車馬費 NT$600。 ・清洗 2 台以上，或室外機搭配室內機一起清洗（不限台數）：免車馬費。 詳細清洗費與商用加價，請見下方「室外機清洗的費用怎麼算？」。"],["為什麼室外機需要清洗？一定要一起清洗嗎？","定期清潔與保養室外機，有助於降低耗電並減少壓縮機異常的風險。若室外機長時間累積灰塵與髒污，可能影響散熱效率，進而讓壓縮機運轉負擔加重，影響整體機器效能。\n\n室外機一定要一起清洗嗎？不一定，但若室外機散熱片髒污明顯、周邊環境粉塵較多或使用年限較長，建議可一併評估清洗，以維持較佳散熱效率。"],["冷氣清洗大約需要多久時間？","實際作業時間會依機型、數量、髒污程度、天花高度、維修孔大小與現場施工難度而有所不同。單台預估清洗／保養時間參考如下： 【室內機】 ・家用壁掛式：約 1.5~2 小時／台 ・吊隱式：約 1.5~2.5 小時／台 ・四方吹（嵌入式）：約 1.5~2.5 小時／台 【室外機】 ・1 對 1：約 0.5 小時／台 ・1 對多（多聯）：約 0.5~1 小時／台 ＊以上為一般家用環境之預估；若為商用（營業場所）或重油污環境，將視現場狀況延長清洗保養時間。 ＊實際到府時間仍以客服協調排程為準。"],["冷氣清洗服務是現場施作還是拆回處理？","本服務為到府現場施作，技師會依機型與現場條件進行拆卸、防護、清洗與組裝。"],["冷氣清洗服務包含哪些項目？","清洗範圍會依現場機型與可施作範圍評估（一般涵蓋濾網、蒸發器、風鼓／風輪、集水盤、排水管可及處、出風口周邊等），實際仍需依現場結構與機型評估。各機型清洗項目如下：\n\n■ 家用壁掛式室內機（採現場掛洗）\n・面板（蓋板）拆解清洗\n・機外殼拆解清洗\n・過濾網拆解清洗\n・扇葉拆解清洗\n・水盤拆解清洗\n・風鼓以不拆洗方式清洗（不拆解，清潔其可及範圍）\n\n■ 吊隱式室內機\n〔小保養清洗方案〕不含風鼓拆洗\n・排水管疏通\n・進迴風濾網拆解清洗\n・馬達潤滑上油\n・功能檢查\n〔大保養清洗方案〕\n・功能檢查\n・風鼓拆解清洗（基本含清洗兩風鼓）\n・排水管疏通\n・鰭片清洗\n・馬達潤滑上油\n・進迴風濾網清洗\n〔全拆洗方案〕\n・功能檢查\n・風鼓拆解清洗（基本含清洗兩風鼓）\n・排水管疏通\n・鰭片清洗\n・馬達潤滑上油\n・進迴風濾網清洗\n・吊隱式下蓋全拆洗\n・蒸發器鰭片清洗\n・下方蓋板全拆洗\n\n■ 四方吹（嵌入式）室內機\n〔小保養清洗方案〕\n・排水管疏通\n・進迴風濾網拆解清洗\n・馬達潤滑上油\n・功能檢查\n〔大保養清洗方案〕\n・功能檢查\n・風鼓拆解清洗（基本含清洗兩風鼓）\n・排水管疏通\n・鰭片清洗\n・馬達潤滑上油\n・進迴風濾網清洗"],["有包含室外機清洗嗎？","室外機清洗需另行加購。建議一併清洗可提升整體散熱效率與冷房效果，並有助於節省電力、延長機器壽命。"],["清洗後多久可以正常開冷氣使用？","清洗完成並經技師測試確認功能正常後，即可正常使用。\n建議清洗後先以送風或除濕模式運轉 30～60 分鐘，待內部充分乾燥後再切換至冷氣模式，可獲得更佳的使用體驗。"],["清洗時會用到什麼清潔劑？會不會對人體或環境有害？","清洗時會使用中性或弱鹼性的冷氣專用清潔劑，具環保與可生物分解特性，無毒且安全。技師在作業時也會做好防護措施，確保藥劑不會殘留於機體或對環境造成影響。"],["冷氣清洗會不會造成損壞？","專業技師會依照標準作業流程，使用專用工具與環保清潔劑，確保不會損及冷氣內部零件。若冷氣機本身老舊或已有潛在故障，技師會於清洗前進行檢視並事先告知您相關風險。"],["清洗完成後要怎麼驗收？","清洗完成後，技師會與您當場一同驗收確認清潔成果；若有加洗項目，請確認服務驗收單已備註加洗項目與金額，以保障您的權益。"],["漏水問題清洗後可以解決嗎？","不一定。若漏水是因濾網阻塞、集水盤髒污或排水管輕微堵塞造成，清洗後通常會改善；但若漏水源自排水管老化、坡度不良、嚴重堵塞、管線破損或安裝問題，屬結構性問題，清洗無法根治，需另行處理或維修。技師會於現場評估漏水原因並向您說明。"]]],["C","費用、加購與取消規則",[["現場可以臨時加洗嗎？","技師到府服務後，如有臨時加洗需求，可直接向技師提出。\n技師會依當天後續服務班表及現場作業時間評估；如時間允許，即可現場加洗。加洗費用依賣場公告價格為準，並採現場現金付款。\n技師收款後，會將加洗項目及金額記錄於「服務驗收單」中。\n\n📌 加洗項目發票說明\n加洗項目的發票，將依原主訂單留存的發票資訊開立，並於服務完成後 1～3個工作天內完成開立。發票開立後，綠界將寄送「發票開立通知」至主訂單留存的 Email。"],["日期確認後想改約或取消，規費是多少？","正式約定服務日期前，兩方案皆可免費取消／改約。服務日期一經約定，取消／改約補償費（每人）依方案不同：\n【標準方案】\n· 服務日前 5 個工作天 17:00 前：免費\n· 服務日前 5 個工作天 17:00 後：NT$300\n· 服務日前 4 個工作天 17:00 後：NT$600\n· 服務日前 1 個工作天 17:00 後或當日：NT$1,000\n【早鳥方案】（享早鳥優惠價，約定後即依下列計費）\n· 約定後至服務前：一律 NT$600\n· 服務日前 1 個工作天 17:00 後或當日：NT$1,000"],["技師到府後發現無法服務，會收費嗎？","視情況而定。若是因我方技術問題（例如特殊機型無法拆解），不收任何費用。\n‧ 若技師到府後發現設備已有故障無法清洗，則酌收車馬費 NT$600。\n‧ 若因現場環境限制、訂購規格不符、非三菱重工空調品牌(如三菱電機)、或事先未告知為餐飲店家或油煙環境，同樣酌收車馬費 NT$600 （若服務前已收款，將扣除車馬費後退款）。"],["技師到府後聯絡不到我，怎麼算？","約定時間後超過 30 分鐘後仍無法聯繫上您，比照「服務當日取消」標準，酌收 NT$1,000／人。"],["購買多台服務，若其中有台設備當天無法清洗，費用如何處理？","若技師到府後，因現場環境限制、設備故障或其他非人為因素，導致部分設備無法施作，將依無法施作的台數按比例退還對應費用，已完成清洗的台數費用則維持不變。\n＊請注意，若訂單享有折扣優惠，退款金額將以折扣後的實際付款金額計算，而非定價。\n\n＊舉例來說，若您購買 3 台壁掛式空調深度清洗（定價每台 NT$3,000，享 9 折優惠後每台 NT$2,700，共付 NT$8,100），\n到府後技師發現其中 1 台設備故障或因其他因素而無法施作，則退還折扣後金額 NT$2,700，實際收取 NT$5,400。\n\n退款作業將由客服與您確認後，依原付款方式辦理，如有疑問歡迎聯繫我們。"],["現場可以加洗嗎？如何收費？發票如何開立？","可以先請技師現場評估，但是否能加洗，需依當日排程、設備狀況及可服務時間確認。\n\n💰 加洗費用參考\n・家用壁掛室內機：NT$3,000／台\n・室外機 1對1：NT$1,000／台\n・室外機 1對多：NT$1,500／台\n\n✅ 加洗前會先確認項目與費用，經您同意後才會施作。\n💵 現場加洗費用以現金收取，發票將依主訂單發票資訊開立。\n📝 為保障您的權益，請確認服務驗收單有備註加洗項目及收現金額。"],["若冷氣很髒、油煙很重或有厚重霉垢，會影響施工嗎？","會。若髒污程度明顯高於一般家用環境，可能增加工時、施工難度與耗材使用，必要時會於現場另行評估是否加價或加時處理"],["室外機清洗的費用怎麼算？會不會另收車馬費？","【清洗費 · 依機型計算】 ・一對一分離式：每台 NT$1,000 ・一對多（多聯機）：每台 NT$1,500 【一般家用 · 車馬費 NT$600】 僅在「單獨清洗室外機、且只洗 1 台」時加收 NT$600（技師專程往返車程成本）。 免車馬費：清洗 2 台以上室外機，或室外機搭配室內機一起清洗（不限台數）。 【營業場所（商用／重油污）· 商用加價 NT$1,000／台】 營業場所改收「商用加價」，不另收車馬費： ・室內機、室外機每台各加收 NT$1,000（室外機不論單獨清洗或搭配室內機清洗，都會加收）"],["清洗服務的價格是多少？","清洗費用依機型與清洗方案計算：\n\n【室內機】\n・家用壁掛式：NT$3,000／台\n・吊隱式（小清洗保養）：NT$1,600／台\n・吊隱式（大清洗保養）：NT$3,000／台\n・吊隱式（全清洗保養）：NT$5,000／台\n・四方吹（標準）：NT$5,000／台\n・四方吹（迷你）：NT$4,000／台\n\n【室外機】\n・一對一分離式：NT$1,000／台\n・一對多（多聯機）：NT$1,500／台\n\n【方案與優惠】\n・早鳥方案：全室內外機清洗服務品項享 85 折\n・標準方案：清洗項目 95 折，約時起 2 週內到府\n・單獨清洗室外機且只洗 1 台：加收車馬費 NT$600（清洗 2 台以上或搭配室內機則免收）\n・偏遠地區：部分區域加價 NT$600"],["怎麼知道我的吊隱機型要不要加洗風鼓費用？","【方案已含 2 個風鼓】\n吊隱式的「大保養」與「全保養」清洗方案，\n基本已包含 2 個風鼓的拆洗保養。\n風鼓數 3 個以上的機型，超出的部分需要加洗。\n\n【加洗費用】\n・風鼓 1～2 個：免加洗\n・風鼓 3 個：加洗 1 個，+NT$500\n・風鼓 4 個：加洗 2 個，+NT$1,000\n\n【怎麼知道自己是幾個風鼓】\n・型號印在室內機機身、或維修孔內側的標籤上\n・找到型號後，對照『吊隱式風鼓加洗對照表』馬上就知道\n・不確定的話，把型號傳給 LINE 客服，我們幫您確認"]]],["D","施工前準備與現場條件",[["清洗會不會弄髒家裡？","技師在作業前會鋪設防水防塵布，並使用專用集水裝備，確保清洗過程中污水不外濺，盡量保持居家環境整潔。"],["若現場評估後不適合施工，會怎麼處理？","若因安全、結構、空間、維修孔、水電、排水或設備老化等因素無法施作，技師會現場說明原因，後續再依平台或賣場規範處理改期、取消或相關費用。"],["施工時會有噪音嗎？","會。拆裝、沖洗、高壓設備運作與機體測試過程中，現場可能產生正常施工聲響，建議避開需要安靜的時段。"],["若家中沒有水龍頭或排水孔該怎麼辦？","冷氣清洗通常需要使用水源與排水設施。若現場沒有可用的水龍頭或排水孔，請於預約時提前告知客服或技師，方便他們攜帶延長水管、集水桶等輔助工具，或評估現場是否具備清洗條件。"],["冷氣若裝在挑高或特殊位置，還能清洗嗎？","若您的冷氣位於挑高天花板、狹窄空間，或須使用特殊梯具才能作業的位置，請在預約時提前告知客服或於備註欄說明。技師將於現場評估可行性，可能需您協助提供高梯，或因作業難度較高而酌收額外費用。若評估後認定施工風險過高，為維護安全，將無法提供清洗服務。"],["冷氣清洗前需要先準備什麼？","現場需可提供基本水源、110V 電源與排水動線，並請先清空冷氣下方至少 1.5 x 1.5 公尺的範圍，方便技師架梯、防護與施工。"],["預約前需要拍哪些冷氣照片？（拍攝重點教學）","為利技師初步判斷現場是否可提供清洗服務，請依機型協助拍攝以下照片：\n\n① 壁掛式室內機\n・正面全景：拍到完整室內機\n・左右兩側空間：拍到冷氣與牆面、櫃體的距離\n・上方空間：拍到冷氣頂部與天花板距離\n・下方環境：拍到冷氣下方是否有床、櫃子、電視或其他大型家具\n・整體安裝位置：建議退後拍一張，讓技師看得出冷氣的實際位置\n\n② 吊隱式室內機\n・出風口／回風口全景\n・天花板整體位置：退後拍攝，讓技師看得出設備安裝位置\n・維修孔照片：需拍到完整維修孔及周邊空間\n・維修孔打開後內部：若方便開啟，請拍攝內部設備位置\n・下方環境：拍到設備下方是否有固定櫃體、家具或其他障礙物\n＊吊隱式特別重要：讓技師確認維修孔的位置、大小及是否有足夠拆洗空間。\n\n③ 四方吹室內機\n・室內機正下方全景：完整拍到四方吹面板\n・天花板整體位置：退後拍攝設備與周邊環境\n・設備四周空間：確認旁邊是否有燈具、消防設備、裝潢或其他阻礙\n・下方環境：拍到下方是否有桌椅、櫃體或固定設備\n・安裝高度：若位置較高，請盡量從遠處拍攝一張可判斷高度的照片\n\n＊拍攝小提醒：照片請盡量清楚、明亮、不裁切設備，並稍微退後拍攝，讓技師同時看到「空調＋周邊環境」。"],["壁掛式／吊隱式／四方吹空調室內機下方，需要預留多少施工空間？","為利技師進行清洗作業，建議室內機下方預留足夠施工範圍，以利：\n1. 梯具擺放\n2. 清洗設備操作\n3. 零件拆裝\n4. 拆下零件暫時放置\n\n建議預留空間如下：\n・一般建議至少預留約 150 × 150 公分的作業空間\n・壁掛式室內機：通常仍需保留下方基本施工空間\n・吊隱式室內機：因施工與拆裝較繁複，通常需預留更充足空間\n・四方吹室內機：因作業方式與設備配置需求，也建議保留較完整的施工範圍\n\n提醒您：若室內機下方空間不足，或周邊有大型家具、裝潢、隔間等影響施工之情況，可能會影響現場作業安排，實際仍須由技師依現場環境評估是否可施作。"],["吊隱式一定要有維修孔才能清洗嗎？若維修孔不夠大怎麼辦？","通常需有適當維修孔，方便技師拆裝與清洗內部零件。若維修孔過小、位置不佳或尺寸不足，將影響拆裝與清潔作業，現場可能改為部分清潔、加價處理，或無法施作。\n※ 四方吹機型同理，若天花板維修孔條件不佳，亦可能影響施工範圍。"],["家中有貴重物品或怕水家具，清洗時會不會弄濕弄髒？","施工前技師會進行防水遮蔽與現場保護，完工後整理環境。\n但仍建議事先將貴重物品、木質家具與怕水電器自行移開或妥善保護；若不方便移動，請事先告知以利技師加強防護。"],["大樓、社區、公寓施工前需要先做什麼？","若社區有施工申請、換證、梯控、時段限制或管委會規範，請務必提前確認，避免技師到場後無法進場施工。"],["天花板太高或無法安全架梯，還能施工嗎？","若安裝高度過高、現場因空間或地面條件限制導致無法安全架梯，或施工風險過高，技師會依安全原則評估，必要時可能需加價或婉拒服務。"],["若現場沒有水源或電源，還可以清洗嗎？","通常不行。現場需具備基本 110V 電源、水源與排水條件，若無法提供，技師可能無法執行清洗作業。"],["冷氣清洗前需要先關機嗎？","建議您在師傅到訪前，提前關閉冷氣約 30 分鐘至 1 小時。這樣可讓機體內部恢復至常溫，避免清洗時產生過多冷凝水，影響作業安全與清潔效果。"],["冷氣下方需要清空嗎？","是的，強烈建議您這麼做！ 為了保護您的傢俱與電器，並讓技師有足夠的空間安全地作業，請您在技師抵達前，清空冷氣下方至少 1.5 x 1.5 公尺的範圍。 特別是床、沙發、書桌、電視、電腦等貴重或怕水的物品，請務必移開或使用防水布妥善覆蓋喔！"],["寵物需要先隔離嗎？","是的，為了毛孩子的安全，也為了讓技師能專心服務，請務必將寵物（無論是貓、狗或鳥等）暫時隔離在另一個房間或籠內。 因為清洗過程中，除了設備運轉的聲響外，也可能會有些許清潔劑的味道，先將毛孩安置好，對牠們來說是比較安心的作法喔！"],["我需要全程在家嗎？","是的，為了保障您的權益，建議您或您的家人需要全程在家。 技師在服務過程中，可能會需要與您確認一些設備的細節狀況，或是在需要移動物品時取得您的同意。您在現場，我們也能更安心地進行最完善的服務。 此外，在服務結束後的最終功能驗收，也需要您一同在場確認，確保一切都回復到最佳狀態喔！"],["服務後會很髒亂嗎？","請您完全放心！ 我們的技師都受過專業訓練，在服務開始前，會使用專業的防水罩與養生膠帶，將冷氣周遭的牆面與傢俱做最完善的保護。 服務結束後，我們也會將工作區域清潔並恢復原狀，確保給您一個乾淨舒適的環境。"]]],["E","清洗效益、頻率與保養",[["清洗後是否一定會變冷、變省電？","清洗可改善因髒污造成的出風不順、異味、滴水或散熱效率下降等狀況；若冷氣本身已有冷媒不足、電控異常、零件老化等問題，仍需另行檢修。"],["冷氣的清潔頻率應該如何拿捏？","一般家庭：建議每年一次；若家中有寵物、過敏成員或近大馬路可增加頻率。\n商業場所：因運轉時間長，建議每半年一次。"],["定期清洗冷氣有哪些必要性？","能維持室內空氣品質、改善異味與過敏問題、提升冷房效率以節省電費。"],["冷氣清洗後建議多久再洗一次？","一般家庭建議每年清洗一次即可，能維持良好效能與空氣品質。若家中有過敏體質成員、飼養寵物，或冷氣使用頻繁（如商業空間、店鋪），建議將清洗週期縮短為每半年一次，確保運轉效率與衛生。"],["日常生活中有哪些保養冷氣的好習慣？","開關機前先送風 3–5 分鐘保持內部乾燥；使用期間濾網約兩週清洗一次；室外機周遭保持通風勿堆雜物；長時間停用前開送風運轉半天吹乾內部。"],["冷氣清洗後有什麼好處？真的能省電嗎？","清洗能有效去除冷氣內部的灰塵與黴菌，讓風量更順暢、冷房效率提升，同時減少異味與細菌滋生。由於機器運轉更輕鬆，確實有助於降低耗電量，還能延長冷氣的使用壽命。"],["多久預約一次清洗服務比較好？","一般家庭建議每年清洗一次。若家中有過敏體質者、嬰幼兒、長者，或有飼養寵物，以及冷氣使用頻率高（如營業場所），建議縮短至半年清洗一次，以維持空氣品質與機器效能。"],["清洗後要怎麼保養才能延長效果？","建議您每隔 2～4 週依使用頻率清洗或更換濾網，並在換季或長時間未使用前，開啟送風模式運轉約 10～15 分鐘，讓機體內部保持乾燥。這樣能有效抑制黴菌滋生，延續冷氣清洗後的潔淨與效能。"],["清洗後冷氣能恢復像新的一樣嗎？","專業清洗可明顯改善冷房效率、去除異味並提升空氣品質。雖然無法讓使用多年的冷氣機完全恢復如新（外觀或零件可能仍有自然老化痕跡），但內部清潔後可使運轉效能接近最佳狀態，並有效延長機器壽命。"],["除了請專業人員清洗外，平時我可以怎麼保養冷氣？","除了定期請專業技師清洗外，建議您每隔 2～4 週視使用頻率與環境狀況，清洗或更換濾網。另可在關機前切換至送風模式約 10～15 分鐘，幫助機體內部乾燥，降低潮濕與黴菌滋生的機率。"]]],["F","特殊情況與注意事項",[["若四方吹/吊隱式機型特殊、結構受限，是否仍可完整清洗？","不一定。部分特殊機型、裝潢封板過密、維修孔位置不佳或天花結構複雜者，可能僅能施作可及範圍，實際需由現場技師判斷。"],["冷氣清洗後，異味或霉味就一定會完全消失嗎？","若異味來源位於本次可清洗範圍內，例如蒸發器、貫流風扇、風箱、集水盤等部位，清洗後通常會有明顯改善。但若氣味來源並非來自機體可清洗區域，例如壁內排水管沼氣回流、裝潢夾層異味，或室內通風條件不佳等情況，則仍需進一步處理根本原因，才能較完整地改善異味問題。"],["清洗後若冷氣出現問題該怎麼處理？","自清洗服務完成日起，享有 30 天基本功能保固。\n\n【保固範圍】\n・保固期內若經原廠鑑定確認為清洗直接導致的功能異常，依設備機齡分級理賠\n・服務過程中因人員疏失造成傢俱損傷，釐清責任後最高賠償 NT$10,000\n\n【不提供保固的情況】\n・設備使用超過 10 年（零件老化風險高，恕不提供保固）\n・清洗前已存在的設備問題或舊有損壞\n・消耗性零配件自然損耗、設備自然磨損\n・天災、外力或使用者不當操作所致\n\n【申請流程】\n1. 保固期內發現異常，聯繫客服並提供照片或影片\n2. 指派原廠技術人員到府鑑定，釐清問題根源\n3. 確認為清洗所致：後續維修由原廠全權協調處理\n   非關清洗問題：相關維修費用由您負擔\n\n＊保固期無法因「未使用、出國」等個人因素延長，請在期限內多加使用測試。\n＊服務完成後請務必與技師一同驗收，以保障您的權益。\n＊以上為重點摘要，完整條款以賣場公告為準。"],["老舊機器是否也可以清洗？清洗後若出現零件脆化怎麼辦？","可先評估。\n但若機器年限較高，塑膠件、泡棉、保溫材、排水管等耗材可能已有老化現象，清洗過程中較容易顯現原有風險，並非一定屬施工異常。\n⚠️ 設備使用超過 10 年者，因零件老化風險高，清洗後恕不提供功能保固。\n⚠️ 設備使用超過 15 年，或超過 10 年且環境惡劣／整體狀況不佳者，恕不提供清洗服務。"],["排水管原本就不順，清洗後一定會改善嗎？","不一定。若排水管已有老化、坡度異常、嚴重堵塞或安裝問題，清洗只能協助基本保養，若有結構性問題仍需另行處理。"],["清洗後若有些微味道或潮濕感，正常嗎？需要做什麼？","清洗後短時間內若有些微濕氣、藥劑或水氣殘留味道，多屬正常現象。\n建議開窗通風並以送風、強風或除濕模式持續運轉 30～60 分鐘，有助於帶走殘留濕氣與味道。"],["濾網要從哪裡購買？","請洽詢當初購買三菱重工空調的經銷商或直接來電上洋客服專線0800-300766購買。"],["遙控器要從哪裡購買？","請洽詢當初購買三菱重工空調的經銷商或直接來電上洋客服專線0800-300766購買。"],["我的冷氣使用多年，還適合清洗嗎？","若冷氣已使用超過 10～15 年，因零件老化，清洗時確實可能增加拆裝或漏水等風險。\n技師會於現場檢視機況並評估可否安全清洗；若判定風險過高，會建議您先行維修或考量是否仍有清洗的必要。\n⚠️ 設備使用超過 10 年者，因零件老化風險高，清洗後恕不提供功能保固。\n⚠️ 設備使用超過 15 年，或超過 10 年且長期處於硫磺／鹽害環境、整體狀況不佳者，因故障風險過高，恕不提供清洗服務。"],["遇到颱風或豪大雨，原本預約的冷氣清洗服務還會到府嗎？","為保障服務人員安全及維持服務品質，若服務當日遇颱風或豪大雨影響，將依以下原則辦理：\n\n📍 1. 服務地區公告停止上班上課\n若您服務地址所在縣市政府已公告「停止上班上課」，原訂到府清洗服務將暫停，後續將由客服主動與您聯繫重新安排服務時間。\n\n📍 2. 未停班停課，但現場不適合前往\n若服務地區雖未公告停班停課，但服務人員依現場風勢、雨勢、道路狀況或其他安全因素評估無法安全前往，亦將主動與您聯繫改期。"]]]];
+var QD_FAQ=[["A","預約、付款與發票",[["早鳥方案與標準方案有什麼不同？怎麼選？","依您的需求，可選擇兩種方案：\n\n早鳥方案（提早規劃、省錢）\n・全室內外機清洗服務品項享 85 折\n・自專人約時起，需安排 30 天後（含）～90 天內到府；農曆春節前三週（除夕前 21 天～除夕）不安排，該期間想到府可補差價改為標準方案\n・適合：不趕時間、想省錢的您\n\n標準方案（近期就要洗）\n・清洗項目 95 折\n・約時起 2 週內可到府（想晚一點，也可以直接選期望日期，最晚約 3 個月）\n・適合：想盡快清洗的您\n\n兩方案的取消／改約規則不同（早鳥約定後即依規則計費；標準享較彈性的免費期限），詳見「訂單取消／改約須知」。"],["要如何購買冷氣清洗服務？","您可以點選下方的【清洗購買】按鈕，依方便的付款方式選擇購買管道：\n\n1️⃣ 1SHOP 線上商城\n支援信用卡付款。\n2️⃣ LINE 線上商城\n支援 LINE Pay 付款。\n\n完成下單及付款後，將由專人主動與您聯繫，協助安排到府服務時間。\n如有任何問題，也歡迎隨時透過 LINE OA 詢問我們。"],["如何預約服務？","從下單到完工，共五個步驟：\n\n1️⃣ 購買服務\n選擇規格、加入購物車完成結帳。\n2️⃣ 預約服務時間\n下單後 0.5-1 個工作天內（不含假日），將有專人主動與您聯繫、安排到府時間。\n3️⃣ 到府服務\n服務前一天以 Email 提醒，技師準時到府清洗。\n4️⃣ 服務驗收\n清洗完成後，當場與技師一同檢視清潔成果、確認驗收。\n5️⃣ 滿意度問卷\n服務完成後 1 天發送滿意度問卷，歡迎回饋您的寶貴意見。\n\n如有任何疑問，也歡迎隨時透過 LINE OA 聯繫客服。"],["可以服務完成後再付款嗎？","目前清洗服務皆採先付款、後安排服務，恕無法於服務完成後再付款。\n\n您可透過以下方式完成下單及付款：\n1️⃣ LINE線上商城\n付款方式：LINE Pay\n2️⃣ 1SHOP線上商城\n付款方式：信用卡\n\n完成付款並確認款項後，我們才會依訂單順序協助安排到府服務。\n📌 若技師到府後臨時增加清洗項目，且當天後續班表時間允許，加洗費用可採現場現金付款。"],["發票如何開立？","本服務使用「綠界電子發票」，發票開立方式及時間依下單管道如下：\n\n1️⃣ LINE 線上商城下單\n完成下單付款後，將於 1個工作天內完成發票開立。\n2️⃣ 1SHOP 線上商城下單\n完成下單付款後，系統將自動開立發票。\n\n📌 發票類型說明：\n如需開立「公司統編發票」，將開立為紙本發票，請於下單時正確填寫「公司抬頭」及「統一編號」。\n非統編發票則預設開立為電子發票。\n發票開立完成後，綠界將寄送「發票開立通知」至訂單填寫或您提供的 Email，請留意收件匣及垃圾郵件匣。\n如需使用「個人手機載具」，請於下單時填寫正確的手機條碼載具。\n\n🧾 電子發票如需列印紙本：\n可於收到綠界發票開立通知信後，依信件提供的發票資訊，前往7-ELEVEN ibon操作列印。\nhttps://www.ecpay.com.tw/Business/invoice_KIOSK_General"],["下單後多久會接到聯絡？","通常在您完成下單並付款完成後的 0.5-1 個工作天內（不含假日），客服人員會主動與您聯繫，確認服務時間與相關細節。"],["訂購後需要在多久內完成預約？","為利技師排程，訂購後需於 30 日內與約時人員約定「到府清洗保養服務日期」。\n若逾期仍未預約，且經多次不同時段致電、留言仍無法取得聯繫，我們將取消訂單並依原付款方式辦理退款，敬請留意。"],["如果一直聯繫不上我，訂單會怎麼處理？","完成訂購後，將由專人於 0.5-1 個工作天內（不含假日）與您聯繫約時。\n若經 3 次以上、於不同時段致電並留言仍無法取得聯繫，訂單將暫緩安排。\n若持續無法聯繫，將取消訂單並依原付款方式辦理退款。建議您留意來電，或直接透過 LINE 客服回覆，以利盡快安排。"],["如何查詢我的冷氣機齡？","請檢視室內機側面的產品資訊標籤，可找到「製造年份」或「出廠日期」。"],["從哪裡可看到機型／機號？","位於室內機右側／下方，或室外機右側的銘板貼紙上。"],["可以指定時段或假日施工嗎？","可預約時段為週一至週日（全年無休），服務時間 09:00–18:00。實際到府時間以客服協調排程為準。"],["你們服務哪些地區？偏遠地區要加價嗎？","服務範圍請見詳情頁「服務區域一覽」。部分偏遠地區需加價 NT$600，另有少數未開放區域；若不確定您的地址是否可服務，歡迎預約前先透過 LINE 客服確認。"],["客服會主動通知我操作 ATM、儲值嗎？（防詐）","不會。本服務客服絕不會主動通知「誤扣款／欠費／分期設定錯誤」等理由，要求您操作 ATM、網路銀行或超商儲值。如接獲可疑來電或訊息，請勿依指示操作，並可撥打 165 反詐騙專線查證。"],["有服務其他品牌的冷氣嗎？","本服務主要提供三菱重工原廠空調的清洗保養。若為其他品牌機型，建議您可洽詢其他品牌原廠服務單位或原購買經銷商，協助確認相關清洗與保養費用，感謝您。"],["技師遲到或未到怎麼辦？","技師會依約定時段到府。若因交通、前一場次延誤等因素可能遲到，客服或技師會主動提前通知您並協調；若遇天災等不可抗力需改期，亦會主動為您重新安排。如已到約定時間卻遲未接到聯繫，歡迎直接透過 LINE 客服或客服專線與我們確認，我們會立即為您查詢。"]]],["B","服務內容、範圍與施工方式",[["壁掛式/吊隱式/四方吹空調清洗是否等同冷氣維修？","不是。清洗屬保養與衛生清潔服務，並非故障修復；若冷氣本身已有異音、不冷、漏冷媒、跳電等狀況，需另行安排檢修。"],["冷氣清洗後還需要補冷媒嗎？","冷媒不是消耗品，通常不會因清洗而需要補充；若原本就有不冷、結霜、結冰等情形，建議另外安排檢測。"],["室外機是如何清洗的？","現場將由技師使用高壓清洗設備進行作業，主要清除室外機外殼表面的灰塵，以及散熱鰭片上的污垢。室外機清洗採不拆卸、不移動原安裝位置的方式進行，是否能施作仍需依現場環境條件評估後確認。\n\n＊如室外機現場有以下情況，將無法提供清洗服務：\n1. 室外機設置於外牆懸掛、無法安全接近，或有工安疑慮的環境\n2. 清洗產生的污水排放可能影響其他住戶\n3. 散熱鰭片老化嚴重，不適合再進行清洗"],["可以只清洗室外機嗎？","可以。室外機可單獨清洗，也可搭配室內機一起清洗。 ・單獨清洗且只洗 1 台：需加收車馬費 NT$600。 ・清洗 2 台以上，或室外機搭配室內機一起清洗（不限台數）：免車馬費。 詳細清洗費與商用加價，請見下方「室外機清洗的費用怎麼算？」。"],["為什麼室外機需要清洗？一定要一起清洗嗎？","定期清潔與保養室外機，有助於降低耗電並減少壓縮機異常的風險。若室外機長時間累積灰塵與髒污，可能影響散熱效率，進而讓壓縮機運轉負擔加重，影響整體機器效能。\n\n室外機一定要一起清洗嗎？不一定，但若室外機散熱片髒污明顯、周邊環境粉塵較多或使用年限較長，建議可一併評估清洗，以維持較佳散熱效率。"],["冷氣清洗大約需要多久時間？","實際作業時間會依機型、數量、髒污程度、天花高度、維修孔大小與現場施工難度而有所不同。\n單台預估清洗／保養時間參考如下：\n【室內機】\n・家用壁掛式：約 1.5~2 小時／台\n・吊隱式小清洗保養：約 0.5~1 小時／台\n・吊隱式大／全清洗保養：約 1.5~2.5 小時／台\n・四方吹（嵌入式）：約 1.5~2.5 小時／台\n【室外機】\n・1 對 1：約 0.5 小時／台\n・1 對多（多聯）：約 0.5~1 小時／台\n＊以上為一般家用環境之預估；若為商用（營業場所）或重油污環境，將視現場狀況延長清洗保養時間。\n＊實際到府時間仍以客服協調排程為準。"],["冷氣清洗服務是現場施作還是拆回處理？","本服務為到府現場施作，技師會依機型與現場條件進行拆卸、防護、清洗與組裝。"],["冷氣清洗服務包含哪些項目？","清洗範圍會依現場機型與可施作範圍評估（一般涵蓋濾網、蒸發器、風鼓／風輪、集水盤、排水管可及處、出風口周邊等），實際仍需依現場結構與機型評估。各機型清洗項目如下：\n\n■ 家用壁掛式室內機（採現場掛洗）\n・面板（蓋板）拆解清洗\n・機外殼拆解清洗\n・過濾網拆解清洗\n・扇葉拆解清洗\n・水盤拆解清洗\n・風鼓以不拆洗方式清洗（不拆解，清潔其可及範圍）\n\n■ 吊隱式室內機\n〔小保養清洗方案〕不含風鼓拆洗\n・排水管疏通\n・進迴風濾網拆解清洗\n・馬達潤滑上油\n・功能檢查\n〔大保養清洗方案〕\n・功能檢查\n・風鼓拆解清洗（基本含清洗兩風鼓）\n・排水管疏通\n・鰭片清洗\n・馬達潤滑上油\n・進迴風濾網清洗\n〔全保養清洗方案〕\n・功能檢查\n・風鼓拆解清洗（基本含清洗兩風鼓）\n・排水管疏通\n・鰭片清洗\n・馬達潤滑上油\n・進迴風濾網清洗\n・吊隱式下蓋全拆洗\n・蒸發器鰭片清洗\n・下方蓋板全拆洗\n\n■ 迷你四方吹／四方吹（嵌入式）室內機\n・面板拆解清洗\n・水盤拆解清洗\n・風扇拆解清洗\n・蒸發器鰭片清洗\n・迴風濾網清洗\n・馬達軸承潤滑\n・功能測試／檢查"],["有包含室外機清洗嗎？","室外機清洗需另行加購。建議一併清洗可提升整體散熱效率與冷房效果，並有助於節省電力、延長機器壽命。"],["清洗後多久可以正常開冷氣使用？","清洗完成並經技師測試確認功能正常後，即可正常使用。\n建議清洗後先以送風或除濕模式運轉 30～60 分鐘，待內部充分乾燥後再切換至冷氣模式，可獲得更佳的使用體驗。"],["清洗時會用到什麼清潔劑？會不會對人體或環境有害？","清洗時會使用中性或弱鹼性的冷氣專用清潔劑，具環保與可生物分解特性，無毒且安全。技師在作業時也會做好防護措施，確保藥劑不會殘留於機體或對環境造成影響。"],["冷氣清洗會不會造成損壞？","專業技師會依照標準作業流程，使用專用工具與環保清潔劑，確保不會損及冷氣內部零件。若冷氣機本身老舊或已有潛在故障，技師會於清洗前進行檢視並事先告知您相關風險。"],["清洗完成後要怎麼驗收？","清洗完成後，技師會與您當場一同驗收確認清潔成果；若有加洗項目，請確認服務驗收單已備註加洗項目與金額，以保障您的權益。"],["漏水問題清洗後可以解決嗎？","不一定。若漏水是因濾網阻塞、集水盤髒污或排水管輕微堵塞造成，清洗後通常會改善；但若漏水源自排水管老化、坡度不良、嚴重堵塞、管線破損或安裝問題，屬結構性問題，清洗無法根治，需另行處理或維修。技師會於現場評估漏水原因並向您說明。"]]],["C","費用、加購與取消規則",[["現場可以臨時加洗嗎？","技師到府服務後，如有臨時加洗需求，可直接向技師提出。\n技師會依當天後續服務班表及現場作業時間評估；如時間允許，即可現場加洗。加洗費用依賣場公告價格，並依主訂單的方案折扣計算，採現場現金付款。\n技師收款後，會將加洗項目及金額記錄於「服務驗收單」中。\n\n📌 加洗項目發票說明\n加洗項目的發票，將依原主訂單留存的發票資訊開立，並於服務完成後 1～3個工作天內完成開立。發票開立後，綠界將寄送「發票開立通知」至主訂單留存的 Email。"],["日期確認後想改約或取消，規費是多少？","正式約定服務日期前，兩方案皆可免費取消／改約。服務日期一經約定，取消／改約補償費（每人）依方案不同：\n【標準方案】\n· 服務日前 5 個工作天 17:00 前：免費\n· 服務日前 5 個工作天 17:00 後：NT$300\n· 服務日前 4 個工作天 17:00 後：NT$600\n· 服務日前 1 個工作天 17:00 後或當日：NT$1,000\n【早鳥方案】（享早鳥優惠價，約定後即依下列計費）\n· 約定後至服務前：一律 NT$600\n· 服務日前 1 個工作天 17:00 後或當日：NT$1,000"],["技師到府後發現無法服務，會收費嗎？","視情況而定。若是因我方技術問題（例如特殊機型無法拆解），不收任何費用。\n‧ 若技師到府後發現設備已有故障無法清洗，則酌收車馬費 NT$600。\n‧ 若因現場環境限制、訂購規格不符、非三菱重工空調品牌(如三菱電機)、或事先未告知為餐飲店家或油煙環境，同樣酌收車馬費 NT$600 （若服務前已收款，將扣除車馬費後退款）。"],["技師到府後聯絡不到我，怎麼算？","約定時間後超過 30 分鐘後仍無法聯繫上您，比照「服務當日取消」標準，酌收 NT$1,000／人。"],["購買多台服務，若其中有台設備當天無法清洗，費用如何處理？","若技師到府後，因現場環境限制、設備故障或其他非人為因素，導致部分設備無法施作，將依無法施作的台數按比例退還對應費用，已完成清洗的台數費用則維持不變。\n＊請注意，若訂單享有折扣優惠，退款金額將以折扣後的實際付款金額計算，而非定價。\n\n＊舉例來說，若您購買 3 台壁掛式空調深度清洗（定價每台 NT$3,000，享標準方案 95 折後每台 NT$2,850，共付 NT$8,550），\n到府後技師發現其中 1 台設備故障或因其他因素而無法施作，則退還折扣後金額 NT$2,850，實際收取 NT$5,700。\n\n退款作業將由客服與您確認後，依原付款方式辦理，如有疑問歡迎聯繫我們。"],["現場可以加洗嗎？如何收費？發票如何開立？","可以先請技師現場評估，但是否能加洗，需依當日排程、設備狀況及可服務時間確認。\n\n💰 加洗費用參考（以下為原價，實際收費依主訂單的方案折扣計算，例如主訂單為早鳥方案，加洗同樣享 85 折）\n・家用壁掛室內機：NT$3,000／台\n・室外機 1對1：NT$1,000／台\n・室外機 1對多：NT$1,500／台\n\n✅ 加洗前會先確認項目與費用，經您同意後才會施作。\n💵 現場加洗費用以現金收取，發票將依主訂單發票資訊開立。\n📝 為保障您的權益，請確認服務驗收單有備註加洗項目及收現金額。"],["若冷氣很髒、油煙很重或有厚重霉垢，會影響施工嗎？","會。若髒污程度明顯高於一般家用環境，可能增加工時、施工難度與耗材使用，必要時會於現場另行評估是否加價或加時處理"],["室外機清洗的費用怎麼算？會不會另收車馬費？","【清洗費 · 依機型計算】 ・一對一分離式：每台 NT$1,000 ・一對多（多聯機）：每台 NT$1,500 【一般家用 · 車馬費 NT$600】 僅在「單獨清洗室外機、且只洗 1 台」時加收 NT$600（技師專程往返車程成本）。 免車馬費：清洗 2 台以上室外機，或室外機搭配室內機一起清洗（不限台數）。 【營業場所（商用／重油污）· 商用加價 NT$1,000／台】 營業場所改收「商用加價」，不另收車馬費： ・室內機、室外機每台各加收 NT$1,000（室外機不論單獨清洗或搭配室內機清洗，都會加收）"],["清洗服務的價格是多少？","清洗費用依機型與清洗方案計算：\n\n【室內機】\n・家用壁掛式：NT$3,000／台\n・吊隱式（小清洗保養）：NT$1,600／台\n・吊隱式（大清洗保養）：NT$3,000／台\n・吊隱式（全清洗保養）：NT$5,000／台\n・四方吹（標準）：NT$5,000／台\n・四方吹（迷你）：NT$4,000／台\n\n【室外機】\n・一對一分離式：NT$1,000／台\n・一對多（多聯機）：NT$1,500／台\n\n【方案與優惠】\n・早鳥方案：全室內外機清洗服務品項享 85 折\n・標準方案：清洗項目 95 折，約時起 2 週內到府\n・單獨清洗室外機且只洗 1 台：加收車馬費 NT$600（清洗 2 台以上或搭配室內機則免收）\n・偏遠地區：部分區域加價 NT$600"],["怎麼知道我的吊隱機型要不要加洗風鼓費用？","【方案已含 2 個風鼓】\n吊隱式的「大保養」與「全保養」清洗方案，\n基本已包含 2 個風鼓的拆洗保養。\n風鼓數 3 個以上的機型，超出的部分需要加洗。\n\n【加洗費用】\n・風鼓 1～2 個：免加洗\n・風鼓 3 個：加洗 1 個，+NT$500\n・風鼓 4 個：加洗 2 個，+NT$1,000\n\n【怎麼知道自己是幾個風鼓】\n・型號印在室內機機身、或維修孔內側的標籤上\n・找到型號後，對照『吊隱式風鼓加洗對照表』馬上就知道\n・不確定的話，把型號傳給 LINE 客服，我們幫您確認"]]],["D","施工前準備與現場條件",[["清洗會不會弄髒家裡？","技師在作業前會鋪設防水防塵布，並使用專用集水裝備，確保清洗過程中污水不外濺，盡量保持居家環境整潔。"],["若現場評估後不適合施工，會怎麼處理？","若因安全、結構、空間、維修孔、水電、排水或設備老化等因素無法施作，技師會現場說明原因，後續再依平台或賣場規範處理改期、取消或相關費用。"],["施工時會有噪音嗎？","會。拆裝、沖洗、高壓設備運作與機體測試過程中，現場可能產生正常施工聲響，建議避開需要安靜的時段。"],["若家中沒有水龍頭或排水孔該怎麼辦？","冷氣清洗通常需要使用水源與排水設施。若現場沒有可用的水龍頭或排水孔，請於預約時提前告知客服或技師，方便他們攜帶延長水管、集水桶等輔助工具，或評估現場是否具備清洗條件。"],["冷氣若裝在挑高或特殊位置，還能清洗嗎？","若您的冷氣位於挑高天花板、狹窄空間，或須使用特殊梯具才能作業的位置，請在預約時提前告知客服或於備註欄說明。技師將於現場評估可行性，可能需您協助提供高梯，或因作業難度較高而酌收額外費用。若評估後認定施工風險過高，為維護安全，將無法提供清洗服務。"],["冷氣清洗前需要先準備什麼？","現場需可提供基本水源、110V 電源與排水動線，並請先清空冷氣下方至少 1.5 x 1.5 公尺的範圍，方便技師架梯、防護與施工。"],["預約前需要拍哪些冷氣照片？（拍攝重點教學）","為利技師初步判斷現場是否可提供清洗服務，請依機型協助拍攝以下照片：\n\n① 壁掛式室內機\n・正面全景：拍到完整室內機\n・左右兩側空間：拍到冷氣與牆面、櫃體的距離\n・上方空間：拍到冷氣頂部與天花板距離\n・下方環境：拍到冷氣下方是否有床、櫃子、電視或其他大型家具\n・整體安裝位置：建議退後拍一張，讓技師看得出冷氣的實際位置\n\n② 吊隱式室內機\n・出風口／回風口全景\n・天花板整體位置：退後拍攝，讓技師看得出設備安裝位置\n・維修孔照片：需拍到完整維修孔及周邊空間\n・維修孔打開後內部：若方便開啟，請拍攝內部設備位置\n・下方環境：拍到設備下方是否有固定櫃體、家具或其他障礙物\n＊吊隱式特別重要：讓技師確認維修孔的位置、大小及是否有足夠拆洗空間。\n\n③ 四方吹室內機\n・室內機正下方全景：完整拍到四方吹面板\n・天花板整體位置：退後拍攝設備與周邊環境\n・設備四周空間：確認旁邊是否有燈具、消防設備、裝潢或其他阻礙\n・下方環境：拍到下方是否有桌椅、櫃體或固定設備\n・安裝高度：若位置較高，請盡量從遠處拍攝一張可判斷高度的照片\n\n＊拍攝小提醒：照片請盡量清楚、明亮、不裁切設備，並稍微退後拍攝，讓技師同時看到「空調＋周邊環境」。"],["壁掛式／吊隱式／四方吹空調室內機下方，需要預留多少施工空間？","為利技師進行清洗作業，建議室內機下方預留足夠施工範圍，以利：\n1. 梯具擺放\n2. 清洗設備操作\n3. 零件拆裝\n4. 拆下零件暫時放置\n\n建議預留空間如下：\n・一般建議至少預留約 150 × 150 公分的作業空間\n・壁掛式室內機：通常仍需保留下方基本施工空間\n・吊隱式室內機：因施工與拆裝較繁複，通常需預留更充足空間\n・四方吹室內機：因作業方式與設備配置需求，也建議保留較完整的施工範圍\n\n提醒您：若室內機下方空間不足，或周邊有大型家具、裝潢、隔間等影響施工之情況，可能會影響現場作業安排，實際仍須由技師依現場環境評估是否可施作。"],["吊隱式一定要有維修孔才能清洗嗎？若維修孔不夠大怎麼辦？","通常需有適當維修孔，方便技師拆裝與清洗內部零件。若維修孔過小、位置不佳或尺寸不足，將影響拆裝與清潔作業，現場可能改為部分清潔、加價處理，或無法施作。\n※ 四方吹機型同理，若天花板維修孔條件不佳，亦可能影響施工範圍。"],["家中有貴重物品或怕水家具，清洗時會不會弄濕弄髒？","施工前技師會進行防水遮蔽與現場保護，完工後整理環境。\n但仍建議事先將貴重物品、木質家具與怕水電器自行移開或妥善保護；若不方便移動，請事先告知以利技師加強防護。"],["大樓、社區、公寓施工前需要先做什麼？","若社區有施工申請、換證、梯控、時段限制或管委會規範，請務必提前確認，避免技師到場後無法進場施工。"],["天花板太高或無法安全架梯，還能施工嗎？","若安裝高度過高、現場因空間或地面條件限制導致無法安全架梯，或施工風險過高，技師會依安全原則評估，必要時可能需加價或婉拒服務。"],["若現場沒有水源或電源，還可以清洗嗎？","通常不行。現場需具備基本 110V 電源、水源與排水條件，若無法提供，技師可能無法執行清洗作業。"],["冷氣清洗前需要先關機嗎？","建議您在師傅到訪前，提前關閉冷氣約 30 分鐘至 1 小時。這樣可讓機體內部恢復至常溫，避免清洗時產生過多冷凝水，影響作業安全與清潔效果。"],["冷氣下方需要清空嗎？","是的，強烈建議您這麼做！ 為了保護您的傢俱與電器，並讓技師有足夠的空間安全地作業，請您在技師抵達前，清空冷氣下方至少 1.5 x 1.5 公尺的範圍。 特別是床、沙發、書桌、電視、電腦等貴重或怕水的物品，請務必移開或使用防水布妥善覆蓋喔！"],["寵物需要先隔離嗎？","是的，為了毛孩子的安全，也為了讓技師能專心服務，請務必將寵物（無論是貓、狗或鳥等）暫時隔離在另一個房間或籠內。 因為清洗過程中，除了設備運轉的聲響外，也可能會有些許清潔劑的味道，先將毛孩安置好，對牠們來說是比較安心的作法喔！"],["我需要全程在家嗎？","是的，為了保障您的權益，建議您或您的家人需要全程在家。 技師在服務過程中，可能會需要與您確認一些設備的細節狀況，或是在需要移動物品時取得您的同意。您在現場，我們也能更安心地進行最完善的服務。 此外，在服務結束後的最終功能驗收，也需要您一同在場確認，確保一切都回復到最佳狀態喔！"],["服務後會很髒亂嗎？","請您完全放心！ 我們的技師都受過專業訓練，在服務開始前，會使用專業的防水罩與養生膠帶，將冷氣周遭的牆面與傢俱做最完善的保護。 服務結束後，我們也會將工作區域清潔並恢復原狀，確保給您一個乾淨舒適的環境。"]]],["E","清洗效益、頻率與保養",[["清洗後是否一定會變冷、變省電？","清洗可改善因髒污造成的出風不順、異味、滴水或散熱效率下降等狀況；若冷氣本身已有冷媒不足、電控異常、零件老化等問題，仍需另行檢修。"],["冷氣的清潔頻率應該如何拿捏？","一般家庭：建議每年一次；若家中有寵物、過敏成員或近大馬路可增加頻率。\n商業場所：因運轉時間長，建議每半年一次。"],["定期清洗冷氣有哪些必要性？","能維持室內空氣品質、改善異味與過敏問題、提升冷房效率以節省電費。"],["冷氣清洗後建議多久再洗一次？","一般家庭建議每年清洗一次即可，能維持良好效能與空氣品質。若家中有過敏體質成員、飼養寵物，或冷氣使用頻繁（如商業空間、店鋪），建議將清洗週期縮短為每半年一次，確保運轉效率與衛生。"],["日常生活中有哪些保養冷氣的好習慣？","開關機前先送風 3–5 分鐘保持內部乾燥；使用期間濾網約兩週清洗一次；室外機周遭保持通風勿堆雜物；長時間停用前開送風運轉半天吹乾內部。"],["冷氣清洗後有什麼好處？真的能省電嗎？","清洗能有效去除冷氣內部的灰塵與黴菌，讓風量更順暢、冷房效率提升，同時減少異味與細菌滋生。由於機器運轉更輕鬆，確實有助於降低耗電量，還能延長冷氣的使用壽命。"],["多久預約一次清洗服務比較好？","一般家庭建議每年清洗一次。若家中有過敏體質者、嬰幼兒、長者，或有飼養寵物，以及冷氣使用頻率高（如營業場所），建議縮短至半年清洗一次，以維持空氣品質與機器效能。"],["清洗後要怎麼保養才能延長效果？","建議您每隔 2～4 週依使用頻率清洗或更換濾網，並在換季或長時間未使用前，開啟送風模式運轉約 10～15 分鐘，讓機體內部保持乾燥。這樣能有效抑制黴菌滋生，延續冷氣清洗後的潔淨與效能。"],["清洗後冷氣能恢復像新的一樣嗎？","專業清洗可明顯改善冷房效率、去除異味並提升空氣品質。雖然無法讓使用多年的冷氣機完全恢復如新（外觀或零件可能仍有自然老化痕跡），但內部清潔後可使運轉效能接近最佳狀態，並有效延長機器壽命。"],["除了請專業人員清洗外，平時我可以怎麼保養冷氣？","除了定期請專業技師清洗外，建議您每隔 2～4 週視使用頻率與環境狀況，清洗或更換濾網。另可在關機前切換至送風模式約 10～15 分鐘，幫助機體內部乾燥，降低潮濕與黴菌滋生的機率。"]]],["F","特殊情況與注意事項",[["若四方吹/吊隱式機型特殊、結構受限，是否仍可完整清洗？","不一定。部分特殊機型、裝潢封板過密、維修孔位置不佳或天花結構複雜者，可能僅能施作可及範圍，實際需由現場技師判斷。"],["冷氣清洗後，異味或霉味就一定會完全消失嗎？","若異味來源位於本次可清洗範圍內，例如蒸發器、貫流風扇、風箱、集水盤等部位，清洗後通常會有明顯改善。但若氣味來源並非來自機體可清洗區域，例如壁內排水管沼氣回流、裝潢夾層異味，或室內通風條件不佳等情況，則仍需進一步處理根本原因，才能較完整地改善異味問題。"],["清洗後若冷氣出現問題該怎麼處理？","自清洗服務完成日起，享有 30 天基本功能保固。\n\n【保固範圍】\n・保固期內若經原廠鑑定確認為清洗直接導致的功能異常，依設備機齡分級理賠\n・服務過程中因人員疏失造成傢俱損傷，釐清責任後最高賠償 NT$10,000\n\n【不提供保固的情況】\n・設備使用超過 10 年（零件老化風險高，恕不提供保固）\n・清洗前已存在的設備問題或舊有損壞\n・消耗性零配件自然損耗、設備自然磨損\n・天災、外力或使用者不當操作所致\n\n【申請流程】\n1. 保固期內發現異常，聯繫客服並提供照片或影片\n2. 指派原廠技術人員到府鑑定，釐清問題根源\n3. 確認為清洗所致：後續維修由原廠全權協調處理\n   非關清洗問題：相關維修費用由您負擔\n\n＊保固期無法因「未使用、出國」等個人因素延長，請在期限內多加使用測試。\n＊服務完成後請務必與技師一同驗收，以保障您的權益。\n＊以上為重點摘要，完整條款以賣場公告為準。"],["老舊機器是否也可以清洗？清洗後若出現零件脆化怎麼辦？","可先評估。\n但若機器年限較高，塑膠件、泡棉、保溫材、排水管等耗材可能已有老化現象，清洗過程中較容易顯現原有風險，並非一定屬施工異常。\n⚠️ 設備使用超過 10 年者，因零件老化風險高，清洗後恕不提供功能保固。\n⚠️ 設備使用超過 15 年，或超過 10 年且環境惡劣／整體狀況不佳者，恕不提供清洗服務。"],["排水管原本就不順，清洗後一定會改善嗎？","不一定。若排水管已有老化、坡度異常、嚴重堵塞或安裝問題，清洗只能協助基本保養，若有結構性問題仍需另行處理。"],["清洗後若有些微味道或潮濕感，正常嗎？需要做什麼？","清洗後短時間內若有些微濕氣、藥劑或水氣殘留味道，多屬正常現象。\n建議開窗通風並以送風、強風或除濕模式持續運轉 30～60 分鐘，有助於帶走殘留濕氣與味道。"],["濾網要從哪裡購買？","請洽詢當初購買三菱重工空調的經銷商或直接來電上洋客服專線0800-300766購買。"],["遙控器要從哪裡購買？","請洽詢當初購買三菱重工空調的經銷商或直接來電上洋客服專線0800-300766購買。"],["我的冷氣使用多年，還適合清洗嗎？","若冷氣已使用超過 10～15 年，因零件老化，清洗時確實可能增加拆裝或漏水等風險。\n技師會於現場檢視機況並評估可否安全清洗；若判定風險過高，會建議您先行維修或考量是否仍有清洗的必要。\n⚠️ 設備使用超過 10 年者，因零件老化風險高，清洗後恕不提供功能保固。\n⚠️ 設備使用超過 15 年，或超過 10 年且長期處於硫磺／鹽害環境、整體狀況不佳者，因故障風險過高，恕不提供清洗服務。"],["遇到颱風或豪大雨，原本預約的冷氣清洗服務還會到府嗎？","為保障服務人員安全及維持服務品質，若服務當日遇颱風或豪大雨影響，將依以下原則辦理：\n\n📍 1. 服務地區公告停止上班上課\n若您服務地址所在縣市政府已公告「停止上班上課」，原訂到府清洗服務將暫停，後續將由客服主動與您聯繫重新安排服務時間。\n\n📍 2. 未停班停課，但現場不適合前往\n若服務地區雖未公告停班停課，但服務人員依現場風勢、雨勢、道路狀況或其他安全因素評估無法安全前往，亦將主動與您聯繫改期。"]]]];
 function _qdText(el,txt){var re=/https?:\/\/[^\s）)」]+/g,last=0,m;while((m=re.exec(txt))){if(m.index>last)el.appendChild(document.createTextNode(txt.slice(last,m.index)));var a=document.createElement('a');a.href=m[0];a.target='_blank';a.rel='noopener';a.textContent=m[0];el.appendChild(a);last=m.index+m[0].length;}if(last<txt.length)el.appendChild(document.createTextNode(txt.slice(last)));}
 function _qdFaq(b,imgs){try{
   if(!QD_FAQ||!QD_FAQ.length)return;
@@ -5380,7 +5437,7 @@ window.__QDV='AC';
 function boot(){
 if(!/(^|\.)my1shop\.com$/.test(location.hostname))return;
 var V=window.__QDV||'A';var hasA=/A|D/.test(V);
-var FAQ=[["早鳥方案與標準方案有什麼不同？怎麼選？", "依您的需求，可選擇兩種方案：\n\n早鳥方案（提早規劃、省錢）\n・全室內外機清洗服務品項享 85 折\n・自專人約時起，需安排 30 天後（含）～90 天內到府；農曆春節前三週（除夕前 21 天～除夕）不安排，該期間想到府可補差價改為標準方案\n・適合：不趕時間、想省錢的您\n\n標準方案（近期就要洗）\n・清洗項目 95 折\n・約時起 2 週內可到府（想晚一點，也可以直接選期望日期，最晚約 3 個月）\n・適合：想盡快清洗的您\n\n兩方案的取消／改約規則不同（早鳥約定後即依規則計費；標準享較彈性的免費期限），詳見「訂單取消／改約須知」。"], ["日期確認後想改約或取消，規費是多少？", "正式約定服務日期前，兩方案皆可免費取消／改約。服務日期一經約定，取消／改約補償費（每人）依方案不同：\n【標準方案】\n· 服務日前 5 個工作天 17:00 前：免費\n· 服務日前 5 個工作天 17:00 後：NT$300\n· 服務日前 4 個工作天 17:00 後：NT$600\n· 服務日前 1 個工作天 17:00 後或當日：NT$1,000\n【早鳥方案】（享早鳥優惠價，約定後即依下列計費）\n· 約定後至服務前：一律 NT$600\n· 服務日前 1 個工作天 17:00 後或當日：NT$1,000"], ["冷氣清洗大約需要多久時間？", "實際作業時間會依機型、數量、髒污程度、天花高度、維修孔大小與現場施工難度而有所不同。單台預估清洗／保養時間參考如下： 【室內機】 ・家用壁掛式：約 1.5~2 小時／台 ・吊隱式：約 1.5~2.5 小時／台 ・四方吹（嵌入式）：約 1.5~2.5 小時／台 【室外機】 ・1 對 1：約 0.5 小時／台 ・1 對多（多聯）：約 0.5~1 小時／台 ＊以上為一般家用環境之預估；若為商用（營業場所）或重油污環境，將視現場狀況延長清洗保養時間。 ＊實際到府時間仍以客服協調排程為準。"], ["我需要全程在家嗎？", "是的，為了保障您的權益，建議您或您的家人需要全程在家。 技師在服務過程中，可能會需要與您確認一些設備的細節狀況，或是在需要移動物品時取得您的同意。您在現場，我們也能更安心地進行最完善的服務。 此外，在服務結束後的最終功能驗收，也需要您一同在場確認，確保一切都回復到最佳狀態喔！"]];
+var FAQ=[["早鳥方案與標準方案有什麼不同？怎麼選？", "依您的需求，可選擇兩種方案：\n\n早鳥方案（提早規劃、省錢）\n・全室內外機清洗服務品項享 85 折\n・自專人約時起，需安排 30 天後（含）～90 天內到府；農曆春節前三週（除夕前 21 天～除夕）不安排，該期間想到府可補差價改為標準方案\n・適合：不趕時間、想省錢的您\n\n標準方案（近期就要洗）\n・清洗項目 95 折\n・約時起 2 週內可到府（想晚一點，也可以直接選期望日期，最晚約 3 個月）\n・適合：想盡快清洗的您\n\n兩方案的取消／改約規則不同（早鳥約定後即依規則計費；標準享較彈性的免費期限），詳見「訂單取消／改約須知」。"], ["日期確認後想改約或取消，規費是多少？", "正式約定服務日期前，兩方案皆可免費取消／改約。服務日期一經約定，取消／改約補償費（每人）依方案不同：\n【標準方案】\n· 服務日前 5 個工作天 17:00 前：免費\n· 服務日前 5 個工作天 17:00 後：NT$300\n· 服務日前 4 個工作天 17:00 後：NT$600\n· 服務日前 1 個工作天 17:00 後或當日：NT$1,000\n【早鳥方案】（享早鳥優惠價，約定後即依下列計費）\n· 約定後至服務前：一律 NT$600\n· 服務日前 1 個工作天 17:00 後或當日：NT$1,000"], ["冷氣清洗大約需要多久時間？", "實際作業時間會依機型、數量、髒污程度、天花高度、維修孔大小與現場施工難度而有所不同。\n單台預估清洗／保養時間參考如下：\n【室內機】\n・家用壁掛式：約 1.5~2 小時／台\n・吊隱式小清洗保養：約 0.5~1 小時／台\n・吊隱式大／全清洗保養：約 1.5~2.5 小時／台\n・四方吹（嵌入式）：約 1.5~2.5 小時／台\n【室外機】\n・1 對 1：約 0.5 小時／台\n・1 對多（多聯）：約 0.5~1 小時／台\n＊以上為一般家用環境之預估；若為商用（營業場所）或重油污環境，將視現場狀況延長清洗保養時間。\n＊實際到府時間仍以客服協調排程為準。"], ["我需要全程在家嗎？", "是的，為了保障您的權益，建議您或您的家人需要全程在家。 技師在服務過程中，可能會需要與您確認一些設備的細節狀況，或是在需要移動物品時取得您的同意。您在現場，我們也能更安心地進行最完善的服務。 此外，在服務結束後的最終功能驗收，也需要您一同在場確認，確保一切都回復到最佳狀態喔！"]];
 var css='#qdx-sheet{position:fixed;inset:0;z-index:2147482000;background:rgba(4,20,40,.5);display:flex;align-items:flex-end;animation:qdxFade .2s}'
 +'@keyframes qdxFade{from{opacity:0}}@keyframes qdxUp{from{transform:translateY(40%)}}'
 +'#qdx-sheet .sh{background:#fff;width:100%;height:88%;border-radius:20px 20px 0 0;display:flex;flex-direction:column;animation:qdxUp .28s ease-out;font-family:"PingFang TC",sans-serif;overflow:hidden}'
