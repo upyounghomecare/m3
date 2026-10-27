@@ -995,19 +995,26 @@ function _ckFanResHtml(){var r=_ckFanR;if(!r)return '';var t;
   else t='➕ 風鼓 '+(r.x+2)+' 個，需要加洗 <b>'+r.x+' 個</b><button type="button" class="qck-act gold" onclick="__qw.ckFanUse('+r.x+')">改選「3 個以上」並加入 '+r.x+' 個</button>';
   return '<div class="qck-fr">'+t+'</div>';}
 function _ckSlot(){var c=window.__qsCleanDate||'';return /上午/.test(c)?{v:'1',t:'13點前'}:(/下午/.test(c)?{v:'2',t:'14-18點'}:{v:'0',t:'不指定'});}
-function _ckSetAddon(k,target){var nm=_CKA[k].nm,t0=Date.now();
-  var rows=function(){return [].slice.call(document.querySelectorAll('#cart-section .cart-item:not(.coupon)')).filter(function(x){var h=x.querySelector('h4');return h&&(h.textContent||'').trim().indexOf(nm)===0;});};
-  var cur=_qtyByName(nm);if(cur===target)return;
+function _ckSetAddon(k,target){var nm=_CKA[k].nm,t0=Date.now(),last=0,tries=0;
+  /* 2026-10-27 改穩：原本「連按 N 次加入」，1SHOP 慢的時候第 2 次會被吞掉（實測：加 2 台只加到 1 台）。
+     改成一步一步：沒有→先加 1 台；有了→用購物車列的編號直接改成目標數量；每一步等 1SHOP 回應（最多 2.5 秒）再做下一步，總共最多 25 秒 */
+  var idx=function(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf(nm)===0)return i;}return -1;};
+  if(_qtyByName(nm)===target)return;
   _ckAddBusy=k;try{var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}catch(e){}
-  try{var it=rows()[0];
-    if(target<=0){var rb=it&&[].slice.call(it.querySelectorAll('button')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0];if(rb)rb.click();}
-    else if(it&&cur>0){var iq=it.getAttribute('data-item');if(window.cartChangeItem&&iq!=null){window.cartChangeItem(iq,target);}else{var btn=[].slice.call(it.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0];if(btn&&window.selectQty)window.selectQty(btn,target-cur);}}
-    else{var r=_resolveBtn(nm);if(r){var c=0;(function one(){if(c>=target)return;try{window.viewProduct(r.btn,r.pid);}catch(e){}c++;setTimeout(one,700);})();}}
-  }catch(e){}
-  (function wt(){var q=_qtyByName(nm);if(q===target||Date.now()-t0>15000){_ckAddBusy='';_cfChg=Date.now();_ckCS='';
-      if(q!==target)_qwDlg({title:'購物車更新沒有成功',html:'抱歉，「'+nm+'」的數量沒有更新成功，請再按一次；若持續失敗，請聯繫客服。'});
-      try{var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}catch(e){}return;}
-    setTimeout(wt,400);})();}
+  var fin=function(ok){_ckAddBusy='';_cfChg=Date.now();_ckCS='';
+    if(!ok)_qwDlg({title:'購物車更新沒有成功',html:'抱歉，「'+nm+'」的數量沒有更新成功，請再按一次；若持續失敗，請聯繫客服。'});
+    try{var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}catch(e){}};
+  (function step(){try{
+    var q=_qtyByName(nm);if(q===target)return fin(true);
+    if(Date.now()-t0>25000)return fin(false);
+    if(Date.now()-last<2500){setTimeout(step,300);return;}
+    last=Date.now();tries++;var ix=idx();
+    if(target<=0||ix<0&&target<=0){var el=ix>=0?_cartRow(ix):null;var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb){try{window.removeCartItem?window.removeCartItem(rb):rb.click();}catch(e){try{rb.click();}catch(e2){}}}}
+    else if(ix<0){var r=_resolveBtn(nm);if(r){try{window.viewProduct(r.btn,r.pid);}catch(e){}}}
+    else{var cid=_cartRowId(ix);
+      if(cid&&window.cartChangeItem){try{window.cartChangeItem(cid,target);}catch(e){}}
+      else{var _el=_cartRow(ix);var _b=_el?[].slice.call(_el.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0]:null;if(_b&&window.selectQty)window.selectQty(_b,target-q);}}
+  }catch(e){}setTimeout(step,300);})();}
 function _ckHeight(){if(window.__QW_CHECKOUT&&!_svOn()&&_ck.hgt){var m=_hiInCart();return _ck.hgt==='lo'||m<=0?'3.5米以下（不加價）':(m>=9?'3.5-4米：9 台以上（客服另行確認）':'3.5-4米：'+m+' 台');}var n=qty.hi||0;return n<=0?'3.5米以下（不加價）':(n>=9?'3.5-4米：9 台以上（客服另行確認）':'3.5-4米：'+n+' 台');}
 /* 2026-10-25 每格告訴手機「這格是什麼」：地址跳出存的地址、公司抬頭跳出公司名；統編／愛心碼／條碼不再跳出手機號碼。
    另外標上欄位名稱與錯誤（aria），讀螢幕功能才會唸出欄位名和錯誤內容 */
@@ -1944,8 +1951,14 @@ var api={
         var _t0=Date.now(),_rmDone=(areaCls!=='remote');
         (function _w(){
           var has=_svInCart();
+          /* 2026-10-27 重試保護：場勘只能 1 筆。萬一第一次只是慢、後來也加進去了，數量改回 1 再往下 */
+          if(has){try{var _sc=_cartArr(),_si=-1,_sq=0;for(var _i=0;_i<_sc.length;_i++){if((_sc[_i].ProductName||'').indexOf(SURVEY_PREFIX)===0){_si=_i;_sq+=Number(_sc[_i].Quantity)||0;}}
+            if(_sq>1&&!_w.fixing){_w.fixing=1;var _cid=_cartRowId(_si);if(_cid&&window.cartChangeItem){try{window.cartChangeItem(_cid,1);}catch(e){}}setTimeout(function(){_w.fixing=0;},2500);}
+            if(_sq>1&&Date.now()-_t0<30000){setTimeout(_w,400);return;}}catch(e){}}
           if(has&&!_rmDone){_rmDone=true;var rr=_resolveBtn('偏遠地區加價');if(rr){try{window.viewProduct(rr.btn,rr.pid);}catch(e){}}setTimeout(_w,900);return;}
-          if(!has&&Date.now()-_t0<8000){setTimeout(_w,250);return;}
+          /* 2026-10-27 改穩：1SHOP 慢的時候 8 秒還沒加進去 → 再加一次（只補一次，避免重複），最多等 20 秒才算失敗 */
+          if(!has&&!_w.retried&&Date.now()-_t0>8000){_w.retried=1;if(!_svInCart()){try{window.viewProduct(r.btn,r.pid);}catch(e){}}}
+          if(!has&&Date.now()-_t0<20000){setTimeout(_w,250);return;}
           setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
           if(!has){_cfLoad(false);_finishing=false;window.__qsAdding=false;render();_qwDlg({title:'加入購物車沒有成功',html:'抱歉，加入「到府場勘」時發生問題，請再試一次；若持續失敗，請聯繫客服。'});return;}
           _cfT0=Date.now();_cfSig='';_cfChg=Date.now();step='confirm';render();try{_ckSnapSave();}catch(e){}
