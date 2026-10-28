@@ -1027,7 +1027,7 @@ function _ckFanResHtml(){var r=_ckFanR;if(!r)return '';var t;
   else if(r.x===0)t='✅ 風鼓 1～2 個，大／全保養已包含，不用加洗<button type="button" class="qck-act line" onclick="__qw.ckPick(\'fan\',\'le2\')">改選「2 個以下」</button>';
   else t='➕ 風鼓 '+(r.x+2)+' 個，需要加洗 <b>'+r.x+' 個</b><button type="button" class="qck-act gold" onclick="__qw.ckFanUse('+r.x+')">改選「3 個以上」並加入 '+r.x+' 個</button>';
   return '<div class="qck-fr">'+t+'</div>';}
-function _ckSlot(){var c=window.__qsCleanDate||'';return /上午/.test(c)?{v:'1',t:'13點前'}:(/下午/.test(c)?{v:'2',t:'14-18點'}:{v:'0',t:'不指定'});}
+function _ckSlot(){var c=window.__qsCleanDate||'';return /上午/.test(c)?{v:'1',t:'上午'}:(/下午/.test(c)?{v:'2',t:'下午'}:{v:'0',t:'不指定'});/* 2026-10-28 老闆選 A：客人只看到上午／下午；1SHOP 收到的值（13點前／14-18點）不變 */}
 function _ckSetAddon(k,target){var nm=_CKA[k].nm,t0=Date.now(),last=0,tries=0;
   /* 2026-10-27 改穩：原本「連按 N 次加入」，1SHOP 慢的時候第 2 次會被吞掉（實測：加 2 台只加到 1 台）。
      改成一步一步：沒有→先加 1 台；有了→用購物車列的編號直接改成目標數量；每一步等 1SHOP 回應（最多 2.5 秒）再做下一步，總共最多 25 秒 */
@@ -1070,7 +1070,7 @@ function _ckHtml(k){
      +'<div class="qck-f"><div class="qck-l">服務地址<b>*</b></div><div class="qck-auto"><div>'+_esc((areaCity||'')+' '+(areaDist||''))+'<em>✓ 已依您選的地區帶入</em></div></div></div>'
      +_ckIn('addr','',0,'例：中山路一段 12 號 5 樓','text','')
      +'<div class="qck-addrtip"><span>📍</span><span>不用再打縣市區域，請寫到<b>門牌號碼和樓層</b>，技師才找得到。<br><span class="ex">例：中山路一段 12 號 5 樓</span></span></div>'/* 2026-10-27 O10 老闆選 A：淡黃提示框（原本用 qck-hint 跟結帳前紅色提示撞名，變成紅色跳動、不換行） */
-     +'<div class="qck-f"><div class="qck-l">期望服務時段</div><div class="qck-auto"><div>'+_esc((!cd||cd==='未指定')?'不指定，由專人與您約定':cd)+'<em>✓ 依您選的期望日期帶入（'+sl.t+'）</em></div></div></div>';
+     +'<div class="qck-f"><div class="qck-l">期望服務時段</div><div class="qck-auto"><div>'+_esc((!cd||cd==='未指定')?'不指定，由專人與您約定':cd)+'<em>✓ 依您選的期望日期帶入</em></div></div></div>';
   }else{
     var isBiz=(env==='biz');if(!_ck.env)_ck.env=isBiz?'營業':'住家';
     b=_ckIn('email','Email',1,'例：name@gmail.com','email','訂單與發票通知會寄到這裡')
@@ -1494,10 +1494,10 @@ function render(){
     /* 只顯示銷售頁上真的買得到的加購品:後台把商品從銷售頁移除,精靈就自動不再提供(加回來也會自動出現),
        不必改程式。__qsBtnMap 還沒建好時不過濾,避免開場瞬間全部消失。 */
     var _bmReady=Object.keys(window.__qsBtnMap||{}).length>0;
-    var body='',_shSec=0;ADDON.forEach(function(x){if(_bmReady&&!_resolveBtn(x.n))return;if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「營業場所加價」<b>× '+bn+'</b>（室內機、室外機每台各 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}if(window.__QW_CHECKOUT&&!_shSec&&(x.k==='fan'||x.k==='hi'||x.k==='bz')){_shSec=1;body+='<div class="qw-site">📋 現場條件<small>依您家實際狀況加購；結帳前會再請您確認一次</small></div>';}if(window.__QW_CHECKOUT&&(x.k==='fan'||x.k==='hi'||x.k==='bz')){body+=optRow(Object.assign({},x,{tag:'結帳前會確認'}));if(x.k==='fan')body+=_fanBox();return;}if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='fan')body+=_fanBox();if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 適用三菱重工家用壁掛式、晴空 ZST 吊隱式及商用壁掛式（DXK／FDK），請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5～4 米 高處的機器台數（最多 '+sumKeys(INK)+' 台，只算室內機）</div>';}});
-    if(!hasBlow()){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
+    var body='',_shSec=0;ADDON.forEach(function(x){if(_bmReady&&!_resolveBtn(x.n))return;if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「營業場所加價」<b>× '+bn+'</b>（室內機、室外機每台各 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}/* 2026-10-28 老闆選 C：挑高、重油煙、風鼓不在加購頁出現，只在確認頁問一次（確認頁答完會自動加入購物車） */if(window.__QW_CHECKOUT&&(x.k==='fan'||x.k==='hi'||x.k==='bz'))return;if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='fan')body+=_fanBox();if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 適用三菱重工家用壁掛式、晴空 ZST 吊隱式及商用壁掛式（DXK／FDK），請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5～4 米 高處的機器台數（最多 '+sumKeys(INK)+' 台，只算室內機）</div>';}});
+    if(!hasBlow()&&!window.__QW_CHECKOUT){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
     var nextLbl=sumKeys(ADDON.map(function(a){return a.k;}))>0?'下一步：選到府方案':'不加購，下一步';
-    w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p><div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>'+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p>'+(window.__QW_CHECKOUT?'<div class="optnote">以下項目<b>非必要</b>，需要再加購即可<br><span style="font-weight:500">安裝高度、油煙、風鼓等現場條件，結帳前會再請您確認</span></div>':'<div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>')+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else {
     /* 方案卡顯示實際金額:客戶原本只看到「95折/85折」,不知道各是多少錢、也不知道差多少。
        實測 20 筆訂單只有 4 筆選早鳥,把省下的金額直接寫出來比抽象折數有感。
