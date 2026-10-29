@@ -853,7 +853,7 @@ function _cfCss(){
   +'#qw-ovl .qx-sub{display:flex;gap:6px;margin-top:10px}#qw-ovl .qx-sub span{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12.5px;font-weight:800;line-height:1.2;border-radius:999px;padding:6px 0;background:rgba(255,255,255,.12);color:#C9D6E4}'
   +'#qw-ovl .qx-sub span.on{background:#D4A947;color:#2B1E00}#qw-ovl .qx-sub span.ok{background:rgba(212,169,71,.22);color:#F3D38A}'
   +'#qw-ovl .qck-box{background:#fff;border:1px solid #E6ECF2;border-radius:16px;padding:14px;margin:12px 0 4px}#qw-ovl .qck-h{font-size:16px;font-weight:900;color:#0C2D57;margin-bottom:8px}'
-  +'#qw-ovl .qck-q{font-size:14.5px;font-weight:800;color:#16202B;margin:2px 0 8px}#qw-ovl .qck-q b{font-size:11.5px;color:#fff;background:#C0392B;border-radius:999px;padding:2px 7px;margin-left:6px}'
+  +'#qw-ovl .qck-q{font-size:14.5px;font-weight:800;color:#16202B;margin:2px 0 8px}#qw-ovl .qck-q b{font-size:11.5px;color:#fff;background:#C0392B;border-radius:999px;padding:2px 7px;margin-left:6px;white-space:nowrap;display:inline-block}'
   +'#qw-ovl .qck-age{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}#qw-ovl .qck-age button,#qw-ovl .qck-ch button{border:1.5px solid #D5DFEA;border-radius:12px;padding:10px 4px;text-align:center;font:800 14px/1.3 inherit;font-family:inherit;color:#16202B;background:#fff;cursor:pointer}'
   +'#qw-ovl .qck-age button.no{color:#9A3412;border-color:#F2C9BC;background:#FFF6F3}#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel{background:#0C2D57;border-color:#0C2D57;color:#fff}'
   +'#qw-ovl .qck-ch{display:flex;gap:6px;flex-wrap:wrap}#qw-ovl .qck-ch button{padding:9px 14px;border-radius:999px}'
@@ -5206,6 +5206,13 @@ function _qwDropCoupons(){var n=0;(function go(){try{var b=document.querySelecto
   function place(){var f=document.querySelector('#qw-ovl .qw:not(.wel) .qwfoot');if(!f||f.querySelector('.fb-btn'))return;if(getComputedStyle(f).position==='static')f.style.position='sticky';
     var b=document.createElement('button');b.type='button';b.className='fb-btn';b.setAttribute('aria-label','常見問題小幫手');b.innerHTML='💬<small>問答</small>';b.onclick=function(e){e.stopPropagation();open();};f.appendChild(b);}
   var pq=0;new MutationObserver(function(){if(!pq){pq=1;requestAnimationFrame(function(){pq=0;try{place();}catch(e){}});}}).observe(document.documentElement,{childList:true,subtree:true});
+}catch(e){}})();
+;/* 2026-10-30 盤點二 1-4（老闆選）：精靈內容最下面多留 64px 空白，捲到底時最後一項不會被金額膠囊蓋住 */
+(function(){try{if(window.__qwBotPad)return;window.__qwBotPad=1;
+  var st=document.createElement('style');st.textContent='#qw-ovl .qw-botpad{height:64px;flex:none}';document.head.appendChild(st);
+  function pad(){var f=document.querySelector('#qw-ovl .qw:not(.wel) .qwfoot');if(!f)return;var p=f.previousElementSibling;if(p&&p.classList.contains('qw-botpad'))return;
+    var d=document.createElement('div');d.className='qw-botpad';d.setAttribute('aria-hidden','true');f.parentNode.insertBefore(d,f);}
+  var pq=0;new MutationObserver(function(){if(!pq){pq=1;requestAnimationFrame(function(){pq=0;try{pad();}catch(e){}});}}).observe(document.documentElement,{childList:true,subtree:true});
 }catch(e){}})();
 
 ;/* ===== 2026-10-18 測試頁專用（只在 ub3ibm 啟動；正式頁、員工頁完全不受影響）=====
