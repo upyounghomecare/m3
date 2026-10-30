@@ -689,7 +689,7 @@ function render(){
      +'<div class="flbl">縣市</div><select class="qsel" onchange="__qw.pickCity(this.value)">'+cityOpts+'</select>'
      +'<div class="flbl">鄉鎮市區</div><select class="qsel" onchange="__qw.pickDist(this.value)">'+distOpts+'</select>'
      +resImg
-     +(areaCls==='nosvc'?'<a class="cslink" href="'+LINE_CS+'" target="_blank" rel="noopener">聯繫客服 →</a>'
+     +(areaCls==='nosvc'?'<a class="cslink" href="'+_lineAreaUrl(areaCity,areaDist)+'" target="_blank" rel="noopener">聯繫客服 →</a>'
         +'<div class="qsvc"><div class="qsvc-t">🔑 已經和客服確認可以服務？<br>請輸入客服提供的通行碼</div>'
         +'<div class="qsvc-r"><input id="qsvc-in" class="qsvc-i" type="text" placeholder="例如 UPX……" autocomplete="off" spellcheck="false">'
         +'<button type="button" class="qsvc-b" onclick="__qw.unlock()">解鎖</button></div>'
@@ -2528,7 +2528,10 @@ function reconcileRm(target){
     var r=_resolveBtn('偏遠地區加價');if(!r)return;_rmSyncing=true;try{if(window.viewProduct)window.viewProduct(r.btn,r.pid);}catch(e){}setTimeout(function(){_rmSyncing=false;},1400);
   }
 }
-function _nosvcBlock(on){
+/* 2026-10-30 老闆選 A：不服務地區按「聯繫客服」→ LINE 打開時輸入框已填好，格式跟圖文選單「服務地區查詢」小工具送出的一模一樣；
+   網頁不能替客人自動送出（LINE 只允許從聊天室打開的小工具代送），客人按「傳送」即可 */
+function _lineAreaUrl(c,d){var t='【地區查詢】我家在 '+String(c||'')+String(d||'').replace(/^\d+\s*/,'')+'，查詢顯示尚未提供服務，想詢問是否有機會安排，謝謝 🙏';return 'https://line.me/R/oaMessage/%40063kttbk/?'+encodeURIComponent(t);}
+function _nosvcBlock(on,c,d){
   var box=document.getElementById('qs-nosvc');
   var btns=[].slice.call(document.querySelectorAll('button')).filter(function(b){if(b.closest('#qw-ovl'))return false;return /下一步|送出|確認訂單|確認付款|前往付款|成立訂單|前往結帳|立即結帳/.test((b.textContent||'').trim());});
   if(on){
@@ -2541,7 +2544,7 @@ function _nosvcBlock(on){
      b.style.setProperty('opacity','1','important');
      b.style.setProperty('cursor','not-allowed','important');});
     _hiBindTap();setTimeout(_hiTapOverlay,0);
-    if(!box){var as=document.querySelector('select[name="Area"]');if(as&&as.parentNode){box=document.createElement('div');box.id='qs-nosvc';box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';box.innerHTML='很抱歉，此地區尚未提供服務，請洽詢客服 <a href="'+LINE_CS+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">聯繫 LINE →</a>';as.parentNode.insertBefore(box,as.nextSibling);}}
+    if(!box){var as=document.querySelector('select[name="Area"]');if(as&&as.parentNode){box=document.createElement('div');box.id='qs-nosvc';box.style.cssText='background:#fdeeec;color:#c0392b;font-size:13px;font-weight:800;border-radius:8px;padding:10px 12px;margin:8px 0;line-height:1.6';box.innerHTML='很抱歉，此地區尚未提供服務，請洽詢客服 <a href="'+_lineAreaUrl(c,d)+'" target="_blank" rel="noopener" style="color:#B8860B;text-decoration:underline">聯繫 LINE →</a>';as.parentNode.insertBefore(box,as.nextSibling);}}
   } else {
     [].slice.call(document.querySelectorAll('[data-qsnb]')).forEach(function(b){
      b.removeAttribute('data-qsnb');
@@ -2887,7 +2890,7 @@ function checkoutArea(){
     var c=cs.value,d=as.value;
     var cls=(c&&d&&!/請/.test(d))?classify(c,d):null;
     if(cls)reconcileRm(cls==='remote'?1:0);
-    _nosvcBlock(cls==='nosvc');
+    _nosvcBlock(cls==='nosvc',c,(as.options[as.selectedIndex]||{}).text||d);try{var _nb=document.getElementById('qs-nosvc'),_na=_nb&&_nb.querySelector('a');if(_na)_na.href=_lineAreaUrl(c,(as.options[as.selectedIndex]||{}).text||d);}catch(e){}
   }catch(e){}
 }
 function _tfInCart(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf('車馬費')===0)return Number(c[i].Quantity)||0;}return 0;}
