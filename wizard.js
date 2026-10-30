@@ -5266,11 +5266,12 @@ function _qwDropCoupons(){var n=0;(function go(){try{var b=document.querySelecto
   function chips(list,el){var q=document.createElement('div');q.className='q';list.forEach(function(t){var b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=function(){ask(t);};q.appendChild(b);});
     var l=document.createElement('a');l.className='ln';l.href=lineUrl();l.target='_blank';l.rel='noopener';l.textContent='💬 找真人客服（LINE）';l.onclick=function(){l.href=lineUrl();};q.appendChild(l);(el||document.querySelector('#fb-sh .log')).appendChild(q);}
   function say(cls,html){var d=document.createElement('div');d.className=cls;d.innerHTML=html;var lg=document.querySelector('#fb-sh .log');lg.appendChild(d);lg.scrollTop=lg.scrollHeight;return d;}
-  function ask(q){q=String(q||'').trim();if(!q)return;say('me',esc(q));var r=search(q),b=r[0];
+  function ask(q){q=String(q||'').trim();if(!q)return;var _me=say('me',esc(q));var r=search(q),b=r[0];
     _last=(!b||b.s<0.34||b.sq<0.12)?{hit:false,v:q.slice(0,60)}:{hit:true,v:b.it.q};
     if(!b||b.s<0.34||b.sq<0.12){say('ai','這題我在常見問題裡找不到答案 🙇<br>建議直接用 LINE 問真人客服，我們會盡快回覆。');chips(['清洗服務的價格是多少？','日期確認後想改約或取消，規費是多少？']);}
     else{say('ai',fmt(b.it.a)+'<div class="src">答案來自：常見問題「'+esc(b.it.q)+'」</div>');var rel=r.slice(1,4).filter(function(x){return x.s>=0.6&&x.sq>=0.2;}).map(function(x){return x.it.q;}).slice(0,2);if(rel.length){say('ai','<span style="font-size:13px;color:#66727F">你可能也想知道：</span>');chips(rel);}}
-    var lg=document.querySelector('#fb-sh .log');lg.scrollTop=lg.scrollHeight;}
+    /* 2026-10-30 老闆：答案長時原本捲到最底，題目和答案開頭被捲掉 → 改成停在剛問的那一題（題目在最上面） */
+    var lg=document.querySelector('#fb-sh .log');try{lg.scrollTop=lg.scrollHeight;lg.scrollTop=Math.max(0,lg.scrollTop+_me.getBoundingClientRect().top-lg.getBoundingClientRect().top-8);}catch(e){lg.scrollTop=lg.scrollHeight;}}
   function open(){if(document.getElementById('fb-sh'))return;var w=document.createElement('div');w.id='fb-sh';
     w.innerHTML='<div class="p" role="dialog" aria-label="常見問題小幫手"><div class="h"><span>💬 常見問題小幫手</span><button type="button" aria-label="關閉">✕</button></div><div class="nt">輸入問題，從常見問題幫您找答案（自動回覆，不是真人客服）</div><div class="log"></div><form><input type="text" enterkeyhint="send" placeholder="輸入您的問題，例如：可以假日來嗎？" aria-label="輸入您的問題"><button type="submit">送出</button></form></div>';
     document.body.appendChild(w);
