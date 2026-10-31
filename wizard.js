@@ -1286,7 +1286,7 @@ function _ckWelcome(){
   var c=_cfCart();if(!c||!c.it.length||c.pay==null)return;
   c={it:c.it.filter(function(x){return !_isCorr(x.n);}),cp:c.cp,pay:c.pay};
   var orig=0;c.it.forEach(function(x){orig+=x.a;});var save=orig-(c.pay||0);
-  try{sessionStorage.setItem('qwb_seen','1');}catch(e){}
+  _wbShownNow=true;try{sessionStorage.setItem('qwb_seen','1');}catch(e){}
   var o=document.createElement('div');o.id='qwb-ovl';o.setAttribute('role','dialog');o.setAttribute('aria-label','歡迎回來');
   o.innerHTML='<div class="c"><div class="hd"><div class="t">歡迎回來！</div><div class="s">您上次還沒完成結帳，購物車都幫您留著</div></div><div class="bd">'
    +c.it.map(function(x){return '<div class="it">'+(x.im?'<img src="'+_esc(x.im)+'" alt="">':'<span class="noim"></span>')+'<div class="n">'+_esc(x.n)+'<small>× '+x.q+'</small></div><div class="p">'+_cfMoney(x.a)+'</div></div>';}).join('')
@@ -1297,7 +1297,9 @@ function _ckWelcome(){
   try{var sp=document.getElementById('qw-splash');if(sp){sp.classList.add('out');setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},400);}}catch(e){}}
 /* 2026-10-25 老闆同意的四條規則：①精靈加的購物車（有快照）＋這次開網頁還沒看過卡片 → 開頁就跳 ②按過「先看看賣場」→ 這次瀏覽不再跳（sessionStorage）
    ③沒用精靈自己加購物車（沒快照）→ 不跳 ④下次打開網頁（新的 session）→ 再跳；快照 3 天 */
-function _wbEligible(){if(!window.__QW_CHECKOUT||_ckRun)return false;try{if(sessionStorage.getItem('qwb_seen'))return false;}catch(e){}
+/* 2026-10-31 老闆選 A：客人「按重新整理」也再跳一次歡迎回來卡片（同一次載入只跳一次；一般瀏覽仍是同分頁只跳一次） */
+var _wbReload=(function(){try{var n=performance.getEntriesByType('navigation')[0];return !!(n&&n.type==='reload');}catch(e){return false;}})(),_wbShownNow=false;
+function _wbEligible(){if(!window.__QW_CHECKOUT||_ckRun||_wbShownNow)return false;try{if(sessionStorage.getItem('qwb_seen')&&!_wbReload)return false;}catch(e){}
   if(!_ckSnapLoad())return false;var c=_cfCart();if(!c||!c.it.some(function(x){return !_isCorr(x.n);}))return false;
   try{if(_cfBusy(c))return false;}catch(e){}return true;}
 (function(){var t0=Date.now(),tm=setInterval(function(){try{
