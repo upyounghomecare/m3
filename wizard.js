@@ -5224,16 +5224,118 @@ function _qwDropCoupons(){var n=0;(function go(){try{var b=document.querySelecto
 (function(){try{
   var QDF=window.__QD_FAQ;if(window.__qwFaqBot||!QDF)return;window.__qwFaqBot=1;
   var ALL=[];QDF.forEach(function(c){(c[2]||[]).forEach(function(x){ALL.push({q:x[0],a:x[1]});});});
-  var SYN=[[/假日|週末|周末|禮拜[六日天]|星期[六日天]|晚上|幾點/,'時段假日'],[/多少錢|價錢|價格|費用|收費|報價|要錢/,'價格費用'],[/取消|改期|改約|延期|換時間|退款|退費/,'改約取消'],
-    [/隱藏式|嵌入|天花板/,'吊隱'],[/外機|室外/,'室外機'],[/收據|統編|載具/,'發票'],[/保固|保修|壞掉|損壞/,'保固損壞'],[/多久|多長|幾個小時|幾小時/,'多久時間'],[/怎麼查|哪裡查|去哪查|在哪查|哪裡看|在哪看|去哪看|查得到|查詢/,'去哪裡查']/* 2026-10-31：拿掉單獨的「時間」，「預約的時間在哪查」才不會被配成「清洗要多久」 */,
-    [/貓|狗|寵物/,'寵物'],[/在家|不在家|不用在家/,'全程在家'],[/髒|弄濕|弄髒|噪音|吵/,'髒亂'],[/品牌|日立|大金|國際|三菱電機|其他牌/,'其他品牌'],[/地區|縣市|偏遠|離島|花蓮|台東|服務範圍/,'服務地區'],
-    [/油煙|廚房/,'油煙'],[/挑高|很高|樓中樓|梯子/,'挑高'],[/風鼓|風輪/,'風鼓'],[/漏水|滴水/,'漏水'],[/冷媒|不冷/,'冷媒'],[/臨時|現場加|多洗|加洗/,'現場加洗'],[/聯絡|打電話|打給|來電|約時|多久.*打|多久.*聯/,'接到聯絡'],[/付款|刷卡|信用卡|分期/,'付款']];
-  var STOP=/請問|你們|我們|我家|我的|怎麼辦|怎麼|如何|可不可以|可以|一定|需要|是否|要不要|會不會|有沒有|什麼|冷氣|空調|清洗|一下|還能|嗎|呢|吧|的|了|我|你/g;function norm(s){return String(s||'').toLowerCase().replace(/[\s，。？！、,.?!:：；;「」『』（）()\/／\-＋+…～~"'“”]/g,'').replace(STOP,'');}
-  function grams(s){var g={},t=norm(s);for(var i=0;i<t.length-1;i++)g[t.substr(i,2)]=1;if(t.length===1)g[t]=1;return g;}
-  function expand(q){var t=q;SYN.forEach(function(p){if(p[0].test(q))t+=p[1];});return t;}
-  function search(q){var Q=grams(expand(q)),keys=Object.keys(Q);if(!keys.length)return [];
-    return ALL.map(function(it){var gq=it._gq||(it._gq=grams(it.q)),ga=it._ga||(it._ga=grams(it.a)),sq=0,sa=0;keys.forEach(function(k){if(gq[k])sq++;else if(ga[k])sa++;});
-      return {it:it,s:(sq*3+sa)/keys.length,sq:sq/keys.length};}).sort(function(a,b){return b.s-a.s;});}
+  /* ===== 2026-10-31 搜尋機制改版（老闆要求徹底盤點）=====
+     舊版只比對「兩個字一組」有沒有重疊：壁掛式多少→配到「預留多少空間」、多久洗一次→配到「清洗要多久」，
+     用 224＋148＋93 句考題實測：直接答錯 10～12%、說找不到 16～28%。
+     新版三層：① 每題「客人可能的說法」（KW，題目開頭比對）② 每個字的重要性（題庫裡越少題出現的字越重要）
+     ③ 第一名有命中說法、且贏第二名夠多才直接回答，否則列「您是不是想問」；NEG＝不是我們服務的事，一律不直接回答。
+     最後驗收用調整時沒看過的考題 C：可接受 51%→89%、直接答錯 10%→0%、說找不到 28%→2%。考題與評分工具在 預覽_題庫盤點/ */
+var KW=[
+['早鳥方案與標準方案','早鳥|標準方案|方案差|哪個方案|方案比較|85折|95折|8\\.5折|9\\.5折|划算|便宜|打折|折扣多少'],
+['要如何購買冷氣清洗服務','怎麼買|哪裡買清洗|購買清洗|哪裡下單|怎麼下單|去哪.{0,2}下單|購買管道|在哪買|怎麼.{0,6}買|在哪.{0,4}買|哪.{0,3}網站|購買|跟你們買|買清洗'],
+['如何預約服務','怎麼預約|如何預約|預約流程|下單流程|步驟|流程'],
+['可以服務完成後再付款','洗完再付|先洗後付|完成後付|現金|LINE ?Pay|付款方式|怎麼付|可以刷卡|能刷卡|刷卡嗎|信用卡嗎|貨到付款|現場付|洗完再.{0,2}(給|付)|再給錢|再付錢|付現'],
+['發票如何開立','發票|統編|載具|收據|公司抬頭|統一編號|三聯|二聯'],
+['下單後多久會接到聯絡','多久.{0,4}(聯絡|打給|來電|打電話)|什麼時候.{0,3}(聯絡|打給|來電)|沒人聯絡|還沒.{0,3}(聯絡|來電)|有人聯絡'],
+['預約好的到府時間要去哪裡查','預約.{0,3}(時間|日期).{0,4}(查|看|哪)|查.{0,3}(預約|訂單)|訂單.{0,2}(查詢|查|狀態|進度)|約.{0,2}(的)?時間是|哪天來|幾號來|什麼時候來|何時來|技師.{0,4}(哪天|幾號|什麼時候)(到|來)'],
+['訂購後需要在多久內完成預約','多久內.{0,3}(預約|約)|預約.{0,2}期限|多久要約|沒約會|一直沒約|30天內'],
+['如果一直聯繫不上我','聯絡不到我|聯繫不上我|電話沒接|沒接到電話|漏接|沒接電話|找不到我.{0,3}(會|取消)'],
+['如何查詢我的冷氣機齡','機齡|幾年.{0,2}(的|了)|用多久了|製造年份|出廠日期|冷氣幾年|年份|用了幾年|幾年了'],
+['從哪裡可看到機型','型號在|機型.{0,2}(在|看|查)|機號|銘板|哪裡看型號|型號怎麼看|型號.{0,3}(貼|在哪|找不到)|機型'],
+['可以指定時段或假日施工','假日|週末|周末|禮拜[六日天]|星期[六日天]|晚上|指定時段|幾點到幾點|服務時間|早上|下午'],
+['你們服務哪些地區','服務範圍|服務地區|服務區域|哪些地區|偏遠|有服務嗎|可以服務嗎|[台臺]東|花蓮|澎湖|金門|馬祖|離島|山區'],
+['客服會主動通知我操作','ATM|詐騙|儲值|解除分期|誤扣|165'],
+['有服務其他品牌','其他品牌|其他牌|日立|大金|國際牌|Panasonic|LG|東元|聲寶|三菱電機|格力|禾聯|品牌'],
+['技師遲到或未到','遲到|還沒到|沒來|沒出現|等很久|晚到|放鳥'],
+['刷卡失敗、付款沒成功','刷卡失敗|刷不過|付款失敗|付不了|沒付成功|付款沒成功|交易失敗|無法付款|付款錯誤|商家交易資料'],
+['選了期望到府日期','期望.{0,2}日期|期望到府|選的日期|指定日期|指定哪天|日期會照|一定是那天'],
+['我的地區顯示「尚未提供服務」','尚未提供服務|沒有服務|不在服務|不服務|未開放|沒開放|通行碼'],
+['壁掛式/吊隱式/四方吹空調清洗是否等同冷氣維修','維修|修理|修冷氣|壞了.{0,3}修|故障|不會動|檢修'],
+['冷氣清洗後還需要補冷媒','冷媒|加冷媒|補冷媒|灌冷媒'],
+['室外機是如何清洗','室外機.{0,3}(怎麼|如何)洗|室外機清洗方式|室外機.{0,2}(外牆|懸掛|掛在)|室外機.{0,4}高壓'],
+['可以只清洗室外機','只洗室外機|只清洗室外機|單獨.{0,2}(洗|清洗)?室外機|室外機單獨|只洗.{0,2}外機'],
+['為什麼室外機需要清洗','為什麼.{0,3}洗室外機|室外機.{0,4}一定要|室外機.{0,4}要洗嗎|室外機.{0,3}必要'],
+['冷氣清洗大約需要多久時間','洗多久|要多久|多久時間|幾個小時|幾小時|多少時間|花多久|做多久|施工.{0,2}多久'],
+['冷氣清洗服務是現場施作還是拆回','拆回|帶回|送回|現場洗|在家.{0,2}洗|到府洗|回廠|拆下來|帶走|搬走'],
+['冷氣清洗服務包含哪些項目','包含哪些|包含什麼|洗哪些|清洗範圍|清洗項目|有洗什麼|有哪些項目|洗得到|範圍|風扇|扇葉|拆哪些|會拆嗎'],
+['有包含室外機清洗','有含室外機|包含室外機|有包室外機|含外機|室外機.{0,3}另外'],
+['清洗後多久可以正常開冷氣','多久可以開|馬上開|可以開冷氣|洗完.{0,3}開|立刻開|何時可以用|多久可以用|可以吹|馬上吹|才能用|等多久.{0,2}用'],
+['清洗時會用到什麼清潔劑','清潔劑|藥劑|藥水|化學|有毒|毒性|環保|安全嗎'],
+['冷氣清洗會不會造成損壞','洗壞|損壞|弄壞|壞掉|擔心.{0,4}壞|洗了.{0,2}壞'],
+['清洗完成後要怎麼驗收','驗收|檢查什麼|確認什麼|驗收單|確認.{0,6}乾淨|洗乾淨了嗎'],
+['漏水問題清洗後可以解決','漏水|滴水|會滴|水滴'],
+['現場可以臨時加洗嗎','臨時.{0,4}(加|多)|加洗|多洗一台|多加一台|追加|順便多洗'],
+['日期確認後想改約或取消','改約|改期|改時間|改日期|換時間|換日期|延期|取消|退費|退款|規費|補償費|延後|提前|晚一點|早一點|延一週|往後'],
+['技師到府後發現無法服務，會收費','不能洗.{0,3}(收|錢)|無法服務.{0,3}收|到了不能洗|來了不能洗|白跑|無法清洗.{0,3}收'],
+['技師到府後聯絡不到我','到了.{0,3}找不到我|聯絡不到.{0,2}(怎麼算|收費)|我不在家.{0,2}怎麼|放技師鳥|沒開門|到了.{0,4}沒接|技師到.{0,4}沒接'],
+['購買多台服務，若其中有台','其中.{0,3}台.{0,4}不能|只能洗.{0,2}台|有一台不能|部分.{0,3}不能|按比例退|台不能洗|那台.{0,4}退|一台不能'],
+['現場可以加洗嗎？如何收費','加洗.{0,3}(多少|費用|收費|價格)|加洗.{0,3}發票|現場.{0,3}加.{0,3}錢'],
+['若冷氣很髒、油煙很重','很髒|髒污|厚重|霉垢|發霉|黴|油垢|很油'],
+['室外機清洗的費用怎麼算','室外機.{0,4}(多少|費用|價格|錢)|外機.{0,3}(多少|價格)|車馬費|一對多.{0,4}(價|錢|多少)|1對多.{0,4}(價|錢|多少)'],
+['清洗服務的價格是多少','多少錢|價格|價錢|價目|費用|收費|報價|怎麼算錢|要錢嗎|壁掛.{0,3}多少|吊隱.{0,3}(多少|價)|四方吹.{0,3}(多少|價)|費怎麼算|清洗費'],
+['怎麼知道我的吊隱機型要不要加洗風鼓','風鼓|風輪.{0,3}(加|幾)'],
+['營業場所、重油煙要加價','營業場所|店面|商用|餐廳|餐飲|小吃|公司行號|辦公室|重油煙|油煙|靠近廚房|廚房|開.{0,3}店|[^商]店的|飲料店|早餐店|美髮|診所|工廠|補習班'],
+['到府場勘估價','場勘|勘查|估價|先來看|先看.{0,2}再|到府看|報價單'],
+['優惠碼可以跟方案折扣','優惠碼|折扣碼|折價券|優惠券|疊加|一起用|合併使用'],
+['除濕機、AIRMON 加購品','除濕機|AIRMON|airmon|遠端控制|加購品|控制器'],
+['清洗會不會弄髒家裡','弄髒家裡|會髒嗎|弄髒|防水布|噴得到處'],
+['若現場評估後不適合施工','不適合施工|不能做|無法施工|現場評估|不能施工'],
+['施工時會有噪音','噪音|很吵|吵嗎|聲音|大聲'],
+['若家中沒有水龍頭或排水孔','水龍頭|排水孔|接水|延長水管|沒有排水|浴室|廁所|水.{0,3}很遠'],
+['冷氣若裝在挑高或特殊位置','挑高|很高|特殊位置|3\\.5|4米|四米|樓中樓|夾層|高度'],
+['冷氣清洗前需要先準備什麼','準備什麼|要準備|事前準備|先做什麼|需要準備|110V'],
+['預約前需要拍哪些冷氣照片','照片|拍照|拍什麼|怎麼拍|傳照片'],
+['壁掛式／吊隱式／四方吹空調室內機下方，需要預留多少','預留.{0,3}空間|施工空間|多少空間|空間多大|多大空間'],
+['吊隱式一定要有維修孔','維修孔|檢修孔|天花板開孔|開口'],
+['家中有貴重物品或怕水家具','貴重|怕水|家具|傢俱|電視|電腦|會不會弄濕|弄濕|鋼琴|地板|木頭'],
+['大樓、社區、公寓施工前','社區|大樓|管委會|管理室|管理員|公寓|梯控|施工申請|換證'],
+['天花板太高或無法安全架梯','架梯|梯子|太高|天花板高|不能架'],
+['若現場沒有水源或電源','沒有電|沒電|電源|沒有水|沒水|水源|插座|停電|斷電'],
+['冷氣清洗前需要先關機','關機|關冷氣|先關|要關嗎|停機'],
+['冷氣下方需要清空','清空|移開|床要|沙發|下面.{0,3}(東西|家具)|搬開|衣櫃|櫃子|書桌|床'],
+['寵物需要先隔離','寵物|貓|狗|鳥|兔|毛孩|隔離'],
+['我需要全程在家','在家|有人在|不在家|全程|要等|陪同|出門|不在|家人代|代替我'],
+['服務後會很髒亂','髒亂|很亂|水漬|收拾|清理現場|恢復原狀'],
+['清洗後是否一定會變冷、變省電','變冷|比較冷|更冷|不冷|冷不冷|涼'],
+['冷氣的清潔頻率應該如何拿捏','多久洗一次|多久.{0,2}要洗|多久清洗一次|一年.{0,3}幾次|幾次|頻率|多久.{0,2}再洗|多久.{0,2}清一次|定期多久'],
+['定期清洗冷氣有哪些必要性','為什麼要.{0,3}(洗|清洗)|必要性|有必要|需要洗嗎|一定要洗嗎|不洗會|不清洗會|不洗的話'],
+['冷氣清洗後建議多久再洗一次','下次.{0,3}洗|多久再洗|再洗一次'],
+['日常生活中有哪些保養冷氣的好習慣','保養|濾網.{0,3}(多久|洗)|平常.{0,3}(怎麼|保養)|自己.{0,3}保養|送風'],
+['冷氣清洗後有什麼好處','好處|效果|省電|電費|有什麼用|值得嗎'],
+['多久預約一次清洗服務','多久預約一次'],
+['清洗後要怎麼保養才能延長','延長.{0,2}效果|洗完.{0,3}保養|維持效果'],
+['清洗後冷氣能恢復像新的','像新的|跟新的一樣|變新|恢復如新|全新'],
+['除了請專業人員清洗外','自己.{0,2}(洗|清|保養)|自行保養|自己可以'],
+['若四方吹/吊隱式機型特殊','特殊機型|結構|封板|完整清洗|全部洗|洗得乾淨嗎'],
+['冷氣清洗後，異味或霉味','異味|霉味|臭味|味道|臭臭|酸味|藥水味'],
+['清洗後若冷氣出現問題該怎麼處理','保固|保修|洗完.{0,3}壞|洗完.{0,3}有問題|出問題|故障.{0,3}賠|賠償|理賠|洗完.{0,3}不冷|洗完.{0,4}壞|壞掉'],
+['老舊機器是否也可以清洗','老舊|零件.{0,2}脆|脆化|老化|很舊|太舊|十幾年|1[0-9] ?年'],
+['排水管原本就不順','排水管|排水不順|堵住|阻塞|不通'],
+['清洗後若有些微味道或潮濕感','洗完.{0,3}(味道|臭|濕|潮)|潮濕|濕濕'],
+['濾網要從哪裡購買','濾網.{0,3}(買|購)|買濾網|濾網哪裡'],
+['遙控器要從哪裡購買','遙控器'],
+['我的冷氣使用多年，還適合清洗','用很多年|使用多年|很多年|多年|太舊|還能洗嗎|還適合|二十年|快.{0,2}年'],
+['遇到颱風或豪大雨','颱風|下雨|豪雨|大雨|雨天|天災|停班停課']
+];
+
+/* 不是我們服務的事：命中就不直接回答（只給選項＋LINE 客服） */
+var NEG=/洗車|移機|裝冷氣|安裝冷氣|新冷氣|買冷氣|賣冷氣|冷氣多少錢一台|熱水器|冰箱|洗衣機|抽油煙機|股票|基金|應徵|兼職|加盟|徵才|找工作|停車場/;
+  function syn(q){return String(q||'').replace(/師傅|師父/g,'技師').replace(/(^|[^室])外機/g,'$1室外機').replace(/(^|[^室])內機/g,'$1室內機').replace(/臺/g,'台').replace(/冷氣機/g,'冷氣');}
+  var KR=ALL.map(function(it){for(var k=0;k<KW.length;k++){if(it.q.indexOf(KW[k][0])===0)return new RegExp(KW[k][1],'gi');}return null;});
+  var STOPC=/[的了嗎呢吧啊喔耶我你他她們是在有要會可以能不也都就還很怎麼什麼請問一下這那個]/;
+  function toks(t){t=syn(t).toLowerCase().replace(/[\s，。？?！!、,.:：；;「」『』（）()\/／\-＋+…～~"'“”]/g,'');var o={};for(var k=0;k<t.length;k++){var c=t[k];if(!STOPC.test(c))o[c]=1;if(k<t.length-1){var b=t.substr(k,2);if(!(STOPC.test(b[0])&&STOPC.test(b[1])))o[b]=1;}}return o;}
+  var DOCS=ALL.map(function(it){return {t:toks(it.q),a:toks(it.a)};}),DF={};DOCS.forEach(function(d){var u={},w;for(w in d.t)u[w]=1;for(w in d.a)u[w]=1;for(w in u)DF[w]=(DF[w]||0)+1;});
+  function idf(w){return Math.log((ALL.length+1)/((DF[w]||0)+0.5));}
+  function search(q0){var q=syn(q0),Q=Object.keys(toks(q)).filter(function(w){return DF[w];}),tot=0;Q.forEach(function(w){tot+=idf(w);});tot=tot||1;
+    return ALL.map(function(it,j){var d=DOCS[j],tf=0,b2=0;Q.forEach(function(w){if(d.t[w]){tf+=idf(w)*(w.length>1?2:1.2);if(w.length>1)b2++;}else if(d.a[w]){tf+=idf(w)*(w.length>1?0.8:0.4);if(w.length>1)b2++;}});tf=tf/tot;
+      var kw=0;if(KR[j]){var m=(q.match(KR[j])||[]),u={},n=0,L=0;m.forEach(function(x){x=x.toLowerCase();if(!u[x]){u[x]=1;n++;L=Math.max(L,x.length);}});if(n)kw=2+0.6*(n-1)+0.15*L;}
+      return {it:it,kw:kw,tf:tf,b2:b2,s:kw+tf*1.2};}).sort(function(a,b){return b.s-a.s;});}
+  /* 直接回答：第一名命中說法，且第二名沒命中、或贏 0.9 分以上；題庫外的事（NEG）一律不直接答 */
+  function decide(q,r){var t=r[0],u=r[1]||{kw:0,s:0};var sure=!!t&&t.kw>0&&(u.kw===0||t.s-u.s>=0.9)&&!NEG.test(q);
+    var sug=r.filter(function(x){return x.kw>0||(x.tf>=0.35&&x.b2>0);}).slice(0,3).map(function(x){return x.it.q;});/* 只對上單一個字（你好的「好」）不算 */
+    var kind=GREET.test(String(q).trim())?'greet':(HUMAN.test(q)?'human':'');return {sure:sure&&!kind,top:t,sug:(kind||NEG.test(q))?[]:sug,kind:kind};}/* 不是我們服務的事：不給選項，直接說找不到＋LINE */
+  var GREET=/^(你好|您好|哈囉|嗨|hi|hello|安安|早安|午安|晚安|謝謝|感謝|謝啦|ok|好|好的|嗯|測試|test|123|\?|？)+[!！。~～]*$/i;
+  var HUMAN=/真人|人工|轉客服|找客服|客服電話|客訴|投訴|抱怨|退貨|機器人|AI/i;
   var esc=function(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
   function fmt(a){return esc(a).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,'<br>');}
   var LINE='https://line.me/R/ti/p/@063kttbk';
@@ -5272,12 +5374,13 @@ function _qwDropCoupons(){var n=0;(function go(){try{var b=document.querySelecto
   function ask(q,lbl){q=String(q||'').trim();if(!q)return;var _me=say('me',esc(lbl||q));/* 對話顯示客人按的字，搜尋用完整題目 */var r=search(q),b=r[0];
     /* 2026-10-31 老闆：加「您是不是想問」。1.0 分以上才直接回答（實測問得準的多在 1.0 以上，會配錯的都在 1.0 以下）；
        0.34～1.0 列出最接近的 2～3 題讓客人點；完全沒相關的才說找不到 */
-    var sug=r.filter(function(x){return x.s>=0.34&&x.sq>=0.12;}).slice(0,3).map(function(x){return x.it.q;});
-    var sure=!!b&&b.s>=1&&b.sq>=0.12;
+    var D=decide(q,r),sug=D.sug,sure=D.sure;
     _last=sure?{hit:true,v:b.it.q}:{hit:false,v:q.slice(0,60)};
-    if(!sure&&sug.length){say('ai','您是不是想問下面這幾題？點一下就能看答案 👇');chips(sug);}
+    if(D.kind==='greet'){_last=null;say('ai','您好！想問什麼都可以直接打，例如「可以假日來嗎」「多少錢」「多久洗一次」，或點下面常見的問題 👇');chips(CHIPS);}
+    else if(D.kind==='human'){say('ai','這部分請直接用 LINE 跟真人客服聯繫，我們會盡快回覆您 🙏');chips([]);}
+    else if(!sure&&sug.length){say('ai','您是不是想問下面這幾題？點一下就能看答案 👇');chips(sug);}
     else if(!sure){say('ai','這題我在常見問題裡找不到答案 🙇<br>建議直接用 LINE 問真人客服，我們會盡快回覆。');chips(['清洗服務的價格是多少？','日期確認後想改約或取消，規費是多少？']);}
-    else{say('ai',fmt(b.it.a)+'<div class="src">答案來自：常見問題「'+esc(b.it.q)+'」</div>'+(/Email 綁定/.test(b.it.a)?'<a class="fb-bind" href="'+BIND_URL+'" target="_blank" rel="noopener">🔐 到 LINE 完成 Email 綁定</a>':''));var rel=r.slice(1,4).filter(function(x){return x.s>=0.6&&x.sq>=0.2;}).map(function(x){return x.it.q;}).slice(0,2);if(rel.length){say('ai','<span style="font-size:13px;color:#66727F">你可能也想知道：</span>');chips(rel);}}
+    else{say('ai',fmt(b.it.a)+'<div class="src">答案來自：常見問題「'+esc(b.it.q)+'」</div>'+(/Email 綁定/.test(b.it.a)?'<a class="fb-bind" href="'+BIND_URL+'" target="_blank" rel="noopener">🔐 到 LINE 完成 Email 綁定</a>':''));var rel=r.slice(1,4).filter(function(x){return x.kw>0||x.tf>=0.6;}).map(function(x){return x.it.q;}).slice(0,2);if(rel.length){say('ai','<span style="font-size:13px;color:#66727F">你可能也想知道：</span>');chips(rel);}}
     /* 2026-10-30 老闆：答案長時原本捲到最底，題目和答案開頭被捲掉 → 改成停在剛問的那一題（題目在最上面） */
     var lg=document.querySelector('#fb-sh .log');try{lg.scrollTop=lg.scrollHeight;lg.scrollTop=Math.max(0,lg.scrollTop+_me.getBoundingClientRect().top-lg.getBoundingClientRect().top-8);}catch(e){lg.scrollTop=lg.scrollHeight;}}
   function open(){if(document.getElementById('fb-sh'))return;var w=document.createElement('div');w.id='fb-sh';
@@ -5289,7 +5392,8 @@ function _qwDropCoupons(){var n=0;(function go(){try{var b=document.querySelecto
     w.addEventListener('click',function(e){if(e.target===w||e.target.closest('.h button'))w.parentNode.removeChild(w);});
     w.querySelector('form').addEventListener('submit',function(e){e.preventDefault();var i=w.querySelector('input');ask(i.value);i.value='';});}
   window.__qwFaqLineUrl=lineUrl;
-  window.__qwFaqAsk=function(q){return search(q).slice(0,3).map(function(x){return [x.it.q,Math.round(x.s*100)/100,Math.round(x.sq*100)/100];});};
+  window.__qwFaqAsk=function(q){return search(q).slice(0,3).map(function(x){return [x.it.q,Math.round(x.s*100)/100,Math.round(x.tf*100)/100,x.kw>0];});};
+  window.__qwFaqDecide=function(q){var D=decide(q,search(q));return {sure:D.sure,top:D.top?D.top.it.q:null,sug:D.sug};};/* 測試用 */
   function place(){var f=document.querySelector('#qw-ovl .qw:not(.wel) .qwfoot');if(!f||f.querySelector('.fb-btn'))return;if(getComputedStyle(f).position==='static')f.style.position='sticky';
     var b=document.createElement('button');b.type='button';b.className='fb-btn';b.setAttribute('aria-label','常見問題小幫手');b.innerHTML='💬<small>問答</small>';b.onclick=function(e){e.stopPropagation();open();};f.appendChild(b);}
   var pq=0;new MutationObserver(function(){if(!pq){pq=1;requestAnimationFrame(function(){pq=0;try{place();}catch(e){}});}}).observe(document.documentElement,{childList:true,subtree:true});
