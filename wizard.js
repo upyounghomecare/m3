@@ -118,7 +118,7 @@ var OUTLIST=[
 ];
 var ADDON=[
  {k:'air',n:'AIRMON',dn:'AIRMON 智慧遠端控制器<br>MHICAD-WF100',d:'含全新設備費跟安裝設定費',air:true,pop:true,tag:'🔧 到府安裝',nmsm:true},
- {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機 DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜每日除濕 18.5 公升',pop:true,tag:'📦 另行宅配',gift:'🎁 加贈清洗8折券'},
+ {k:'dh',n:'三菱重工除濕機',dn:'三菱重工除濕機<br>DH18W-T 織紋白',d:'內建UVC燈＋機內乾燥｜每日除濕 18.5 公升',pop:true,tag:'📦 另行宅配',gift:'🎁 加贈清洗8折券'},
  {k:'fan',n:'風鼓清洗',d:'僅適用吊隱大保養/全保養清洗',needBlow:true},
  {k:'tf',n:'車馬費',d:'技師車程與交通成本'},
  {k:'hi',n:'挑高施作3.5-4M加價',dn:'挑高施作 3.5～4 米加價',d:'每台加收'},
@@ -1736,7 +1736,7 @@ var _NOPICK={title:'還沒選要清洗的冷氣',html:'請至少選擇一台<b>�
 function toast(msg,ms){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},ms||2600);}
 /* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
 var _TERMS={
- dh:{pill:'📦 另行宅配',title:'三菱重工除濕機 DH18W-T 織紋白',body:
+ dh:{pill:'📦 另行宅配',title:'三菱重工除濕機<br>DH18W-T 織紋白',body:
   '<div class="qwt-intro">本項目為冷氣清洗服務限定加購商品，須與冷氣清洗服務同筆訂購。</div>'
   +'<p>三菱重工除濕機為實體宅配商品，將於訂單確認後由物流另行配送至指定地址，不會由清洗技師攜帶，亦不一定與冷氣清洗服務於同日送達。</p>'
   +'<div class="qwt-h">加購內容</div><ul class="qwt-ul"><li>三菱重工除濕機</li><li>物流宅配到府</li><li>原廠保固服務</li><li>加贈冷氣清洗8折折價券 1 張，限次回使用</li></ul>'
