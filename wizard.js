@@ -6453,6 +6453,9 @@ FB+' .fb-cs{display:block}',
 'html body #qw-terms#qw-terms .qwt-hd .qwt-x{position:absolute'+I+';z-index:2'+I+';top:12px'+I+';right:12px'+I+';width:36px'+I+';height:36px'+I+';min-width:36px'+I+';padding:0'+I+';display:flex'+I+';align-items:center'+I+';justify-content:center'+I+';font-size:22px'+I+';line-height:1'+I+';background:#fff'+I+';border:1px solid '+C.line+I+';border-radius:50%'+I+';box-shadow:0 2px 8px rgba(22,32,43,.12)'+I+';box-sizing:border-box'+I+'}',
 /* 2026-11-01 老闆：加購視窗為什麼不能加寬 → 原本手機與摺疊都限 380px、只有滑鼠電腦放到 520px；新風格頁螢幕夠寬就放到 600px */
 '@media (min-width:640px){html body #qw-terms#qw-terms .qwt-m{max-width:600px'+I+'}}',
+/* 2026-11-01 老闆 Fold 7 實機：加購視窗上下被切、X 貼頂 → 原本 max-height:90vh，三星瀏覽器的 vh 含底部分頁列／網址列，視窗比看得到的區域高。
+   改用「實際看得到的高度」dvh 減 48px（上下各留 24px）；不支援 dvh 的舊瀏覽器退回 vh 版本 */
+'html body #qw-terms#qw-terms .qwt-m{max-height:calc(100vh - 48px)'+I+';max-height:calc(100dvh - 48px)'+I+'}',
 'html body #qw-terms#qw-terms .qwt-hd.rs-hasimg h3{padding-right:calc(min(40%,170px) + 8px)'+I+'}',
 /* 2026-11-01 老闆：日期頁「您選擇的方案」卡片右側放目前方案的人物插圖（標準＝OK 手勢、早鳥＝雞頭），改選的小框不放 */
 'html body #qw-cdcal#qw-cdcal .qwcd-sg.on{position:relative'+I+';overflow:visible'+I+';padding-right:86px'+I+'}',
