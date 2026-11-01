@@ -6222,7 +6222,7 @@ function apply(keep){
   var lightBg=new Map();
   info.forEach(function(x){
     var e=x.e,img=x.img&&x.img!=='none'&&!/url\(/.test(x.img)?x.img:'',gc=img?cols(img):[],btn=isBtn(e);
-    if(e.closest('.envnote'))return;/* 老闆 11-01：環境頁下方說明維持現行樣式 */
+    if(e.closest('.envnote')||e.closest('.rs-w'))return;/* 再洗提示條已由樣式程式改綠色，不可再被改回灰色。老闆 11-01：環境頁下方說明維持現行樣式 */
     if(/url\(/.test(x.img||''))return;/* 有照片的元素（機型分頁、橫幅）一律不動底圖 */
     /* 全螢幕的半透明遮罩（視窗後面那層）：維持半透明，只換成範例的淡深色，不可變成不透明白底 */
     if(x.w>=innerWidth-4&&x.h>=innerHeight*0.85&&x.bg&&x.bg[3]<0.95&&x.bg[3]>0.05&&(!img)){setp(e,'background-color','rgba(22,32,43,.45)');setp(e,'background-image','none');e.setAttribute('data-rs','1');return;}
@@ -6254,7 +6254,7 @@ function apply(keep){
   /* 再依「新的底色」調整文字顏色 */
   function effBg(e){for(var p=e;p&&p.nodeType===1;p=p.parentElement){var s=getComputedStyle(p),c=rgb(s.backgroundColor);if(s.backgroundImage&&s.backgroundImage!=='none'&&!/url\(/.test(s.backgroundImage)){var g=cols(s.backgroundImage);if(g.length)return g[0];}if(c&&c[3]>.5)return c;}return [255,255,255,1];}
   info.forEach(function(x){
-    var e=x.e;if(!x.c||e.closest('.envnote'))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
+    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w'))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
     var bg=effBg(e),light=lum(bg)>.6,nc=null;
     if(isLightTxt(x.c)&&light)nc=(x.c[3]<.9?SUB:INK);
     else if(isNavy(x.c))nc=light?INK:'#FFFFFF';
@@ -6286,7 +6286,8 @@ O+' .qw.qw-step-plan{padding-top:46px'+I+'}',O+' .qw.qw-step-plan::before{conten
 O+' .s26p,'+O+' .s26p *{background:transparent'+I+';color:'+C.mute+I+'}',
 O+' .s26p .t{font-size:13px'+I+';font-weight:700'+I+'}',O+' .s26p .t b{color:'+C.ink+I+'}',
 O+' .s26p .b{background:'+C.line+I+';height:3px'+I+';border-radius:2px'+I+'}',O+' .s26p .b i{background:'+C.red+I+';height:3px'+I+'}',
-O+' .qw h2,'+O+' .qw .qh4{background:transparent'+I+';color:'+C.ink+I+';font-size:23px'+I+';font-weight:900'+I+';text-align:left'+I+';letter-spacing:0'+I+'}',
+O+' .qw:not(.wel) h2,'+O+' .qw:not(.wel) .qh4{background:transparent'+I+';color:'+C.ink+I+';font-size:23px'+I+';font-weight:900'+I+';text-align:left'+I+';letter-spacing:0'+I+'}',
+O+' .qw.wel h2{background:transparent'+I+';color:'+C.ink+I+';text-align:center'+I+'}',
 O+' .qw p.sub,'+O+' .qw .qx-sub{background:transparent'+I+';color:'+C.sub+I+';font-size:15px'+I+';text-align:left'+I+'}',
 O+' .qw-x{background:'+C.ground+I+';color:'+C.ink+I+';border:0'+I+';box-shadow:none'+I+';top:10px'+I+'}',
 /* 機型分頁：文字膠囊 */
@@ -6401,14 +6402,14 @@ O+' .qsok,'+O+' .qswarn,'+O+' .qsterm{background:'+C.ground+I+';color:'+C.sub+I+
 'html body #qs-rewiz#qs-rewiz::before,html body #qs-rewiz#qs-rewiz::after{display:none'+I+'}',
 /* 2026-11-01 老闆：現有版的插圖都要保留 → 只換插圖外的框、標籤、按鈕與文字 */
 O+' .qw-gt{border:1.5px solid '+C.line2+I+';border-radius:12px'+I+';box-shadow:none'+I+';background-color:#fff'+I+'}',O+' .qw-gt.on{border-color:'+C.ink+I+';box-shadow:inset 0 0 0 1px '+C.ink+I+'}',
-O+' .qw-gt span{color:'+C.ink+I+';font-weight:700'+I+';text-shadow:none'+I+'}',O+' .qw-gt em{background:'+C.red+I+';color:#fff'+I+';box-shadow:none'+I+'}',
+O+' .qw-gt span{color:#fff'+I+';-webkit-text-fill-color:#fff'+I+';font-weight:700'+I+';text-shadow:0 1px 3px rgba(0,0,0,.55)'+I+'}',O+' .qw-gt em{background:'+C.red+I+';color:#fff'+I+';box-shadow:none'+I+'}',
 O+' .env-o{border:1.5px solid '+C.line2+I+';border-radius:12px'+I+';box-shadow:none'+I+';background:#fff'+I+';outline:0'+I+'}',O+' .env-o.on,'+O+' .env-o.sel{border-color:'+C.ink+I+';box-shadow:inset 0 0 0 1px '+C.ink+I+'}',
 O+' .env-o .env-rd{background:#fff'+I+';border:2px solid '+C.line2+I+';color:transparent'+I+';box-shadow:none'+I+'}',O+' .env-o.on .env-rd,'+O+' .env-o.sel .env-rd{border:7px solid '+C.red+I+'}',
 O+' img.area-res{border-radius:12px'+I+';box-shadow:none'+I+'}',
 O+' .qplan{border:1.5px solid '+C.line2+I+';border-radius:14px'+I+';box-shadow:none'+I+';background:#fff'+I+';transform:none'+I+';outline:0'+I+'}',O+' .qplan.sel{border-color:'+C.ink+I+';box-shadow:inset 0 0 0 1px '+C.ink+I+'}',
 O+' .qplan .qp-ck{background:'+C.red+I+';color:#fff'+I+';box-shadow:none'+I+'}',
-O+' .qp-money{background:#fff'+I+';background-image:none'+I+';color:'+C.ink+I+';border:0'+I+'}',O+' .qp-money s{color:'+C.mute+I+'}',O+' .qp-money b{color:'+C.ink+I+';font-weight:900'+I+'}',
-O+' .qpn{background:'+C.ground+I+';background-image:none'+I+';color:'+C.sub+I+';border:0'+I+'}',O+' .qp-save{background:'+C.saveWash+I+';color:'+C.save+I+'}',O+' .qp-save span{color:'+C.save+I+'}',
+O+' .qp-money{background:#fff'+I+';background-image:none'+I+';color:'+C.ink+I+';border:0'+I+';padding-left:12px'+I+';padding-right:12px'+I+'}',O+' .qp-money s{color:'+C.mute+I+'}',O+' .qp-money b{color:'+C.ink+I+';font-weight:900'+I+'}',
+O+' .qpn{background:'+C.ground+I+';background-image:none'+I+';color:'+C.sub+I+';border:0'+I+';margin:6px 10px 10px'+I+';border-radius:8px'+I+';padding-left:8px'+I+';padding-right:8px'+I+'}',O+' .qp-save{background:'+C.saveWash+I+';color:'+C.save+I+';margin-left:10px'+I+';margin-right:10px'+I+';border-radius:8px'+I+'}',O+' .qp-save span{color:'+C.save+I+'}',
 O+' .wel-start{box-shadow:none'+I+';border-radius:14px'+I+'}',O+' .qwh-tip{background:'+C.ink+I+';color:#fff'+I+'}',
 FB+' .fb-cs{display:block}',
 /* 2026-11-01 老闆：問答氣泡不能遮擋任何內容 → 收進底部按鈕列（仍在右下），不再浮在內容上 */
@@ -6432,6 +6433,11 @@ FB+' .fb-cs{display:block}',
 'html body #qw-ovl#qw-ovl#qw-ovl .opt .step-ctl{border:1.5px solid '+C.line2+I+';border-radius:999px'+I+'}','html body #qw-ovl#qw-ovl#qw-ovl .opt.sel .step-ctl,html body #qw-ovl#qw-ovl#qw-ovl .opt .step-ctl.on{border-color:'+C.ink+I+'}',
 'html body #qw-ovl#qw-ovl#qw-ovl .opt .det-body{margin:12px 0 0'+I+';width:auto'+I+';padding:12px 14px'+I+';box-sizing:border-box'+I+'}',
 'html body #qw-ovl#qw-ovl#qw-ovl .qwmore{border:0'+I+';background:transparent'+I+';box-shadow:none'+I+'}',
+/* 2026-11-01 老闆選「改」：金額膠囊、往下滑提示原本浮在內容上會蓋字 → 收進底部按鈕區（只在新風格頁） */
+'html body #qw-ovl#qw-ovl#qw-ovl .qwfoot>.s26c.s26c{position:static'+I+';transform:none'+I+';left:auto'+I+';bottom:auto'+I+';top:auto'+I+';flex:0 0 100%'+I+';width:100%'+I+';max-width:100%'+I+';justify-content:center'+I+';margin:0'+I+';box-sizing:border-box'+I+';border-radius:12px'+I+';background:#F4F5F7'+I+';border:0'+I+';padding:8px 14px'+I+';order:0'+I+'}',
+'html body #qw-ovl#qw-ovl#qw-ovl .qwfoot>.qwmore.qwmore.qwmore{position:static'+I+';top:auto'+I+';left:auto'+I+';right:auto'+I+';order:-1'+I+';flex:0 0 100%'+I+';margin:0'+I+';padding:0'+I+';height:auto'+I+';text-align:center'+I+'}',
+'html body #qw-ovl#qw-ovl#qw-ovl .qwfoot>.qwmore.qwmore.qwmore.off{display:none'+I+'}',
+'html body #qw-ovl#qw-ovl#qw-ovl .qwfoot>.qwmore.qwmore.qwmore span{padding:0'+I+';background:transparent'+I+';box-shadow:none'+I+';font-size:13px'+I+';color:'+C.sub+I+'}',
 /* 2026-11-01 量出來還貼邊的 3 處 */
 'html body #qw-ovl#qw-ovl#qw-ovl .env-g{background:transparent'+I+';border:0'+I+';box-shadow:none'+I+';padding:0'+I+'}',
 'html body #qw-ovl#qw-ovl#qw-ovl .qcf-list{padding:2px 14px'+I+'}',
@@ -6460,7 +6466,7 @@ function deco(){
     var im=document.createElement('img');im.className='rs-pimg rs-add';im.alt='';im.src='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/'+(air?'LWx9yMqPlG7b699ZlEpb1wO7':'GBnwbKdx3dvWpwwDNW7954ej')+'/600x.jpg';h.insertBefore(im,h.firstChild);h.classList.add('rs-hasimg');});
   /* 「再洗 N 台…全戶 92 折」提示條（精靈內、購物車上）改成範例的綠色提示 */
   document.querySelectorAll('body *').forEach(function(e0){if(e0.children.length>3||!/再洗\s*\d/.test(e0.textContent)||e0.textContent.length>90)return;
-    var e=null;for(var p=e0,k=0;p&&k<3;p=p.parentElement,k++){var c0=getComputedStyle(p);if(/gradient/.test(c0.backgroundImage)||(function(c){var m=c.match(/\d+/g);return m&&+m[2]>+m[0]+25&&+m[0]<90;})(c0.backgroundColor)){e=p;break;}}if(!e||e.textContent.length>120)return;
+    var e=null;for(var p=e0,k=0;p&&k<3;p=p.parentElement,k++){var c0=getComputedStyle(p);if(/gradient/.test(c0.backgroundImage)||/rgb\(22, 32, 43\)/.test(c0.backgroundColor)||(p.hasAttribute('data-rs')&&p.offsetHeight>=40)||(function(c){var m=c.match(/\d+/g);return m&&+m[2]>+m[0]+25&&+m[0]<90;})(c0.backgroundColor)){e=p;break;}}if(!e||e.textContent.length>120)return;
     if(e.dataset.rsw)return;e.dataset.rsw=e.getAttribute('style')||'';e.style.cssText+=';background:#EAF5EF!important;background-image:none!important;color:#1D6B45!important;box-shadow:none!important;border:0!important';e.querySelectorAll('*').forEach(function(x){x.style.setProperty('color','#1D6B45','important');});e.classList.add('rs-w');});
   /* 購物車「立即結帳」金色按鈕 → 深色 */
   document.querySelectorAll('button,a').forEach(function(b){if(b.closest('#qw-ovl,#qs-fab')||!/立即結帳/.test(b.textContent))return;if(b.dataset.rsb!==undefined)return;b.dataset.rsb=b.getAttribute('style')||'';b.style.setProperty('background','#16202B','important');b.style.setProperty('background-image','none','important');b.style.setProperty('box-shadow','none','important');b.style.setProperty('color','#fff','important');b.classList.add('rs-w');});
