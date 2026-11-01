@@ -6449,7 +6449,11 @@ FB+' .fb-cs{display:block}',
 'html body #qw-terms#qw-terms .qwt-hd .rs-pimg{position:absolute;right:0;top:0;bottom:0;width:40%;max-width:170px;object-fit:contain;object-position:right center;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(to left,#000 45%,transparent 100%);mask-image:linear-gradient(to left,#000 45%,transparent 100%);opacity:.95}',
 'html body #qw-terms#qw-terms .qwt-hd>*:not(.rs-pimg){position:relative;z-index:1}',
 'html body #qw-terms#qw-terms .qwt-hd.rs-hasimg h3{padding-right:34%'+I+'}',
-'html body #qw-terms#qw-terms .qwt-hd .qwt-x{position:absolute'+I+';z-index:2'+I+';background:rgba(255,255,255,.85)'+I+';border-radius:50%'+I+'}',
+/* 2026-11-01 老闆：右上 X 變形 → 原本白圓底沒給固定大小，只跟著「×」字縮成橢圓；改成固定 36×36 正圓、字置中 */
+'html body #qw-terms#qw-terms .qwt-hd .qwt-x{position:absolute'+I+';z-index:2'+I+';top:12px'+I+';right:12px'+I+';width:36px'+I+';height:36px'+I+';min-width:36px'+I+';padding:0'+I+';display:flex'+I+';align-items:center'+I+';justify-content:center'+I+';font-size:22px'+I+';line-height:1'+I+';background:#fff'+I+';border:1px solid '+C.line+I+';border-radius:50%'+I+';box-shadow:0 2px 8px rgba(22,32,43,.12)'+I+';box-sizing:border-box'+I+'}',
+/* 2026-11-01 老闆：加購視窗為什麼不能加寬 → 原本手機與摺疊都限 380px、只有滑鼠電腦放到 520px；新風格頁螢幕夠寬就放到 600px */
+'@media (min-width:640px){html body #qw-terms#qw-terms .qwt-m{max-width:600px'+I+'}}',
+'html body #qw-terms#qw-terms .qwt-hd.rs-hasimg h3{padding-right:calc(min(40%,170px) + 8px)'+I+'}',
 /* 2026-11-01 老闆：日期頁「您選擇的方案」卡片右側放目前方案的人物插圖（標準＝OK 手勢、早鳥＝雞頭），改選的小框不放 */
 'html body #qw-cdcal#qw-cdcal .qwcd-sg.on{position:relative'+I+';overflow:visible'+I+';padding-right:86px'+I+'}',
 'html body #qw-cdcal#qw-cdcal .qwcd-sg.on .rs-fig{position:absolute;right:6px;bottom:0;height:calc(100% + 30px);width:auto;pointer-events:none;z-index:2;filter:drop-shadow(0 2px 3px rgba(22,32,43,.12))}',
