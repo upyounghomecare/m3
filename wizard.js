@@ -1001,7 +1001,9 @@ function _ckStopWhy(){var t=_ckTodo();return (t.length&&t[0][0]==='stop')?(t[0][
 function _ckGoTodo(){var t=_ckTodo();if(!t.length)return;_ckShake(_ckSel(t[0][0]));}
 function _ckAgreeOK(){if(_svOn())return !!_ck.agree;return _ckTodo().length===0;}
 /* 小步驟膠囊放在標題說明(.sub)裡面：跟標題區同一塊深藍底、同寬、上下間距一致（10-22 老闆：原本獨立一塊，膠囊上下沒置中、電腦版左右露白） */
-function _ckSub(k){return '<span class="qx-sub">'+['① 確認','② 聯絡','③ 補充'].map(function(t,i){return '<span class="'+(i<k?'ok':(i===k?'on':''))+'">'+(i<k?'✓ ':'')+t+'</span>';}).join('')+'</span>';}
+/* 2026-11-03 老闆選 A（只在新風格頁 r9v15r）：「聯絡」和「補充」合併成一頁 → 結帳只剩兩段 */
+var _ckOne=/r9v15r/.test(location.pathname);
+function _ckSub(k){return '<span class="qx-sub">'+(_ckOne?['① 確認','② 聯絡與付款資料']:['① 確認','② 聯絡','③ 補充']).map(function(t,i){return '<span class="'+(i<k?'ok':(i===k?'on':''))+'">'+(i<k?'✓ ':'')+t+'</span>';}).join('')+'</span>';}
 function _ckShake(sel){try{var el=ovl&&ovl.querySelector(sel);if(!el)return;var c=ovl.querySelector('.qw');
   /* 用畫面位置換算（offsetTop 是相對最近的定位容器，會算錯）；扣掉手機固定在上方的標題區 */
   if(c){var st=c.querySelector('.qw-stick'),off=(st?st.offsetHeight:0)+16;c.scrollTop=Math.max(0,el.getBoundingClientRect().top-c.getBoundingClientRect().top+c.scrollTop-off);}el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}catch(e){}}
@@ -1110,7 +1112,8 @@ function _ckIn(k,lbl,req,ph,type,sm){var bad=_ck.err[k];
   +'<div class="qck-err" id="qck-e-'+k+'" data-ckerr="'+k+'"'+(bad?' role="alert"':'')+'>'+(bad||'')+'</div></div>';}
 function _ckHtml(k){
   var d=_cfCart(),pay=d&&d.pay!=null?d.pay:0,b='';
-  if(k===2){
+  if(_ckOne&&k===2){return _ckHtml(22);}/* 合併頁：k=22 代表「聯絡＋補充」 */
+  if(k===2||k===22){
     var sl=_ckSlot(),cd=window.__qsCleanDate;
     b=_ckIn('name','姓名',1,'例：王小明')
      +'<div class="qck-f"><div class="qck-l">怎麼稱呼您</div><div class="qck-ch">'+[['1','先生'],['2','小姐'],['0','不指定']].map(function(g){return '<button type="button" class="'+(_ck.gender===g[0]?'sel':'')+'" onclick="__qw.ckPick(\'gender\',\''+g[0]+'\')">'+g[1]+'</button>';}).join('')+'</div></div>'
@@ -1120,9 +1123,11 @@ function _ckHtml(k){
      +_ckIn('addr','',0,'例：中山路一段 12 號 5 樓','text','')
      +'<div class="qck-addrtip"><span>📍</span><span>不用再打縣市區域，請寫到<b>門牌號碼和樓層</b>，技師才找得到。<br><span class="ex">例：中山路一段 12 號 5 樓</span></span></div>'/* 2026-10-27 O10 老闆選 A：淡黃提示框（原本用 qck-hint 跟結帳前紅色提示撞名，變成紅色跳動、不換行） */
      +'<div class="qck-f"><div class="qck-l">期望服務時段</div><div class="qck-auto"><div>'+_esc((!cd||cd==='未指定')?'不指定，由專人與您約定':cd)+'<em>✓ 依您選的期望日期帶入</em></div></div></div>';
-  }else{
+  }
+  if(k===22)b+='<div class="qck-sec">住家與發票</div>';
+  if(k===3||k===22){
     var isBiz=(env==='biz');if(!_ck.env)_ck.env=isBiz?'營業':'住家';
-    b='<div class="qck-f"><div class="qck-l">'+(isBiz?'服務環境<b>*</b>':'住宅類型<b>*</b><div class="qck-lsub">住社區大樓的話，請先向管委會報備施工時間</div>')+'</div>'+(isBiz?'<div class="qck-auto"><div>營業場所<em>✓ 依您選的「營業場所」帶入</em></div></div>'
+    b+='<div class="qck-f"><div class="qck-l">'+(isBiz?'服務環境<b>*</b>':'住宅類型<b>*</b><div class="qck-lsub">住社區大樓的話，請先向管委會報備施工時間</div>')+'</div>'+(isBiz?'<div class="qck-auto"><div>營業場所<em>✓ 依您選的「營業場所」帶入</em></div></div>'
        :'<div class="qck-ch">'+[['住家','一般住家'],['社區','社區大樓（需管委會同意）']].map(function(g){return '<button type="button" class="'+(_ck.env===g[0]?'sel':'')+'" onclick="__qw.ckPick(\'env\',\''+g[0]+'\')">'+g[1]+'</button>';}).join('')+'</div>')+'</div>'
      +((!isBiz&&_ck.env==='社區')?'<label class="qck-chk'+(_ck.mgmt?' on':'')+(_ck.err.mgmt?' bad':'')+'"><input type="checkbox"'+(_ck.mgmt?' checked':'')+' onchange="__qw.ckSet(\'mgmt\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked);this.parentNode.classList.remove(\'bad\')"><span>我已取得社區管委會同意施工</span></label><div class="qck-err" data-ckerr="mgmt">'+(_ck.err.mgmt||'')+'</div>':'')
      +(_svOn()?'':'<div class="qck-auto"><div>機齡 '+_esc((_ck.age||'').replace('（恕不服務）',''))+'・安裝高度 '+_esc(_ckHeight().replace('（不加價）',''))+'<em>✓ 已依前面的選擇帶入</em></div></div>'
@@ -1131,6 +1136,9 @@ function _ckHtml(k){
      +_rcHtml()
      +'<div class="qck-note">💳 按「前往付款」後會到<b>綠界</b>的頁面輸入信用卡，卡號只在綠界輸入。</div>';
   }
+  if(k===22)return '<div class="qw qw-step-ck qck-one">'+stepBar(7)+'<h2 class="qh4">聯絡與付款資料</h2><p class="sub">填完這一頁就前往付款'+_ckSub(1)+'</p>'
+   +'<div class="qck-body">'+b+'</div>'
+   +'<div class="nav"><button class="btn gho" onclick="__qw.ckBack()">上一步</button><button class="btn pri qck-go gold" onclick="__qw.ckNext()"><span class="l1">前往付款</span><span class="l2" data-ckpay="1">應付 '+_cfMoney(pay)+'・綠界信用卡</span></button></div></div>';
   return '<div class="qw qw-step-ck">'+stepBar(7)+'<h2 class="qh4">'+(k===2?'聯絡資料':'補充資料')+'</h2><p class="sub">'+(k===2?'技師到府前，專人會打這支電話跟您約時間':'最後一頁，填完就前往付款')+_ckSub(k-1)+'</p>'
    +'<div class="qck-body">'+b+'</div>'
    +'<div class="nav"><button class="btn gho" onclick="__qw.ckBack()">上一步</button><button class="btn pri qck-go'+(k===3?' gold':'')+'" onclick="__qw.ckNext()">'+(k===2?'<span class="l1">下一步：補充資料</span>':'<span class="l1">前往付款</span><span class="l2" data-ckpay="1">應付 '+_cfMoney(pay)+'・綠界信用卡</span>')+'</button></div></div>';}
@@ -1348,7 +1356,7 @@ function _rcHtml(){
    +T.map(function(t){return '<button type="button" class="'+(_ck.rType===t[0]?'sel':'')+'" onclick="__qw.ckPick(\'rType\',\''+t[0]+'\')">'+t[1]+'<small>'+t[2]+'</small></button>';}).join('')+'</div>';
   if(_ck.rType==='0'){
     h+='<div class="qck-ch">'+[['0','寄到 Email（會員載具）'],['3','手機條碼'],['2','自然人憑證']].map(function(c){return '<button type="button" class="'+(_ck.rCar===c[0]?'sel':'')+'" onclick="__qw.ckPick(\'rCar\',\''+c[0]+'\')">'+c[1]+'</button>';}).join('')+'</div>';
-    if(_ck.rCar==='0')h+='<div class="qiv-n">發票會寄到「聯絡資料」填的 Email'+(_ck.email?'（'+_esc(_ck.email)+'）':'')+'</div>';
+    if(_ck.rCar==='0')h+='<div class="qiv-n">'+(_ckOne?'發票會寄到上面填的 Email':'發票會寄到「聯絡資料」填的 Email'+(_ck.email?'（'+_esc(_ck.email)+'）':''))+'</div>';
     else h+=_ckIn('rNum','',0,_ck.rCar==='3'?'手機條碼，例：/ABC1234（/ 開頭共 8 碼）':'自然人憑證，例：AB12345678901234（2 碼英文＋14 碼數字）','text','');
   }else if(_ck.rType==='2'){
     h+=_ckIn('rTitle','公司抬頭',1,'例：上洋產業股份有限公司','text','')+_ckIn('rUBN','統一編號',1,'8 碼數字','tel','')+'<div class="qiv-n">公司統編發票將開立為紙本發票</div>';
@@ -1427,7 +1435,7 @@ function render(){
   else if(step==='ck2'||step==='ck3'){w=_ckHtml(step==='ck2'?2:3);
     /* 2026-10-27 R4 老闆選 A：補充資料頁的「應付」跟著購物車即時更新；還在算就顯示「金額確認中」、先不能按 */
     if(!window.__qwCkPayT)window.__qwCkPayT=setInterval(function(){try{
-      if(step!=='ck3'||!ovl){return;}
+      if((step!=='ck3'&&!(_ckOne&&step==='ck2'))||!ovl){return;}
       var g=ovl.querySelector('.qck-go'),l2=g&&g.querySelector('[data-ckpay]');if(!l2)return;
       var d=_cfCart(),b=_cfBusy(d),tx=b?'金額確認中…':'應付 '+_cfMoney(d.pay)+'・綠界信用卡';
       if(l2.textContent!==tx)l2.textContent=tx;g.classList.toggle('qcf-busy',!!b);g.setAttribute('aria-disabled',b?'true':'false');
@@ -2149,6 +2157,12 @@ var api={
       if(!/^09\d{8}$/.test(dg(_ck.mobile)))e.mobile='請填寫 09 開頭的 10 碼手機號碼';
       if(String(_ck.addr||'').trim().length<4)e.addr='請填寫巷弄街道＋門牌號碼';
       if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(_ck.email||'').trim()))e.email='請填寫正確的 Email（訂單與發票通知會寄到這裡）';/* 2026-10-31 Email 移到聯絡頁 */
+      if(_ckOne){/* 合併頁：兩頁的檢查一起做，全部對了才送出 */
+        if(env!=='biz'&&_ck.env==='社區'&&!_ck.mgmt)e.mgmt='社區大樓需先取得管委會同意，請勾選確認';
+        _rcCheck(e);
+        _ck.err=e;if(Object.keys(e).length){render();_ckShake('.qck-f .bad,.qck-chk.bad');return;}
+        try{if(_cfBusy(_cfCart())){toast('金額還在確認中，請稍候幾秒再按「前往付款」',5000);return;}}catch(x){}
+        _ckSubmit();return;}
       _ck.err=e;if(Object.keys(e).length){render();_ckShake('.qck-f .bad');return;}
       step='ck3';render();return;}
     if(step==='ck3'){
@@ -6253,7 +6267,7 @@ function apply(keep){
   var lightBg=new Map();
   info.forEach(function(x){
     var e=x.e,img=x.img&&x.img!=='none'&&!/url\(/.test(x.img)?x.img:'',gc=img?cols(img):[],btn=isBtn(e);
-    if(e.closest('.envnote')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar'))return;
+    if(e.closest('.envnote')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb'))return;/* 11-03 結帳選項選取綠色、日期頁問答鈕：由 reskin2／more 模組處理 */
     if(e.matches&&e.matches('#qw-ovl .opt,#qw-ovl .s26c,#qw-cdcal .qwcd-d:not(.av):not(.sel)'))return;/* 11-03 老闆選 B：月曆不能選的日子反灰，由 reskin2 樣式處理 *//* 11-03 老闆選 A：已加入的卡片綠框、底部金額條綠底，由 reskin2 樣式處理，這裡不自動改色 *//* 11-03 老闆截圖：確認視窗（要重新挑選嗎？等）由 reskin2 樣式完整處理，這裡不自動改色，否則會散成三塊 *//* 再洗提示條已由樣式程式改綠色，不可再被改回灰色。老闆 11-01：環境頁下方說明維持現行樣式 */
     if(/url\(/.test(x.img||''))return;/* 有照片的元素（機型分頁、橫幅）一律不動底圖 */
     /* 全螢幕的半透明遮罩（視窗後面那層）：維持半透明，只換成範例的淡深色，不可變成不透明白底 */
@@ -6291,7 +6305,7 @@ function apply(keep){
   /* 再依「新的底色」調整文字顏色 */
   function effBg(e){for(var p=e;p&&p.nodeType===1;p=p.parentElement){var s=getComputedStyle(p),c=rgb(s.backgroundColor);if(s.backgroundImage&&s.backgroundImage!=='none'&&!/url\(/.test(s.backgroundImage)){var g=cols(s.backgroundImage);if(g.length)return g[0];}if(c&&c[3]>.5)return c;}return [255,255,255,1];}
   info.forEach(function(x){
-    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
+    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
     var bg=effBg(e),light=lum(bg)>.6,nc=null;
     if(isLightTxt(x.c)&&light)nc=(x.c[3]<.9?SUB:INK);
     else if(isNavy(x.c))nc=light?INK:'#FFFFFF';
@@ -6468,6 +6482,12 @@ FB+' .fb-cs{display:block}',
 'html body #qw-ovl#qw-ovl#qw-ovl .opt{border:1px solid '+C.line+I+';border-radius:14px'+I+';padding:12px 14px'+I+';margin:0 0 10px'+I+';background:#fff'+I+';box-shadow:none'+I+';outline:0'+I+';box-sizing:border-box'+I+'}',
 /* 11-03 老闆：加了一台很不明顯 → 選 A：已加入的卡片綠框＋淡綠底＋右上「✓ 已加入購物車」；底部金額條有選東西時綠底 */
  'html body #qw-ovl#qw-ovl#qw-ovl .opt.sel{position:relative'+I+';border-color:'+C.ok+I+';background:#F3FAF6'+I+';box-shadow:inset 0 0 0 1px '+C.ok+',0 0 0 4px rgba(29,107,69,.10)'+I+';overflow:visible'+I+'}', 'html body #qw-ovl#qw-ovl#qw-ovl .opt.sel::before{content:"✓ 已加入購物車";position:absolute;top:-11px;right:14px;z-index:2;background:'+C.ok+';color:#fff;font-size:12px;font-weight:800;line-height:1;padding:5px 10px;border-radius:999px;box-shadow:0 2px 6px rgba(29,107,69,.25);pointer-events:none}', /* 11-03 老闆選 B：月曆不能選的日子灰底無框淡灰字；今天那格標「今天」 */
+/* 11-03 老闆：結帳選項選了只有黑框看不清楚 → 選 A：跟「已加入購物車」同一個綠：綠框＋淡綠底＋綠字＋左上 ✓（機齡、高度、油煙、稱呼、住宅類型、發票、載具） */
+ 'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qck-age button.sel,html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qck-ch button.sel,html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qiv-seg button.sel{position:relative'+I+';background:'+C.okWash+I+';background-image:none'+I+';border:2px solid '+C.ok+I+';color:'+C.ok+I+';-webkit-text-fill-color:'+C.ok+I+';box-shadow:0 0 0 3px rgba(29,107,69,.12)'+I+';overflow:visible'+I+'}',
+ 'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qck-age button.sel small,html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qiv-seg button.sel small{color:#2E7D55'+I+';-webkit-text-fill-color:#2E7D55'+I+'}',
+ 'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qck-age button.sel::before,html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qck-ch button.sel::before,html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qiv-seg button.sel::before{content:"✓";position:absolute;top:-9px;left:-9px;width:22px;height:22px;border-radius:50%;background:'+C.ok+';color:#fff;-webkit-text-fill-color:#fff;font-size:13px;font-weight:900;line-height:22px;text-align:center;z-index:1}',
+/* 11-03 老闆選 A：「聯絡」和「補充」合併成一頁，中間加小標分段 */
+ 'html body #qw-ovl#qw-ovl#qw-ovl .qck-sec{margin:22px 0 12px'+I+';padding-top:16px'+I+';border-top:1px solid '+C.line+I+';font-size:16px'+I+';font-weight:800'+I+';color:'+C.ink+I+'}',
  'html body #qw-cdcal#qw-cdcal#qw-cdcal .qwcd-d:not(.av):not(.sel){background:#EEF1F4'+I+';background-image:none'+I+';border-color:transparent'+I+';color:#A9B1BA'+I+';-webkit-text-fill-color:#A9B1BA'+I+';box-shadow:none'+I+';cursor:not-allowed'+I+';font-weight:500'+I+'}', 'html body #qw-cdcal#qw-cdcal#qw-cdcal .qwcd-d.rs-today{position:relative'+I+';flex-direction:column'+I+';gap:0'+I+';line-height:1.1'+I+'}', 'html body #qw-cdcal#qw-cdcal#qw-cdcal .qwcd-d.rs-today::after{content:"今天";display:block;font-size:10px;font-weight:800;color:'+C.red+';-webkit-text-fill-color:'+C.red+';line-height:1;margin-top:2px}',
  'html body #qw-ovl#qw-ovl#qw-ovl .s26c.rs-has,html body #qw-ovl#qw-ovl#qw-ovl .qwfoot > .s26c.s26c.rs-has{background:'+C.okWash+I+';background-image:none'+I+';border-color:#9FD0B4'+I+';color:'+C.ok+I+'}', 'html body #qw-ovl#qw-ovl#qw-ovl .s26c.rs-has *,html body #qw-ovl#qw-ovl#qw-ovl .qwfoot > .s26c.s26c.rs-has *{color:'+C.ok+I+';-webkit-text-fill-color:'+C.ok+I+'}',
 'html body #qw-ovl#qw-ovl#qw-ovl .opt .opt-main{width:auto'+I+';margin:0'+I+';padding:0'+I+'}',
@@ -6502,6 +6522,16 @@ FB+' .fb-cs{display:block}',
 /* 2026-11-01 老闆：日期頁「您選擇的方案」卡片右側放目前方案的人物插圖（標準＝OK 手勢、早鳥＝雞頭），改選的小框不放 */
 'html body #qw-cdcal#qw-cdcal .qwcd-sg.on{position:relative'+I+';overflow:visible'+I+';padding-right:86px'+I+'}',
 'html body #qw-cdcal#qw-cdcal .qwcd-sg.on .rs-fig{position:absolute;right:6px;bottom:0;height:calc(100% + 30px);width:auto;pointer-events:none;z-index:2;filter:drop-shadow(0 2px 3px rgba(22,32,43,.12))}',
+/* 11-03 老闆：開場畫面的手不會動 → 上面「共同」把動畫全關了，連有作用的也停了。恢復有意義的動作（系統設定「減少動態效果」的人仍然不動）：
+   開場的手、要點選的小手、填錯時抖一下、計算中／建立訂單的轉圈、日期頁時段提醒。裝飾性的（方案卡上下晃、電話圖示晃）維持不動。 */
+'@media (prefers-reduced-motion: no-preference){'
++'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qw.wel .qwh-hand{animation:qwhTap 2.4s ease-in-out infinite'+I+'}'
++'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qw.wel .qwh-hand.big{animation:qwhTap2 2.2s ease-in-out infinite'+I+'}'
++'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qw .qw-need i{animation:qwTap .9s infinite'+I+'}'
++'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qw-shake{animation:qwShake .45s'+I+'}'
++'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .qcf-sum .sp i,html body #qcf-ld#qcf-ld#qcf-ld .it.on i{animation:qcfSp .8s linear infinite'+I+'}'
++'html body #qw-cdcal#qw-cdcal#qw-cdcal .qwcd-sl.need .qwcd-slot{animation:qwcdNeed 1.4s ease-out infinite'+I+'}'
++'}',
 ''].join('\n');}
 function deco(){
   /* 老闆 11-01：「必選」「點我」這類深色底小標籤，字維持白色（跟現行一樣） */
@@ -6574,6 +6604,21 @@ css.textContent='#rs-more-bar{display:flex;align-items:center;gap:10px;margin:8p
  +'#rs-more-bar .rs-mtabs button{height:34px;padding:0 6px;border:1.5px solid #9FD0B4;background:#fff;color:#1D6B45;border-radius:999px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}'
  +'#rs-more-bar .rs-mtabs button.on{background:#1D6B45;border-color:#1D6B45;color:#fff}'
  +'@media(max-width:380px){#rs-more-bar{flex-wrap:wrap}#rs-more-bar .rs-mtabs{flex-basis:100%}}';
+document.head.appendChild(css);
+})();
+/* 2026-11-03 老闆選 A（只在新風格頁 r9v15r）：日期頁（#qw-cdcal，另一個視窗）右下角也要有「💬 問答」
+   日期視窗蓋在精靈上面，精靈原本的問答鈕被擋住 → 在「確認日期，前往結帳」右邊放一顆一樣的，按了等於按精靈的問答鈕（同一個小幫手）。 */
+(function(){
+if(window.__rsCdFb)return;window.__rsCdFb=1;
+function put(){var cd=document.getElementById('qw-cdcal');if(!cd||getComputedStyle(cd).display==='none')return;
+  var nav=cd.querySelector('.qwcd-nav');if(!nav||nav.querySelector('#rs-cd-fb'))return;
+  var b=document.createElement('button');b.type='button';b.id='rs-cd-fb';b.setAttribute('aria-label','常見問題小幫手');b.innerHTML='💬<small>問答</small>';
+  b.onclick=function(e){e.preventDefault();e.stopPropagation();var s=document.querySelector('#qw-ovl .fb-btn');if(s)s.click();};
+  nav.appendChild(b);}
+var tm=0;new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(put,60);}).observe(document.body,{childList:true,subtree:true});
+var css=document.createElement('style');css.id='rs-cd-fb-css';
+css.textContent='#qw-cdcal #rs-cd-fb{position:relative;flex:none;align-self:center;width:46px;height:46px;padding:0;margin:0;border-radius:50%;border:1.5px solid #C9D0D8;background:#fff;color:#16202B;font-size:20px;line-height:1;cursor:pointer}'
+ +'#qw-cdcal #rs-cd-fb small{position:absolute;top:-9px;right:-10px;background:#fff;border:1px solid #C9D0D8;color:#16202B;font-size:11.5px;font-weight:800;line-height:1;border-radius:999px;padding:3px 5px}';
 document.head.appendChild(css);
 })();
 
