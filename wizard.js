@@ -769,7 +769,7 @@ function _cfBusy(d){
   if(!rb||rb.getAttribute('data-qslock')!=null||rb.disabled)return true;/* 1SHOP 結帳鈕被鎖＝金額計算中，永遠尊重 */
   if(window.__qsAdding||_finishing||_cfClearing||_ckAddBusy)return true;
   if(!d||!d.it.length||d.pay==null)return true;
-  if(Date.now()-_cfChg<2000)return true;/* 購物車剛變動，等它穩定 */
+  if(Date.now()-_cfChg<(_ckOne?1000:2000))return true;/* 購物車剛變動，等它穩定（2026-11-03 D：新風格頁 1 秒；付款前 ckNext 還會再檢查一次） */
   var early=Date.now()-_cfT0<40000;/* 以下兩項最多等 40 秒；之後交給 1SHOP 結帳鈕本身的保護 */
   if(plan&&!d.cp.length)return true;/* 方案券還沒套上 → 2026-10-27 老闆選 A：不論等多久都不放行原價（原本 40 秒後放行，客人會多付 5～15%） */
   if(early&&window.__qsSwapBusy)return true;
@@ -949,7 +949,7 @@ function _cfLoad(on,n){
   var pn=plan==='early'?'早鳥85折':(plan==='std'?'標準方案折扣':'方案折扣');var _sv1=_svOn();
   var d=document.createElement('div');d.id='qcf-ld';d.setAttribute('role','status');d.setAttribute('aria-live','polite');
   /* 老闆 10-22 選：A 的步驟打勾＋B 的金色進度條 */
-  d.innerHTML='<div class="box"><div class="t">正在為您計算訂單金額</div><div class="bar"><b></b></div><div class="pct">0%</div><div class="s">約需 10～20 秒，請稍候</div>'
+  d.innerHTML='<div class="box"><div class="t">正在為您計算訂單金額</div><div class="bar"><b></b></div><div class="pct">0%</div><div class="s">'+(_ckOne?'約需 5～10 秒，請稍候':'約需 10～20 秒，請稍候')+'</div>'
    +'<div class="st"><div class="it on" data-k="1"><i></i>'+(_sv1?'加入到府場勘':'加入您選的清洗項目')+'</div><div class="it" data-k="2"><i></i>'+(_sv1?'確認場勘費（不適用折扣）':'套用'+pn)+'</div><div class="it" data-k="3"><i></i>確認應付金額</div></div></div>';
   document.body.appendChild(d);_cfLd=d;_cfLdP=0;_cfLdS=[false,false,false];/* 掛 body：掛在 #qw-ovl 裡，確認頁重畫(innerHTML)會把過場一起洗掉 */
   _cfLdTm=setInterval(function(){try{
@@ -963,7 +963,7 @@ function _cfLoad(on,n){
     /* 進度條：百分比是照步驟估的（第一步爬到 33、第二步 66、第三步 92，算好跳 100），不是真的秒數 */
     var cap=done?100:(st[1]?92:(st[0]?66:33));_cfLdP=done?100:Math.min(cap,_cfLdP+Math.max(0.5,(cap-_cfLdP)*0.07));
     var bb=_cfLd.querySelector('.bar b'),pp=_cfLd.querySelector('.pct');if(bb)bb.style.width=_cfLdP.toFixed(1)+'%';if(pp)pp.textContent=Math.floor(_cfLdP)+'%';
-    if(done){setTimeout(function(){_cfLoad(false);},450);clearInterval(_cfLdTm);_cfLdTm=null;}
+    if(done){setTimeout(function(){_cfLoad(false);},_ckOne?150:450);clearInterval(_cfLdTm);_cfLdTm=null;}
     else if(Date.now()-_cfLdT0>60000)_cfLoad(false);
   }catch(e){_cfLoad(false);}},300);}
 
@@ -2320,14 +2320,14 @@ var api={
           INDOOR.concat(OUTLIST).map(function(x){return [x.k,x.n,false];}).concat([['air','AIRMON',true],['dh','三菱重工除濕機',true],['hi','挑高施作',true],['fan','風鼓清洗',true]].concat(env!=='biz'?[['bz','商用/重油汙加價',true]]:[]))/* 2026-10-27 R5 老闆選 A：挑高、風鼓、家用重油煙也核對，少了補加（營業場所加價有 reconcileBz 自己補） */.forEach(function(p){var want=qty[p[0]]||0;if(want<=0)return;var r=resolve(p[1]);if(!r)return;for(var m=_cq(p[1]);m<want;m++)miss.push({btn:r.btn,pid:r.pid,addon:p[2],chk:p[1],want:m+1});});
           if(miss.length)jobs=jobs.concat(miss);else _verified=2;
           next();
-        },2500);
+        },(_ckOne&&_verified===1)?300:2500);/* 2026-11-03 D 第一階段（只在新風格頁）：每項加入時已經等到件數增加才加下一項，第一次核對不必再等 2.5 秒；有補加的第二次照舊 */
         return;
       }
       if(i>=jobs.length){
         try{var _ex={};_qtyItems().forEach(function(p){var w=qty[p[0]]||0;_ex[p[1]]=w;});window.__qwExpect=_ex;window.__qwFixN=0;}catch(e){}/* 2026-10-30 數量保護：記下客人在精靈選的數量 */
         window.__qsPlan=plan;window.__qsEnv=env;window.__qsAreaCls=areaCls;window.__qsAreaCity=areaCity;window.__qsAreaDist=areaDist;
         if(!_ufirst&&window.__qsSwapBusy===_addTk)window.__qsSwapBusy=false;/* 商品都加完了,交還自動補券 */
-        if(window.__qsApplyPlanCoupon&&!_ufirst)setTimeout(window.__qsApplyPlanCoupon,900);
+        if(window.__qsApplyPlanCoupon&&!_ufirst){if(_ckOne){try{window.__qsApplyPlanCoupon();}catch(e){}}else setTimeout(window.__qsApplyPlanCoupon,900);}/* 2026-11-03 D：新風格頁立刻套方案券。原本等 0.9 秒，自動補券會先放一張，再被這裡「先拿掉再放回」多跑一輪（早鳥實測多 1.4 秒） */
         if(_userCode){window.__qsUserCpAt=Date.now();window.__qsCpBusy=Date.now();_lockCheckout(true);
           if(_ufirst)setTimeout(function(){_userFirstApply(_userCode);},1500);
           else{
@@ -2342,7 +2342,7 @@ var api={
                 toast('您輸入的優惠碼折扣沒有比較多<br>已為您保留更優惠的方案折扣，這組碼請留著下次使用');
                 _cpBanner('same',_uc);}},500);
           }}/* 先讓方案券落地,再送客戶自己的碼:1SHOP 會留折扣多的那張 */
-        setTimeout(function(){window.__qsAdding=false;_finishing=false;},1800);
+        setTimeout(function(){window.__qsAdding=false;_finishing=false;},_ckOne?900:1800);
         /* 2026-10-22 第 7 步：不關精靈，改顯示「確認訂單」(精靈已被客人關掉時照舊帶到購物車) */
         if(window.__QW_CONFIRM&&ovl){_cfT0=Date.now();_cfSig='';_cfChg=Date.now();step='confirm';render();try{_ckSnapSave();}catch(e){}return;}
         close();toast('已為您加入購物車，可再調整或結帳');
