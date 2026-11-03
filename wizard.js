@@ -1055,6 +1055,27 @@ function _ckFanResHtml(){var r=_ckFanR;if(!r)return '';var t;
   else t='➕ 風鼓 '+(r.x+2)+' 個，需要加洗 <b>'+r.x+' 個</b><button type="button" class="qck-act gold" onclick="__qw.ckFanUse('+r.x+')">改選「3 個以上」並加入 '+r.x+' 個</button>';
   return '<div class="qck-fr">'+t+'</div>';}
 function _ckSlot(){var c=window.__qsCleanDate||'';return /上午/.test(c)?{v:'1',t:'上午'}:(/下午/.test(c)?{v:'2',t:'下午'}:{v:'0',t:'不指定'});/* 2026-10-28 老闆選 A：客人只看到上午／下午；1SHOP 收到的值（13點前／14-18點）不變 */}
+/* 2026-11-03 新風格頁「加購不離開精靈」：把精靈裡的台數同步進購物車。
+   精靈的 ＋／－ 只改精靈自己的數量，購物車要另外同步；購物車已經有東西，不能用 finish 全部重加（會重複）。
+   做法同 _ckSetAddon：沒有→先加 1 台；有了→直接改成目標數量；每步等 1SHOP 回應（剛按加入多等），每項最多 25 秒。 */
+var _moreIn=false,_moreBusy=false;
+function _moreSet(nm,target,cb){var t0=Date.now(),last=0,la=false,done=false;
+  var idx=function(){var c=_cartArr();for(var i=0;i<c.length;i++){if((c[i].ProductName||'').indexOf(nm)===0)return i;}return -1;};
+  var fin=function(ok){if(done)return;done=true;cb(ok);};
+  (function step(){try{
+    var q=_qtyByName(nm);if(q===target)return fin(true);
+    if(Date.now()-t0>25000)return fin(false);
+    if(Date.now()-last<(la?6000:2500)){setTimeout(step,300);return;}
+    last=Date.now();la=false;var ix=idx();
+    if(target<=0){var el=ix>=0?_cartRow(ix):null;var rb=el?[].slice.call(el.querySelectorAll('button,a,i,span')).filter(function(b){return (b.getAttribute('onclick')||'').indexOf('removeCartItem')>=0;})[0]:null;if(rb){try{window.removeCartItem?window.removeCartItem(rb):rb.click();}catch(e){try{rb.click();}catch(e2){}}}}
+    else if(ix<0){var r=_resolveBtn(nm);if(!r)return fin(false);la=true;try{window.viewProduct(r.btn,r.pid);}catch(e){}}
+    else{var cid=_cartRowId(ix);
+      if(cid&&window.cartChangeItem){try{window.cartChangeItem(cid,target);}catch(e){}}
+      else{var _el=_cartRow(ix);var _b=_el?[].slice.call(_el.querySelectorAll('button')).filter(function(b){var t=(b.textContent||'').trim();return t==='+'||t==='-';})[0]:null;if(_b&&window.selectQty)window.selectQty(_b,target-q);}}
+  }catch(e){}if(!done)setTimeout(step,300);})();}
+function _moreSync(cb){/* 主商品先（1SHOP 要先有清洗服務才收加購品），再室外機、風鼓、AIRMON、除濕機；挑高／重油煙／偏遠／營業場所由原本的自動校正處理 */
+  var L=INDOOR.concat(OUTLIST).concat(ADDON.filter(function(x){return /^(fan|air|dh)$/.test(x.k);})),i=0,bad=[];
+  (function nx(){if(i>=L.length)return cb(bad);var x=L[i++],t=qty[x.k]||0;if(_qtyByName(x.n)===t)return nx();_moreSet(x.n,t,function(ok){if(!ok)bad.push(x.n);nx();});})();}
 function _ckSetAddon(k,target){var nm=_CKA[k].nm,t0=Date.now(),last=0,tries=0,la=false;
   /* 2026-10-27 改穩：原本「連按 N 次加入」，1SHOP 慢的時候第 2 次會被吞掉（實測：加 2 台只加到 1 台）。
      改成一步一步：沒有→先加 1 台；有了→用購物車列的編號直接改成目標數量；每一步等 1SHOP 回應（最多 2.5 秒）再做下一步，總共最多 25 秒 */
@@ -1694,7 +1715,7 @@ function _qbHtml(i,ph,val,list,fn,rg){
     return '<button type="button" role="option" class="qb-it'+(on?' sel':'')+'" onclick="__qw.'+fn+'(&quot;'+_esc(v)+'&quot;)"><span>'+_esc(v)+'</span>'+(r&&!on?'<em>'+r+'</em>':'')+'</button>';}).join('')+'</div>';}
   return h+'</div>';}
 function open(){if(!document.getElementById('qw-style')){var s=document.createElement('style');s.id='qw-style';s.textContent=CSS;document.head.appendChild(s);}ovl=document.createElement('div');ovl.id='qw-ovl';document.body.appendChild(ovl);step=(_qwResume!=null?_qwResume:0);_qwResume=null;render();}
-function close(){try{_cfLoad(false);}catch(e){}if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
+function close(){_moreIn=false;/* 加購中按 X 關掉＝取消加購，下次開精靈不要還卡在加購模式 */try{_cfLoad(false);}catch(e){}if(ovl){ovl.parentNode.removeChild(ovl);ovl=null;}}
 /* 2026-10-25 精靈風格的確認／提示視窗（取代瀏覽器灰色 confirm/alert：字小、上面還寫網址、看起來像錯誤）
    o={title,html,ok,cancel(沒有=只有一顆鈕),onOk,onCancel}；手機返回鍵＝取消（app_preview 會呼叫 __qwDlgClose） */
 function _qwDlg(o){try{var old=document.getElementById('qw-dlg');if(old)old.parentNode.removeChild(old);
@@ -2111,7 +2132,13 @@ var api={
   ckFanUse:function(x){_ck.fan='ge3';_ckN.fan=x;_ckSetAddon('fan',x);},
   ckSet:function(k,v){_ck[k]=v;clearTimeout(window.__qwSnapT);window.__qwSnapT=setTimeout(_ckSnapSave,600);if(_ck.err[k]){delete _ck.err[k];var e=ovl&&ovl.querySelector('[data-ckerr="'+k+'"]');if(e)e.textContent='';var i=ovl&&ovl.querySelector('[data-ck="'+k+'"]');if(i)i.classList.remove('bad');}
     if(step==='confirm'&&(k==='agree'||k==='ack'||k==='out'))_cfTick();},
-  wbGo:function(){try{sessionStorage.removeItem('qw_more');}catch(e){}_ckWbHide();_ckResume();},
+  wbGo:function(){if(_moreIn){_ckWbHide();api.moreDone();return;}try{sessionStorage.removeItem('qw_more');}catch(e){}_ckWbHide();_ckResume();},
+  moreOn:function(){return _moreIn;},
+  moreDone:function(){if(!_moreIn||_moreBusy)return;_moreBusy=true;
+    var b=ovl?ovl.querySelector('.qwfoot .btn.pri'):null;if(b){b.disabled=true;b.textContent='加入購物車中…';}
+    _moreSync(function(bad){_moreBusy=false;_moreIn=false;_qmClr();
+      if(bad.length)_qwDlg({title:'購物車更新沒有成功',html:'「'+_esc(bad.join('、'))+'」的數量沒有更新成功。回到結帳確認後請再檢查一次；若持續失敗，請聯繫客服。'});
+      _ckResume();});},
   wbRe:function(){_qmClr();_ckWbHide();_ckSnapClear();var r=document.getElementById('qs-rewiz');if(r)r.click();},
   wbX:function(){_ckWbHide();_ckHideModal();if(ovl)close();},
   ckBack:function(){if(step==='ck2'){step='confirm';render();}else if(step==='ck3'){step='ck2';render();}},
@@ -2133,7 +2160,10 @@ var api={
       _ckSubmit();}
   },
   cfMore:function(){
-    if(step!=='confirm')return;clearInterval(_cfTm);_cfTm=null;close();
+    if(step!=='confirm')return;clearInterval(_cfTm);_cfTm=null;
+    /* 2026-11-03 老闆選 B（只在新風格頁 r9v15r）：不離開精靈，直接回到「機型」加購；完成時用 moreDone() 把台數同步進購物車再回確認頁 */
+    if(/r9v15r/.test(location.pathname)){_moreIn=true;try{sessionStorage.setItem('qw_more','1');}catch(e){}step=1;render();return;}
+    close();
     /* 2026-10-25 加購完要能回到精靈：記住「正在加購」，浮動條改成「回到結帳確認」 */
     try{sessionStorage.setItem('qw_more','1');}catch(e){}
     setTimeout(function(){var cb=document.getElementById('qs-contbtn');if(cb)cb.click();else _cfToCart();toast('選好要加購的項目後，按畫面下方的「回到結帳確認」',5000);},120);
@@ -2217,6 +2247,7 @@ var api={
     },180);
   },
   finish:function(){
+    if(_moreIn){api.moreDone();return;}/* 2026-11-03 加購中走到方案頁再按完成：不可「全部重加」（購物車已有東西會重複），改成同步差額 */
     try{_ck.agree=false;_ck.out=false;_ck.agreeAt=0;}catch(e){}/* 2026-10-27 O6：重新加入購物車＝內容可能變了，同意與室外機位置要重新勾 */
     _svFlow=false;_qmClr();
     /* 防重入用獨立旗標 _finishing;__qsAdding 會凍結所有保護機制(校正/車馬費/挑高/孤兒把關),
@@ -6222,7 +6253,7 @@ function apply(keep){
   var lightBg=new Map();
   info.forEach(function(x){
     var e=x.e,img=x.img&&x.img!=='none'&&!/url\(/.test(x.img)?x.img:'',gc=img?cols(img):[],btn=isBtn(e);
-    if(e.closest('.envnote')||e.closest('.rs-w')||e.closest('#qw-dlg'))return;
+    if(e.closest('.envnote')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar'))return;
     if(e.matches&&e.matches('#qw-ovl .opt,#qw-ovl .s26c,#qw-cdcal .qwcd-d:not(.av):not(.sel)'))return;/* 11-03 老闆選 B：月曆不能選的日子反灰，由 reskin2 樣式處理 *//* 11-03 老闆選 A：已加入的卡片綠框、底部金額條綠底，由 reskin2 樣式處理，這裡不自動改色 *//* 11-03 老闆截圖：確認視窗（要重新挑選嗎？等）由 reskin2 樣式完整處理，這裡不自動改色，否則會散成三塊 *//* 再洗提示條已由樣式程式改綠色，不可再被改回灰色。老闆 11-01：環境頁下方說明維持現行樣式 */
     if(/url\(/.test(x.img||''))return;/* 有照片的元素（機型分頁、橫幅）一律不動底圖 */
     /* 全螢幕的半透明遮罩（視窗後面那層）：維持半透明，只換成範例的淡深色，不可變成不透明白底 */
@@ -6260,7 +6291,7 @@ function apply(keep){
   /* 再依「新的底色」調整文字顏色 */
   function effBg(e){for(var p=e;p&&p.nodeType===1;p=p.parentElement){var s=getComputedStyle(p),c=rgb(s.backgroundColor);if(s.backgroundImage&&s.backgroundImage!=='none'&&!/url\(/.test(s.backgroundImage)){var g=cols(s.backgroundImage);if(g.length)return g[0];}if(c&&c[3]>.5)return c;}return [255,255,255,1];}
   info.forEach(function(x){
-    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
+    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
     var bg=effBg(e),light=lum(bg)>.6,nc=null;
     if(isLightTxt(x.c)&&light)nc=(x.c[3]<.9?SUB:INK);
     else if(isNavy(x.c))nc=light?INK:'#FFFFFF';
@@ -6499,4 +6530,51 @@ var busy=0,last=0;function run(){busy=0;last=Date.now();try{window.__rsColor(tru
 function go(){try{window.__rsMap();}catch(e){}run();
   new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var t=ms[i].target;if(t&&t.id==='rs-css2'||t.id==='rs-css')return;}if(!busy){busy=1;setTimeout(run,Math.max(120,400-(Date.now()-last)));}}).observe(document.body,{childList:true,subtree:true});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
+/* 2026-11-03 老闆選 B＋A（只在新風格頁 r9v15r）：確認頁「＋ 還要加購其他清洗項目」不離開精靈
+   流程在精靈本體 merged_base.js：cfMore 在 r9v15r 不關精靈、跳到「機型」並進入加購模式（__qw.moreOn()），
+   __qw.moreDone() 會把精靈裡的台數一步一步同步進購物車，再回到結帳確認。
+   這裡只負責畫面：上方「加購中」提示＋「室內機｜室外機｜加購品」三個分類鈕，主按鈕改成「✓ 完成加購，回到結帳確認」。 */
+(function(){
+var Q=window.__qw;if(!Q||!Q.moreOn||Q.__rsMoreUi)return;Q.__rsMoreUi=1;
+var TABS=[[1,'室內機'],[2,'室外機'],[3,'加購品']];
+/* 精靈是 position:fixed，offsetParent 永遠是 null，要用 display 判斷有沒有開著 */
+function ovl(){var o=document.getElementById('qw-ovl');return o&&getComputedStyle(o).display!=='none'?o:null;}
+/* 提示一律放在副標題（p.sub）下面：室內機頁的 p.sub 在 .qw-stick 裡、機型大圖上面（老闆 11-03：放機型圖下面很怪），室外機、加購品頁在 .qw 底下 */
+function head(){var o=ovl(),s=o&&o.querySelector('.qw');return s?(s.textContent||'').replace(/\s+/g,' ').slice(0,180):'';}
+function anchor(o){return o.querySelector('.qw p.sub')||o.querySelector('.qw h2');}
+function cur(h){if(/第\s*4\s*步/.test(h))return 3;if(/第\s*3\s*步/.test(h))return /室外機嗎/.test(h)?2:1;return 0;}
+function deco(){
+  var o=ovl(),on=false;try{on=Q.moreOn();}catch(e){}
+  var bar=document.getElementById('rs-more-bar');
+  if(!on||!o){if(bar)bar.remove();return;}
+  var h=head(),c=cur(h),st=anchor(o);
+  if(!c||!st){if(bar)bar.remove();return;}
+  if(!bar||bar.previousElementSibling!==st){if(bar)bar.remove();bar=document.createElement('div');bar.id='rs-more-bar';st.insertAdjacentElement('afterend',bar);}
+  if(bar.getAttribute('data-c')!==String(c)){bar.setAttribute('data-c',String(c));
+    bar.innerHTML='<b class="rs-mt">🛒 加購中</b>'
+      +'<div class="rs-mtabs">'+TABS.map(function(t){return '<button type="button" data-rs-go="'+t[0]+'"'+(t[0]===c?' class="on"':'')+'>'+t[1]+'</button>';}).join('')+'</div>';}
+  /* 室外機頁底下的「我自己選就好」會關掉精靈，加購中不要出現 */
+  var sk=o.querySelector('.qw .skip');if(sk)sk.style.setProperty('display','none','important');
+  var pri=o.querySelector('.qwfoot .btn.pri');
+  if(pri&&!pri.disabled&&pri.textContent.trim()!=='✓ 完成加購，回到結帳確認'){pri.innerHTML='✓ 完成加購，回到結帳確認';}
+  if(pri)pri.setAttribute('data-rs-more','1');
+}
+document.addEventListener('click',function(e){
+  var on=false;try{on=Q.moreOn();}catch(x){}if(!on)return;var t=e.target;
+  var g=t.closest&&t.closest('#rs-more-bar [data-rs-go]');
+  if(g){e.preventDefault();e.stopImmediatePropagation();try{Q.go(+g.getAttribute('data-rs-go'));}catch(x){}setTimeout(deco,30);return;}
+  var p=t.closest&&t.closest('#qw-ovl .qwfoot .btn.pri[data-rs-more]');
+  if(p&&cur(head())){e.preventDefault();e.stopImmediatePropagation();try{Q.moreDone();}catch(x){}}
+},true);
+var tm=0;new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(deco,40);}).observe(document.body,{childList:true,subtree:true});
+var css=document.createElement('style');css.id='rs-more-css';
+css.textContent='#rs-more-bar{display:flex;align-items:center;gap:10px;margin:8px 0 10px;padding:8px 10px;background:#EAF5EF;border:1.5px solid #9FD0B4;border-radius:12px;color:#1D6B45}'
+ +'#rs-more-bar .rs-mt{flex:none;font-size:14px;font-weight:800;color:#1D6B45;white-space:nowrap}'
+ +'#rs-more-bar .rs-mtabs{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}'
+ +'#rs-more-bar .rs-mtabs button{height:34px;padding:0 6px;border:1.5px solid #9FD0B4;background:#fff;color:#1D6B45;border-radius:999px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}'
+ +'#rs-more-bar .rs-mtabs button.on{background:#1D6B45;border-color:#1D6B45;color:#fff}'
+ +'@media(max-width:380px){#rs-more-bar{flex-wrap:wrap}#rs-more-bar .rs-mtabs{flex-basis:100%}}';
+document.head.appendChild(css);
+})();
+
 })();}
