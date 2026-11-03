@@ -6223,7 +6223,7 @@ function apply(keep){
   info.forEach(function(x){
     var e=x.e,img=x.img&&x.img!=='none'&&!/url\(/.test(x.img)?x.img:'',gc=img?cols(img):[],btn=isBtn(e);
     if(e.closest('.envnote')||e.closest('.rs-w')||e.closest('#qw-dlg'))return;
-    if(e.matches&&e.matches('#qw-ovl .opt,#qw-ovl .s26c'))return;/* 11-03 老闆選 A：已加入的卡片綠框、底部金額條綠底，由 reskin2 樣式處理，這裡不自動改色 *//* 11-03 老闆截圖：確認視窗（要重新挑選嗎？等）由 reskin2 樣式完整處理，這裡不自動改色，否則會散成三塊 *//* 再洗提示條已由樣式程式改綠色，不可再被改回灰色。老闆 11-01：環境頁下方說明維持現行樣式 */
+    if(e.matches&&e.matches('#qw-ovl .opt,#qw-ovl .s26c,#qw-cdcal .qwcd-d:not(.av):not(.sel)'))return;/* 11-03 老闆選 B：月曆不能選的日子反灰，由 reskin2 樣式處理 *//* 11-03 老闆選 A：已加入的卡片綠框、底部金額條綠底，由 reskin2 樣式處理，這裡不自動改色 *//* 11-03 老闆截圖：確認視窗（要重新挑選嗎？等）由 reskin2 樣式完整處理，這裡不自動改色，否則會散成三塊 *//* 再洗提示條已由樣式程式改綠色，不可再被改回灰色。老闆 11-01：環境頁下方說明維持現行樣式 */
     if(/url\(/.test(x.img||''))return;/* 有照片的元素（機型分頁、橫幅）一律不動底圖 */
     /* 全螢幕的半透明遮罩（視窗後面那層）：維持半透明，只換成範例的淡深色，不可變成不透明白底 */
     if(x.w>=innerWidth-4&&x.h>=innerHeight*0.85&&x.bg&&x.bg[3]<0.95&&x.bg[3]>0.05&&(!img)){setp(e,'background-color','rgba(22,32,43,.45)');setp(e,'background-image','none');e.setAttribute('data-rs','1');return;}
@@ -6252,12 +6252,15 @@ function apply(keep){
     if(x.bw>0&&x.bc&&(isGold(x.bc)||isNavy(x.bc))){setp(e,'border-color',isNavy(x.bc)?INK:LINE2);e.setAttribute('data-rs','1');}
   });
   void document.body.offsetHeight;
+  /* 11-03 老闆選 B：月曆標出「今天」（台灣時間，比對畫面上的年月） */
+  var cal=document.getElementById('qw-cdcal');if(cal){var ml=((cal.querySelector('#qwcd-ml')||{}).textContent||'').match(/(\d{4})\s*年\s*(\d{1,2})\s*月/),tw=new Date(Date.now()+8*3600e3);
+    cal.querySelectorAll('.qwcd-d').forEach(function(d){d.classList.toggle('rs-today',!!(ml&&+ml[1]===tw.getUTCFullYear()&&+ml[2]===tw.getUTCMonth()+1&&parseInt(d.textContent,10)===tw.getUTCDate()));});}
   /* 底部金額條：有選東西時加 rs-has（綠底），沒選時拿掉 */
   document.querySelectorAll('#qw-ovl .s26c').forEach(function(b){b.classList.toggle('rs-has',/已選\s*[1-9]/.test(b.textContent||''));});
   /* 再依「新的底色」調整文字顏色 */
   function effBg(e){for(var p=e;p&&p.nodeType===1;p=p.parentElement){var s=getComputedStyle(p),c=rgb(s.backgroundColor);if(s.backgroundImage&&s.backgroundImage!=='none'&&!/url\(/.test(s.backgroundImage)){var g=cols(s.backgroundImage);if(g.length)return g[0];}if(c&&c[3]>.5)return c;}return [255,255,255,1];}
   info.forEach(function(x){
-    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#qw-ovl .s26c'))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
+    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
     var bg=effBg(e),light=lum(bg)>.6,nc=null;
     if(isLightTxt(x.c)&&light)nc=(x.c[3]<.9?SUB:INK);
     else if(isNavy(x.c))nc=light?INK:'#FFFFFF';
@@ -6433,7 +6436,9 @@ FB+' .fb-cs{display:block}',
 /* 2026-11-01 老闆：商品卡兩側太貼 → 卡片內左右留 14px，清洗項目灰框內縮，往下滑提示拿掉外框 */
 'html body #qw-ovl#qw-ovl#qw-ovl .opt{border:1px solid '+C.line+I+';border-radius:14px'+I+';padding:12px 14px'+I+';margin:0 0 10px'+I+';background:#fff'+I+';box-shadow:none'+I+';outline:0'+I+';box-sizing:border-box'+I+'}',
 /* 11-03 老闆：加了一台很不明顯 → 選 A：已加入的卡片綠框＋淡綠底＋右上「✓ 已加入購物車」；底部金額條有選東西時綠底 */
- 'html body #qw-ovl#qw-ovl#qw-ovl .opt.sel{position:relative'+I+';border-color:'+C.ok+I+';background:#F3FAF6'+I+';box-shadow:inset 0 0 0 1px '+C.ok+',0 0 0 4px rgba(29,107,69,.10)'+I+';overflow:visible'+I+'}', 'html body #qw-ovl#qw-ovl#qw-ovl .opt.sel::before{content:"✓ 已加入購物車";position:absolute;top:-11px;right:14px;z-index:2;background:'+C.ok+';color:#fff;font-size:12px;font-weight:800;line-height:1;padding:5px 10px;border-radius:999px;box-shadow:0 2px 6px rgba(29,107,69,.25);pointer-events:none}', 'html body #qw-ovl#qw-ovl#qw-ovl .s26c.rs-has,html body #qw-ovl#qw-ovl#qw-ovl .qwfoot > .s26c.s26c.rs-has{background:'+C.okWash+I+';background-image:none'+I+';border-color:#9FD0B4'+I+';color:'+C.ok+I+'}', 'html body #qw-ovl#qw-ovl#qw-ovl .s26c.rs-has *,html body #qw-ovl#qw-ovl#qw-ovl .qwfoot > .s26c.s26c.rs-has *{color:'+C.ok+I+';-webkit-text-fill-color:'+C.ok+I+'}',
+ 'html body #qw-ovl#qw-ovl#qw-ovl .opt.sel{position:relative'+I+';border-color:'+C.ok+I+';background:#F3FAF6'+I+';box-shadow:inset 0 0 0 1px '+C.ok+',0 0 0 4px rgba(29,107,69,.10)'+I+';overflow:visible'+I+'}', 'html body #qw-ovl#qw-ovl#qw-ovl .opt.sel::before{content:"✓ 已加入購物車";position:absolute;top:-11px;right:14px;z-index:2;background:'+C.ok+';color:#fff;font-size:12px;font-weight:800;line-height:1;padding:5px 10px;border-radius:999px;box-shadow:0 2px 6px rgba(29,107,69,.25);pointer-events:none}', /* 11-03 老闆選 B：月曆不能選的日子灰底無框淡灰字；今天那格標「今天」 */
+ 'html body #qw-cdcal#qw-cdcal#qw-cdcal .qwcd-d:not(.av):not(.sel){background:#EEF1F4'+I+';background-image:none'+I+';border-color:transparent'+I+';color:#A9B1BA'+I+';-webkit-text-fill-color:#A9B1BA'+I+';box-shadow:none'+I+';cursor:not-allowed'+I+';font-weight:500'+I+'}', 'html body #qw-cdcal#qw-cdcal#qw-cdcal .qwcd-d.rs-today{position:relative'+I+';flex-direction:column'+I+';gap:0'+I+';line-height:1.1'+I+'}', 'html body #qw-cdcal#qw-cdcal#qw-cdcal .qwcd-d.rs-today::after{content:"今天";display:block;font-size:10px;font-weight:800;color:'+C.red+';-webkit-text-fill-color:'+C.red+';line-height:1;margin-top:2px}',
+ 'html body #qw-ovl#qw-ovl#qw-ovl .s26c.rs-has,html body #qw-ovl#qw-ovl#qw-ovl .qwfoot > .s26c.s26c.rs-has{background:'+C.okWash+I+';background-image:none'+I+';border-color:#9FD0B4'+I+';color:'+C.ok+I+'}', 'html body #qw-ovl#qw-ovl#qw-ovl .s26c.rs-has *,html body #qw-ovl#qw-ovl#qw-ovl .qwfoot > .s26c.s26c.rs-has *{color:'+C.ok+I+';-webkit-text-fill-color:'+C.ok+I+'}',
 'html body #qw-ovl#qw-ovl#qw-ovl .opt .opt-main{width:auto'+I+';margin:0'+I+';padding:0'+I+'}',
 'html body #qw-ovl#qw-ovl#qw-ovl .opt .oi{border:0'+I+';min-width:0'+I+'}','html body #qw-ovl#qw-ovl#qw-ovl .opt .oi>.on,html body #qw-ovl#qw-ovl#qw-ovl .opt .oi>.od{border-bottom:0'+I+'}',
 'html body #qw-ovl#qw-ovl#qw-ovl .opt .step-ctl{border:1.5px solid '+C.line2+I+';border-radius:999px'+I+'}','html body #qw-ovl#qw-ovl#qw-ovl .opt.sel .step-ctl,html body #qw-ovl#qw-ovl#qw-ovl .opt .step-ctl.on{border-color:'+C.ink+I+'}',
