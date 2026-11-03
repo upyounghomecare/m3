@@ -815,8 +815,8 @@ function _cfTick(){
       var st=q.querySelector('.qw-stick'),off=(st?st.offsetHeight:0)+12,to=Math.max(0,bx.getBoundingClientRect().top-q.getBoundingClientRect().top+q.scrollTop-off);
       try{q.scrollTo({top:to,behavior:'smooth'});}catch(e){q.scrollTop=to;}
       setTimeout(function(){try{if(Math.abs(q.scrollTop-to)>30)q.scrollTop=to;var t=_ckTodo();if(!t.length)return;var el=ovl.querySelector(_ckSel(t[0][0]));if(el){el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}}catch(e){}},700);
-    }catch(e){}},2000);}
-  var _why=ck?_ckStopWhy():'';var gh=busy?'<span class="l1">金額確認中…</span>':(ck&&_why?'<span class="l1">無法結帳</span><span class="l2">'+_why+'</span>':(ck?(aok?'<span class="l1">下一步：填聯絡資料</span><span class="l2">應付 '+_cfMoney(d.pay)+'</span>':'<span class="l1 qb-b">下一步：填聯絡資料</span><span class="l2 qb-b">請先完成上方的確認</span><span class="l1 qb-s">還有 '+(_ckTodo().length||1)+' 題沒完成</span><span class="l2 qb-s">點這裡帶我去 ↓</span>'):'<span class="l1">立即結帳</span><span class="l2">應付 '+_cfMoney(d.pay)+'</span>'));
+    }catch(e){}},_ckOne?800:2000);}/* 新風格頁：0.8 秒就捲到題目（客人才知道下面還有題目要回答） */
+  var _why=ck?_ckStopWhy():'';var gh=busy?'<span class="l1">金額確認中…</span>':(ck&&_why?'<span class="l1">無法結帳</span><span class="l2">'+_why+'</span>':(ck?(aok?'<span class="l1">下一步：填聯絡資料</span><span class="l2">應付 '+_cfMoney(d.pay)+'</span>':'<span class="l1 qb-b">下一步：填聯絡資料</span><span class="l2 qb-b">'+(_ckOne?'請先回答下方 '+(_ckTodo().length||1)+' 題':'請先完成上方的確認')+'</span><span class="l1 qb-s">還有 '+(_ckTodo().length||1)+' 題沒完成</span><span class="l2 qb-s">點這裡帶我去 ↓</span>'):'<span class="l1">立即結帳</span><span class="l2">應付 '+_cfMoney(d.pay)+'</span>'));
   if(go.getAttribute('data-h')!==gh){go.setAttribute('data-h',gh);go.innerHTML=gh;}
   /* 結帳模式：同意區沒完成也讓按鈕可以按（按了會把同意區捲出來搖一下），只有金額計算中才真的鎖 */
   go.disabled=!!busy;go.classList.toggle('qcf-busy',!!busy||(ck&&!aok));go.classList.toggle('qb-need',!busy&&ck&&!aok&&!_why);
@@ -830,7 +830,8 @@ function _cfTick(){
       if(box)box.classList.toggle('hint-on',!!_tg);}}catch(e){}/* 2026-10-25 老闆選 C 款 */
     if(box){box.classList.toggle('need',n>0);var bd=box.querySelector('.qck-h b');if(n>0){if(!bd){bd=document.createElement('b');box.querySelector('.qck-h').appendChild(bd);}bd.textContent='還有 '+n+' 題';}else if(bd)bd.parentNode.removeChild(bd);}
     if(ft&&n>0&&!busy){if(!bar){bar=document.createElement('button');bar.type='button';bar.id='qya';bar.onclick=function(){_ckGoTodo();};ft.insertBefore(bar,ft.firstChild);}
-      var tx='<i>👇</i><span>'+(n>1?'還有 '+n+' 題沒完成：'+td.map(function(x){return x[1];}).join('、'):'還有 1 題：'+td[0][1])+'</span><b>點我</b>';if(bar.getAttribute('data-t')!==tx){bar.setAttribute('data-t',tx);bar.innerHTML=tx;}}
+      /* 2026-11-03 老闆（只在新風格頁）：「客戶會知道要往下選擇 5 個題目？」→ 講清楚方向：往下還有 N 題 */
+      var tx='<i>👇</i><span>'+(_ckOne?(n>1?'往下還有 '+n+' 題要回答：'+td.map(function(x){return x[1];}).join('、'):'往下還有 1 題：'+td[0][1]):(n>1?'還有 '+n+' 題沒完成：'+td.map(function(x){return x[1];}).join('、'):'還有 1 題：'+td[0][1]))+'</span><b>點我</b>';if(bar.getAttribute('data-t')!==tx){bar.setAttribute('data-t',tx);bar.innerHTML=tx;}}
     else if(bar)bar.parentNode.removeChild(bar);}catch(e){}}}
 function _cfCss(){
   if(!document.getElementById('qcf-st')){var st=document.createElement('style');st.id='qcf-st';st.textContent=''
