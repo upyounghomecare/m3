@@ -2342,7 +2342,7 @@ var api={
                 toast('您輸入的優惠碼折扣沒有比較多<br>已為您保留更優惠的方案折扣，這組碼請留著下次使用');
                 _cpBanner('same',_uc);}},500);
           }}/* 先讓方案券落地,再送客戶自己的碼:1SHOP 會留折扣多的那張 */
-        setTimeout(function(){window.__qsAdding=false;_finishing=false;},_ckOne?900:1800);
+        setTimeout(function(){window.__qsAdding=false;_finishing=false;if(_ckOne){try{reconcileAdjust();}catch(e){}}},_ckOne?900:1800);/* 新風格頁：解除凍結後立刻核對加購品價差（不等 0.6 秒巡查） */
         /* 2026-10-22 第 7 步：不關精靈，改顯示「確認訂單」(精靈已被客人關掉時照舊帶到購物車) */
         if(window.__QW_CONFIRM&&ovl){_cfT0=Date.now();_cfSig='';_cfChg=Date.now();step='confirm';render();try{_ckSnapSave();}catch(e){}return;}
         close();toast('已為您加入購物車，可再調整或結帳');
@@ -4301,7 +4301,7 @@ function _setCorr(M){if(_adjSyncing)return;M=Math.max(0,Math.round(M));
  if(!ops.length)return;
  _adjSyncing=true;if(!window.__qsCorrBusy)window.__qsCorrBusy=Date.now();var i2=0;
  (function step(){
-   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;},900);return;}
+   if(i2>=ops.length){setTimeout(function(){_adjSyncing=false;if(_ckOne){try{reconcileAdjust();}catch(e){}}},_ckOne?400:900);return;}/* 2026-11-03 AIRMON 等待（只在新風格頁）：補完 0.4 秒就放開並立刻核對一次（原本 0.9 秒＋等下一輪 0.6 秒巡查）；沒達標會再補，跟原本一樣 */
    var op=ops[i2++];
    try{
      if(op.t==='add'){if(map[op.d]&&window.viewProduct)window.viewProduct(map[op.d].btn,map[op.d].pid);}
