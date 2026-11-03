@@ -1005,6 +1005,16 @@ function _ckAgreeOK(){if(_svOn())return !!_ck.agree;return _ckTodo().length===0;
 /* 2026-11-03 老闆選 A（只在新風格頁 r9v15r）：「聯絡」和「補充」合併成一頁 → 結帳只剩兩段 */
 var _ckOne=/r9v15r/.test(location.pathname);
 function _ckSub(k){return '<span class="qx-sub">'+(_ckOne?['① 確認','② 聯絡與付款資料']:['① 確認','② 聯絡','③ 補充']).map(function(t,i){return '<span class="'+(i<k?'ok':(i===k?'on':''))+'">'+(i<k?'✓ ':'')+t+'</span>';}).join('')+'</span>';}
+/* 2026-11-03 老闆（只在新風格頁）：「為什麼點完油煙那題，不會自動跳到『我已詳閱並同意』？」→ 選 A：
+   每答完一題，下一個還沒完成的項目如果不在畫面裡（被頁首或底部按鈕區擋住），就平滑捲過去再抖一下；已經看得到就不捲，免得畫面一直跳。
+   全部答完不捲（「下一步」按鈕固定在底部，會直接變成可以按）。 */
+function _ckGoNext(){if(!_ckOne)return;setTimeout(function(){try{if(step!=='confirm'||!ovl)return;var t=_ckTodo();if(!t.length)return;
+  var el=ovl.querySelector(_ckSel(t[0][0])),c=ovl.querySelector('.qw');if(!el||!c)return;
+  var cr=c.getBoundingClientRect(),st=c.querySelector('.qw-stick'),top=cr.top+(st?st.offsetHeight:0)+8,f=c.querySelector('.qwfoot'),bot=(f?f.getBoundingClientRect().top:cr.bottom)-8,r=el.getBoundingClientRect();
+  if(r.top>=top&&r.bottom<=bot)return;
+  var to=Math.max(0,c.scrollTop+r.top-top-12);try{c.scrollTo({top:to,behavior:'smooth'});}catch(e){c.scrollTop=to;}
+  setTimeout(function(){try{if(Math.abs(c.scrollTop-to)>30)c.scrollTop=to;el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}catch(e){}},650);
+}catch(e){}},160);}
 function _ckShake(sel){try{var el=ovl&&ovl.querySelector(sel);if(!el)return;var c=ovl.querySelector('.qw');
   /* 用畫面位置換算（offsetTop 是相對最近的定位容器，會算錯）；扣掉手機固定在上方的標題區 */
   if(c){var st=c.querySelector('.qw-stick'),off=(st?st.offsetHeight:0)+16;c.scrollTop=Math.max(0,el.getBoundingClientRect().top-c.getBoundingClientRect().top+c.scrollTop-off);}el.classList.remove('qw-shake');void el.offsetWidth;el.classList.add('qw-shake');}catch(e){}}
@@ -2130,7 +2140,7 @@ var api={
   },
   /* 2026-10-22 精靈內結帳 */
   ckPick:function(k,v){_ck[k]=v;_ckSnapSave();if(k==='rType'||k==='rCar'){delete _ck.err.rNum;delete _ck.err.rTitle;delete _ck.err.rUBN;delete _ck.err.rLove;}if(k==='age'&&v!=='10-15年')_ck.ack=false;if(k==='env'&&v!=='社區')_ck.mgmt=false;if(k==='fan'&&v!=='unk')_ckFanR=null;delete _ck.err[k];
-    if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();}else render();},
+    if(step==='confirm'){var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();_cfTick();_ckGoNext();}else render();},
   /* 2026-10-28 W2：同意勾選裡的兩個連結。服務規範＝現有的完整服務說明；隱私權政策＝賣場自己的隱私權頁（另開分頁，不打斷結帳） */
   ckRules:function(){try{api.seeDetail();}catch(e){}},
   ckPrivacy:function(){try{window.open('https://upyoung.my1shop.com/privacy','_blank','noopener');}catch(e){}},
@@ -2145,7 +2155,7 @@ var api={
   ckFanLook:function(){_ckFanR=_fanFind(_ckFanQ);var a=ovl&&ovl.querySelector('.qck-agree');if(a)a.innerHTML=_ckAgreeHtml();},
   ckFanUse:function(x){_ck.fan='ge3';_ckN.fan=x;_ckSetAddon('fan',x);},
   ckSet:function(k,v){_ck[k]=v;clearTimeout(window.__qwSnapT);window.__qwSnapT=setTimeout(_ckSnapSave,600);if(_ck.err[k]){delete _ck.err[k];var e=ovl&&ovl.querySelector('[data-ckerr="'+k+'"]');if(e)e.textContent='';var i=ovl&&ovl.querySelector('[data-ck="'+k+'"]');if(i)i.classList.remove('bad');}
-    if(step==='confirm'&&(k==='agree'||k==='ack'||k==='out'))_cfTick();},
+    if(step==='confirm'&&(k==='agree'||k==='ack'||k==='out')){_cfTick();if(v)_ckGoNext();}},
   wbGo:function(){if(_moreIn){_ckWbHide();api.moreDone();return;}try{sessionStorage.removeItem('qw_more');}catch(e){}_ckWbHide();_ckResume();},
   moreOn:function(){return _moreIn;},
   moreDone:function(){if(!_moreIn||_moreBusy)return;_moreBusy=true;
