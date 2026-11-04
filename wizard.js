@@ -1230,6 +1230,18 @@ try{(function(){var tm=null,coarse=function(){try{return matchMedia('(pointer:co
   document.addEventListener('focusin',function(e){try{var t=e.target;if(!coarse()||!t||!/^(INPUT|TEXTAREA)$/.test(t.tagName)||/^(checkbox|radio|button)$/.test(t.type||''))return;var o=document.getElementById('qw-ovl');if(!o||!o.contains(t))return;
     clearTimeout(tm);o.classList.add('qw-kb');setTimeout(function(){try{var q=o.querySelector('.qw');if(!q)return;var r=t.getBoundingClientRect(),vh=(window.visualViewport?window.visualViewport.height:innerHeight);q.scrollTop+=r.top-vh/2+r.height/2;}catch(x){}},350);}catch(x){}},true);
   document.addEventListener('focusout',function(e){try{var o=document.getElementById('qw-ovl');if(!o)return;clearTimeout(tm);tm=setTimeout(function(){var a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&o.contains(a)))o.classList.remove('qw-kb');},250);}catch(x){}},true);})();}catch(e){}
+/* 2026-11-04 老闆選 A：全面測試 66 次有 2 次「結帳視窗沒打開」（12 秒內 1SHOP 沒回應，推測當下網路／1SHOP 慢；記錄器重跑 12 次都在 0.5 秒內打開）。
+   新風格頁：最多等 25 秒，超過 8 秒提示「網路較慢」；還沒開就再請 1SHOP 開一次（這一步還沒建立訂單，不會重複下單），再等 12 秒。其他頁維持 12 秒 */
+function _ckOpenWait(cb){var mo=function(){return _ckModal()===1||_ckModal()===2;},sl=false;
+  if(!_ckOne)return _ckWait(mo,12000,cb);
+  var tm=setTimeout(function(){if(!mo()&&_ckLd){sl=true;_ckLoad(true,1,'網路較慢，正在幫您打開結帳畫面…');}},8000);
+  var end=function(k){clearTimeout(tm);if(k&&sl&&_ckLd)_ckLoad(true,1,'馬上帶您前往付款，請稍候');cb(k);};
+  _ckWait(mo,25000,function(ok){if(ok)return end(ok);
+    window.__qwCkRetry=(window.__qwCkRetry||0)+1;
+    /* 第一次的回應晚到時，1SHOP 會再呼叫 openViewCheckoutModal 把視窗拉回第 1 步 → 已經在第 2、3 步就不理它，免得打亂填到一半／送出中的畫面 */
+    try{var ov=window.openViewCheckoutModal;if(ov&&!ov.__qwG){var g=function(){if(_ckModal()>=2)return;return ov.apply(this,arguments);};g.__qwG=1;window.openViewCheckoutModal=g;}}catch(e){}
+    try{if(window.checkoutType1&&!_ckModal())checkoutType1(0,'cart',0);}catch(e){}
+    _ckWait(mo,12000,end);});}
 function _ckSubmit(){
   if(_ckRun)return;
   if(window.__qwCkLockUntil&&Date.now()<window.__qwCkLockUntil){_qwDlg({title:'請先不要再按送出',html:'剛才的訂單<b>可能已經成立</b>，為避免重複下單，請先看手機簡訊或 Email 有沒有「訂單成立」通知。<br>5 分鐘內都沒收到，請<a href="'+LINE_CS+'" target="_blank" rel="noopener">用 LINE 詢問客服</a>。'});return;}_ckRun=true;window.__qwCkResult=null;
@@ -1252,7 +1264,7 @@ function _ckSubmit(){
        場勘時：把舊視窗藏起來不給客人看到，當場把方案框改成場勘版、勾同意、按繼續，一氣呵成 */
     if(!r.skip&&_svOn()){try{var _ov=document.getElementById('qs-ovl');if(_ov)_ov.style.opacity='0';hidePlanForSurvey();if(!r.ag.checked)r.ag.click();try{r.ag.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}r.go.disabled=false;r.go.click();}catch(e){}}
     else if(!r.skip){if(!r.ag.checked)r.ag.click();setTimeout(function(){try{r.go.disabled=false;r.go.click();}catch(e){}},350);}
-    _ckWait(function(){return _ckModal()===1||_ckModal()===2;},12000,function(ok){
+    _ckOpenWait(function(ok){
       if(!ok)return _ckFail('結帳視窗沒打開');
       var m=document.getElementById('checkout'),nb=function(){return m.querySelector('.subtotal button');};
       var goStep2=function(cb){if(_ckModal()===2)return cb();try{nb().click();}catch(e){}_ckWait(function(){return _ckModal()===2;},8000,function(k){if(!k)return _ckFail('第 1 步沒過');cb();});};
@@ -5515,6 +5527,29 @@ var NEG=/洗車|移機|裝冷氣|安裝冷氣|新冷氣|買冷氣|賣冷氣|冷�
   var CHIPS=[['可以指定假日嗎？','可以指定時段或假日施工嗎？'],['取消要收費嗎？','日期確認後想改約或取消，規費是多少？'],['清洗要多久？','冷氣清洗大約需要多久時間？'],['吊隱式要加洗風鼓嗎？','怎麼知道我的吊隱機型要不要加洗風鼓費用？']];/* 顯示短字、送出完整題目，保證直接配到 */
   var _base=(function(){var u=[].slice.call(document.scripts).map(function(x){return x.src||'';}).filter(function(x){return /upyounghomecare\/m3@[^\/]+\/wizard\.js/.test(x);})[0];return u?u.replace(/wizard\.js.*$/,''):'';})();
   /* 2026-10-30 老闆：按「找真人客服」把客人最後看的題目帶給客服 → LINE「預先填好訊息」，客人按傳送就送出（LINE 規定不能自動送） */
+  /* 2026-11-04 老闆選 A（只在新風格頁 r9v15r）：①依客人「現在在哪一步」推薦 4 題（題目都是題庫原題，答案不變）③每個答案下方問「有幫到您嗎？」，按「沒有」直接帶這題去 LINE 真人客服 */
+  var _rsFaq=/r9v15r/.test(location.pathname);
+  var STEP_CHIPS={
+    area:['服務地區',[['你們服務哪些地區？','你們服務哪些地區？偏遠地區要加價嗎？'],['顯示「尚未提供服務」？','我的地區顯示「尚未提供服務」怎麼辦？'],['可以假日施工嗎？','可以指定時段或假日施工嗎？'],['價格是多少？','清洗服務的價格是多少？']]],
+    env:['使用環境',[['營業場所要加價嗎？','營業場所、重油煙要加價嗎？怎麼算？'],['大樓社區要先做什麼？','大樓、社區、公寓施工前需要先做什麼？'],['機齡怎麼查？','如何查詢我的冷氣機齡？'],['老舊冷氣還能洗嗎？','我的冷氣使用多年，還適合清洗嗎？']]],
+    indoor:['室內機',[['有服務其他品牌嗎？','有服務其他品牌的冷氣嗎？'],['機型在哪裡看？','從哪裡可看到機型／機號？'],['吊隱式要加洗風鼓嗎？','怎麼知道我的吊隱機型要不要加洗風鼓費用？'],['不確定要洗哪些？','到府場勘估價是什麼？多少錢？']]],
+    outdoor:['室外機',[['室外機一定要洗嗎？','為什麼室外機需要清洗？一定要一起清洗嗎？'],['室外機怎麼收費？','室外機清洗的費用怎麼算？會不會另收車馬費？'],['可以只洗室外機嗎？','可以只清洗室外機嗎？'],['室外機怎麼洗？','室外機是如何清洗的？']]],
+    addon:['加購',[['加購品會打折嗎？','除濕機、AIRMON 加購品會打折嗎？怎麼送、怎麼裝？'],['挑高還能洗嗎？','冷氣若裝在挑高或特殊位置，還能清洗嗎？'],['油煙重要加價嗎？','營業場所、重油煙要加價嗎？怎麼算？'],['現場可以加洗嗎？','現場可以臨時加洗嗎？']]],
+    plan:['方案',[['早鳥和標準差在哪？','早鳥方案與標準方案有什麼不同？怎麼選？'],['優惠碼能一起用嗎？','優惠碼可以跟方案折扣一起用嗎？'],['取消要收費嗎？','日期確認後想改約或取消，規費是多少？'],['可以洗完再付款嗎？','可以服務完成後再付款嗎？']]],
+    date:['期望到府日期',[['可以選假日嗎？','可以指定時段或假日施工嗎？'],['選了就一定是那天嗎？','選了期望到府日期，就一定是那天到府嗎？'],['多久會接到電話？','下單後多久會接到聯絡？'],['之後可以改期嗎？','日期確認後想改約或取消，規費是多少？']]],
+    confirm:['結帳確認',[['機齡怎麼查？','如何查詢我的冷氣機齡？'],['挑高還能洗嗎？','冷氣若裝在挑高或特殊位置，還能清洗嗎？'],['油煙重要加價嗎？','營業場所、重油煙要加價嗎？怎麼算？'],['到府後無法服務會收費嗎？','技師到府後發現無法服務，會收費嗎？']]],
+    contact:['聯絡與付款',[['發票怎麼開？','發票如何開立？'],['刷卡失敗怎麼辦？','刷卡失敗、付款沒成功怎麼辦？'],['多久會接到電話？','下單後多久會接到聯絡？'],['需要全程在家嗎？','我需要全程在家嗎？']]]};
+  function _stepNow(){try{var cd=document.getElementById('qw-cdcal');if(cd&&getComputedStyle(cd).display!=='none')return 'date';
+    var h=(document.querySelector('#qw-ovl .qw h2')||{}).textContent||'';
+    var M=[[/服務地區/,'area'],[/使用環境/,'env'],[/室內機/,'indoor'],[/室外機/,'outdoor'],[/特殊項目|加購/,'addon'],[/多快安排|方案/,'plan'],[/確認訂單/,'confirm'],[/聯絡|付款資料|補充/,'contact']];
+    for(var i=0;i<M.length;i++)if(M[i][0].test(h))return M[i][1];}catch(e){}return '';}
+  function _stepChips(){if(!_rsFaq)return null;var k=_stepNow(),c=k&&STEP_CHIPS[k];if(!c)return null;return ['您正在看「'+c[0]+'」這一步，這幾題最多人問 👇<br>也可以直接打字問',c[1]];}
+  function _fbAdd(el){if(!_rsFaq||!el)return;var row=document.createElement('div');row.className='fb-help';
+    row.innerHTML='<span>有幫到您嗎？</span><button type="button" class="y">👍 有</button><a class="n" target="_blank" rel="noopener">👎 沒有，找真人</a>';
+    var n=row.querySelector('.n');n.href=lineUrl();
+    row.querySelector('.y').onclick=function(){row.innerHTML='<span class="ok">謝謝您的回饋 🙏</span>';};
+    n.onclick=function(){n.href=lineUrl();setTimeout(function(){row.innerHTML='<span class="ok">已幫您帶著這一題去 LINE 真人客服 💬</span>';},50);};el.appendChild(row);}
+  if(_rsFaq){var _fst=document.createElement('style');_fst.textContent='#fb-sh .fb-help{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:10px;padding-top:8px;border-top:1px dashed #D9DFE7;font-size:13px;color:#4F5B69}#fb-sh .fb-help button,#fb-sh .fb-help a{border:1.5px solid #C9D0D8;background:#fff;color:#16202B;border-radius:999px;padding:4px 12px;font:800 13px/1.3 inherit;font-family:inherit;text-decoration:none;cursor:pointer}#fb-sh .fb-help .y{border-color:#9FD0B4;color:#1D6B45;background:#EAF5EF}#fb-sh .fb-help .ok{color:#1D6B45;font-weight:800}';(document.head||document.documentElement).appendChild(_fst);}
   var _last=null;
   function lineMsg(){var m=!_last?'【常見問題小幫手】我想問客服：':(_last.hit?'【常見問題小幫手】我剛看了「'+_last.v+'」，想再問客服：':'【常見問題小幫手】我想問：「'+_last.v+'」（常見問題裡找不到）');return m.slice(0,240);}
   function lineUrl(){return 'https://line.me/R/oaMessage/%40063kttbk/?'+encodeURIComponent(lineMsg());}
@@ -5526,12 +5561,12 @@ var NEG=/洗車|移機|裝冷氣|安裝冷氣|新冷氣|買冷氣|賣冷氣|冷�
        0.34～1.0 列出最接近的 2～3 題讓客人點；完全沒相關的才說找不到 */
     var D=decide(q,r),sug=D.sug,sure=D.sure;if(sure&&D.top)b=D.top;
     _last=sure?{hit:true,v:b.it.q}:{hit:false,v:q.slice(0,60)};
-    if(D.kind==='greet'){_last=null;say('ai','您好！想問什麼都可以直接打，例如「可以假日來嗎」「多少錢」「多久洗一次」，或點下面常見的問題 👇');chips(CHIPS);}
+    if(D.kind==='greet'){_last=null;say('ai','您好！想問什麼都可以直接打，例如「可以假日來嗎」「多少錢」「多久洗一次」，或點下面常見的問題 👇');chips((_stepChips()||[0,CHIPS])[1]);}
     else if(D.kind==='human'){say('ai','這部分請直接用 LINE 跟真人客服聯繫，我們會盡快回覆您 🙏');chips([]);}
     else if(D.kind==='topic'){say('ai','關於「'+esc(q)+'」，大家最常問這幾題，點一下就能看答案 👇');chips(sug);}
     else if(!sure&&sug.length){say('ai','您是不是想問下面這幾題？點一下就能看答案 👇');chips(sug);}
     else if(!sure){say('ai','這題我在常見問題裡找不到答案 🙇<br>建議直接用 LINE 問真人客服，我們會盡快回覆。');chips(['清洗服務的價格是多少？','日期確認後想改約或取消，規費是多少？']);}
-    else{say('ai',fmt(b.it.a)+'<div class="src">答案來自：常見問題「'+esc(b.it.q)+'」</div>'+(/Email 綁定/.test(b.it.a)?'<a class="fb-bind" href="'+BIND_URL+'" target="_blank" rel="noopener">🔐 到 LINE 完成 Email 綁定</a>':''));var rel=r.filter(function(x){return x.it!==b.it;}).slice(0,3).filter(function(x){return x.kw>0||x.tf>=0.6;}).map(function(x){return x.it.q;}).slice(0,2);if(rel.length){say('ai','<span style="font-size:13px;color:#66727F">你可能也想知道：</span>');chips(rel);}}
+    else{var _ans=say('ai',fmt(b.it.a)+'<div class="src">答案來自：常見問題「'+esc(b.it.q)+'」</div>'+(/Email 綁定/.test(b.it.a)?'<a class="fb-bind" href="'+BIND_URL+'" target="_blank" rel="noopener">🔐 到 LINE 完成 Email 綁定</a>':''));_fbAdd(_ans);var rel=r.filter(function(x){return x.it!==b.it;}).slice(0,3).filter(function(x){return x.kw>0||x.tf>=0.6;}).map(function(x){return x.it.q;}).slice(0,2);if(rel.length){say('ai','<span style="font-size:13px;color:#66727F">你可能也想知道：</span>');chips(rel);}}
     /* 2026-10-30 老闆：答案長時原本捲到最底，題目和答案開頭被捲掉 → 改成停在剛問的那一題（題目在最上面） */
     var lg=document.querySelector('#fb-sh .log');try{lg.scrollTop=lg.scrollHeight;lg.scrollTop=Math.max(0,lg.scrollTop+_me.getBoundingClientRect().top-lg.getBoundingClientRect().top-8);}catch(e){lg.scrollTop=lg.scrollHeight;}}
   function open(){if(document.getElementById('fb-sh'))return;var w=document.createElement('div');w.id='fb-sh';
@@ -5539,7 +5574,7 @@ var NEG=/洗車|移機|裝冷氣|安裝冷氣|新冷氣|買冷氣|賣冷氣|冷�
     document.body.appendChild(w);
     if(_base){var pp=w.querySelector('.p'),im=document.createElement('img');im.className='fb-cs';im.alt='';im.onerror=function(){pp.classList.remove('cs');};im.src=_base+'faq-cs.webp';pp.appendChild(im);pp.classList.add('cs');
       var fc=new Image();fc.onload=function(){pp.style.setProperty('--fbface','url('+_base+'faq-cs-face.webp)');pp.classList.add('av');};fc.src=_base+'faq-cs-face.webp';}
-    say('ai','您好！想問什麼都可以打在下面，或點常見的問題 👇');chips(CHIPS);
+    var _cs=_stepChips();say('ai',_cs?_cs[0]:'您好！想問什麼都可以打在下面，或點常見的問題 👇');chips(_cs?_cs[1]:CHIPS);
     w.addEventListener('click',function(e){if(e.target===w||e.target.closest('.h button'))w.parentNode.removeChild(w);});
     w.querySelector('form').addEventListener('submit',function(e){e.preventDefault();var i=w.querySelector('input');ask(i.value);i.value='';});}
   window.__qwFaqLineUrl=lineUrl;
