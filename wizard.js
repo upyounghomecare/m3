@@ -1957,7 +1957,12 @@ function showCleanDatePicker(pl,onDone,opt){
   var pv=ov.querySelector('[data-nav="-1"]'),nx=ov.querySelector('[data-nav="1"]');
   pv.disabled=(view<=minMonth);nx.disabled=(view>=maxMonth);
  }
+ var _rsPrev=false;
  function need(){var on=!!(selDate&&!selSlot);var sl=ov.querySelector('.qwcd-sl'),nt=ov.querySelector('.qwcd-needtip');if(sl)sl.classList.toggle('need',on);if(nt)nt.style.display=on?'':'none';
+  /* 2026-11-04 老闆（新風格頁）：「按下日期後，時段要比照『結帳前請確認』的視覺提示」→ 時段正上方置中紅色「請點選下方一個時段 👇」、時段按鈕金框、選了日期就捲到時段並抖一下（跟結帳確認頁同一套） */
+  if(_ckOne&&!ED&&sl){if(nt)nt.style.display='none';var hp=ov.querySelector('.rs-cdhint');if(on&&!hp){hp=document.createElement('div');hp.className='rs-cdhint';hp.setAttribute('aria-hidden','true');hp.textContent='請點選下方一個時段 👇';sl.parentNode.insertBefore(hp,sl);}if(!on&&hp)hp.parentNode.removeChild(hp);sl.classList.toggle('rs-todo',on);
+   if(on&&!_rsPrev){setTimeout(function(){try{var bd=ov.querySelector('.qwcd-bd'),tg=ov.querySelector('.rs-cdhint')||sl;if(bd){var r=sl.getBoundingClientRect(),r0=tg.getBoundingClientRect(),br=bd.getBoundingClientRect();if(r.bottom>br.bottom-8||r0.top<br.top)bd.scrollTo({top:bd.scrollTop+r0.top-br.top-Math.max(20,(br.height-(r.bottom-r0.top))/2),behavior:'smooth'});}sl.classList.remove('rs-flash');void sl.offsetWidth;sl.classList.add('rs-flash');}catch(e){}},60);}
+   _rsPrev=on;}
   if(sl){sl.classList.toggle('off',!selDate);[].forEach.call(sl.querySelectorAll('.qwcd-slot'),function(b){b.disabled=!selDate;});}var ot=ov.querySelector('.qwcd-offtip');if(ot)ot.style.display=selDate?'none':'';
   /* 2026-10-19 老闆：選了日期要提示點時段；小手機時段在畫面外就捲過去 */
   if(on&&sl){var bd=ov.querySelector('.qwcd-bd');if(bd){var r=sl.getBoundingClientRect(),br=bd.getBoundingClientRect();if(r.bottom>br.bottom-4)bd.scrollTop+=r.bottom-br.bottom+10;}}}
@@ -6312,7 +6317,7 @@ function apply(keep){
   var lightBg=new Map();
   info.forEach(function(x){
     var e=x.e,img=x.img&&x.img!=='none'&&!/url\(/.test(x.img)?x.img:'',gc=img?cols(img):[],btn=isBtn(e);
-    if(e.closest('.envnote')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb,#qw-ovl .fx-hint,#qw-ovl .qck-auto,#qw-cdcal #qwcd-sum'))return;/* 11-03 結帳選項選取綠色、日期頁問答鈕：由 reskin2／more 模組處理 */
+    if(e.closest('.envnote')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb,#qw-ovl .fx-hint,#qw-ovl .qck-auto,#qw-cdcal #qwcd-sum,#qw-cdcal .rs-cdhint,#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot'))return;/* 11-03 結帳選項選取綠色、日期頁問答鈕：由 reskin2／more 模組處理 */
     if(e.matches&&e.matches('#qw-ovl .opt,#qw-ovl .s26c,#qw-cdcal .qwcd-d:not(.av):not(.sel)'))return;/* 11-03 老闆選 B：月曆不能選的日子反灰，由 reskin2 樣式處理 *//* 11-03 老闆選 A：已加入的卡片綠框、底部金額條綠底，由 reskin2 樣式處理，這裡不自動改色 *//* 11-03 老闆截圖：確認視窗（要重新挑選嗎？等）由 reskin2 樣式完整處理，這裡不自動改色，否則會散成三塊 *//* 再洗提示條已由樣式程式改綠色，不可再被改回灰色。老闆 11-01：環境頁下方說明維持現行樣式 */
     if(/url\(/.test(x.img||''))return;/* 有照片的元素（機型分頁、橫幅）一律不動底圖 */
     /* 全螢幕的半透明遮罩（視窗後面那層）：維持半透明，只換成範例的淡深色，不可變成不透明白底 */
@@ -6350,7 +6355,7 @@ function apply(keep){
   /* 再依「新的底色」調整文字顏色 */
   function effBg(e){for(var p=e;p&&p.nodeType===1;p=p.parentElement){var s=getComputedStyle(p),c=rgb(s.backgroundColor);if(s.backgroundImage&&s.backgroundImage!=='none'&&!/url\(/.test(s.backgroundImage)){var g=cols(s.backgroundImage);if(g.length)return g[0];}if(c&&c[3]>.5)return c;}return [255,255,255,1];}
   info.forEach(function(x){
-    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb,#qw-ovl .fx-hint,#qw-ovl .qck-auto,#qw-cdcal #qwcd-sum')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
+    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb,#qw-ovl .fx-hint,#qw-ovl .qck-auto,#qw-cdcal #qwcd-sum,#qw-cdcal .rs-cdhint,#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
     var bg=effBg(e),light=lum(bg)>.6,nc=null;
     if(isLightTxt(x.c)&&light)nc=(x.c[3]<.9?SUB:INK);
     else if(isNavy(x.c))nc=light?INK:'#FFFFFF';
@@ -6540,6 +6545,12 @@ FB+' .fb-cs{display:block}',
  'html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal #qwcd-sum.rs-cdtodo b{color:#8A4B00'+I+';-webkit-text-fill-color:#8A4B00'+I+'}','html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal #qwcd-sum.rs-cdtodo b.go{margin-left:auto'+I+';flex:none'+I+';background:#B42318'+I+';color:#fff'+I+';-webkit-text-fill-color:#fff'+I+';border-radius:999px'+I+';padding:3px 11px'+I+';font-size:13px'+I+'}',
  'html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal #qwcd-ok small{display:block'+I+';font-size:12px'+I+';font-weight:700'+I+';opacity:.92'+I+';margin-top:1px'+I+'}',
  '@media (prefers-reduced-motion: no-preference){html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal .rs-flash{animation:qwShake .45s'+I+'}}',
+/* 11-04 老闆：時段提示比照「結帳前請確認」：置中紅色提示＋時段按鈕金框 */
+ 'html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal .rs-cdhint{display:block'+I+';width:max-content'+I+';margin:6px auto 8px'+I+';background:#C0392B'+I+';color:#fff'+I+';-webkit-text-fill-color:#fff'+I+';border-radius:999px'+I+';padding:3px 12px'+I+';font-size:13px'+I+';font-weight:900'+I+';line-height:1.5'+I+';letter-spacing:.5px'+I+'}',
+ 'html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot{border:2px solid #D4A947'+I+';background:#FFFCF3'+I+'}',
+ 'html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot{position:relative'+I+';overflow:visible'+I+'}','html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot::after{content:"";position:absolute;left:-2px;top:-2px;right:-2px;bottom:-2px;border-radius:inherit;pointer-events:none}',
+ '@keyframes rsRing{0%{box-shadow:0 0 0 0 rgba(212,169,71,.7)}70%{box-shadow:0 0 0 9px rgba(212,169,71,0)}100%{box-shadow:0 0 0 0 rgba(212,169,71,0)}}',
+ '@media (prefers-reduced-motion: no-preference){html body #qw-cdcal#qw-cdcal#qw-cdcal#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot::after{animation:rsRing 1.4s ease-out infinite}}',/* 時段按鈕本身的 box-shadow 被新風格鎖成 none（!important 蓋過動畫），改在 ::after 外圈做金色光暈一閃一閃 */
 /* 11-04 老闆：「✓ 手機號碼格式正確」顯示成紅字 → 綠色；錯的維持紅色 */
  'html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .fx-hint.ok{color:'+C.ok+I+';-webkit-text-fill-color:'+C.ok+I+'}','html body #qw-ovl#qw-ovl#qw-ovl#qw-ovl .fx-hint.no{color:#B42318'+I+';-webkit-text-fill-color:#B42318'+I+'}',
 /* 11-04 老闆：「期望日期會不會太小」→ 自動帶入的欄位（服務地址、期望服務時段等）改成跟輸入框一樣的灰框，主文字放大 */
