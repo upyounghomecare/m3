@@ -780,7 +780,7 @@ function _cfBusy(d){
   return false;}
 function _cfBody(d,busy){
   var e=_esc,h='<div class="qcf-info"><span>📍 '+e((areaCity||'')+' '+(areaDist||''))+'</span><span>'+(env==='biz'?'🏢 營業場所':'🏠 家用')+'</span>'
-   +'<span>🗓 '+((window.__qsCleanDate&&window.__qsCleanDate!=='未指定')?(_svOn()?'期望場勘：':'期望到府：')+e(window.__qsCleanDate):(_svOn()?'場勘日期：由專人與您約定':'到府日期：由專人與您約定'))+'</span></div>';
+   +'<span>🗓 '+((window.__qsCleanDate&&window.__qsCleanDate!=='未指定')?(_svOn()?'期望場勘：':'期望到府：')+e(_ckOne?_cdWk(window.__qsCleanDate):window.__qsCleanDate):(_svOn()?'場勘日期：由專人與您約定':'到府日期：由專人與您約定'))+'</span></div>';
   if(_svOn())h+='<div class="qcf-plan"><div class="ck">🔍</div><div><div class="t1">您選擇的服務</div><div class="t2">到府場勘估價</div><div class="t3">技師到府勘查，依實際機型與環境提供確定報價；📞 專人將於 0.5～1 個工作天內來電約時（付款後起算、不含假日）</div></div></div><div class="qcf-pn" style="margin:0 0 10px">※ 場勘後若未安排清洗，此費用不予退還<br>📅 約定場勘日期前可免費取消／改約；約定後依標準方案的取消表收費；一經派工即不予退還</div>';
   else if(plan)h+='<div class="qcf-plan"><div class="ck">✓</div><div><div class="t1">您選擇的方案</div><div class="t2">'+(plan==='early'?'早鳥方案・約時起 30 天後到府':'標準方案・約時起 2 週內到府')+'</div><div class="t3">📞 專人將於 0.5～1 個工作天內來電約時（付款後起算、不含假日）</div></div></div>';
   if(!d||!d.it.length)return h+'<div class="qcf-sum busy"><div class="sp"><i></i>正在為您加入購物車…</div></div>';
@@ -1032,6 +1032,22 @@ function _ckAgreeHtml(){
   h+='<ul class="qck-rules">'+_CK_RULES.map(function(r){return '<li>'+r+'</li>';}).join('')+'</ul>'
    +(_stop?'</div>':'<label class="qck-chk qck-ag'+(_ck.agree?' on':'')+'"><input type="checkbox"'+(_ck.agree?' checked':'')+' onchange="__qw.ckSet(\'agree\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"><span>我已詳閱並同意<a class="qck-lk" onclick="event.preventDefault();event.stopPropagation();__qw.ckRules()">賣場服務規範</a>與<a class="qck-lk" onclick="event.preventDefault();event.stopPropagation();__qw.ckPrivacy()">隱私權政策</a></span></label></div>');
   return h;}
+/* 2026-11-04 老闆（新風格頁）：「會看的消費者就是會看，不會看就是不會看」→ 不能服務的條件不要等到最後才問：
+   第 2 步選完環境，接著先問「機齡」「安裝高度」兩題（跟結帳確認頁同一組答案 _ck.age／_ck.hgt，結帳時自動帶入、還能改）。
+   選到 15 年以上或 4 米以上，當場告知無法服務，不能往下走；3.5～4 米的台數與加價照舊在結帳確認頁處理（不動金額）。 */
+/* 2026-11-04 老闆（新風格頁）：期望日期加上星期幾。只改畫面顯示，存進訂單的 __qsCleanDate 格式不變（同意存證、解析都照舊） */
+function _cdWk(v){var m=String(v||'').match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})(.*)$/);if(!m)return v;var d=new Date(+m[1],+m[2]-1,+m[3]);if(isNaN(d))return v;return m[1]+'/'+m[2]+'/'+m[3]+'（'+'日一二三四五六'.charAt(d.getDay())+'）'+m[4].replace(/^（(.*)）$/,'$1');}
+var _ENV_PRE=false;/* 2026-11-04 老闆：「先處理期望日期加星期幾就好」→ 機齡／高度提前問先關著，要上線時改成 true */
+function _envPreOk(){return !!(_ck.age&&_ck.hgt&&_ck.age.indexOf('15年以上')<0&&_ck.hgt!=='hi4');}
+function _envPreStop(){return !!((_ck.age&&_ck.age.indexOf('15年以上')>=0)||_ck.hgt==='hi4');}
+function _envPreHtml(){var mark=function(h,k){return _ck[k]?h:h.replace('data-todo="'+k+'"','data-todo="'+k+'" data-empty="1"');};
+  var h='<div class="qck-box qck-pre"><div class="qck-h">開始前，先確認 2 件事</div>'
+   +mark(_ckQ('age','最舊的那台冷氣大約用了幾年？',[['10年內','10年內','可保固'],['10-15年','10-15年','不提供保固'],['15年以上（恕不服務）','15年以上','恕不服務','no']],'有好幾台的話，以最舊的那台為準'),'age');
+  if(_ck.age&&_ck.age.indexOf('15年以上')>=0)return h+_ckStopBox('很抱歉，機齡 15 年以上恕無法服務','零件老化風險高，清洗容易造成損壞。如果不確定年份，可以先問客服怎麼查。')+'</div>';
+  h+=mark(_ckQ('hgt','冷氣安裝高度（地面到室內機頂端）？',[['lo','3.5米以下','不加價'],['mid','3.5～4 米','每台 +NT$1,000'],['hi4','4米以上','恕不服務','no']]),'hgt');
+  if(_ck.hgt==='hi4')return h+_ckStopBox('很抱歉，安裝高度 4 米以上恕無法服務','需要特殊高空設備，技師無法安全施作。如果不確定高度，可以先拍照問客服。')+'</div>';
+  if(_ck.hgt==='mid')h+='<div class="qck-nt">3.5～4 米的有幾台，最後結帳前會再請您確認（每台 +NT$1,000）</div>';
+  return h+'</div>';}
 function _ckStopBox(t,why){return '<div class="qck-stop2"><b>'+t+'</b>'+why+'<a class="qck-line" href="'+LINE_CS+'" target="_blank" rel="noopener">💬 LINE 詢問客服</a><span class="alt">選錯了？直接改選上面的選項就能繼續</span></div>';}
 /* 2026-10-25 現場條件題目（只在精靈內結帳、非場勘） */
 var _CKA={hi:{nm:'挑高施作',p:1000,u:'台'},bz:{nm:'商用/重油汙加價',p:1000,u:'台'},fan:{nm:'風鼓清洗',p:500,u:'個'}};
@@ -1138,7 +1154,7 @@ function _ckHtml(k){
      +'<div class="qck-f"><div class="qck-l">服務地址<b>*</b></div><div class="qck-auto"><div>'+_esc((areaCity||'')+' '+(areaDist||''))+'<em>✓ 已依您選的地區帶入</em></div></div></div>'
      +_ckIn('addr','',0,'例：中山路一段 12 號 5 樓','text','')
      +'<div class="qck-addrtip"><span>📍</span><span>不用再打縣市區域，請寫到<b>門牌號碼和樓層</b>，技師才找得到。<br><span class="ex">例：中山路一段 12 號 5 樓</span></span></div>'/* 2026-10-27 O10 老闆選 A：淡黃提示框（原本用 qck-hint 跟結帳前紅色提示撞名，變成紅色跳動、不換行） */
-     +'<div class="qck-f"><div class="qck-l">期望服務時段</div><div class="qck-auto"><div>'+_esc((!cd||cd==='未指定')?'不指定，由專人與您約定':cd)+'<em>✓ 依您選的期望日期帶入</em></div></div></div>';
+     +'<div class="qck-f"><div class="qck-l">期望服務時段</div><div class="qck-auto"><div>'+_esc((!cd||cd==='未指定')?'不指定，由專人與您約定':(_ckOne?_cdWk(cd):cd))+'<em>✓ 依您選的期望日期帶入</em></div></div></div>';
   }
   if(k===22)b+='<div class="qck-sec">住家與發票</div>';
   if(k===3||k===22){
@@ -1491,7 +1507,9 @@ function render(){
     +'<div class="env-g '+(env?'has':'need')+'">'+[['home',IMG_HOME,'一般家用'],['biz',IMG_SHOP,'營業場所']].map(function(o){var on=env===o[0];
       return '<button type="button" class="env-o '+(on?'sel':'')+'" aria-pressed="'+on+'" onclick="__qw.pickEnv(&quot;'+o[0]+'&quot;)"><img src="'+o[1]+'" alt="'+o[2]+'"'+(o[0]==='biz'?' onerror="this.onerror=null;this.src=&quot;'+IMG_SHOP_OLD+'&quot;"':'')+'><span class="env-rd" aria-hidden="true">✓</span>'+(on?'<span class="env-sb">✓ 您選擇的</span>':'')+'</button>';}).join('')+'</div>'
     +'<div class="envnote">選「營業場所」後，之後選的室內機、室外機，每台會自動幫你算好加價 <b>$1,000</b>（也一起享有方案折扣）</div>'
-    +'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri'+(env?'':' qw-needbtn')+'" onclick="'+(env?'__qw.go(1)':'__qw.needPick(&quot;.env-g&quot;)')+'">'+(env?'下一步：室內機':'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">還沒選環境</span><span style="display:block;line-height:1.35">👆 請先點上方一個</span>')+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    +((_ckOne&&_ENV_PRE&&env)?_envPreHtml():'')
+    +((_ckOne&&_ENV_PRE&&env&&!_envPreOk())?('<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri qw-needbtn" onclick="__qw.needPick(&quot;'+(_envPreStop()?'.qck-pre .qck-stop2':'.qck-pre .qck-age')+'&quot;)">'+(_envPreStop()?'<span style="display:block;line-height:1.35">無法服務</span><span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">請看上方說明或 LINE 詢問客服</span>':'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">還有 '+((_ck.age?0:1)+(_ck.hgt?0:1))+' 題沒回答</span><span style="display:block;line-height:1.35">👆 請先回答上方問題</span>')+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>'):'')
+    +((_ckOne&&_ENV_PRE&&env&&!_envPreOk())?'':'<div class="nav"><button class="btn gho" onclick="__qw.go(&quot;area&quot;)">上一步</button><button class="btn pri'+(env?'':' qw-needbtn')+'" onclick="'+(env?'__qw.go(1)':'__qw.needPick(&quot;.env-g&quot;)')+'">'+(env?'下一步：室內機':'<span style="display:block;font-size:11.5px;font-weight:700;opacity:.85;line-height:1.3">還沒選環境</span><span style="display:block;line-height:1.35">👆 請先點上方一個</span>')+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>');
   } else if(step===1){
     var groups={};INDOOR.forEach(function(x){(groups[x.grp]=groups[x.grp]||[]).push(x);});
     var body='',_gk=Object.keys(groups),_gt='';
