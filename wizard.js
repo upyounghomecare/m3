@@ -6343,6 +6343,7 @@ if(/r9v15r|v8cs91/.test(location.pathname)){(function(){
 (function(){
 var INK='#16202B',SUB='#4F5B69',MUTE='#68737F',LINE='#E1E5EA',LINE2='#C9D0D8',RED='#C8102E',REDINK='#A50E26',REDWASH='#FCEFF1',
     SAVE='#7A5A12',SAVEWASH='#FBF5E6',GROUND='#F4F5F7',DIS='#AEB6BF';
+/* 2026-11-06 老闆手機：加購視窗「確認加購」勾選後深底深字（灰底時被補成深色字，勾選後沒有再補一次）→ 這顆按鈕不經過自動補色，完全由 reskin2 的樣式表決定 */
 var ROOTS='#qw-ovl,#qw-cdcal,#qw-dlg,#qw-terms,#fb-sh,#qwb-ovl,#qcf-ld,#qw-pc,#qs-cartg,#qs-fab,#qs-contbtn-wrap,.order-alert';
 var PROPS=['background','background-image','background-color','color','border-color','box-shadow','text-shadow','font-family','-webkit-text-fill-color'];
 function rgb(s){var m=String(s).match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);return m?[+m[1],+m[2],+m[3],m[4]===undefined?1:+m[4]]:null;}
@@ -6372,7 +6373,7 @@ function apply(keep){
   var lightBg=new Map();
   info.forEach(function(x){
     var e=x.e,img=x.img&&x.img!=='none'&&!/url\(/.test(x.img)?x.img:'',gc=img?cols(img):[],btn=isBtn(e);
-    if(e.closest('.envnote')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb,#qw-ovl .fx-hint,#qw-ovl .qck-auto,#qw-cdcal #qwcd-sum,#qw-cdcal .rs-cdhint,#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot'))return;/* 11-03 結帳選項選取綠色、日期頁問答鈕：由 reskin2／more 模組處理 */
+    if(e.closest('.envnote')||e.closest('#qw-terms .qwt-ok')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb,#qw-ovl .fx-hint,#qw-ovl .qck-auto,#qw-cdcal #qwcd-sum,#qw-cdcal .rs-cdhint,#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot'))return;/* 11-03 結帳選項選取綠色、日期頁問答鈕：由 reskin2／more 模組處理 */
     if(e.matches&&e.matches('#qw-ovl .opt,#qw-ovl .s26c,#qw-cdcal .qwcd-d:not(.av):not(.sel)'))return;/* 11-03 老闆選 B：月曆不能選的日子反灰，由 reskin2 樣式處理 *//* 11-03 老闆選 A：已加入的卡片綠框、底部金額條綠底，由 reskin2 樣式處理，這裡不自動改色 *//* 11-03 老闆截圖：確認視窗（要重新挑選嗎？等）由 reskin2 樣式完整處理，這裡不自動改色，否則會散成三塊 *//* 再洗提示條已由樣式程式改綠色，不可再被改回灰色。老闆 11-01：環境頁下方說明維持現行樣式 */
     if(/url\(/.test(x.img||''))return;/* 有照片的元素（機型分頁、橫幅）一律不動底圖 */
     /* 全螢幕的半透明遮罩（視窗後面那層）：維持半透明，只換成範例的淡深色，不可變成不透明白底 */
@@ -6410,7 +6411,7 @@ function apply(keep){
   /* 再依「新的底色」調整文字顏色 */
   function effBg(e){for(var p=e;p&&p.nodeType===1;p=p.parentElement){var s=getComputedStyle(p),c=rgb(s.backgroundColor);if(s.backgroundImage&&s.backgroundImage!=='none'&&!/url\(/.test(s.backgroundImage)){var g=cols(s.backgroundImage);if(g.length)return g[0];}if(c&&c[3]>.5)return c;}return [255,255,255,1];}
   info.forEach(function(x){
-    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb,#qw-ovl .fx-hint,#qw-ovl .qck-auto,#qw-cdcal #qwcd-sum,#qw-cdcal .rs-cdhint,#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
+    var e=x.e;if(!x.c||e.closest('.envnote')||e.closest('#qw-terms .qwt-ok')||e.closest('.qw-gt')||e.closest('.rs-w')||e.closest('#qw-dlg')||e.closest('#rs-more-bar')||e.closest('#qw-ovl .qck-age button.sel,#qw-ovl .qck-ch button.sel,#qw-ovl .qiv-seg button.sel,#rs-cd-fb,#qw-ovl .fx-hint,#qw-ovl .qck-auto,#qw-cdcal #qwcd-sum,#qw-cdcal .rs-cdhint,#qw-cdcal .qwcd-sl.rs-todo .qwcd-slot')||e.closest('#qw-ovl .s26c')||(e.matches&&e.matches('#qw-cdcal .qwcd-d:not(.av):not(.sel)')))return;var hasTxt=[].some.call(e.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});if(!hasTxt)return;
     var bg=effBg(e),light=lum(bg)>.6,nc=null;
     if(isLightTxt(x.c)&&light)nc=(x.c[3]<.9?SUB:INK);
     else if(isNavy(x.c))nc=light?INK:'#FFFFFF';
@@ -6534,7 +6535,7 @@ DL+' .c,'+DL+'>div,'+TM+' .qwt-m,'+WB+' .c,'+LD+' .box{background:#fff'+I+';back
 TM+' .qwt-hd,'+WB+' .hd{background:#fff'+I+';background-image:none'+I+';border-bottom:1px solid '+C.line+I+';color:'+C.ink+I+'}',TM+' .qwt-hd *,'+WB+' .hd *{color:'+C.ink+I+'}',
 TM+' .qwt-pill{background:'+C.ground+I+';color:'+C.sub+I+'}',TM+' .qwt-intro,'+TM+' .qwt-note{background:'+C.ground+I+';color:'+C.sub+I+';border:0'+I+'}',
 DL+' .yes,'+TM+' .qwt-ok,'+WB+' .go,'+WB+' button:first-of-type{background:'+C.ink+I+';background-image:none'+I+';color:#fff'+I+';border:0'+I+';border-radius:999px'+I+';box-shadow:none'+I+'}',
-TM+' .qwt-ok:disabled{background:'+C.dis+I+'}',
+TM+' .qwt-ok,'+TM+' .qwt-ok:disabled{-webkit-text-fill-color:#fff'+I+';text-shadow:none'+I+'}',TM+' .qwt-ok:disabled{background:'+C.dis+I+'}',
 DL+' .no{background:#fff'+I+';color:'+C.ink+I+';border:1.5px solid '+C.line2+I+';border-radius:999px'+I+'}',
  /* 11-03 老闆截圖：「要重新挑選嗎？」這類確認視窗散成三塊 → 整個視窗統一成白色圓角卡片、深色字標題、底線分隔 */
  DL+'{background:rgba(22,32,43,.45)'+I+';background-image:none'+I+'}', DL+' .bx{background:#fff'+I+';background-image:none'+I+';border:0'+I+';overflow:hidden'+I+';box-shadow:0 18px 50px rgba(22,32,43,.22)'+I+'}', DL+':not(.sh) .bx{border-radius:18px'+I+'}', DL+' .hd{background:#fff'+I+';background-image:none'+I+';color:'+C.ink+I+';-webkit-text-fill-color:'+C.ink+I+';border:0'+I+';border-bottom:1px solid '+C.line+I+';border-radius:0'+I+';padding:18px 20px 14px'+I+';font-size:18px'+I+';font-weight:800'+I+'}', DL+' .bd{background:#fff'+I+';background-image:none'+I+';border:0'+I+';color:'+C.sub+I+';padding:16px 20px 4px'+I+'}', DL+' .ft{background:#fff'+I+';background-image:none'+I+';padding:16px 20px 20px'+I+'}', DL+' .ft button{min-height:48px'+I+';font-size:16px'+I+';font-weight:800'+I+'}',
