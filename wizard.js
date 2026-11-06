@@ -2,6 +2,14 @@
 /* ===== M3 引導精靈（正式版）===== */
 (function(){
 try{
+/* 2026-11-06 老闆：手機跟電腦字型不一樣 → 統一。整頁載入思源黑體（內文）＋思源明體（詳情頁標題）網路字型；
+   用可變字重＋Google 依用到的字切片下載，實測整頁約 250KB；display=swap：字型還沒到先用系統字，不會看不到字 */
+(function(){try{if(document.getElementById('qs-font'))return;var d=document.head||document.documentElement;
+  [['https://fonts.googleapis.com',0],['https://fonts.gstatic.com',1]].forEach(function(x){var p=document.createElement('link');p.rel='preconnect';p.href=x[0];if(x[1])p.crossOrigin='anonymous';d.appendChild(p);});
+  var l=document.createElement('link');l.id='qs-font';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400..900&family=Noto+Serif+TC:wght@400..900&display=swap';d.appendChild(l);
+  var c=document.createElement('style');c.id='qs-font-css';c.textContent='body,button,input,select,textarea{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}'
+    +'.page-sale h1,.page-sale h2,.page-sale h3,.page-sale h4,.page-sale .btn,.page-sale .a-link{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important}';/* 1SHOP 商品清單的標題與按鈕自己指定了微軟正黑體 */d.appendChild(c);
+}catch(e){}})();
 var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
 function imj(t){return IB+t+'/600x.jpg';}
@@ -5003,7 +5011,7 @@ var QD_GROUPS=[
  ['聯繫我們','📞',['20'],1]
 ];
 function _qdOf(alt,keys){for(var i=0;i<keys.length;i++){if(alt.indexOf(keys[i]+'_')===0||alt.indexOf(keys[i]+'b_')===0)return true;}return false;}
-var QD_CSS='.qd-toc{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e3e8ef;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}'
+var QD_CSS='.qdd.qdd{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}.qdd .price-table .group-row td{font-family:"Noto Sans TC","PingFang TC",sans-serif!important}.qd-toc{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e3e8ef;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}'
       +'.qd-toc::-webkit-scrollbar{display:none}'
       +'.qd-toc a{flex:none;font-size:13px;line-height:1.2;padding:7px 12px;border-radius:999px;background:#eef3f9;color:#123a66!important;text-decoration:none!important;white-space:nowrap}'
       +'.qd-toc a.on{background:#123a66;color:#fff!important}'
