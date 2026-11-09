@@ -1996,7 +1996,7 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
     +'<button class="gadd" type="button"'+((read&&(!n||(ok&&ack)))?'':' disabled')+'>'+((n&&!(ok&&ack))?'雷雕還沒完成':(opt.fixQ?'確認雷雕內容':(had?'更新加購':'確認加購')))+'</button>'
     +'<button type="button" class="gno">'+((had||opt.fixQ)?'關閉':'先不加購')+'</button></div>';};
   var drawFoot=function(){wz.innerHTML=footH();};
-  var pvH=function(c,i){var col=C[c.c]||C[0];return '<div class="gpv"><img src="'+_engImg(col).u+'" onerror="this.onerror=null;this.src=\''+_engImg(col).o+'\'" alt=""><div class="gtx2 '+(c.p?'d':'c')+(col[0]==='霧白'?'':' lt')+'" style="font-family:'+ENG_FONT[c.f][2]+(c.f===2?';font-size:19px':'')+'">'+esc(c.t||'Your Name')+'</div><div class="gtag">第 '+(i+1)+' 個・示意</div></div>';};
+  var pvH=function(c,i){var col=C[c.c]||C[0];return '<div class="gpv"><img src="'+_engImg(col).u+'" onerror="this.onerror=null;this.src=\''+_engImg(col).o+'\'" alt=""><div class="gtx2 '+(c.p?'d':'c')+(/^(霧白|玫瑰粉)$/.test(col[0])?'':' lt')/* 2026-11-09 老闆：淺色杯（霧白、玫瑰粉）用深灰字，白字看不到 */+'" style="font-family:'+ENG_FONT[c.f][2]+(c.f===2?';font-size:19px':'')+'">'+esc(c.t||'Your Name')+'</div><div class="gtag">第 '+(i+1)+' 個・示意</div></div>';};
   var formH=function(c,i){var h='',hn=hint(c.t);
    if(C.length>1)h+='<div class="glb">杯子顏色</div><div class="gpills">'+C.map(function(x,j){var used=D.filter(function(y,m){return m!==i&&y.c===j;}).length;return '<button type="button" data-c="'+j+'" class="'+(c.c===j?'on':'')+'"'+(used>=x[2]*Q?' disabled':'')+'>'+x[0]+'</button>';}).join('')+'</div>';
    h+='<div class="glb">雕刻文字<span class="glen">'+c.t.length+' / 10</span></div><input class="gin" type="text" maxlength="10" value="'+esc(c.t)+'" placeholder="例如 Amy & Leo" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><div class="ghint '+hn[0]+'">'+hn[1]+'</div>';
@@ -2329,7 +2329,7 @@ var api={
   pickDist:function(v){areaDist=v||null;areaCls=classify(areaCity,areaDist);qty.rm=(areaCls==='remote')?1:0;_qbOpen=-1;render();},
   qbToggle:function(i){if(i===1&&!areaCity){api.needPick('.qb-btn');return;}_qbOpen=(_qbOpen===i)?-1:i;render();_qbShow();},
   pickEnv:function(k){env=k;if(k!=='biz')qty.bz=0;render();},
-  pick:function(k){if(_isGlK(k)&&window.__qsRead_gl&&window.__qsDhDelivery){if(!qty[k])qty[k]=1;render();return;}/* 玻璃杯三款共用注意事項與配送日：讀過、選過就直接加 */if(_isGlK(k)){_glInfo(k,'wiz',{gate:1});return;}/* 2026-11-09 老闆：商品介紹跟加入整合成同一個視窗 */if(k==='dh'||k==='air'){showTerms(k,'gate');return;}if(k==='hi'&&sumKeys(INK)<1)return;var was=qty[k]||0;if(!qty[k])qty[k]=1;render();},
+  pick:function(k){/* 2026-11-09 老闆：按「加入」一律跳加入視窗（有數量、加購後問雷雕）；讀過的注意事項自動勾、選過的配送日不再問 */if(_isGlK(k)){_glInfo(k,'wiz',{gate:1});return;}/* 2026-11-09 老闆：商品介紹跟加入整合成同一個視窗 */if(k==='dh'||k==='air'){showTerms(k,'gate');return;}if(k==='hi'&&sumKeys(INK)<1)return;var was=qty[k]||0;if(!qty[k])qty[k]=1;render();},
   terms:function(k){showTerms(k,'read');},
   glInfo:function(k){_glInfo(k,'wiz');},
   glEng:function(k){_glInfo(k,'wiz',{gate:1,eng:1,engOnly:1});},
