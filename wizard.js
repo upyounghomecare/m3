@@ -187,8 +187,8 @@ function _engAllOk(){var o=_engCart();for(var k in o){if(!o[k].every(function(c)
 function _dhMinN(n){var d=new Date();d.setHours(12,0,0,0);var i=0;while(i<n){d.setDate(d.getDate()+1);if(!_dhBlocked(d))i++;}return d;}
 function _engEarly(){var p=_whenParse(window.__qsDhDelivery||'');if(!p)return true;var m=_dhMinN(ENG_WD);m.setHours(0,0,0,0);return p.d<m;}
 /* 訂單欄位的精簡寫法：「國慶禮盒3入:霧白「Amy & Leo」A中、寶藍「LEO」B下」；字型代號放最前面說明，放不下就縮短說明 */
-function _engTxt(){var o=_engCart(),tk=[],n=0;GL_KEYS.forEach(function(k){var L=o[k];if(!L||!L.length)return;var C=ENG_COL[k];L.forEach(function(c,i){n++;tk.push((i?'':ENG_SH[k]+':')+(C.length>1?C[c.c][0]:'')+'「'+c.t+'」'+ENG_FONT[c.f][1]+(c.p?'下':'中'));});});
-  return n?['共'+n+'個(字型A=Arial,B=Bodoni MT Condensed,F=Freestyle Script;中=置中,下=偏下)'].concat(tk):[];}
+function _engTxt(){var o=_engCart(),tk=[],n=0;GL_KEYS.forEach(function(k){var L=o[k];if(!L||!L.length)return;var C=ENG_COL[k];L.forEach(function(c,i){n++;tk.push((i?'':ENG_SH[k]+':')+(C.length>1?C[c.c][0]:'')+'「'+c.t+'」'+ENG_FONT[c.f][1]);});});
+  return n?['共'+n+'個(字型A=Arial,B=Bodoni MT Condensed,F=Freestyle Script;位置固定杯口下方)'].concat(tk):[];}
 function _engPack(tk){var a='',b='',over=false;tk.forEach(function(t,i){var s=(i===0?'':(/^[^「]*:/.test(t)?'；':'、'))+t;if(!b&&(a+s).length<=200)a+=s;else{var s2=b?s:t;if((b+s2).length<=200)b+=s2;else over=true;}});if(over)b=b.slice(0,186)+'…(未完,請聯繫客人)';return [a,b,over];}
 function fillEng(){try{var f1=_cdField(/【雷雕】內容(?!（續）)/),f2=_cdField(/【雷雕】內容（續）/);if(f1)_cfHide(f1);if(f2)_cfHide(f2);if(!f1)return;
   var tk=_engTxt(),v=['',''];if(tk.length){var L=[tk[0],tk[0].replace(/\(.*\)/,'(A=Arial,B=Bodoni,F=Freestyle)'),tk[0].replace(/\(.*\)/,'')];for(var i=0;i<L.length;i++){v=_engPack([L[i]].concat(tk.slice(1)));if(!v[2])break;}}
@@ -1942,7 +1942,7 @@ function _glCss(){if(_glCssDone)return;_glCssDone=true;var st=document.createEle
 +'#qs-gli .gbk{flex:none;border:none;background:none;font-size:13.5px;font-weight:900;color:#0C447C;cursor:pointer;padding:0;width:56px;text-align:left}'
 +'#qs-gli .gcnt{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px}#qs-gli .gcnt b{font-size:14.5px;color:#111}#qs-gli .gcnt small{display:block;font-size:12px;color:#777}#qs-gli .gemp{padding:30px 16px;text-align:center;color:#888;font-size:13.5px}'
 +'#qs-gli .gpv{position:relative;height:230px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff}#qs-gli .gpv img{height:100%!important;width:auto!important;max-width:none!important;border-radius:0!important;display:block;margin:0!important}'
-+'#qs-gli .gtx2{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;color:rgba(90,90,90,.62);font-size:15px;letter-spacing:.3px;pointer-events:none}#qs-gli .gtx2.c{top:50%}#qs-gli .gtx2.d{top:70%}#qs-gli .gtx2.lt{color:rgba(255,255,255,.9);text-shadow:0 0 2px rgba(0,0,0,.45)}'
++'#qs-gli .gtx2{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;color:rgba(90,90,90,.62);font-size:15px;letter-spacing:.3px;pointer-events:none}#qs-gli .gtx2.u{top:16%}#qs-gli .gtx2.lt{color:rgba(255,255,255,.9);text-shadow:0 0 2px rgba(0,0,0,.45)}'
 +'#qs-gli .gtag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px}'
 +'#qs-gli .gctab{display:flex;gap:6px;padding:10px 16px;overflow-x:auto;scrollbar-width:none}#qs-gli .gctab::-webkit-scrollbar{display:none}'
 +'#qs-gli .gctab button{flex:none;border:1.5px solid #D5DBE2;background:#fff;color:#111;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}#qs-gli .gctab button.on{border-color:#111;background:#111;color:#fff}'
@@ -1952,6 +1952,9 @@ function _glCss(){if(_glCssDone)return;_glCssDone=true;var st=document.createEle
 +'#qs-gli .gpills.half{flex-wrap:nowrap}#qs-gli .gpills.half button{flex:1;white-space:nowrap;padding:7px 8px}'
 +'#qs-gli .gin,#qs-gli .gsel{width:100%;box-sizing:border-box;border:1.5px solid #D5DBE2;border-radius:10px;padding:10px 11px;font-size:16px;background:#fff;color:#111;height:auto;margin:0;box-shadow:none}'
 +'#qs-gli .ghint{font-size:11.5px;color:#888;margin-top:4px}#qs-gli .ghint.bad{color:#C0392B;font-weight:700}#qs-gli .ghint.ok{color:#1F7A4D;font-weight:700}'
++'#qs-gli .grs{position:absolute;inset:0;z-index:12;background:rgba(10,20,30,.45);display:flex;align-items:flex-end}#qs-gli .grs-b{width:100%;background:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgba(0,0,0,.18)}'
++'#qs-gli .grs-t{font-size:16px;font-weight:900;color:#111;margin-bottom:12px}#qs-gli .grs-b .gchk{font-size:14px}#qs-gli .grs-go{color:#0C447C;text-decoration:underline;cursor:pointer}'
++'#qs-gli .grs-f{display:flex;gap:10px;margin-top:16px}#qs-gli .grs-f button{flex:1;min-height:46px;border-radius:999px;font-size:15px;font-weight:900;cursor:pointer}#qs-gli .grs-no{border:1.5px solid #D5DBE2;background:#fff;color:#33475C}#qs-gli .grs-ok{border:none;background:#111;color:#fff}#qs-gli .grs-ok:disabled{background:#B7C2CF;cursor:not-allowed}'
 +'#qs-gli .grow2{display:flex;gap:8px}#qs-gli .grow2>div{flex:1;min-width:0}#qs-gli .gnote{margin:6px 16px 18px;font-size:12px;color:#777;line-height:1.7}';
  document.head.appendChild(st);}
 var _glInfoCache={};
@@ -1990,18 +1993,24 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
   var priceH=function(){var n=D.length;return '<div class="gpr">'+(pr.oprice&&!n?'<s>'+money(pr.oprice*Q)+'</s>':'')+'<b>'+money(pr.price*Q+300*n)+'</b>'+(n?'<small>含雷雕 '+n+' 個 '+money(300*n)+'</small>':'')+'</div>';};
   var footH=function(){var n=D.length,ok=allOk(),had=(qty[k]||0)>0;
    return ((EG&&opt.eng&&!opt.engOnly)?'<div class="geg"><span class="gic">✍️</span><div class="gtx"><b>'+(n?'已加雷雕 '+n+' 個':'想刻名字？可加購雷雕')+'</b><small>'+(n?((ok&&ack)?'每個杯子 +$300・已設定好':'還沒設定完成，請按「修改雷雕」'):'每個杯子 +$300・英文名字或紀念數字')+'</small></div><button type="button" class="gegb'+(n?' on':'')+'">'+(n?'修改雷雕':'加購雷雕')+'</button></div>':'')
-    +'<div class="gfoot gate"><label class="gchk"><input type="checkbox" class="grd"'+(read?' checked':'')+'><span>我已閱讀並瞭解<a data-go="2">注意事項</a>（宅配、退換貨說明）</span></label>'
+    +'<div class="gfoot gate">'/* 2026-11-09 老闆：「我已閱讀並瞭解注意事項」改成按確認加購後才跳出（_readSheet） */
     +(opt.fixQ?'':'<div class="gq"><span><b>數量</b><small>'+per+' 入一組・共 '+(per*Q)+' 個杯子</small></span><div class="gstp"><button type="button" data-q="-1"'+(Q<=1?' disabled':'')+'>−</button><span>'+Q+' 組</span><button type="button" data-q="1"'+(Q>=GL_QMAX?' disabled':'')+'>＋</button></div></div>')
     +priceH()
-    +'<button class="gadd" type="button"'+((read&&(!n||(ok&&ack)))?'':' disabled')+'>'+((n&&!(ok&&ack))?'雷雕還沒完成':(opt.fixQ?'確認雷雕內容':(had?'更新加購':'確認加購')))+'</button>'
+    +'<button class="gadd" type="button"'+((!n||(ok&&ack))?'':' disabled')+'>'+((n&&!(ok&&ack))?'雷雕還沒完成':(opt.fixQ?'確認雷雕內容':(had?'更新加購':'確認加購')))+'</button>'
     +'<button type="button" class="gno">'+((had||opt.fixQ)?'關閉':'先不加購')+'</button></div>';};
   var drawFoot=function(){wz.innerHTML=footH();};
-  var pvH=function(c,i){var col=C[c.c]||C[0];return '<div class="gpv"><img src="'+_engImg(col).u+'" onerror="this.onerror=null;this.src=\''+_engImg(col).o+'\'" alt=""><div class="gtx2 '+(c.p?'d':'c')+(/^(霧白|玫瑰粉)$/.test(col[0])?'':' lt')/* 2026-11-09 老闆：淺色杯（霧白、玫瑰粉）用深灰字，白字看不到 */+'" style="font-family:'+ENG_FONT[c.f][2]+(c.f===2?';font-size:19px':'')+'">'+esc(c.t||'Your Name')+'</div><div class="gtag">第 '+(i+1)+' 個・示意</div></div>';};
+  var readSheet=function(){var gm=ov.querySelector('.gm');var sh=document.createElement('div');sh.className='grs';
+   sh.innerHTML='<div class="grs-b"><div class="grs-t">加購前請確認</div><label class="gchk"><input type="checkbox" class="grs-cb"><span>我已閱讀並瞭解<a class="grs-go">注意事項</a>（宅配、退換貨說明）</span></label><div class="grs-f"><button type="button" class="grs-no">取消</button><button type="button" class="grs-ok" disabled>確認加購</button></div></div>';
+   gm.appendChild(sh);var cb=sh.querySelector('.grs-cb'),okb=sh.querySelector('.grs-ok'),rm=function(){if(sh.parentNode)sh.parentNode.removeChild(sh);};
+   cb.onchange=function(){okb.disabled=!cb.checked;};sh.querySelector('.grs-no').onclick=rm;sh.onclick=function(e){if(e.target===sh)rm();};
+   sh.querySelector('.grs-go').onclick=function(e){e.preventDefault();e.stopPropagation();rm();goNotice();};
+   okb.onclick=function(){if(!cb.checked)return;read=true;rm();confirmAdd();};};
+  var pvH=function(c,i){var col=C[c.c]||C[0];return '<div class="gpv"><img src="'+_engImg(col).u+'" onerror="this.onerror=null;this.src=\''+_engImg(col).o+'\'" alt=""><div class="gtx2 u'+(/^(寶藍|梅紫)$/.test(col[0])?' lt':'')/* 2026-11-09 老闆：Picardie 只能雕在偏上（杯口下方那圈）；淺色杯用深灰字，只有寶藍、梅紫用白字 */+'" style="font-family:'+ENG_FONT[c.f][2]+(c.f===2?';font-size:19px':'')+'">'+esc(c.t||'Your Name')+'</div><div class="gtag">第 '+(i+1)+' 個・示意</div></div>';};
   var formH=function(c,i){var h='',hn=hint(c.t);
    if(C.length>1)h+='<div class="glb">杯子顏色</div><div class="gpills">'+C.map(function(x,j){var used=D.filter(function(y,m){return m!==i&&y.c===j;}).length;return '<button type="button" data-c="'+j+'" class="'+(c.c===j?'on':'')+'"'+(used>=x[2]*Q?' disabled':'')+'>'+x[0]+'</button>';}).join('')+'</div>';
    h+='<div class="glb">雕刻文字<span class="glen">'+c.t.length+' / 10</span></div><input class="gin" type="text" maxlength="10" value="'+esc(c.t)+'" placeholder="例如 Amy & Leo" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><div class="ghint '+hn[0]+'">'+hn[1]+'</div>';
    h+='<div class="grow2"><div><div class="glb">字型</div><select class="gsel">'+ENG_FONT.map(function(f,j){return '<option value="'+j+'"'+(c.f===j?' selected':'')+'>'+f[0]+'</option>';}).join('')+'</select></div>'
-    +'<div><div class="glb">雕刻位置</div><div class="gpills half"><button type="button" data-pos="0" class="'+(c.p?'':'on')+'">置中</button><button type="button" data-pos="1" class="'+(c.p?'on':'')+'">偏下</button></div></div></div><div class="ghint">偏下：約離杯底 1.5 公分</div>';
+    +'</div><div class="ghint">雕刻位置：杯口下方（Picardie 只能雕在偏上位置）</div>';
    return h;};
   var engFootH=function(){var n=D.length,ok=allOk();return (n?'<label class="gchk red"><input type="checkbox" class="gack"'+(ack?' checked':'')+'><span>我已核對雕刻文字拼字（含大小寫），了解客製品不適用 7 天猶豫期、不接受取消與退換，約 7 個工作天出貨</span></label>':'')
    +priceH()+'<button type="button" class="gadd gdone"'+((!n||(ok&&ack))?'':' disabled')+'>'+(!n?'不雕刻，返回':(!ok?'請填好雕刻文字':(!ack?'請勾選上方確認':'完成雷雕設定')))+'</button>';};
@@ -2014,19 +2023,20 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
    return h;};
   var drawEng=function(){var sc=lay.querySelector('.gsc'),st=sc?sc.scrollTop:0;lay.innerHTML=engH();sc=lay.querySelector('.gsc');if(sc)sc.scrollTop=st;};
   var openEng=function(){_engFonts();if(!D.length&&maxN()>0)D.push(newCup());act=0;lay.hidden=false;lay.innerHTML=engH();};
+  var asked=false,autoAdd=false;
   var confirmAdd=function(){var n=D.length;if(!read||(n&&!(allOk()&&ack)))return;window.__qsRead_gl=_readStamp();
+   /* 2026-11-09 老闆：雷雕要早於詢問配送日（有雷雕最早配送日會往後）→ 第一次加這款時先問雷雕，再選日期 */
+   if(EG&&!(qty[k]||0)&&!n&&!opt.eng&&!asked){asked=true;_qwDlg({title:'✍️ 要幫杯子刻名字嗎？',html:'<div style="text-align:center"><div style="white-space:nowrap;font-size:clamp(12px,3.7vw,14.5px)">可加購雷雕客製，<b>每個杯子 +$300</b>（不打折）</div>英文名字或紀念數字，3～10 字<div style="font-size:13px;color:#8a1f1f;margin-top:6px">客製品不接受退換，約 7 個工作天出貨</div></div>',cancel:'不用了',ok:'要，設定雷雕',onOk:function(){autoAdd=true;openEng();},onCancel:function(){confirmAdd();}});return;}
    var E=window.__qsEng||(window.__qsEng={}),after=_engN()-((E[k]||[]).length)+n;
    var commit=function(){var E2=window.__qsEng||(window.__qsEng={});if(n){E2[k]=D;window.__qsEngAck=_readStamp();}else delete E2[k];_engSave();
-    if(opt.onConfirm){opt.onConfirm();return;}var was=qty[k]||0;qty[k]=Q;_engSync();render();
-    /* 2026-11-09 老闆：加購後再問要不要雷雕（第一次加這款、還沒雕刻時才問） */
-    if(EG&&!was&&!n&&!opt.eng)setTimeout(function(){_qwDlg({title:'✍️ 要幫杯子刻名字嗎？',html:'<div style="text-align:center"><div style="white-space:nowrap;font-size:clamp(12px,3.7vw,14.5px)">可加購雷雕客製，<b>每個杯子 +$300</b>（不打折）</div>英文名字或紀念數字，3～10 字<div style="font-size:13px;color:#8a1f1f;margin-top:6px">客製品不接受退換，約 7 個工作天出貨</div></div>',cancel:'不用了',ok:'要，設定雷雕',onOk:function(){_glInfo(k,'wiz',{gate:1,eng:1,engOnly:1});}});},350);};
+    if(opt.onConfirm){opt.onConfirm();return;}qty[k]=Q;_engSync();render();};
    cl();
    if(!window.__qsDhDelivery||(after>0&&_engEarly()))showDeliveryPicker(commit,{nm:'玻璃杯',eng:after>0,okTxt:((qty[k]||0)>0?'確認配送日':''),noTxt:((qty[k]||0)>0?'取消':'')});else commit();};
   wz.addEventListener('click',function(e){var t=e.target;
    if(t.closest('.gegb')){openEng();return;}
    if(t.closest('[data-go]')){e.preventDefault();goNotice();return;}
    var q=t.closest('[data-q]');if(q&&!q.disabled){Q=Math.max(1,Math.min(GL_QMAX,Q+(+q.getAttribute('data-q'))));D=_engFix(D,k,Q);D=D.slice(0,maxN());if(!D.length)ack=false;drawFoot();return;}
-   if(t.closest('.gadd')){confirmAdd();return;}
+   if(t.closest('.gadd')){if(!read){readSheet();return;}confirmAdd();return;}
    if(t.closest('.gno')){cl();return;}});
   wz.addEventListener('change',function(e){if(e.target.classList.contains('grd')){read=e.target.checked;drawFoot();}});
   lay.addEventListener('click',function(e){var t=e.target,c=D[act];
@@ -2035,7 +2045,7 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
    b=t.closest('[data-a]');if(b){act=+b.getAttribute('data-a');drawEng();return;}
    b=t.closest('[data-c]');if(b&&!b.disabled&&c){c.c=+b.getAttribute('data-c');drawEng();return;}
    b=t.closest('[data-pos]');if(b&&c){c.p=+b.getAttribute('data-pos');drawEng();return;}
-   if(t.closest('.gdone')){if(D.length&&!(allOk()&&ack))return;if(opt.engOnly&&read){confirmAdd();return;}lay.hidden=true;drawFoot();}});
+   if(t.closest('.gdone')){if(D.length&&!(allOk()&&ack))return;if((opt.engOnly||autoAdd)&&read){confirmAdd();return;}lay.hidden=true;drawFoot();}});
   lay.addEventListener('change',function(e){var t=e.target,c=D[act];
    if(t.classList.contains('gsel')&&c){c.f=+t.value;drawEng();return;}
    if(t.classList.contains('gack')){ack=t.checked;lay.querySelector('.gef').innerHTML=engFootH();}});
