@@ -106,9 +106,9 @@ var P={
  bz:{pid:'aovEX3VGzav0AMmq1jy9xdYm',price:1000,img:imj('w560gEeAlo0aovA2NOqrx1ab')},
  rm:{pid:'ndwgBoML1AZ9omyv7lD8O52Z',price:600,img:imj('41brG7JDYpJLm4AXlxW5ywvg')},
  dh:{price:21900,oprice:25900,img:imj('GBnwbKdx3dvWpwwDNW7954ej')},
- gla:{price:720,img:imj('41brG7JDYpJLrkWplxW5ywvg')},
- glb:{price:699,oprice:799,img:imj('Xno5Qb1D3MV2eyxBl67ZWPv9')},
- glc:{price:1000,img:imj('rAW85emGlnzxakZAlyok6vBL')},
+ gla:{price:599,oprice:720,img:imj('41brG7JDYpJLrkWplxW5ywvg')},/* 2026-11-09 老闆給加購價；oprice＝官網價（後台 price_base），price＝加購價（後台 price_special） */
+ glb:{price:599,oprice:799,img:imj('Xno5Qb1D3MV2eyxBl67ZWPv9')},
+ glc:{price:799,oprice:1000,img:imj('rAW85emGlnzxakZAlyok6vBL')},
  gle:{price:300,img:imj('1LPZao453vJ7Akbo3QAR86mM')},
  tf:{price:600,img:imj('wAjo1QaDle4m1WkZ390xLGMJ')}
 };
@@ -151,6 +151,8 @@ function _isGlK(k){return GL_KEYS.indexOf(k)>=0;}
 function _isGl(n){return /Duralex/.test(n||'');}
 function _isShip(n){return /除濕機|Duralex/.test(n||'');}
 function _adN(k){for(var i=0;i<ADDON.length;i++){if(ADDON[i].k===k)return ADDON[i].n;}return k;}
+/* 2026-11-09 老闆：玻璃杯要顯示折數；老闆選甲＝無條件進位（599/720＝83.2% → 84折，不誇大折扣），整數十位寫「8折」 */
+function _glOff(k){var p=P[k];if(!_isGlK(k)||!p||!p.oprice||p.price>=p.oprice)return '';var r=Math.ceil(p.price/p.oprice*100-1e-9);return '<span class="qs-gloff rs-w" style="display:inline-block;margin-left:6px;background:#C0392B!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:12px;font-weight:900;line-height:1.4;border-radius:6px;padding:1px 6px;vertical-align:2px;white-space:nowrap">'+(r%10?r:r/10)+'折</span>';}
 function _glItems(){return GL_KEYS.map(function(k){return [k,_adN(k)];});}
 function _glInCart(){try{return _cartArr().some(function(x){return _isGl(x.ProductName);});}catch(e){return false;}}
 function _glFirstKey(){var c=_cartArr();for(var i=0;i<GL_KEYS.length;i++){var n=_adN(GL_KEYS[i]);if(c.some(function(x){return (x.ProductName||'').indexOf(n)===0;}))return GL_KEYS[i];}return GL_KEYS[0];}
@@ -163,7 +165,7 @@ function _shipLbl(){var c=_cartArr(),d=c.some(function(x){return /除濕機/.tes
    雕刻內容寫進訂單欄位「✍️【雷雕】內容」「✍️【雷雕】內容（續）」（各 200 字，客人看不到）。
    資料：window.__qsEng={gla:[{c:顏色序,t:文字,f:字型序,p:0置中/1偏下},…]}（存 sessionStorage，重新整理不會不見）；qty.gle＝雕刻總個數 */
 var ENG_NM='Duralex 雷雕客製',ENG_WD=7,ENG_MAX=20,GL_QMAX=5;
-var ENG_COL={gla:[['玫瑰粉','kEyLdZjRNLmRA50pY8pWbz6O',2,'eng_gla_1.jpg'],['海水藍','wP6vpqMBNgzMPkgbld7DaZ0y',2,'eng_gla_2.jpg']],glb:[['霧白','1LPZao453vJ7Akbo3QAR86mM',1,'eng_glb_1.jpg'],['寶藍','xWLzk147Y7gqV4jeYV8mGo9O',1,'eng_glb_2.jpg'],['梅紫','7QBw2oEnYzJrMAmrYxAP0vM9',1,'eng_glb_3.jpg']],glc:[['土耳其藍','BW4907rb3bP6nk02NQGK6kwy',4,'eng_glc_1.jpg']]};
+var ENG_COL={gla:[['玫瑰粉','kEyLdZjRNLmRA50pY8pWbz6O',2,'eng_gla_1.jpg',30.5],['海水藍','wP6vpqMBNgzMPkgbld7DaZ0y',2,'eng_gla_2.jpg',30.5]],glb:[['霧白','1LPZao453vJ7Akbo3QAR86mM',1,'eng_glb_1.jpg',29.5],['寶藍','xWLzk147Y7gqV4jeYV8mGo9O',1,'eng_glb_2.jpg',28.5],['梅紫','7QBw2oEnYzJrMAmrYxAP0vM9',1,'eng_glb_3.jpg',29.5]],glc:[['土耳其藍','BW4907rb3bP6nk02NQGK6kwy',4,'eng_glc_1.jpg',37]]};/* 第 5 欄＝預覽字中央的高度（%） */
 /* 2026-11-09 老闆：雷雕預覽的杯子大小不一樣 → 6 張照片另外裁成同規格（600×600、杯高 480、置中、白底），
    跟 wizard.js 一起放 GitHub（原檔 素材_Duralex杯/雷雕預覽杯/）；找不到就退回 1SHOP 原圖 */
 function _engBase(){if(_engBase.v!==undefined)return _engBase.v;var v='';[].some.call(document.scripts,function(x){var m=(x.src||'').match(/^(https:\/\/cdn\.jsdelivr\.net\/gh\/upyounghomecare\/m3@[0-9a-f]+\/)wizard\.js/);if(m){v=m[1];return true;}return false;});return (_engBase.v=v);}
@@ -176,18 +178,21 @@ function _engFonts(){if(document.getElementById('qs-engf'))return;var l=document
 function _engPer(k){var n=0;(ENG_COL[k]||[]).forEach(function(x){n+=x[2];});return n;}
 function _engOk(t){return /^[A-Za-z0-9 &]{3,10}$/.test(t||'')&&/[A-Za-z0-9]/.test(t)&&t.trim()===t;}
 /* 組數變少時：雕刻個數最多＝組數×每組杯數；每個顏色也不能超過（例：國慶禮盒 1 組只有 1 個霧白） */
-function _engFix(L,k,q){var C=ENG_COL[k]||[];L=(L||[]).slice(0,Math.max(0,q*_engPer(k)));var cnt={};L.forEach(function(c){if(!C[c.c])c.c=0;cnt[c.c]=(cnt[c.c]||0)+1;if(cnt[c.c]>C[c.c][2]*q){cnt[c.c]--;for(var j=0;j<C.length;j++){if((cnt[j]||0)<C[j][2]*q){c.c=j;cnt[j]=(cnt[j]||0)+1;break;}}}});return L;}
+function _engSeq(k,q){var C=ENG_COL[k]||[],s=[];for(var n=0;n<q;n++){C.forEach(function(x,j){for(var m=0;m<x[2];m++)s.push(j);});}return s;}
+/* 2026-11-09 老闆：整組全部雕 → 有雷雕就是「組數×每組杯數」個，每個杯子顏色依組固定；文字／字型照順序保留（fill＝本來沒有也補滿） */
+function _engFix(L,k,q,fill){L=L||[];if(!L.length&&!fill)return [];return _engSeq(k,q).map(function(ci,i){var o=L[i]||{};return {c:ci,t:o.t||'',f:(typeof o.f==='number')?o.f:-1,p:0};});}
+function _engDone(c){return !!c&&_engOk(c.t)&&c.f>=0&&c.f<ENG_FONT.length;}
 function _engN(){var n=0,E=window.__qsEng||{};GL_KEYS.forEach(function(k){n+=(E[k]||[]).length;});return n;}
 /* 精靈數量變了就跟著修雷雕（只修精靈裡有數字的款式；精靈還沒開過時 qty 是空的，不可以把資料清掉） */
 function _engSync(){try{var E=window.__qsEng||(window.__qsEng={}),ch=false,n=0;GL_KEYS.forEach(function(k){if(!E[k])return;if(typeof qty[k]!=='number')return;var L=_engFix(E[k],k,qty[k]);if(L.length!==E[k].length)ch=true;if(L.length){E[k]=L;n+=L.length;}else delete E[k];});if(n>0)qty.gle=n;else delete qty.gle;if(ch)_engSave();}catch(e){}}
 /* 購物車版：只算購物車裡真的有的杯子（回訪客人、或在購物車刪了杯子） */
 function _engCart(){var o={},E=window.__qsEng||{};GL_KEYS.forEach(function(k){var q=_qtyByName(_adN(k));if(q>0&&E[k]&&E[k].length)o[k]=_engFix(JSON.parse(JSON.stringify(E[k])),k,q);});return o;}
 function _engNC(){var n=0,o=_engCart();for(var k in o)n+=o[k].length;return n;}
-function _engAllOk(){var o=_engCart();for(var k in o){if(!o[k].every(function(c){return _engOk(c.t);}))return false;}return true;}
+function _engAllOk(){var o=_engCart();for(var k in o){if(!o[k].every(_engDone))return false;}return true;}
 function _dhMinN(n){var d=new Date();d.setHours(12,0,0,0);var i=0;while(i<n){d.setDate(d.getDate()+1);if(!_dhBlocked(d))i++;}return d;}
 function _engEarly(){var p=_whenParse(window.__qsDhDelivery||'');if(!p)return true;var m=_dhMinN(ENG_WD);m.setHours(0,0,0,0);return p.d<m;}
 /* 訂單欄位的精簡寫法：「國慶禮盒3入:霧白「Amy & Leo」A中、寶藍「LEO」B下」；字型代號放最前面說明，放不下就縮短說明 */
-function _engTxt(){var o=_engCart(),tk=[],n=0;GL_KEYS.forEach(function(k){var L=o[k];if(!L||!L.length)return;var C=ENG_COL[k];L.forEach(function(c,i){n++;tk.push((i?'':ENG_SH[k]+':')+(C.length>1?C[c.c][0]:'')+'「'+c.t+'」'+ENG_FONT[c.f][1]);});});
+function _engTxt(){var o=_engCart(),tk=[],n=0;GL_KEYS.forEach(function(k){var L=o[k];if(!L||!L.length)return;var C=ENG_COL[k];L.forEach(function(c,i){n++;tk.push((i?'':ENG_SH[k]+':')+(C.length>1?C[c.c][0]:'')+'「'+c.t+'」'+((ENG_FONT[c.f]||['','?'])[1]));});});
   return n?['共'+n+'個(字型A=Arial,B=Bodoni MT Condensed,F=Freestyle Script;位置固定杯口下方)'].concat(tk):[];}
 function _engPack(tk){var a='',b='',over=false;tk.forEach(function(t,i){var s=(i===0?'':(/^[^「]*:/.test(t)?'；':'、'))+t;if(!b&&(a+s).length<=200)a+=s;else{var s2=b?s:t;if((b+s2).length<=200)b+=s2;else over=true;}});if(over)b=b.slice(0,186)+'…(未完,請聯繫客人)';return [a,b,over];}
 function fillEng(){try{var f1=_cdField(/【雷雕】內容(?!（續）)/),f2=_cdField(/【雷雕】內容（續）/);if(f1)_cfHide(f1);if(f2)_cfHide(f2);if(!f1)return;
@@ -669,7 +674,7 @@ function hasBlow(){return (qty.cm||0)+(qty.cl||0)>0;}
 function bzQty(){if(env!=='biz')return 0;var i=sumKeys(INK),o=sumKeys(['o1','om']);return i+o;}
 /* 車馬費：家用 + 只洗室外機 + 剛好1台 → 自動加$600(單筆);2台以上免;非此情況不加 */
 function tfQty(){var i=sumKeys(INK),o=sumKeys(['o1','om']);return (env==='home'&&i===0&&o===1)?1:0;}
-function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+(P[item.k].oprice?'<s class="op-o">'+money(P[item.k].oprice)+'</s>':'')+money(P[item.k].price)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'<button class="qw-add" onclick="__qw.pick(&quot;'+item.k+'&quot;)">＋ 加入</button>')+'</div>';}
+function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+(P[item.k].oprice?'<s class="op-o">'+money(P[item.k].oprice)+'</s>':'')+money(P[item.k].price)+_glOff(item.k)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'<button class="qw-add" onclick="__qw.pick(&quot;'+item.k+'&quot;)">＋ 加入</button>')+'</div>';}
 var OUT_DETAIL='<b>清洗項目：</b><br>1. 機外殼除塵清潔<br>2. 冷凝器（散熱鰭片）深層清洗<br>3. 高壓水柱沖洗散熱片<br>4. 清除散熱口灰塵與雜物';
 function detailBlock(item){if(item.k==='o1'||item.k==='om'){return (qty[item.k]>0)?'<div class="det-body">'+OUT_DETAIL+'</div>':'';}var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
 function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var gift=item.gift?'<span class="qw-gift">'+item.gift+'</span>':'';var tags=(pop||tag||gift)?'<div class="qw-tags">'+pop+tag+gift+'</div>':'';var tm=_TERMS[item.k]?'<span class="qw-terms" onclick="event.stopPropagation();__qw.terms(&quot;'+item.k+'&quot;)">📋 注意事項 ›</span>':'';var _gk=_isGlK(item.k);return '<div class="opt '+(q>0?'sel':'')+(_gk?' qw-gl':'')+'"'+(_gk?' style="position:relative"':'')+'>'+(_gk?_glRib():'')+'<div class="opt-main"><img class="qw-thumb" src="'+P[item.k].img+'" onclick="event.stopPropagation();'+(_gk?'__qw.glInfo(&quot;'+item.k+'&quot;)':'__qw.zoom(&quot;'+P[item.k].img+'&quot;)')+'"><div class="oi"><span class="on'+(item.nmsm?' qw-on-sm':'')+'">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+(tm?' '+tm:'')+(_gk?' <span class="qw-terms" onclick="event.stopPropagation();__qw.glInfo(&quot;'+item.k+'&quot;)">🔍 商品介紹 ›</span>':'')+((_gk&&q>0&&_resolveBtn(ENG_NM))?'<br><span class="qw-terms" style="margin-top:4px" onclick="event.stopPropagation();__qw.glEng(&quot;'+item.k+'&quot;)">✍️ '+(((window.__qsEng||{})[item.k]||[]).length?'雷雕 '+((window.__qsEng||{})[item.k]||[]).length+' 個・修改':'加購雷雕（每個杯子 +$300）')+' ›</span>':'')+'</span>'+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
@@ -1942,7 +1947,7 @@ function _glCss(){if(_glCssDone)return;_glCssDone=true;var st=document.createEle
 +'#qs-gli .gbk{flex:none;border:none;background:none;font-size:13.5px;font-weight:900;color:#0C447C;cursor:pointer;padding:0;width:56px;text-align:left}'
 +'#qs-gli .gcnt{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px}#qs-gli .gcnt b{font-size:14.5px;color:#111}#qs-gli .gcnt small{display:block;font-size:12px;color:#777}#qs-gli .gemp{padding:30px 16px;text-align:center;color:#888;font-size:13.5px}'
 +'#qs-gli .gpv{position:relative;height:230px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff}#qs-gli .gpv img{height:100%!important;width:auto!important;max-width:none!important;border-radius:0!important;display:block;margin:0!important}'
-+'#qs-gli .gtx2{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;color:rgba(90,90,90,.62);font-size:15px;letter-spacing:.3px;pointer-events:none}#qs-gli .gtx2.u{top:27%}#qs-gli .gtx2.u2{top:33%}#qs-gli .gtx2.lt{color:rgba(255,255,255,.9);text-shadow:0 0 2px rgba(0,0,0,.45)}'
++'#qs-gli .gtx2{position:absolute;left:50%;transform:translate(-50%,-50%);white-space:nowrap;color:rgba(90,90,90,.62);font-size:15px;letter-spacing:.3px;pointer-events:none}#qs-gli .gtx2.lt{color:rgba(255,255,255,.9);text-shadow:0 0 2px rgba(0,0,0,.45)}'
 +'#qs-gli .gtag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px}'
 +'#qs-gli .gctab{display:flex;gap:6px;padding:10px 16px;overflow-x:auto;scrollbar-width:none}#qs-gli .gctab::-webkit-scrollbar{display:none}'
 +'#qs-gli .gctab button{flex:none;border:1.5px solid #D5DBE2;background:#fff;color:#111;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}#qs-gli .gctab button.on{border-color:#111;background:#111;color:#fff}'
@@ -1955,6 +1960,8 @@ function _glCss(){if(_glCssDone)return;_glCssDone=true;var st=document.createEle
 +'#qs-gli .grs{position:absolute;inset:0;z-index:12;background:rgba(10,20,30,.45);display:flex;align-items:flex-end}#qs-gli .grs-b{width:100%;background:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgba(0,0,0,.18)}'
 +'#qs-gli .grs-t{font-size:16px;font-weight:900;color:#111;margin-bottom:12px}#qs-gli .grs-b .gchk{font-size:14px}#qs-gli .grs-go{color:#0C447C;text-decoration:underline;cursor:pointer}'
 +'#qs-gli .grs-f{display:flex;gap:10px;margin-top:16px}#qs-gli .grs-f button{flex:1;min-height:46px;border-radius:999px;font-size:15px;font-weight:900;cursor:pointer}#qs-gli .grs-no{border:1.5px solid #D5DBE2;background:#fff;color:#33475C}#qs-gli .grs-ok{border:none;background:#111;color:#fff}#qs-gli .grs-ok:disabled{background:#B7C2CF;cursor:not-allowed}'
++'#qs-gli .gall{display:flex;align-items:center;gap:10px;margin:12px 16px 6px;background:#FBF7EE;border:1px solid #F0E6CF;border-radius:12px;padding:10px 12px}#qs-gli .gall>div{flex:1;min-width:0}#qs-gli .gall b{display:block;font-size:14.5px;color:#111}#qs-gli .gall small{display:block;font-size:12.5px;color:#8a6a1f;font-weight:700}'
++'#qs-gli .gnoeng{flex:none;border:none;background:none;color:#7c8998;font-size:12.5px;text-decoration:underline;cursor:pointer;padding:0}#qs-gli .gin.err,#qs-gli .gsel.err{border-color:#C0392B;background:#FFF6F5}#qs-gli .gadd.gtodo{background:#C0392B}#qs-gli .gsel{margin-top:0}'
 +'#qs-gli .grow2{display:flex;gap:8px}#qs-gli .grow2>div{flex:1;min-width:0}#qs-gli .gnote{margin:6px 16px 18px;font-size:12px;color:#777;line-height:1.7}';
  document.head.appendChild(st);}
 var _glInfoCache={};
@@ -1968,13 +1975,13 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
  var WZ=from==='wiz'&&(!opt.onConfirm||opt.eng),EG=WZ&&!!ENG_COL[k]&&!!_resolveBtn(ENG_NM);
  var Q=opt.fixQ||Math.min(GL_QMAX,Math.max(1,qty[k]||0)),D=_engFix(JSON.parse(JSON.stringify((window.__qsEng||{})[k]||[])),k,Q),act=0,read=!!window.__qsRead_gl,ack=!!(D.length&&window.__qsEngAck);
  var ov=document.createElement('div');ov.id='qs-gli';ov.className='rs-w';
- ov.innerHTML='<div class="gm"><div class="ghead"><button class="gx" type="button" aria-label="關閉">✕</button><div class="gtt"><div class="gt1">'+(it.dn||it.n).replace(/<br>/,'</div><div class="gt2">')+'</div></div></div><div class="gsc"><div style="position:relative"><div class="ggal"><img src="'+pr.img+'" alt=""></div><div class="gdots"></div>'+_glRib()+'</div>'
+ ov.innerHTML='<div class="gm"><div class="ghead"><div class="gtt" style="flex:1"><div class="gt1">'+(it.dn||it.n).replace(/<br>/,'</div><div class="gt2">')+'</div></div><button class="gx" type="button" aria-label="關閉">✕</button></div><div class="gsc"><div style="position:relative"><div class="ggal"><img src="'+pr.img+'" alt=""></div><div class="gdots"></div>'+_glRib()+'</div>'
   +'<div class="ghd">'
   +'<div class="gtabs"><button type="button" class="on" data-t="0">商品介紹</button><button type="button" data-t="1">規格</button><button type="button" data-t="2">注意事項</button></div></div>'
   +'<div class="gpane" data-p="0"><div style="padding:30px 0;text-align:center;color:#999;font-size:13px">載入中…</div></div>'
   +'<div class="gpane" data-p="1" hidden><div class="gspec">容量 250ml｜高 9cm｜杯口直徑 8.7cm<br>'+(_GL_SPEC[k]||'')+'<br>材質：強化玻璃（100% 法國製造）<br>可用於洗碗機、微波爐及冷凍，耐熱衝擊 130°C</div></div>'
   +'<div class="gpane" data-p="2" hidden>'+_GL_BODY+'</div></div>'
-  +(WZ?'<div class="gwz"></div><div class="geng" hidden></div>':'<div class="gfoot"><div class="gpr">'+(pr.oprice?'<s>'+money(pr.oprice)+'</s>':'')+'<b>'+money(pr.price)+'</b></div><button class="gadd" type="button">'+((from==='wiz'&&(qty[k]||0)>0)?'✓ 已加入，再加 1 組':'＋ 加入')+'</button></div>')+'</div>';
+  +(WZ?'<div class="gwz"></div><div class="geng" hidden></div>':'<div class="gfoot"><div class="gpr">'+(pr.oprice?'<s>'+money(pr.oprice)+'</s>':'')+'<b>'+money(pr.price)+'</b>'+_glOff(k)+'</div><button class="gadd" type="button">'+((from==='wiz'&&(qty[k]||0)>0)?'✓ 已加入，再加 1 組':'＋ 加入')+'</button></div>')+'</div>';
  document.body.appendChild(ov);
  function cl(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
  ov.querySelector('.gx').onclick=cl;ov.onclick=function(e){if(e.target===ov)cl();};
@@ -1984,16 +1991,18 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
   if(from==='wiz'){qty[k]=(qty[k]||0)+1;render();return;}
   var r=_resolveBtn(_adN(k));if(r&&window.viewProduct){try{window.__qsGatePass=true;window.viewProduct(r.btn,r.pid);}catch(e){}setTimeout(function(){window.__qsGatePass=false;},300);}}
  if(WZ){
-  var C=ENG_COL[k]||[],per=_engPer(k),wz=ov.querySelector('.gwz'),lay=ov.querySelector('.geng'),t1=(it.dn||it.n).split('<br>')[0];
-  var allOk=function(){return D.every(function(c){return _engOk(c.t);});};
-  var maxN=function(){var o=_engN()-(((window.__qsEng||{})[k]||[]).length);return Math.max(0,Math.min(Q*per,ENG_MAX-o));};
+  /* 2026-11-09 老闆：雷雕改成「整組全部雕」（不能自選個數）；每個杯子顏色固定、各自填文字＋自己選字型（不預設）；沒填完要提示 */
+  var C=ENG_COL[k]||[],per=_engPer(k),wz=ov.querySelector('.gwz'),lay=ov.querySelector('.geng'),t1=(it.dn||it.n).split('<br>')[0],showErr=false;
+  var allOk=function(){return D.every(_engDone);};
+  var todoN=function(){return D.filter(function(c){return !_engDone(c);}).length;};
+  var overMax=function(q){var o=_engN()-(((window.__qsEng||{})[k]||[]).length);return o+q*per>ENG_MAX;};
+  var maxDlg=function(){_qwDlg({title:'雷雕數量超過上限',html:'一張訂單最多雷雕 '+ENG_MAX+' 個杯子，更多數量請聯繫客服協助。'});};
   var esc=function(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');};
-  var hint=function(t){return !t?['','只能雷雕英文及數字，請注意大小寫']:(_engOk(t)?['ok','✓ 可以雕刻']:['bad','只能英文、數字（可含空格、&），3～10 字']);};
-  var newCup=function(){var cc=0;for(var j=0;j<C.length;j++){var u=D.filter(function(x){return x.c===j;}).length;if(u<C[j][2]*Q){cc=j;break;}}return {c:cc,t:'',f:0,p:0};};
-  var priceH=function(){var n=D.length;return '<div class="gpr">'+(pr.oprice&&!n?'<s>'+money(pr.oprice*Q)+'</s>':'')+'<b>'+money(pr.price*Q+300*n)+'</b>'+(n?'<small>含雷雕 '+n+' 個 '+money(300*n)+'</small>':'')+'</div>';};
+  var hint=function(c){var t=c.t;if(!t)return showErr?['bad','請輸入雕刻文字']:['','只能雷雕英文及數字，請注意大小寫'];return _engOk(t)?['ok','✓ 可以雕刻']:['bad','只能英文、數字（可含空格、&），3～10 字'];};
+  var priceH=function(){var n=D.length;return '<div class="gpr">'+(pr.oprice&&!n?'<s>'+money(pr.oprice*Q)+'</s>':'')+'<b>'+money(pr.price*Q+300*n)+'</b>'+(n?'':_glOff(k))+(n?'<small>含雷雕 '+n+' 個 '+money(300*n)+'</small>':'')+'</div>';};
   var footH=function(){var n=D.length,ok=allOk(),had=(qty[k]||0)>0;
-   return ((EG&&opt.eng&&!opt.engOnly)?'<div class="geg"><span class="gic">✍️</span><div class="gtx"><b>'+(n?'已加雷雕 '+n+' 個':'想刻名字？可加購雷雕')+'</b><small>'+(n?((ok&&ack)?'每個杯子 +$300・已設定好':'還沒設定完成，請按「修改雷雕」'):'每個杯子 +$300・英文名字或紀念數字')+'</small></div><button type="button" class="gegb'+(n?' on':'')+'">'+(n?'修改雷雕':'加購雷雕')+'</button></div>':'')
-    +'<div class="gfoot gate">'/* 2026-11-09 老闆：「我已閱讀並瞭解注意事項」改成按確認加購後才跳出（_readSheet） */
+   return ((EG&&((opt.eng&&!opt.engOnly)||n))?'<div class="geg"><span class="gic">✍️</span><div class="gtx"><b>'+(n?'已加雷雕 '+n+' 個':'想刻名字？可加購雷雕')+'</b><small>'+(n?((ok&&ack)?'每個杯子 +$300・已設定好':'還沒設定完成，請按「修改雷雕」'):'整組杯子都會雷雕・每個 +$300')+'</small></div><button type="button" class="gegb'+(n?' on':'')+'">'+(n?'修改雷雕':'加購雷雕')+'</button></div>':'')
+    +'<div class="gfoot gate">'/* 2026-11-09 老闆：「我已閱讀並瞭解注意事項」改成按確認加購後才跳出（readSheet） */
     +(opt.fixQ?'':'<div class="gq"><span><b>數量</b><small>'+per+' 入一組・共 '+(per*Q)+' 個杯子</small></span><div class="gstp"><button type="button" data-q="-1"'+(Q<=1?' disabled':'')+'>−</button><span>'+Q+' 組</span><button type="button" data-q="1"'+(Q>=GL_QMAX?' disabled':'')+'>＋</button></div></div>')
     +priceH()
     +'<button class="gadd" type="button"'+((!n||(ok&&ack))?'':' disabled')+'>'+((n&&!(ok&&ack))?'雷雕還沒完成':(opt.fixQ?'確認雷雕內容':(had?'更新加購':'確認加購')))+'</button>'
@@ -2005,28 +2014,26 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
    cb.onchange=function(){okb.disabled=!cb.checked;};sh.querySelector('.grs-no').onclick=rm;sh.onclick=function(e){if(e.target===sh)rm();};
    sh.querySelector('.grs-go').onclick=function(e){e.preventDefault();e.stopPropagation();rm();goNotice();};
    okb.onclick=function(){if(!cb.checked)return;read=true;rm();confirmAdd();};};
-  var pvH=function(c,i){var col=C[c.c]||C[0];return '<div class="gpv"><img src="'+_engImg(col).u+'" onerror="this.onerror=null;this.src=\''+_engImg(col).o+'\'" alt=""><div class="gtx2 u'+(col[0]==='土耳其藍'?' u2':'')+(/^(寶藍|梅紫|土耳其藍)$/.test(col[0])?' lt':'')/* 老闆選乙：土耳其藍照片是斜拍，字單獨下移＋白字 *//* 2026-11-09 老闆：Picardie 只能雕在偏上（杯口下方那圈）；淺色杯用深灰字，只有寶藍、梅紫用白字 */+'" style="font-family:'+ENG_FONT[c.f][2]+(c.f===2?';font-size:19px':'')+'">'+esc(c.t||'Your Name')+'</div><div class="gtag">第 '+(i+1)+' 個・示意</div></div>';};
-  var formH=function(c,i){var h='',hn=hint(c.t);
-   if(C.length>1)h+='<div class="glb">杯子顏色</div><div class="gpills">'+C.map(function(x,j){var used=D.filter(function(y,m){return m!==i&&y.c===j;}).length;return '<button type="button" data-c="'+j+'" class="'+(c.c===j?'on':'')+'"'+(used>=x[2]*Q?' disabled':'')+'>'+x[0]+'</button>';}).join('')+'</div>';
-   h+='<div class="glb">雕刻文字<span class="glen">'+c.t.length+' / 10</span></div><input class="gin" type="text" maxlength="10" value="'+esc(c.t)+'" placeholder="例如 Amy & Leo" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><div class="ghint '+hn[0]+'">'+hn[1]+'</div>';
-   h+='<div class="grow2"><div><div class="glb">字型</div><select class="gsel">'+ENG_FONT.map(function(f,j){return '<option value="'+j+'"'+(c.f===j?' selected':'')+'>'+f[0]+'</option>';}).join('')+'</select></div>'
-    +'</div><div class="ghint">雕刻位置：杯口下方（Picardie 只能雕在偏上位置）</div>';
-   return h;};
-  var engFootH=function(){var n=D.length,ok=allOk();return (n?'<label class="gchk red"><input type="checkbox" class="gack"'+(ack?' checked':'')+'><span>我已核對雕刻文字拼字（含大小寫），了解客製品不適用 7 天猶豫期、不接受取消與退換，約 7 個工作天出貨</span></label>':'')
-   +priceH()+'<button type="button" class="gadd gdone"'+((!n||(ok&&ack))?'':' disabled')+'>'+(!n?'不雕刻，返回':(!ok?'請填好雕刻文字':(!ack?'請勾選上方確認':'完成雷雕設定')))+'</button>';};
-  var engH=function(){var n=D.length,mx=maxN();act=Math.min(act,Math.max(0,n-1));
-   var h='<div class="ghead"><button type="button" class="gbk">'+(opt.engOnly?'‹ 返回':'‹ 回商品')+'</button><div class="gtt" style="flex:1;text-align:center"><div class="gt1">雷雕設定</div><div class="gt2">'+t1+'</div></div><span style="width:56px;flex:none"></span></div><div class="gsc">'
-    +'<div class="gcnt"><div><b>要雕幾個？</b><small>每個 +$300（不打折），最多 '+mx+' 個'+(opt.fixQ?'':'（'+Q+' 組）')+'</small></div><div class="gstp"><button type="button" data-n="-1"'+(n<=0?' disabled':'')+'>−</button><span>'+n+'</span><button type="button" data-n="1"'+(n>=mx?' disabled':'')+'>＋</button></div></div>';
-   if(!n)h+='<div class="gemp">按「＋」選擇要雕幾個杯子</div>';
-   else{var c=D[act];h+=pvH(c,act)+'<div class="gctab">'+D.map(function(x,j){return '<button type="button" data-a="'+j+'" class="'+(j===act?'on':'')+'">第 '+(j+1)+' 個<i class="'+(_engOk(x.t)?'ok':'')+'"></i></button>';}).join('')+'</div><div class="gform">'+formH(c,act)+'</div>';}
+  /* 字的「中央」對準杯口下緣～拱形條紋頂端那一圈；6 張照片角度不同，各色高度分開量（ENG_COL 第 5 欄，老闆 11-09 逐張確認） */
+  var pvH=function(c,i){var col=C[c.c]||C[0];return '<div class="gpv"><img src="'+_engImg(col).u+'" onerror="this.onerror=null;this.src=\''+_engImg(col).o+'\'" alt=""><div class="gtx2'+(/^(寶藍|梅紫|土耳其藍)$/.test(col[0])?' lt':'')+'" style="top:'+col[4]+'%;font-family:'+(ENG_FONT[c.f]||ENG_FONT[0])[2]+(c.f===2?';font-size:19px':'')+'">'+esc(c.t||'Your Name')+'</div><div class="gtag">第 '+(i+1)+' 個・示意</div></div>';};
+  var formH=function(c){var hn=hint(c),te=showErr&&!_engOk(c.t),fe=showErr&&!(c.f>=0);
+   return '<div class="glb">雕刻文字<span class="glen">'+c.t.length+' / 10</span></div><input class="gin'+(te?' err':'')+'" type="text" maxlength="10" value="'+esc(c.t)+'" placeholder="例如 Amy & Leo" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><div class="ghint '+hn[0]+'">'+hn[1]+'</div>'
+    +'<div class="glb">字型</div><select class="gsel'+(fe?' err':'')+'"><option value="-1" disabled'+(c.f>=0?'':' selected')+'>請選擇字型</option>'+ENG_FONT.map(function(f,j){return '<option value="'+j+'"'+(c.f===j?' selected':'')+'>'+f[0]+'</option>';}).join('')+'</select>'
+    +(fe?'<div class="ghint bad gfe">請選擇字型</div>':'')+'<div class="ghint">雕刻位置：杯口下方（Picardie 只能雕在偏上位置）</div>';};
+  var engFootH=function(){var n=D.length,td=todoN();return (n?'<label class="gchk red"><input type="checkbox" class="gack"'+(ack?' checked':'')+'><span>我已核對雕刻文字拼字（含大小寫），了解客製品不適用 7 天猶豫期、不接受取消與退換，約 7 個工作天出貨</span></label>':'')
+   +priceH()+(td?'<button type="button" class="gadd gdone gtodo">還有 '+td+' 個杯子沒填完</button>':'<button type="button" class="gadd gdone"'+(ack?'':' disabled')+'>'+(ack?'完成雷雕設定':'請勾選上方確認')+'</button>');};
+  var engH=function(){var n=D.length;act=Math.min(act,Math.max(0,n-1));var c=D[act];
+   var h='<div class="ghead"><button type="button" class="gbk">'+((opt.engOnly||autoAdd)?'‹ 返回':'‹ 回商品')+'</button><div class="gtt" style="flex:1;text-align:center"><div class="gt1">雷雕設定</div><div class="gt2">'+t1+'</div></div><span style="width:56px;flex:none"></span></div><div class="gsc">'
+    +'<div class="gall"><div><b>✍️ 整組 '+n+' 個杯子都會雷雕</b><small>每個 +$300（不打折），共 +$'+(300*n).toLocaleString()+'</small></div><button type="button" class="gnoeng">不要雷雕</button></div>';
+   if(c)h+=pvH(c,act)+'<div class="gctab">'+D.map(function(x,j){return '<button type="button" data-a="'+j+'" class="'+(j===act?'on':'')+'">第 '+(j+1)+' 個・'+((C[x.c]||C[0])[0])+'<i class="'+(_engDone(x)?'ok':'')+'"></i></button>';}).join('')+'</div><div class="gform">'+formH(c)+'</div>';
    h+='<div class="gnote">・只能雷雕英文、數字（可含空格及 &amp;），3～10 字，請注意大小寫<br>・預覽為示意，實際雕刻效果依杯子顏色、材質略有不同</div></div><div class="gfoot gate gef">'+engFootH()+'</div>';
    return h;};
   var drawEng=function(){var sc=lay.querySelector('.gsc'),st=sc?sc.scrollTop:0;lay.innerHTML=engH();sc=lay.querySelector('.gsc');if(sc)sc.scrollTop=st;};
-  var openEng=function(){_engFonts();if(!D.length&&maxN()>0)D.push(newCup());act=0;lay.hidden=false;lay.innerHTML=engH();};
+  var openEng=function(){if(overMax(Q)){maxDlg();return false;}_engFonts();D=_engFix(D,k,Q,true);act=0;showErr=false;lay.hidden=false;lay.innerHTML=engH();return true;};
   var asked=false,autoAdd=false;
   var confirmAdd=function(){var n=D.length;if(!read||(n&&!(allOk()&&ack)))return;window.__qsRead_gl=_readStamp();
    /* 2026-11-09 老闆：雷雕要早於詢問配送日（有雷雕最早配送日會往後）→ 第一次加這款時先問雷雕，再選日期 */
-   if(EG&&!(qty[k]||0)&&!n&&!opt.eng&&!asked){asked=true;_qwDlg({title:'✍️ 要幫杯子刻名字嗎？',html:'<div style="text-align:center"><div style="white-space:nowrap;font-size:clamp(12px,3.7vw,14.5px)">可加購雷雕客製，<b>每個杯子 +$300</b>（不打折）</div>英文名字或紀念數字，3～10 字<div style="font-size:13px;color:#8a1f1f;margin-top:6px">客製品不接受退換，約 7 個工作天出貨</div></div>',cancel:'不用了',ok:'要，設定雷雕',onOk:function(){autoAdd=true;openEng();},onCancel:function(){confirmAdd();}});return;}
+   if(EG&&!(qty[k]||0)&&!n&&!opt.eng&&!asked){asked=true;_qwDlg({title:'✍️ 要幫杯子刻名字嗎？',html:'<div style="text-align:center"><div style="white-space:nowrap;font-size:clamp(12px,3.7vw,14.5px)">可加購雷雕客製，<b>每個杯子 +$300</b>（不打折）</div>英文名字或紀念數字，3～10 字<div style="font-size:13px;color:#8a1f1f;margin-top:6px">客製品不接受退換，約 7 個工作天出貨</div></div>',cancel:'不用了',ok:'要，設定雷雕',onOk:function(){autoAdd=true;if(!openEng())autoAdd=false;},onCancel:function(){confirmAdd();}});return;}
    var E=window.__qsEng||(window.__qsEng={}),after=_engN()-((E[k]||[]).length)+n;
    var commit=function(){var E2=window.__qsEng||(window.__qsEng={});if(n){E2[k]=D;window.__qsEngAck=_readStamp();}else delete E2[k];_engSave();
     if(opt.onConfirm){opt.onConfirm();return;}qty[k]=Q;_engSync();render();};
@@ -2035,27 +2042,28 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
   wz.addEventListener('click',function(e){var t=e.target;
    if(t.closest('.gegb')){openEng();return;}
    if(t.closest('[data-go]')){e.preventDefault();goNotice();return;}
-   var q=t.closest('[data-q]');if(q&&!q.disabled){Q=Math.max(1,Math.min(GL_QMAX,Q+(+q.getAttribute('data-q'))));D=_engFix(D,k,Q);D=D.slice(0,maxN());if(!D.length)ack=false;drawFoot();return;}
+   var q=t.closest('[data-q]');if(q&&!q.disabled){var nq=Math.max(1,Math.min(GL_QMAX,Q+(+q.getAttribute('data-q'))));if(D.length&&nq>Q&&overMax(nq)){maxDlg();return;}Q=nq;if(D.length)D=_engFix(D,k,Q);drawFoot();return;}
    if(t.closest('.gadd')){if(!read){readSheet();return;}confirmAdd();return;}
    if(t.closest('.gno')){cl();return;}});
-  wz.addEventListener('change',function(e){if(e.target.classList.contains('grd')){read=e.target.checked;drawFoot();}});
-  lay.addEventListener('click',function(e){var t=e.target,c=D[act];
-   if(t.closest('.gbk')){if(opt.engOnly){cl();return;}lay.hidden=true;drawFoot();return;}
-   var b=t.closest('[data-n]');if(b&&!b.disabled){if(+b.getAttribute('data-n')>0){if(D.length<maxN()){D.push(newCup());act=D.length-1;}}else{D.pop();if(!D.length)ack=false;}drawEng();return;}
-   b=t.closest('[data-a]');if(b){act=+b.getAttribute('data-a');drawEng();return;}
-   b=t.closest('[data-c]');if(b&&!b.disabled&&c){c.c=+b.getAttribute('data-c');drawEng();return;}
-   b=t.closest('[data-pos]');if(b&&c){c.p=+b.getAttribute('data-pos');drawEng();return;}
-   if(t.closest('.gdone')){if(D.length&&!(allOk()&&ack))return;if((opt.engOnly||autoAdd)&&read){confirmAdd();return;}lay.hidden=true;drawFoot();}});
+  lay.addEventListener('click',function(e){var t=e.target;
+   if(t.closest('.gbk')){if(opt.engOnly){cl();return;}if(autoAdd){D=[];ack=false;autoAdd=false;}lay.hidden=true;drawFoot();return;}
+   if(t.closest('.gnoeng')){D=[];ack=false;if(opt.engOnly||autoAdd||opt.fixQ){confirmAdd();return;}lay.hidden=true;drawFoot();return;}
+   var b=t.closest('[data-a]');if(b){act=+b.getAttribute('data-a');drawEng();return;}
+   if(t.closest('.gdone')){
+    /* 沒填完：跳到第一個沒填完的杯子，紅框＋紅字說缺什麼 */
+    if(todoN()){showErr=true;for(var j=0;j<D.length;j++){if(!_engDone(D[j])){act=j;break;}}drawEng();var sc=lay.querySelector('.gsc'),pv=lay.querySelector('.gpv');if(sc&&pv)sc.scrollTop=Math.max(0,pv.offsetTop-8);return;}
+    if(!ack)return;if((opt.engOnly||autoAdd||opt.fixQ)&&read){confirmAdd();return;}lay.hidden=true;drawFoot();}});
   lay.addEventListener('change',function(e){var t=e.target,c=D[act];
    if(t.classList.contains('gsel')&&c){c.f=+t.value;drawEng();return;}
    if(t.classList.contains('gack')){ack=t.checked;lay.querySelector('.gef').innerHTML=engFootH();}});
   /* 打字時只更新局部（整個重畫會讓手機鍵盤收起來） */
   lay.addEventListener('input',function(e){var t=e.target;if(!t.classList.contains('gin'))return;var c=D[act];if(!c)return;
    var v=t.value.replace(/[^A-Za-z0-9 &]/g,'').slice(0,10);if(v!==t.value){var ps=t.selectionStart;t.value=v;try{t.setSelectionRange(Math.min(ps,v.length),Math.min(ps,v.length));}catch(x){}}c.t=v;
-   var hn=hint(v),h=lay.querySelector('.gin+.ghint');if(h){h.className='ghint '+hn[0];h.textContent=hn[1];}
+   var hn=hint(c),h=lay.querySelector('.gin+.ghint');if(h){h.className='ghint '+hn[0];h.textContent=hn[1];}
+   if(_engOk(v))t.classList.remove('err');
    var ln=lay.querySelector('.glen');if(ln)ln.textContent=v.length+' / 10';
    var tx=lay.querySelector('.gtx2');if(tx)tx.textContent=v||'Your Name';
-   var dt=lay.querySelector('.gctab [data-a="'+act+'"] i');if(dt)dt.className=_engOk(v)?'ok':'';
+   var dt=lay.querySelector('.gctab [data-a="'+act+'"] i');if(dt)dt.className=_engDone(c)?'ok':'';
    lay.querySelector('.gef').innerHTML=engFootH();});
   drawFoot();
   /* 2026-11-09 老闆：打開視窗就先把這款各顏色的雷雕預覽照片載好，切換顏色時不會先空白 */
@@ -2346,7 +2354,7 @@ var api={
   glInfo:function(k){_glInfo(k,'wiz');},
   glEng:function(k){_glInfo(k,'wiz',{gate:1,eng:1,engOnly:1});},
   zoom:function(src){if(document.getElementById('qw-zoom'))return;var z=document.createElement('div');z.id='qw-zoom';z.innerHTML='<img src="'+src+'" alt="">';z.onclick=function(){if(z.parentNode)z.parentNode.removeChild(z);};document.body.appendChild(z);},
-  chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK);if(v>mx)v=mx;}if(_isGlK(k)&&v>GL_QMAX)v=GL_QMAX;qty[k]=v;render();},
+  chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK);if(v>mx)v=mx;}if(_isGlK(k)&&v>GL_QMAX)v=GL_QMAX;var _eg=_isGlK(k)&&d>0&&v>(qty[k]||0)&&((window.__qsEng||{})[k]||[]).length;if(_eg&&_engN()+_engPer(k)>ENG_MAX){_qwDlg({title:'雷雕數量超過上限',html:'一張訂單最多雷雕 '+ENG_MAX+' 個杯子，更多數量請聯繫客服協助。'});return;}qty[k]=v;render();if(_eg)setTimeout(function(){_glInfo(k,'wiz',{gate:1,eng:1,engOnly:1});},250);}/* 2026-11-09 整組全雕：加一組＝多幾個杯子要填 */,
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
   toStd:function(){plan='std';window.__qsPlan='std';render();setTimeout(function(){try{var i=document.getElementById('qw-cp');if(i&&_userCode)i.value=_userCode;__qw.applyCode();}catch(e){}},60);},
   /* 2026-09-23 精靈裡輸入優惠碼:只記下來,完成加入購物車後才真的送出(精靈階段購物車是空的,送了也無效) */
