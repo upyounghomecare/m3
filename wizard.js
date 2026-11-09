@@ -2930,7 +2930,7 @@ function addPopularBadge(){
       for(var j=0;j<map.length;j++){if(nm.indexOf(map[j].key)>=0){m=map[j];break;}}
       if(!m)continue;
       /* 2026-11-09 盤點（老闆：全部照建議）：頁面上的杯子卡片也顯示折數（用卡片上的特價／原價算，跟頁面一定一致） */
-      if(_isGlK(m.tk)){var _pr=w.querySelector('.price');if(_pr&&!_pr.querySelector('.qs-gloff')){var _sp=+((_pr.querySelector('.special .amount')||{}).textContent||0),_bp=+((_pr.querySelector('.base .amount')||{}).textContent||0);var _tg=_offTag(_sp,_bp);if(_tg)_pr.insertAdjacentHTML('beforeend',_tg);}}
+      if(_isGlK(m.tk)){var _pr=w.querySelector('.price');if(_pr&&!_pr.querySelector('.qs-gloff')){var _num=function(e){return +(((e||{}).textContent||'').replace(/[^\d.]/g,''))||0;},_sp=_num(_pr.querySelector('.special .amount')),_bp=_num(_pr.querySelector('.base .amount'));/* 價格有千分位逗號（1,000）要先去掉 */var _tg=_offTag(_sp,_bp);if(_tg)_pr.insertAdjacentHTML('beforeend',_tg);}}
       if(w.querySelector('.qs-tags'))continue;
       var box=document.createElement('div');box.className='qs-tags';
       box.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px;align-self:flex-start';
