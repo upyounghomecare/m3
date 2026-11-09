@@ -628,7 +628,7 @@ function tfQty(){var i=sumKeys(INK),o=sumKeys(['o1','om']);return (env==='home'&
 function stepper(item){var q=qty[item.k]||0;return '<div class="op-wrap"><span class="op">'+(P[item.k].oprice?'<s class="op-o">'+money(P[item.k].oprice)+'</s>':'')+money(P[item.k].price)+'</span>'+(q>0?'<div class="step-ctl" onclick="event.stopPropagation()"><button onclick="__qw.chg(&quot;'+item.k+'&quot;,-1)">−</button><span class="q">'+q+'</span><button onclick="__qw.chg(&quot;'+item.k+'&quot;,1)">＋</button></div>':'<button class="qw-add" onclick="__qw.pick(&quot;'+item.k+'&quot;)">＋ 加入</button>')+'</div>';}
 var OUT_DETAIL='<b>清洗項目：</b><br>1. 機外殼除塵清潔<br>2. 冷凝器（散熱鰭片）深層清洗<br>3. 高壓水柱沖洗散熱片<br>4. 清除散熱口灰塵與雜物';
 function detailBlock(item){if(item.k==='o1'||item.k==='om'){return (qty[item.k]>0)?'<div class="det-body">'+OUT_DETAIL+'</div>':'';}var mk=LK[item.k];if(!mk||!(qty[item.k]>0)||!window.__qsLISTS||!window.__qsLISTS[mk])return '';return '<div class="det-body">'+window.__qsLISTS[mk]+'</div>';}
-function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var gift=item.gift?'<span class="qw-gift">'+item.gift+'</span>':'';var tags=(pop||tag||gift)?'<div class="qw-tags">'+pop+tag+gift+'</div>':'';var tm=_TERMS[item.k]?'<span class="qw-terms" onclick="event.stopPropagation();__qw.terms(&quot;'+item.k+'&quot;)">📋 注意事項 ›</span>':'';return '<div class="opt '+(q>0?'sel':'')+'"><div class="opt-main"><img class="qw-thumb" src="'+P[item.k].img+'" onclick="event.stopPropagation();__qw.zoom(&quot;'+P[item.k].img+'&quot;)"><div class="oi"><span class="on'+(item.nmsm?' qw-on-sm':'')+'">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+(tm?' '+tm:'')+'</span>'+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
+function optRow(item){var q=qty[item.k]||0;var pop=item.pop?'<span class="qw-pop">🔥 人氣加購</span>':'';var tag=item.tag?'<span class="qw-info">'+item.tag+'</span>':'';var gift=item.gift?'<span class="qw-gift">'+item.gift+'</span>':'';var tags=(pop||tag||gift)?'<div class="qw-tags">'+pop+tag+gift+'</div>':'';var tm=_TERMS[item.k]?'<span class="qw-terms" onclick="event.stopPropagation();__qw.terms(&quot;'+item.k+'&quot;)">📋 注意事項 ›</span>':'';var _gk=_isGlK(item.k);return '<div class="opt '+(q>0?'sel':'')+(_gk?' qw-gl':'')+'"'+(_gk?' style="position:relative"':'')+'>'+(_gk?_glRib():'')+'<div class="opt-main"><img class="qw-thumb" src="'+P[item.k].img+'" onclick="event.stopPropagation();'+(_gk?'__qw.glInfo(&quot;'+item.k+'&quot;)':'__qw.zoom(&quot;'+P[item.k].img+'&quot;)')+'"><div class="oi"><span class="on'+(item.nmsm?' qw-on-sm':'')+'">'+(item.dn||item.n)+'</span>'+tags+'<span class="od">'+item.d+(tm?' '+tm:'')+(_gk?' <span class="qw-terms" onclick="event.stopPropagation();__qw.glInfo(&quot;'+item.k+'&quot;)">🔍 商品介紹 ›</span>':'')+'</span>'+stepper(item)+'</div></div>'+detailBlock(item)+'</div>';}
 /* ===== 精靈全程小計 =====
    客戶要走過室內機／室外機／加購三個畫面,以前中途完全看不到累計金額,
    要按下「完成」跳到購物車才第一次看到總價。客單價 $2,850~$9,975 不是隨手買的金額,
@@ -1840,6 +1840,65 @@ var _NOPICK={title:'還沒選要清洗的冷氣',html:'請至少選擇一台<b>�
 function toast(msg,ms){var t=document.getElementById('qw-toast');if(!t){t=document.createElement('div');t.id='qw-toast';document.body.appendChild(t);}t.innerHTML='<span>'+msg+'</span>';clearTimeout(window.__qwTt);window.__qwTt=setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},ms||2600);}
 /* ===== 加購商品注意事項(除濕機自動彈；AIRMON併入原機型提醒) ===== */
 /* 2026-11-09 Duralex 玻璃杯三款共用（rk:'gl' → 已讀紀錄 __qsRead_gl） */
+/* ===== 2026-11-09 Duralex 玻璃杯：17 號緞帶標籤＋D 款「商品介紹」視窗（老闆選定） =====
+   商品圖、產品介紹直接讀 1SHOP（GetProductInfo 的 MediaGroup／Content），老闆在後台改內容前台就跟著變；
+   ⚠️ logo 一定要 inline border-radius:0!important：精靈有樣式把所有 img 裁 12px 圓角，D 字會被切掉；
+   ⚠️ 外層加 rs-w：新風格換色會把黑底、陰影改掉 */
+var _GL_LOGO='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/O5gwrR4GNQboDzJZYBpn071e/original.png';
+var _GL_SPEC={gla:'4 入組（玫瑰粉 2 入、海水藍 2 入）',glb:'3 入禮盒（霧白、寶藍、梅紫各 1 入）',glc:'4 入組（土耳其藍）・2026 年獨家限定款'};
+function _glRib(){return '<div class="qs-glrib rs-w" style="position:absolute;top:12px;right:-1px;z-index:3;display:flex;align-items:center;gap:8px;background:#111;padding:7px 13px 7px 22px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,9px 50%);pointer-events:none"><img src="'+_GL_LOGO+'" alt="DURALEX" style="display:block!important;height:17px!important;width:auto!important;max-width:none!important;border-radius:0!important;background:transparent!important;object-fit:contain!important;margin:0!important;box-shadow:none!important"><i style="width:1px;height:11px;background:rgba(255,255,255,.4);flex:none"></i><span style="color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap;line-height:1">法國生產製造</span></div>';}
+var _glCssDone=false;
+function _glCss(){if(_glCssDone)return;_glCssDone=true;var st=document.createElement('style');st.textContent=
+ '.qw-gl .opt-main .on{margin-top:30px!important}'
++'@media (max-width:767px){.qs-glw h3{margin-top:30px!important}}'
++'#qs-gli{position:fixed;inset:0;z-index:100002;background:rgba(10,20,30,.55);display:flex;align-items:flex-end;justify-content:center;font-family:inherit}'
++'#qs-gli .gm{position:relative;background:#fff;width:100%;max-width:480px;height:94vh;height:94dvh;border-radius:20px 20px 0 0;overflow:hidden;display:flex;flex-direction:column}'
++'@media (min-width:768px){#qs-gli{align-items:center}#qs-gli .gm{height:88vh;border-radius:20px}}'
++'#qs-gli .gsc{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}'
++'#qs-gli .ggal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}#qs-gli .ggal::-webkit-scrollbar{display:none}'
++'#qs-gli .ggal img{flex:none;width:100%!important;height:auto!important;aspect-ratio:1/1;object-fit:cover!important;scroll-snap-align:start;display:block;border-radius:0!important;background:#f3f4f6}'
++'#qs-gli .gdots{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:6px;pointer-events:none}'
++'#qs-gli .gdots i{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.7);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:width .2s}#qs-gli .gdots i.on{width:18px;background:#fff}'
++'#qs-gli .gx{position:absolute;top:12px;left:12px;z-index:6;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.94);font-size:18px;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer}'
++'#qs-gli .gt1{font-size:18px;font-weight:900;color:#111;line-height:1.35}#qs-gli .gt2{font-size:13.5px;color:#666;margin-top:3px}'
++'#qs-gli .gtabs{display:flex;margin:14px 16px 0;border-bottom:1px solid #E6E9ED;position:sticky;top:0;background:#fff;z-index:4}'
++'#qs-gli .gtabs button{flex:1;border:none;background:none;padding:11px 0;font:inherit;font-size:14px;font-weight:600;color:#888;border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer}'
++'#qs-gli .gtabs button.on{font-weight:900;color:#111;border-bottom-color:#111}'
++'#qs-gli .gpane{padding:0 16px 24px}#qs-gli .gpane img{max-width:100%;height:auto}'
++'#qs-gli .gspec{font-size:14px;line-height:2;color:#444;margin-top:16px}'
++'#qs-gli .gfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid #ECEFF3;background:#fff}'
++'#qs-gli .gfoot s{font-size:12.5px;color:#999;margin-right:6px}#qs-gli .gfoot b{font-size:19px;font-weight:900;color:#111}'
++'#qs-gli .gadd{border:none;background:#111;color:#fff;font:inherit;font-weight:900;font-size:15px;border-radius:999px;padding:12px 26px;cursor:pointer}';
+ document.head.appendChild(st);}
+var _glInfoCache={};
+function _glFetch(k,cb){var r=_resolveBtn(_adN(k));if(!r||!window.$||!window._api){cb(null);return;}if(_glInfoCache[k]){cb(_glInfoCache[k]);return;}
+ try{$.ajax({url:_api+'view/GetProductInfo?ShopID='+_ShopID+'&ProductID='+r.pid,type:'GET'}).done(function(d){var I=d&&d.success===0&&d.data&&d.data.Info;if(I)_glInfoCache[k]=I;cb(I||null);}).fail(function(){cb(null);});}catch(e){cb(null);}}
+function _glMedia(f){if(!f||!f.URL)return '';var u=f.URL;return /\/$/.test(u)?u+'original.'+(f.Extension||'jpg'):u;}
+function _glInfo(k,from){try{_glCss();var old=document.getElementById('qs-gli');if(old)old.parentNode.removeChild(old);
+ var it=null;for(var i=0;i<ADDON.length;i++)if(ADDON[i].k===k)it=ADDON[i];if(!it)return;var pr=P[k]||{};
+ var ov=document.createElement('div');ov.id='qs-gli';ov.className='rs-w';
+ ov.innerHTML='<div class="gm"><button class="gx" type="button" aria-label="關閉">✕</button><div class="gsc"><div style="position:relative"><div class="ggal"><img src="'+pr.img+'" alt=""></div><div class="gdots"></div>'+_glRib()+'</div>'
+  +'<div style="padding:14px 16px 0"><div class="gt1">'+(it.dn||it.n).replace(/<br>/,'</div><div class="gt2">')+'</div></div>'
+  +'<div class="gtabs"><button type="button" class="on" data-t="0">商品介紹</button><button type="button" data-t="1">規格</button><button type="button" data-t="2">注意事項</button></div>'
+  +'<div class="gpane" data-p="0"><div style="padding:30px 0;text-align:center;color:#999;font-size:13px">載入中…</div></div>'
+  +'<div class="gpane" data-p="1" hidden><div class="gspec">容量 250ml｜高 9cm｜杯口直徑 8.7cm<br>'+(_GL_SPEC[k]||'')+'<br>材質：強化玻璃（100% 法國製造）<br>可用於洗碗機、微波爐及冷凍，耐熱衝擊 130°C</div></div>'
+  +'<div class="gpane" data-p="2" hidden>'+_GL_BODY+'</div></div>'
+  +'<div class="gfoot"><div>'+(pr.oprice?'<s>'+money(pr.oprice)+'</s>':'')+'<b>'+money(pr.price)+'</b></div><button class="gadd" type="button">'+((from==='wiz'&&(qty[k]||0)>0)?'✓ 已加入，再加 1 組':'＋ 加入')+'</button></div></div>';
+ document.body.appendChild(ov);
+ function cl(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
+ ov.querySelector('.gx').onclick=cl;ov.onclick=function(e){if(e.target===ov)cl();};
+ [].forEach.call(ov.querySelectorAll('.gtabs button'),function(b){b.onclick=function(){[].forEach.call(ov.querySelectorAll('.gtabs button'),function(x){x.className=(x===b?'on':'');});[].forEach.call(ov.querySelectorAll('.gpane'),function(pn){pn.hidden=pn.getAttribute('data-p')!==b.getAttribute('data-t');});};});
+ ov.querySelector('.gadd').onclick=function(){cl();
+  if(from==='wiz'){if((qty[k]||0)>0)api.chg(k,1);else api.pick(k);return;}
+  var r=_resolveBtn(_adN(k));if(r&&r.btn){try{r.btn.click();}catch(e){}}};
+ var gal=ov.querySelector('.ggal'),dots=ov.querySelector('.gdots');
+ gal.addEventListener('scroll',function(){clearTimeout(gal._t);gal._t=setTimeout(function(){var n=Math.round(gal.scrollLeft/Math.max(1,gal.clientWidth));[].forEach.call(dots.children,function(d,i){d.className=(i===n?'on':'');});},60);});
+ _glFetch(k,function(I){if(!ov.parentNode)return;
+  var urls=[];if(I){(I.MediaGroup||[]).forEach(function(g){var u=_glMedia(g.MediaFile);if(u)urls.push(u);});if(!urls.length&&I.MediaFile)urls.push(_glMedia(I.MediaFile));}
+  if(urls.length){gal.innerHTML=urls.map(function(u){return '<img src="'+u+'" alt="" loading="lazy">';}).join('');dots.innerHTML=urls.length>1?urls.map(function(u,i){return '<i class="'+(i?'':'on')+'"></i>';}).join(''):'';}
+  var html='';if(I&&I.Content){(I.Content||[]).forEach(function(b){if(!b)return;if(b.html)html+=b.html;else if(b.MediaFile)html+='<img src="'+_glMedia(b.MediaFile)+'" alt="" style="width:100%;border-radius:12px;display:block;margin:10px 0">';});}
+  ov.querySelector('[data-p="0"]').innerHTML=html||'<div style="padding:16px 0;font-size:14px;line-height:1.8;color:#444">'+(it.d||'')+'</div>';});
+}catch(e){}}
 var _GL_BODY='<div class="qwt-intro">本項目為冷氣清洗服務限定加購商品，須與冷氣清洗服務同筆訂購。</div>'+'<p>Duralex 玻璃杯為實體宅配商品，將於訂單確認後由物流另行配送至指定地址，不會由清洗技師攜帶，亦不一定與冷氣清洗服務於同日送達。</p>'+'<div class="qwt-h">商品規格</div><ul class="qwt-ul"><li>100% 法國製造強化玻璃（Duralex Picardie 系列）</li><li>容量 250ml，高 9cm、杯口直徑 8.7cm</li><li>可用於洗碗機、微波爐及冷凍，耐熱衝擊 130°C</li><li>入數與顏色依所選款式</li></ul><div class="qwt-note">※ 商品因拍攝關係顏色可能略有差異，實際以出貨為準。</div>'+'<div class="qwt-h">使用注意事項</div><ul class="qwt-ul"><li>使用前請先清洗</li><li>請勿於烤箱或直接火源上使用</li><li>請勿讓商品承受超過 130°C 的急遽溫差</li><li>請勿使用已損壞或有裂痕的杯子，並避免刮傷表面</li><li>請勿使用鋼絲或可能刮傷表面的用具清潔</li></ul><p>強化玻璃在特定條件下可能發生自爆，但並不常見；破裂時為較無尖角的小碎片，可降低割傷風險。如有疑問請聯繫客服。</p>'+'<div class="qwt-h">配送及收件說明</div><ul class="qwt-ul"><li>冷氣清洗服務：由約時人員聯繫安排技師到府</li><li>玻璃杯加購商品：由物流另行安排宅配</li></ul><p>實際出貨及到貨時間，將依訂單確認、商品庫存及物流配送狀況為準。若同時加購除濕機，兩者使用同一個期望配送日，但不一定同箱、同日送達。</p><div class="qwt-note">※ 玻璃杯不會由清洗技師於服務當日攜帶或交付。</div>'+'<div class="qwt-h">取消、退換貨及售後說明</div><p>本商品屬網路購買之實體宅配商品，消費者自收到商品次日起享有 7 日猶豫期，猶豫期並非試用期。</p><p>如需辦理退貨，請於收到商品後 7 日內聯繫客服提出申請，請勿自行寄回。退貨商品須保持全新及完整包裝（含商品本體、原廠包裝及所有附隨文件）。</p><p>如收到時有破損、缺件或瑕疵，請先拍照或錄影並保留商品與包裝，再聯繫客服協助處理。</p>';
 var _TERMS={
  dh:{pill:'📦 另行宅配',title:'三菱重工除濕機<br>DH18W-T 織紋白',body:
@@ -2103,6 +2162,7 @@ var api={
   pickEnv:function(k){env=k;if(k!=='biz')qty.bz=0;render();},
   pick:function(k){if(_isGlK(k)&&window.__qsRead_gl&&window.__qsDhDelivery){if(!qty[k])qty[k]=1;render();return;}/* 玻璃杯三款共用注意事項與配送日：讀過、選過就直接加 */if(k==='dh'||k==='air'||_isGlK(k)){showTerms(k,'gate');return;}if(k==='hi'&&sumKeys(INK)<1)return;var was=qty[k]||0;if(!qty[k])qty[k]=1;render();},
   terms:function(k){showTerms(k,'read');},
+  glInfo:function(k){_glInfo(k,'wiz');},
   zoom:function(src){if(document.getElementById('qw-zoom'))return;var z=document.createElement('div');z.id='qw-zoom';z.innerHTML='<img src="'+src+'" alt="">';z.onclick=function(){if(z.parentNode)z.parentNode.removeChild(z);};document.body.appendChild(z);},
   chg:function(k,d){var v=Math.max(0,(qty[k]||0)+d);if(k==='hi'){var mx=sumKeys(INK);if(v>mx)v=mx;}qty[k]=v;render();},
   pickPlan:function(k){plan=k;window.__qsPlan=k;render();},
@@ -2664,6 +2724,12 @@ function addPopularBadge(){
       lk.style.cssText='display:inline-block;margin:0 0 4px;font-size:11.5px;font-weight:800;color:#0C447C;text-decoration:underline;text-underline-offset:2px;cursor:pointer;align-self:flex-start';
       (function(tk){lk.onclick=function(){if(window.__qw)window.__qw.terms(tk);};})(m.tk);
       box.parentNode.insertBefore(lk,box.nextSibling);
+      if(m.nopop){/* 2026-11-09 Duralex 玻璃杯：右上角 17 號緞帶標籤＋點商品圖開「商品介紹」 */
+        w.classList.add('qs-glw');if(getComputedStyle(w).position==='static')w.style.position='relative';
+        if(!w.querySelector('.qs-glrib')){var rb=document.createElement('div');rb.innerHTML=_glRib();w.appendChild(rb.firstChild);}
+        var iw=w.querySelector('.img-square-wrap');if(iw&&!iw.__gl){iw.__gl=1;iw.style.cursor='zoom-in';(function(tk){iw.addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();_glInfo(tk,'page');},true);})(m.tk);}
+        var gi=document.createElement('span');gi.className='qs-termlink';gi.textContent='🔍 商品介紹 ›';gi.style.cssText=lk.style.cssText+';margin-left:10px';(function(tk){gi.onclick=function(){_glInfo(tk,'page');};})(m.tk);lk.parentNode.insertBefore(gi,lk.nextSibling);
+      }
     }
   }catch(e){}
 }
