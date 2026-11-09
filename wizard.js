@@ -2019,9 +2019,9 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
    var commit=function(){var E2=window.__qsEng||(window.__qsEng={});if(n){E2[k]=D;window.__qsEngAck=_readStamp();}else delete E2[k];_engSave();
     if(opt.onConfirm){opt.onConfirm();return;}var was=qty[k]||0;qty[k]=Q;_engSync();render();
     /* 2026-11-09 老闆：加購後再問要不要雷雕（第一次加這款、還沒雕刻時才問） */
-    if(EG&&!was&&!n&&!opt.eng)setTimeout(function(){_qwDlg({title:'✍️ 要幫杯子刻名字嗎？',html:'<div style="text-align:center">可加購雷雕客製，<b>每個杯子 +$300</b>（不打折）<br>英文名字或紀念數字，3～10 字<div style="font-size:13px;color:#8a1f1f;margin-top:6px">客製品不接受退換，約 7 個工作天出貨</div></div>',cancel:'不用了',ok:'要，設定雷雕',onOk:function(){_glInfo(k,'wiz',{gate:1,eng:1,engOnly:1});}});},350);};
+    if(EG&&!was&&!n&&!opt.eng)setTimeout(function(){_qwDlg({title:'✍️ 要幫杯子刻名字嗎？',html:'<div style="text-align:center"><div style="white-space:nowrap;font-size:clamp(12px,3.7vw,14.5px)">可加購雷雕客製，<b>每個杯子 +$300</b>（不打折）</div>英文名字或紀念數字，3～10 字<div style="font-size:13px;color:#8a1f1f;margin-top:6px">客製品不接受退換，約 7 個工作天出貨</div></div>',cancel:'不用了',ok:'要，設定雷雕',onOk:function(){_glInfo(k,'wiz',{gate:1,eng:1,engOnly:1});}});},350);};
    cl();
-   if(!window.__qsDhDelivery||(after>0&&_engEarly()))showDeliveryPicker(commit,{nm:'玻璃杯',eng:after>0});else commit();};
+   if(!window.__qsDhDelivery||(after>0&&_engEarly()))showDeliveryPicker(commit,{nm:'玻璃杯',eng:after>0,okTxt:((qty[k]||0)>0?'確認配送日':''),noTxt:((qty[k]||0)>0?'取消':'')});else commit();};
   wz.addEventListener('click',function(e){var t=e.target;
    if(t.closest('.gegb')){openEng();return;}
    if(t.closest('[data-go]')){e.preventDefault();goNotice();return;}
@@ -2114,8 +2114,8 @@ function showDeliveryPicker(onDone,opt){
  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-slot="上午" class="qwdh-slot" style="border:1.5px solid #d3ddea;border-radius:12px;padding:12px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer">上午<span style="display:block;font-size:11px;font-weight:600;color:#7c8998;margin-top:2px">約 09:00–12:00</span></button><button data-slot="下午" class="qwdh-slot" style="border:1.5px solid #d3ddea;border-radius:12px;padding:12px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer">下午<span style="display:block;font-size:11px;font-weight:600;color:#7c8998;margin-top:2px">約 13:00–18:00</span></button></div>'
  +'<div style="font-size:11.5px;color:#8a6410;background:rgba(184,134,11,.09);border:1px solid rgba(184,134,11,.25);border-radius:10px;padding:10px 12px;line-height:1.65;margin-top:15px">⚠️ 此為<b>期望配送時間</b>，實際仍需依物流量能為準，司機將於配送前<b>去電聯繫</b>確認。</div>'
  +'<div id="qwdh-sum" style="font-size:12.5px;color:#042C53;font-weight:800;text-align:center;margin-top:13px;min-height:17px"></div>'
- +'<button id="qwdh-ok" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed">'+(ED?'確認變更':'確認加購'+NM)+'</button>'
- +'<button id="qwdh-cancel" style="width:100%;border:none;background:none;color:#7c8998;font-size:12.5px;margin-top:10px;cursor:pointer;text-decoration:underline">'+(ED?'不變更':'取消，不加購'+NM)+'</button>'
+ +'<button id="qwdh-ok" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed">'+(ED?'確認變更':(opt.okTxt||'確認加購'+NM))+'</button>'
+ +'<button id="qwdh-cancel" style="width:100%;border:none;background:none;color:#7c8998;font-size:12.5px;margin-top:10px;cursor:pointer;text-decoration:underline">'+(ED?'不變更':(opt.noTxt||'取消，不加購'+NM))+'</button>'
  +'</div></div>';
  document.body.appendChild(ov);
  var wd=['日','一','二','三','四','五','六'];
