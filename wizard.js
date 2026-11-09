@@ -183,7 +183,7 @@ var CSS='#qw-cdcal .qwcd-sl{grid-template-columns:repeat(2,1fr)!important}#qw-cd
 +'#qw-ovl .qw .qplans.qw-bob .qplan:nth-child(1){animation:qwBob 1.2s infinite}#qw-ovl .qw .qplans.qw-bob .qplan:nth-child(2){animation:qwBob 1.2s .2s infinite}#qw-ovl .qw .qplans.qw-shake{animation:qwShake .45s}'
 +'#qw-ovl .qw .btn.pri.qw-needbtn{background:#B8860B!important;animation:qwGold 1.4s infinite}'
 +'@media (prefers-reduced-motion:reduce){#qw-ovl .qw .qw-need i,#qw-ovl .qw .qplans.qw-bob .qplan,#qw-ovl .qw .btn.pri.qw-needbtn,#qw-ovl .qw .qplans.qw-shake{animation:none}}'
-+'#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
++'#qw-ovl{position:fixed;inset:0;z-index:99999;background:rgba(4,20,40,.55);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}'
 +'#qw-ovl *{box-sizing:border-box}'
 +''
 +'#qw-ovl .qw{max-width:640px!important}'/* 內文CSS有一份舊的.qw(max-width:400px)排在後面會壓過來,故用#qw-ovl前綴+!important搶回;必須放在下面兩個@media之前,否則會反過來壓掉桌機規則 */
@@ -215,7 +215,7 @@ var CSS='#qw-cdcal .qwcd-sl{grid-template-columns:repeat(2,1fr)!important}#qw-cd
 +'.qw .qw-info{display:inline-flex;align-items:center;background:#E6F1FB;color:#0C447C;border:1px solid #cddff0;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;line-height:1.4;white-space:nowrap}'
 +'.qw .qw-gift{display:inline-flex;align-items:center;background:#fdeeec;color:#c0392b;border:1px solid #f3c9c4;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;line-height:1.4;white-space:nowrap}'
 +'.qw .qw-terms{display:inline-flex;align-items:center;gap:3px;margin-top:7px;font-size:11.5px;font-weight:800;color:#0C447C;text-decoration:underline;text-underline-offset:2px;cursor:pointer}'
-+'#qw-terms{position:fixed;inset:0;z-index:100003;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:16px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif}#qw-terms *{box-sizing:border-box}'
++'#qw-terms{position:fixed;inset:0;z-index:100003;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:16px;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}#qw-terms *{box-sizing:border-box}'
 +'.qwt-m{background:#fff;border-radius:16px;max-width:380px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 55px rgba(0,0,0,.4)}'
 +'.qwt-hd{background:linear-gradient(120deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative;flex:0 0 auto}'
 +'.qwt-pill{display:inline-block;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:3px 10px;margin-bottom:7px}'
@@ -1846,7 +1846,7 @@ function toast(msg,ms){var t=document.getElementById('qw-toast');if(!t){t=docume
    ⚠️ 外層加 rs-w：新風格換色會把黑底、陰影改掉 */
 var _GL_LOGO='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/O5gwrR4GNQboDzJZYBpn071e/original.png';
 var _GL_SPEC={gla:'4 入組（玫瑰粉 2 入、海水藍 2 入）',glb:'3 入禮盒（霧白、寶藍、梅紫各 1 入）',glc:'4 入組（土耳其藍）・2026 年獨家限定款'};
-function _glRib(){return '<div class="qs-glrib rs-w" style="position:absolute;top:12px;right:-1px;z-index:3;display:flex;align-items:center;gap:8px;background:#111;padding:7px 13px 7px 22px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,9px 50%);pointer-events:none"><img src="'+_GL_LOGO+'" alt="DURALEX" style="display:block!important;height:17px!important;width:auto!important;max-width:none!important;border-radius:0!important;background:transparent!important;object-fit:contain!important;margin:0!important;box-shadow:none!important"><i style="width:1px;height:11px;background:rgba(255,255,255,.4);flex:none"></i><span style="color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap;line-height:1">法國生產製造</span></div>';}
+function _glRib(){return '<div class="qs-glrib rs-w" style="position:absolute;top:12px;right:0;z-index:3;display:flex;align-items:center;gap:8px;background:#111;padding:7px 13px 7px 22px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,9px 50%);pointer-events:none"><img src="'+_GL_LOGO+'" alt="DURALEX" style="display:block!important;height:17px!important;width:auto!important;max-width:none!important;border-radius:0!important;background:transparent!important;object-fit:contain!important;margin:0!important;box-shadow:none!important"><i style="width:1px;height:11px;background:rgba(255,255,255,.4);flex:none"></i><span style="color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap;line-height:1">法國生產製造</span></div>';}
 var _glCssDone=false;
 function _glCss(){if(_glCssDone)return;_glCssDone=true;var st=document.createElement('style');st.textContent=
  '.qw-gl .opt-main .on{margin-top:30px!important}'
@@ -1856,7 +1856,11 @@ function _glCss(){if(_glCssDone)return;_glCssDone=true;var st=document.createEle
 +'#qs-gli .gm{position:relative;background:#fff;width:100%;max-width:380px;height:calc(100vh - 48px);height:calc(100dvh - 48px);max-height:880px;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 55px rgba(0,0,0,.4)}'
 +'@media (min-width:760px) and (pointer:fine){#qs-gli .gm{max-width:520px}}'
 +(/r9v15r|v8cs91/.test(location.pathname)?'@media (min-width:640px){#qs-gli .gm{max-width:600px}}':'')
-+'#qs-gli .gsc{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}'
++'#qs-gli .gsc{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}#qs-gli .gsc::-webkit-scrollbar{display:none}'
+/* 2026-11-09 老闆：Windows 看到兩條捲軸 → 藏起來（照樣可以滾）；配送日／期望日期視窗一起藏 */
++'#qw-dhcal>div,#qw-cdcal,#qw-cdcal *{scrollbar-width:none}#qw-dhcal>div::-webkit-scrollbar,#qw-cdcal::-webkit-scrollbar,#qw-cdcal *::-webkit-scrollbar{display:none}'
+/* 2026-11-09 老闆：商品名稱要固定、不受捲動影響 → 名稱＋分頁列一起 sticky；捲到頂時讓開左上角 ✕ */
++'#qs-gli .ghd{position:sticky;top:0;z-index:5;background:#fff;transition:padding .15s}#qs-gli .ghd.stuck{padding-left:56px;box-shadow:0 4px 10px rgba(0,0,0,.06)}#qs-gli .ghd .gtabs{position:static}'
 +'#qs-gli .ggal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}#qs-gli .ggal::-webkit-scrollbar{display:none}'
 +'#qs-gli .ggal img{flex:none;width:100%!important;height:auto!important;aspect-ratio:1/1;object-fit:cover!important;scroll-snap-align:start;display:block;border-radius:0!important;background:#f3f4f6}'
 +'#qs-gli .gdots{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:6px;pointer-events:none}'
@@ -1884,8 +1888,8 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
  var it=null;for(var i=0;i<ADDON.length;i++)if(ADDON[i].k===k)it=ADDON[i];if(!it)return;var pr=P[k]||{};
  var ov=document.createElement('div');ov.id='qs-gli';ov.className='rs-w';
  ov.innerHTML='<div class="gm"><button class="gx" type="button" aria-label="關閉">✕</button><div class="gsc"><div style="position:relative"><div class="ggal"><img src="'+pr.img+'" alt=""></div><div class="gdots"></div>'+_glRib()+'</div>'
-  +'<div style="padding:14px 16px 0"><div class="gt1">'+(it.dn||it.n).replace(/<br>/,'</div><div class="gt2">')+'</div></div>'
-  +'<div class="gtabs"><button type="button" class="on" data-t="0">商品介紹</button><button type="button" data-t="1">規格</button><button type="button" data-t="2">注意事項</button></div>'
+  +'<div class="ghd"><div style="padding:14px 16px 0"><div class="gt1">'+(it.dn||it.n).replace(/<br>/,'</div><div class="gt2">')+'</div></div>'
+  +'<div class="gtabs"><button type="button" class="on" data-t="0">商品介紹</button><button type="button" data-t="1">規格</button><button type="button" data-t="2">注意事項</button></div></div>'
   +'<div class="gpane" data-p="0"><div style="padding:30px 0;text-align:center;color:#999;font-size:13px">載入中…</div></div>'
   +'<div class="gpane" data-p="1" hidden><div class="gspec">容量 250ml｜高 9cm｜杯口直徑 8.7cm<br>'+(_GL_SPEC[k]||'')+'<br>材質：強化玻璃（100% 法國製造）<br>可用於洗碗機、微波爐及冷凍，耐熱衝擊 130°C</div></div>'
   +'<div class="gpane" data-p="2" hidden>'+_GL_BODY+'</div></div>'
@@ -1900,11 +1904,12 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
  function toGate(){var f=ov.querySelector('.gfoot');if(f.classList.contains('gate'))return;f.classList.add('gate');var b=ov.querySelector('.gadd');b.textContent='確認加購';b.disabled=true;
   var lb=document.createElement('label');lb.className='gchk';lb.innerHTML='<input type="checkbox"><span>我已閱讀並瞭解<a data-go="2">注意事項</a>（宅配、退換貨說明）</span>';f.insertBefore(lb,f.firstChild);
   var no=document.createElement('button');no.type='button';no.className='gno';no.textContent='先不加購';no.onclick=cl;f.appendChild(no);
-  var cb=lb.querySelector('input');cb.onchange=function(){b.disabled=!cb.checked;};lb.querySelector('a').onclick=function(e){e.preventDefault();var t=ov.querySelector('.gtabs [data-t="2"]');if(t)t.click();var sc=ov.querySelector('.gsc'),tb=ov.querySelector('.gtabs');if(sc&&tb)sc.scrollTop=tb.offsetTop;};
+  var cb=lb.querySelector('input');cb.onchange=function(){b.disabled=!cb.checked;};lb.querySelector('a').onclick=function(e){e.preventDefault();var t=ov.querySelector('.gtabs [data-t="2"]');if(t)t.click();var sc=ov.querySelector('.gsc'),tb=ov.querySelector('.ghd');if(sc&&tb)sc.scrollTop=tb.offsetTop;};
   b.onclick=function(){if(!cb.checked)return;window.__qsRead_gl=_readStamp();cl();if(window.__qsDhDelivery)doAdd();else showDeliveryPicker(doAdd,{nm:'玻璃杯'});};}
  ov.querySelector('.gadd').onclick=function(){if(window.__qsRead_gl&&window.__qsDhDelivery&&!opt.gate){cl();doAdd();return;}toGate();};
  if(opt.gate)toGate();
  var gal=ov.querySelector('.ggal'),dots=ov.querySelector('.gdots');
+ var gsc=ov.querySelector('.gsc'),ghd=ov.querySelector('.ghd');gsc.addEventListener('scroll',function(){ghd.classList.toggle('stuck',gsc.scrollTop>=ghd.offsetTop-1);});
  gal.addEventListener('scroll',function(){clearTimeout(gal._t);gal._t=setTimeout(function(){var n=Math.round(gal.scrollLeft/Math.max(1,gal.clientWidth));[].forEach.call(dots.children,function(d,i){d.className=(i===n?'on':'');});},60);});
  _glFetch(k,function(I){if(!ov.parentNode)return;
   var urls=[];if(I){(I.MediaGroup||[]).forEach(function(g){var u=_glMedia(g.MediaFile);if(u)urls.push(u);});if(!urls.length&&I.MediaFile)urls.push(_glMedia(I.MediaFile));}
@@ -1946,7 +1951,7 @@ function showDeliveryPicker(onDone,opt){
  var MIN=_dhMin();var MAX=new Date();MAX.setHours(23,59,59,999);MAX.setDate(MAX.getDate()+9);/* 只開放 D+2(工作天)~D+9 */var minMonth=new Date(MIN.getFullYear(),MIN.getMonth(),1);var maxMonth=new Date(MAX.getFullYear(),MAX.getMonth(),1);var view=new Date(minMonth);var selDate=null,selSlot=null;
  if(ED){var _pc=_whenParse(opt.cur);if(_pc){if(_pc.d>=MIN&&_pc.d<=MAX&&!_dhBlocked(_pc.d)){selDate=_pc.d;view=new Date(_pc.d.getFullYear(),_pc.d.getMonth(),1);}selSlot=_pc.slot;}}
  var ov=document.createElement('div');ov.id='qw-dhcal';
- ov.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
+ ov.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(4,20,40,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.35)">'
  +'<div style="background:linear-gradient(135deg,#042C53,#0C447C);color:#fff;padding:15px 18px;position:relative"><div style="font-size:11px;font-weight:800;opacity:.85">📦 '+HD+' · 另行宅配</div><div style="font-size:16.5px;font-weight:900;margin-top:3px;padding-right:34px">'+(ED?'變更'+NM+'期望配送日期與時段':'選擇'+NM+'期望配送日期與時段')+'</div><button id="qwdh-x" type="button" aria-label="關閉" style="position:absolute;top:10px;right:12px;width:30px;height:30px;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:19px;line-height:1;border-radius:50%;cursor:pointer">×</button></div>'
  +'<div style="padding:15px 18px 18px">'
@@ -2820,7 +2825,7 @@ function _showBackBtn(){try{
   if(!document.getElementById('qw-bk-css')){var bs=document.createElement('style');bs.id='qw-bk-css';bs.textContent='@keyframes qwbk{0%{transform:translateX(-50%) translateY(18px);opacity:0}60%{transform:translateX(-50%) translateY(-3px);opacity:1}100%{transform:translateX(-50%) translateY(0);opacity:1}}';document.head.appendChild(bs);}
   b=document.createElement('button');b.type='button';b.id='qw-back';
   b.textContent='↩ 回到引導精靈';
-  b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:99990;background:linear-gradient(135deg,#C9962A,#B8860B);color:#fff;border:none;border-radius:99px;padding:15px 30px;font-size:15.5px;font-weight:900;letter-spacing:.02em;font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 30px rgba(184,134,11,.5);white-space:nowrap;animation:qwbk .34s cubic-bezier(.2,1.4,.4,1)';
+  b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:99990;background:linear-gradient(135deg,#C9962A,#B8860B);color:#fff;border:none;border-radius:99px;padding:15px 30px;font-size:15.5px;font-weight:900;letter-spacing:.02em;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 30px rgba(184,134,11,.5);white-space:nowrap;animation:qwbk .34s cubic-bezier(.2,1.4,.4,1)';
   b.onclick=function(){_hideBackBtn();open();};
   document.body.appendChild(b);
   return b;
@@ -4679,7 +4684,7 @@ function updateFab(){
     if(!(hasProd&&!inCheckout&&!wizardOpen&&!cartBtnVis)){if(fab)fab.style.display='none';document.body.style.paddingBottom='';return;}
     if(!fab){
       fab=document.createElement('div');fab.id='qs-fab';
-      fab.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9998;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid rgba(4,44,83,.12);box-shadow:0 -6px 22px rgba(4,44,83,.1);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));font-family:\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif';
+      fab.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9998;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid rgba(4,44,83,.12);box-shadow:0 -6px 22px rgba(4,44,83,.1);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));font-family:\"Noto Sans TC\",\"PingFang TC\",\"Microsoft JhengHei\",system-ui,sans-serif';
       fab.innerHTML='<div style=\"width:100%;max-width:640px;margin:0 auto;display:flex;align-items:center;gap:14px\"><div style=\"flex:1;min-width:0;font-size:14.5px;color:#1c2733;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">共 <b id=\"qs-fab-n\" style=\"color:#042C53\">0</b> 件 · <span id=\"qs-fab-p\" style=\"font-size:17px;font-weight:900;color:#8A6416\"></span></div><button id=\"qs-fab-btn\" type=\"button\" style=\"flex:0 0 auto;border:none;border-radius:999px;background:#042C53;color:#fff;font-size:15px;font-weight:800;padding:14px 46px;font-family:inherit;cursor:pointer;white-space:nowrap\">立即結帳</button></div>';
       document.body.appendChild(fab);
       fab.querySelector('#qs-fab-btn').onclick=function(){if(window.__QW_CHECKOUT&&_ckSnapLoad()&&window.__qw&&__qw.wbGo){__qw.wbGo();return;}var co=[].slice.call(document.querySelectorAll('button')).filter(function(b){return (b.textContent||'').trim()==='立即結帳'&&!b.closest('#qs-fab');})[0];if(co)co.click();};
@@ -5370,7 +5375,7 @@ function _qwDropCoupons(){var n=0;(function go(){try{var b=document.querySelecto
    +'#qw-ovl.qw-kb .s26c{display:none!important}'
    +'#qw-ovl .qwfoot:has(.s26c) .qwmore{top:-98px!important}'/* 往下滑提示疊在膠囊上面 */
    +'#s26d{position:fixed;inset:0;z-index:2147483640;background:rgba(4,24,48,.5);display:flex;align-items:flex-end;justify-content:center}'
-   +'#s26d .sh{background:#fff;width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:75vh;overflow:auto;font-family:"PingFang TC","Noto Sans TC",sans-serif}'
+   +'#s26d .sh{background:#fff;width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:75vh;overflow:auto;font-family:"Noto Sans TC","PingFang TC",sans-serif}'
    +'#s26d h3{margin:0 0 10px;font-size:18px;color:#0A2540}#s26d .r{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #EEF1F5;font-size:15px;color:#14202E}#s26d .r span:last-child{font-weight:700;white-space:nowrap}'
    +'#s26d .tt{display:flex;justify-content:space-between;padding:12px 0 4px;font-weight:800;font-size:17px;color:#0A2540}#s26d .ex{font-size:13px;color:#66727F;margin-top:6px}'
    +'#s26d .x{display:block;width:100%;margin-top:14px;height:50px;border:0;border-radius:999px;background:#0A2540;color:#fff;font:800 16px inherit;font-family:inherit}';
@@ -5621,7 +5626,7 @@ var NEG=/洗車|移機|裝冷氣|安裝冷氣|新冷氣|買冷氣|賣冷氣|冷�
   st.textContent='.fb-btn{position:absolute;right:2px;top:-112px;z-index:7;width:50px;height:50px;border-radius:50%;border:0;background:linear-gradient(145deg,#E2BE5E,#B8892B);color:#fff;font-size:22px;box-shadow:0 0 0 3px #fff,0 10px 24px -6px rgba(120,80,10,.6);cursor:pointer;display:grid;place-items:center;padding:0}'/* 2026-10-30 盤點四③乙：深藍會跟深藍的場勘提示條黏在一起→改金色＋白外圈 */
    +'.fb-btn small{position:absolute;top:-6px;right:-8px;background:#0A2540;color:#fff;font-size:12.5px;font-weight:800;line-height:1;border-radius:999px;padding:3px 5px}'
    +'#qw-ovl.qw-kb .fb-btn{display:none!important}'
-   +'#fb-sh{position:fixed;inset:0;z-index:2147483300;background:rgba(4,24,48,.45);display:flex;align-items:flex-end;justify-content:center;font-family:"PingFang TC","Noto Sans TC",sans-serif}'
+   +'#fb-sh{position:fixed;inset:0;z-index:2147483300;background:rgba(4,24,48,.45);display:flex;align-items:flex-end;justify-content:center;font-family:"Noto Sans TC","PingFang TC",sans-serif}'
    +'#fb-sh .p{background:#fff;width:100%;max-width:560px;max-height:82vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}'
    +'#fb-sh .h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;font-weight:800;font-size:17px;color:#0A2540}#fb-sh .h button{border:0;background:#F2F4F7;width:34px;height:34px;border-radius:50%;font-size:18px;color:#0A2540}'
    +'#fb-sh .nt{padding:0 16px 8px;font-size:12.5px;color:#66727F}'
