@@ -8,7 +8,10 @@ try{
   [['https://fonts.googleapis.com',0],['https://fonts.gstatic.com',1]].forEach(function(x){var p=document.createElement('link');p.rel='preconnect';p.href=x[0];if(x[1])p.crossOrigin='anonymous';d.appendChild(p);});
   var l=document.createElement('link');l.id='qs-font';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400..900&family=Noto+Serif+TC:wght@400..900&display=swap';d.appendChild(l);
   var c=document.createElement('style');c.id='qs-font-css';c.textContent='body,button,input,select,textarea{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}'
-    +'.page-sale h1,.page-sale h2,.page-sale h3,.page-sale h4,.page-sale .btn,.page-sale .a-link{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important}';/* 1SHOP 商品清單的標題與按鈕自己指定了微軟正黑體 */d.appendChild(c);
+    +'.page-sale h1,.page-sale h2,.page-sale h3,.page-sale h4,.page-sale .btn,.page-sale .a-link{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important}'
+    /* 2026-11-09 老闆：全面盤點字體要一致 → 1SHOP 對按鈕、輸入框、結帳表單、購物車另外指定了微軟正黑體，優先順序比上面高；
+       整頁一律改 Noto Sans TC（避開 Font Awesome 圖示、SVG；雷雕預覽字 .gtx2 要顯示客人選的雕刻字型，保留） */
+    +'body *:not(i):not(svg):not(svg *):not(.fa):not(.far):not(.fas):not(.fab):not(.fal):not(.fad):not([class*=" fa-"]):not([class^="fa-"]):not(.gtx2){font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important}';/* 1SHOP 商品清單的標題與按鈕自己指定了微軟正黑體 */d.appendChild(c);
 }catch(e){}})();
 var IB='https://img.1shop.tw/ZLDl7P1ybNpzP89AO5Q6n98k/';
 function im(t){return IB+t+'/600x.png';}
@@ -1687,7 +1690,7 @@ function render(){
     var body='',_shSec=0;ADDON.forEach(function(x){if(x.hid)return;if(_bmReady&&!_resolveBtn(x.n))return;if(x.needBlow&&!hasBlow())return;if(x.k==='bz'&&env==='biz'){var bn=bzQty();if(bn>0){body+='<div class="envnote">🏢 營業場所：已自動加購「營業場所加價」<b>× '+bn+'</b>（室內機、室外機每台各 +$1,000）</div>';}return;}if(x.k==='rm'){if(areaCls==='remote'){body+='<div class="envnote">📍 偏遠地區：已自動加購「偏遠地區加價」<b>× 1</b>（一張訂單收一次 +$600）</div>';}return;}/* 2026-10-28 老闆選 C：挑高、重油煙、風鼓不在加購頁出現，只在確認頁問一次（確認頁答完會自動加入購物車） */if(window.__QW_CHECKOUT&&(x.k==='fan'||x.k==='hi'||x.k==='bz'))return;if(x.k==='tf'){if(tfQty()>0){body+='<div class="envnote">🚗 只洗 1 台室外機：已自動加購「車馬費」<b>× 1</b>（技師車程成本 +$600，單筆）</div>';}return;}body+=optRow(x);if(x.k==='fan')body+=_fanBox();if(x.k==='air'&&(qty.air||0)>0){body+='<div class="airnote">＊AIRMON 適用三菱重工家用壁掛式、晴空 ZST 吊隱式及商用壁掛式（DXK／FDK），請確認機型後再購買</div>';}if(x.k==='hi'&&(qty.hi||0)>0){body+='<div class="airnote">＊挑高加價請對應實際 3.5～4 米 高處的機器台數（最多 '+sumKeys(INK)+' 台，只算室內機）</div>';}});
     if(!hasBlow()&&!window.__QW_CHECKOUT){body+='<div class="warnbox">＊「風鼓清洗」僅在選購吊隱式大/全清洗時才可加購</div>';}
     var nextLbl=sumKeys(ADDON.map(function(a){return a.k;}))>0?'下一步：選到府方案':'不加購，下一步';
-    w='<div class="qw">'+stepBar()+'<h2>要加購特殊項目嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p>'+(window.__QW_CHECKOUT?'<div class="optnote">以下項目<b>非必要</b>，需要再加購即可<br><span style="font-weight:500">安裝高度、油煙、風鼓等現場條件，結帳前會再請您確認</span></div>':'<div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>')+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
+    w='<div class="qw">'+stepBar()+'<h2>要加購其他商品嗎？</h2><p class="sub">這一步是「選配」，沒有需要可直接按下一步</p>'+(window.__QW_CHECKOUT?'<div class="optnote">以下項目<b>非必要</b>，需要再加購即可<br><span style="font-weight:500">安裝高度、油煙、風鼓等現場條件，結帳前會再請您確認</span></div>':'<div class="optnote">以下項目<b>非必要</b>，依你的現場條件加購即可</div>')+body+_qwBar()+'<div class="nav"><button class="btn gho" onclick="__qw.go(2)">上一步</button><button class="btn pri" onclick="__qw.go(4)">'+nextLbl+'</button></div><div class="skip" onclick="__qw.skip()">我自己選就好</div></div>';
   } else {
     /* 方案卡顯示實際金額:客戶原本只看到「95折/85折」,不知道各是多少錢、也不知道差多少。
        實測 20 筆訂單只有 4 筆選早鳥,把省下的金額直接寫出來比抽象折數有感。
@@ -5375,7 +5378,9 @@ function _qdHtmlVersion(t,base,box){try{
   var host=document.createElement('div');host.className='qd-host';
   if(!host.attachShadow)return false;
   var sr=host.attachShadow({mode:'open'});
-  sr.innerHTML='<style>'+QD_CSS+'</style>'+t.split('__B__').join(base);
+  sr.innerHTML='<style>'+QD_CSS+'</style>'+t.split('__B__').join(base)
+    /* 2026-11-09 老闆：字體要跟其他頁面一致 → 詳情頁原本標題用思源明體、型號用等寬字、方案 A/B/C 用 Georgia，一律改 Noto Sans TC（這塊在 Shadow DOM 裡，外面的規則進不來，要在這裡加） */
+    +'<style>.qdd,.qdd *:not(svg):not(svg *){font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important}</style>';
   var root=sr.querySelector('.qdd');if(!root)return false;
   var secs=[].slice.call(root.children).filter(function(x){return x.hasAttribute('data-qg');});
   if(secs.length<10)return false;
