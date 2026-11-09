@@ -2058,6 +2058,8 @@ function _glInfo(k,from,opt){try{_glCss();opt=opt||{};var old=document.getElemen
    var dt=lay.querySelector('.gctab [data-a="'+act+'"] i');if(dt)dt.className=_engOk(v)?'ok':'';
    lay.querySelector('.gef').innerHTML=engFootH();});
   drawFoot();
+  /* 2026-11-09 老闆：打開視窗就先把這款各顏色的雷雕預覽照片載好，切換顏色時不會先空白 */
+  if(EG){C.forEach(function(col){try{var im=new Image();im.src=_engImg(col).u;}catch(e){}});}
   if(opt.eng)openEng();
  }else{
  function toGate(){var f=ov.querySelector('.gfoot');if(f.classList.contains('gate'))return;f.classList.add('gate');var b=ov.querySelector('.gadd');b.textContent='確認加購';b.disabled=true;
