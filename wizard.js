@@ -2117,7 +2117,7 @@ function _dhBlocked(dt){if(_DHHOL[_dhKey(dt)])return true;var w=dt.getDay();if(w
 function _dhMin(){var d=new Date();d.setHours(12,0,0,0);var n=0;while(n<2){d.setDate(d.getDate()+1);if(!_dhBlocked(d))n++;}return d;}
 function _dhFmt(dt){var m=dt.getMonth()+1,d=dt.getDate();return dt.getFullYear()+'/'+(m<10?'0':'')+m+'/'+(d<10?'0':'')+d;}
 function showDeliveryPicker(onDone,opt){
- opt=opt||{};var ED=!!opt.edit;var NM=opt.nm||'除濕機';var HD=(NM==='除濕機')?'三菱重工除濕機':(NM==='玻璃杯'?'Duralex 玻璃杯':NM);
+ opt=opt||{};var ED=!!opt.edit;var NM=opt.nm||'除濕機',NM2=(NM==='玻璃杯')?'Duralex玻璃杯':NM;/* 2026-11-09 老闆：按鈕寫「確認加購Duralex玻璃杯」 */var HD=(NM==='除濕機')?'三菱重工除濕機':(NM==='玻璃杯'?'Duralex 玻璃杯':NM);
  if(document.getElementById('qw-dhcal'))return;
  var ENG=('eng' in opt)?!!opt.eng:_engN()>0;/* 2026-11-09 雷雕：約 7 個工作天出貨 → 最早第 7 個工作天，可選範圍一樣往後 9 天 */var MIN=ENG?_dhMinN(ENG_WD):_dhMin();MIN.setHours(0,0,0,0);if(!ENG){do{MIN.setDate(MIN.getDate()+1);}while(_dhBlocked(MIN));}/* 2026-11-09 老闆選 B：除濕機／玻璃杯配送日實際一直是從「第 2 個工作天的下一個可配送日」開始（原本中午 12 點比對造成），規則維持（多留一天給晚付款的客人），把 MIN 對齊實際第一個可選日，視窗文字就不會寫一個點不到的日期 *//* 雷雕：寫的「最早 11/18」那天要點得到（除濕機原本的規則不動） */var MAX=ENG?new Date(MIN):new Date();MAX.setHours(23,59,59,999);MAX.setDate(MAX.getDate()+9);/* 只開放 D+2(工作天)~D+9 */var minMonth=new Date(MIN.getFullYear(),MIN.getMonth(),1);var maxMonth=new Date(MAX.getFullYear(),MAX.getMonth(),1);var view=new Date(minMonth);var selDate=null,selSlot=null;
  if(ED){var _pc=_whenParse(opt.cur);if(_pc){if(_pc.d>=MIN&&_pc.d<=MAX&&!_dhBlocked(_pc.d)){selDate=_pc.d;view=new Date(_pc.d.getFullYear(),_pc.d.getMonth(),1);}selSlot=_pc.slot;}}
@@ -2133,9 +2133,11 @@ function showDeliveryPicker(onDone,opt){
  +'<div style="font-size:12px;font-weight:800;color:#042C53;margin:16px 0 8px">2. 時段</div>'
  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-slot="上午" class="qwdh-slot" style="border:1.5px solid #d3ddea;border-radius:12px;padding:12px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer">上午<span style="display:block;font-size:11px;font-weight:600;color:#7c8998;margin-top:2px">約 09:00–12:00</span></button><button data-slot="下午" class="qwdh-slot" style="border:1.5px solid #d3ddea;border-radius:12px;padding:12px;font-size:14px;font-weight:800;background:#fff;color:#16202b;cursor:pointer">下午<span style="display:block;font-size:11px;font-weight:600;color:#7c8998;margin-top:2px">約 13:00–18:00</span></button></div>'
  +'<div style="font-size:11.5px;color:#8a6410;background:rgba(184,134,11,.09);border:1px solid rgba(184,134,11,.25);border-radius:10px;padding:10px 12px;line-height:1.65;margin-top:15px">⚠️ 此為<b>期望配送時間</b>，實際仍需依物流量能為準，司機將於配送前<b>去電聯繫</b>確認。</div>'
- +'<div id="qwdh-sum" style="font-size:12.5px;color:#042C53;font-weight:800;text-align:center;margin-top:13px;min-height:17px"></div>'
- +'<button id="qwdh-ok" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed">'+(ED?'確認變更':(opt.okTxt||'確認加購'+NM))+'</button>'
- +'<button id="qwdh-cancel" style="width:100%;border:none;background:none;color:#7c8998;font-size:12.5px;margin-top:10px;cursor:pointer;text-decoration:underline">'+(ED?'不變更':(opt.noTxt||'取消，不加購'+NM))+'</button>'
+ /* 2026-11-09 老闆：螢幕矮要捲動才按得到確認 → 已選＋確認＋取消固定在視窗最下面 */
+ +'<div style="position:sticky;bottom:0;background:#fff;padding:8px 18px 14px;margin:13px -18px -18px;border-top:1px solid #ECEFF3;box-shadow:0 -6px 14px rgba(0,0,0,.06)">'
+ +'<div id="qwdh-sum" style="font-size:12.5px;color:#042C53;font-weight:800;text-align:center;margin-top:0;min-height:17px"></div>'
+ +'<button id="qwdh-ok" disabled style="width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;background:#b7c2cf;color:#fff;margin-top:9px;cursor:not-allowed">'+(ED?'確認變更':(opt.okTxt||'確認加購'+NM2))+'</button>'
+ +'<button id="qwdh-cancel" style="width:100%;border:none;background:none;color:#7c8998;font-size:12.5px;margin-top:10px;cursor:pointer;text-decoration:underline">'+(ED?'不變更':(opt.noTxt||'取消，不加購'+NM2))+'</button></div>'
  +'</div></div>';
  document.body.appendChild(ov);
  var wd=['日','一','二','三','四','五','六'];
